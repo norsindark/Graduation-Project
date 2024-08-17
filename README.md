@@ -12,12 +12,6 @@ To run the Swagger UI for this project, follow these steps:
      ```bash
      ./mvnw spring-boot:run
      ```
-     or
-
-     ```bash
-     ./gradlew bootRun
-     ```
-     Alternatively, you can run the application from your IDE.
 
 2. **Access Swagger UI**:
    - Once the application is up and running, open your browser and go to the following URL:
