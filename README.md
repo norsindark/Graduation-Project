@@ -1,5 +1,18 @@
 # Server
 
+### Setting apache and jdk
+1. **Download this folder**:
+   ```bash
+     https://drive.google.com/file/d/1mRmpALO5WBx_CeTnslZdllfW0egKsmva/view?usp=drive_link
+   ```
+2. **Set JAVA_HOME and MAVEN_HOME**:
+   follow the instructions below
+   ```bash
+     https://mkyong.com/java/how-to-set-java_home-on-windows-10/
+   ```
+ ```bash
+     [https://mkyong.com/java/how-to-set-java_home-on-windows-10/](https://mkyong.com/maven/how-to-install-maven-in-windows/)
+   ```
 ### Swagger API Documentation
 
 This project includes a Swagger UI for easy visualization and interaction with the API. Swagger UI provides a user-friendly interface to explore the available endpoints, view request and response formats, and test the API directly from your browser.
