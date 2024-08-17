@@ -1,7 +1,15 @@
+import {
+    RouterProvider,
+} from "react-router-dom";
+import {router} from "./routers/Router.tsx";
+// import {Counter} from "./pages/Counter.tsx";
+
+
 function App() {
     return (
         <>
-            <h2>hello</h2>
+            {/*<Counter/>*/}
+            <RouterProvider router={router} />
         </>
     )
 }
