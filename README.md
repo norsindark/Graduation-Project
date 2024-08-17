@@ -1,6 +1,6 @@
-### Server
+# Server
 
-## Swagger API Documentation
+### Swagger API Documentation
 
 This project includes a Swagger UI for easy visualization and interaction with the API. Swagger UI provides a user-friendly interface to explore the available endpoints, view request and response formats, and test the API directly from your browser.
 
