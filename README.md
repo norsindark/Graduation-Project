@@ -1,10 +1,10 @@
+### Server
+
 ## Swagger API Documentation
 
 This project includes a Swagger UI for easy visualization and interaction with the API. Swagger UI provides a user-friendly interface to explore the available endpoints, view request and response formats, and test the API directly from your browser.
 
-### Running Swagger UI
-
-To run the Swagger UI for this project, follow these steps:
+#### Running the Server
 
 1. **Ensure the application is running**:
    - Make sure you have built and started your application. If you're running a Spring Boot application, you can start the application using the following command:
@@ -12,6 +12,8 @@ To run the Swagger UI for this project, follow these steps:
      ```bash
      ./mvnw spring-boot:run
      ```
+
+#### Accessing Swagger UI
 
 2. **Access Swagger UI**:
    - Once the application is up and running, open your browser and go to the following URL:
