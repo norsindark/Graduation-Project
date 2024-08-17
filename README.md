@@ -9,12 +9,13 @@
    
    follow the instructions below:
 
-   JAVA_HOME
+   **JAVA_HOME**
    
    ```bash
      https://mkyong.com/java/how-to-set-java_home-on-windows-10/
    ```
-   MAVEN_HOME
+   
+   **MAVEN_HOME**
    ```bash
      [https://mkyong.com/java/how-to-set-java_home-on-windows-10/](https://mkyong.com/maven/how-to-install-maven-in-windows/)
    ```
