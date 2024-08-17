@@ -17,7 +17,7 @@
    
    **MAVEN_HOME**
    ```bash
-     [https://mkyong.com/java/how-to-set-java_home-on-windows-10/](https://mkyong.com/maven/how-to-install-maven-in-windows/)
+    https://mkyong.com/maven/how-to-install-maven-in-windows/
    ```
 ### Swagger API Documentation
 
