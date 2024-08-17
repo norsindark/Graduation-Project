@@ -6,10 +6,15 @@
      https://drive.google.com/file/d/1mRmpALO5WBx_CeTnslZdllfW0egKsmva/view?usp=drive_link
    ```
 2. **Set JAVA_HOME and MAVEN_HOME**:
-   follow the instructions below
+   
+   follow the instructions below:
+
+   JAVA_HOME
+   
    ```bash
      https://mkyong.com/java/how-to-set-java_home-on-windows-10/
    ```
+   MAVEN_HOME
    ```bash
      [https://mkyong.com/java/how-to-set-java_home-on-windows-10/](https://mkyong.com/maven/how-to-install-maven-in-windows/)
    ```
