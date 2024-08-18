@@ -11,7 +11,7 @@ import java.util.Set;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserProfileResponse {
+public class UserResponse {
 
     private String email;
     private String fullName;
