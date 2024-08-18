@@ -1,6 +1,6 @@
 # Server
 
-### Setting apache and jdk
+### Setting Maven 3.9.6 and JDK 21
 1. **Download this folder**:
    ```bash
      https://drive.google.com/file/d/1mRmpALO5WBx_CeTnslZdllfW0egKsmva/view?usp=drive_link
