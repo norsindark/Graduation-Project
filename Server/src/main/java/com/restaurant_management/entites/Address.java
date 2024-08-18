@@ -6,7 +6,10 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UuidGenerator;
+
+import java.sql.Timestamp;
 
 @Data
 @Builder
@@ -21,6 +24,15 @@ public class Address {
     @Column(name = "addresses_id", length = 36, nullable = false)
     private String id;
 
+    @Column(name = "email")
+    private String email;
+
+    @Column(name = "phone_number", length = 15)
+    private String phoneNumber;
+
+    @Column(name = "state")
+    private String state;
+
     @Column(nullable = true)
     private String street;
 
@@ -32,6 +44,16 @@ public class Address {
 
     @Column(name = "postal_code")
     private int postalCode;
+
+    @Column(name = "address_type")
+    private String addressType;
+
+    @Column(name = "created_at")
+    @CreationTimestamp
+    private Timestamp createdAt;
+
+    @Column(name = "updated_at")
+    private Timestamp updatedAt;
 
     @ManyToOne
     @JoinColumn(name = "user_id", referencedColumnName = "user_id")

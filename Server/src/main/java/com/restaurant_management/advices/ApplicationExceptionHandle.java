@@ -1,9 +1,6 @@
 package com.restaurant_management.advices;
 
-import com.restaurant_management.exceptions.InvalidTokenException;
-import com.restaurant_management.exceptions.SignInException;
-import com.restaurant_management.exceptions.SignUpException;
-import com.restaurant_management.exceptions.UserNotFoundException;
+import com.restaurant_management.exceptions.*;
 import com.restaurant_management.payloads.responses.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -65,6 +62,13 @@ public class ApplicationExceptionHandle {
     public ResponseEntity<ApiResponse> handleUserNotFoundException(UserNotFoundException e) {
         ApiResponse apiResponse = new ApiResponse("User not found: " + e.getMessage(), HttpStatus.NOT_FOUND);
         return new ResponseEntity<>(apiResponse, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(AddressException.class)
+    @ResponseBody
+    public ResponseEntity<ApiResponse> handleAddressException(AddressException e) {
+        ApiResponse apiResponse = new ApiResponse("Address error: " + e.getMessage(), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(apiResponse, HttpStatus.BAD_REQUEST);
     }
 
 }
