@@ -1,7 +1,6 @@
 package com.restaurant_management.services.interfaces;
 
-import com.restaurant_management.exceptions.SignInException;
-import com.restaurant_management.exceptions.SignUpException;
+import com.restaurant_management.exceptions.DataExitsException;
 import com.restaurant_management.payloads.requests.ResetPasswordRequest;
 import com.restaurant_management.payloads.requests.SignInRequest;
 import com.restaurant_management.payloads.requests.SignUpRequest;
@@ -12,15 +11,15 @@ import jakarta.mail.MessagingException;
 import java.io.UnsupportedEncodingException;
 
 public interface AuthService {
-    ApiResponse signUp(SignUpRequest signUpRequest) throws SignUpException, MessagingException, UnsupportedEncodingException;
+    ApiResponse signUp(SignUpRequest signUpRequest) throws DataExitsException, MessagingException, UnsupportedEncodingException;
 
-    JwtResponse signIn(SignInRequest signInRequest) throws SignInException;
+    JwtResponse signIn(SignInRequest signInRequest) throws DataExitsException;
 
     ApiResponse verifyEmail(String token);
 
-    ApiResponse resendVerificationEmail(String email) throws MessagingException, UnsupportedEncodingException, SignInException;
+    ApiResponse resendVerificationEmail(String email) throws MessagingException, UnsupportedEncodingException, DataExitsException;
 
-    ApiResponse forgotPassword(String email) throws MessagingException, UnsupportedEncodingException, SignInException;
+    ApiResponse forgotPassword(String email) throws MessagingException, UnsupportedEncodingException, DataExitsException;
 
-    ApiResponse resetPassword(ResetPasswordRequest request) throws SignInException;
+    ApiResponse resetPassword(ResetPasswordRequest request) throws DataExitsException;
 }

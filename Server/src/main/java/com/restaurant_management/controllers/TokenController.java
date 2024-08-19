@@ -1,6 +1,6 @@
 package com.restaurant_management.controllers;
 
-import com.restaurant_management.exceptions.InvalidTokenException;
+import com.restaurant_management.exceptions.DataExitsException;
 import com.restaurant_management.payloads.requests.RefreshTokenRequest;
 import com.restaurant_management.services.interfaces.TokenService;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +16,7 @@ public class TokenController {
     private final TokenService tokenService;
 
     @PostMapping("/refresh-token")
-    public ResponseEntity<?> refreshToken(@RequestBody RefreshTokenRequest request) throws InvalidTokenException {
+    public ResponseEntity<?> refreshToken(@RequestBody RefreshTokenRequest request) throws DataExitsException {
         return ResponseEntity.ok(tokenService.refreshAccessToken(request));
     }
 
