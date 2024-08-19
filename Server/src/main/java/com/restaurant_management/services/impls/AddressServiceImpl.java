@@ -3,14 +3,15 @@ package com.restaurant_management.services.impls;
 import com.restaurant_management.dtos.AddressDto;
 import com.restaurant_management.entites.Address;
 import com.restaurant_management.entites.User;
-import com.restaurant_management.exceptions.AddressException;
-import com.restaurant_management.exceptions.UserNotFoundException;
+import com.restaurant_management.exceptions.DataExitsException;
 import com.restaurant_management.payloads.responses.AddressByUserIdResponse;
 import com.restaurant_management.payloads.responses.AddressResponse;
 import com.restaurant_management.payloads.responses.ApiResponse;
 import com.restaurant_management.repositories.AddressRepository;
 import com.restaurant_management.repositories.UserRepository;
 import com.restaurant_management.services.interfaces.AddressService;
+import com.restaurant_management.utils.ApiUtil;
+import com.restaurant_management.utils.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -31,11 +32,18 @@ public class AddressServiceImpl implements AddressService {
     private final UserRepository userRepository;
 
     @Override
-    public ApiResponse addAddress(AddressDto addressDto) throws UserNotFoundException, AddressException {
+    public ApiResponse addAddress(AddressDto addressDto) throws DataExitsException {
+        String currentUserName = SecurityUtils.getCurrentUserId();
         Optional<User> user = this.userRepository.findById(addressDto.getUserId());
         if (user.isEmpty()) {
-            throw new UserNotFoundException("User not found");
+            throw new DataExitsException("User not found");
         }
+
+
+        if(currentUserName != null && !currentUserName.equals(user.get().getEmail())){
+            return new ApiResponse("An error!", ApiUtil.createErrorDetails("You are not allowed to add address for this user"), HttpStatus.FORBIDDEN);
+        }
+
         Address newAddress = addressDto.toAddress(user.get());
 
         User _user = user.get();
@@ -49,14 +57,14 @@ public class AddressServiceImpl implements AddressService {
     }
 
     @Override
-    public ApiResponse updateAddress(AddressDto addressDto) throws AddressException {
+    public ApiResponse updateAddress(AddressDto addressDto) throws DataExitsException {
         Optional<User> user = this.userRepository.findById(addressDto.getUserId());
         if (user.isEmpty()) {
-            throw new AddressException("User not found");
+            throw new DataExitsException("User not found");
         }
         Optional<Address> address = this.addressRepository.findById(addressDto.getId());
         if (address.isEmpty()) {
-            throw new AddressException("Address not found");
+            throw new DataExitsException("Address not found");
         }
         Address _address = address.get();
         _address.setCity(addressDto.getCity());
@@ -74,16 +82,20 @@ public class AddressServiceImpl implements AddressService {
     }
 
     @Override
-    public ApiResponse deleteAddress(String addressId) throws AddressException {
+    public ApiResponse deleteAddress(String addressId) {
+        Optional<Address> address = this.addressRepository.findById(addressId);
+        if (address.isEmpty()) {
+            return new ApiResponse("An error!", ApiUtil.createErrorDetails("Address not found"), HttpStatus.NOT_FOUND);
+        }
         this.addressRepository.deleteById(addressId);
-        return new ApiResponse("Address deleted successfully", null, HttpStatus.OK);
+        return new ApiResponse("Address deleted successfully", HttpStatus.OK);
     }
 
     @Override
-    public AddressResponse getAddress(String addressId) throws AddressException {
+    public AddressResponse getAddress(String addressId) throws DataExitsException {
         Optional<Address> address = this.addressRepository.findById(addressId);
         if (address.isEmpty()) {
-            throw new AddressException("Address not found");
+            throw new DataExitsException("Address not found");
         }
         new AddressResponse();
         return AddressResponse.toAddress(address.get());
@@ -91,12 +103,12 @@ public class AddressServiceImpl implements AddressService {
 
     @Override
     public Page<AddressByUserIdResponse> getAllAddressByUserId(String userId, int pageNo, int pageSize)
-            throws UserNotFoundException {
+            throws DataExitsException {
         Pageable pageable = PageRequest.of(pageNo, pageSize);
 
         Optional<User> user = userRepository.findById(userId);
         if (user.isEmpty()) {
-            throw new UserNotFoundException("User not found");
+            throw new DataExitsException("User not found");
         }
 
         Page<Address> addressPages = addressRepository.findByUserId(userId, pageable);

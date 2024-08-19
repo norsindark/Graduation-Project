@@ -61,12 +61,20 @@ public class JwtAuthTokenFilterConfig extends OncePerRequestFilter {
             }
 
         } catch (ExpiredJwtException e) {
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token has expired, please login again.");
+            if (!response.isCommitted()) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.setContentType("application/json");
+                response.getWriter().write("{\"message\": \"JWT token is expired!\"}");
+            }
             return;
         } catch (Exception e) {
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "An error occurred.");
+            if (!response.isCommitted()) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.setContentType("application/json");
+                response.getWriter().write("{\"message\": \"Failed to authenticate user!\"}");
+            }
+            return;
         }
-
         filterChain.doFilter(request, response);
     }
 

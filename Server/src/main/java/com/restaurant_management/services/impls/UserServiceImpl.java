@@ -1,16 +1,29 @@
 package com.restaurant_management.services.impls;
 
 import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
+import com.restaurant_management.dtos.UserDto;
 import com.restaurant_management.entites.User;
-import com.restaurant_management.exceptions.UserNotFoundException;
+import com.restaurant_management.entites.UserToken;
+import com.restaurant_management.exceptions.DataExitsException;
+import com.restaurant_management.payloads.requests.PasswordRequest;
+import com.restaurant_management.payloads.responses.ApiResponse;
 import com.restaurant_management.repositories.UserRepository;
 import com.restaurant_management.repositories.UserTokenRepository;
 import com.restaurant_management.services.interfaces.UserService;
+import com.restaurant_management.utils.ApiUtil;
 import com.restaurant_management.utils.GetUserUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -21,6 +34,8 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
 
     private final UserTokenRepository userTokenRepository;
+
+    private final PasswordEncoder encoder;
 
     private final Cloudinary cloudinary;
 
@@ -44,44 +59,84 @@ public class UserServiceImpl implements UserService {
 //    }
 
     @Override
-    public Optional<User> getUserByAccessToken() throws UserNotFoundException {
+    public Optional<User> getUserByAccessToken() throws DataExitsException {
         GetUserUtil userUtil = new GetUserUtil();
         String username = userUtil.getUserEmail();
         Optional<User> user = this.userRepository.findByEmail(username);
         if (user.isEmpty()) {
-            throw new UserNotFoundException("User not found with: " + username);
+            throw new DataExitsException("User not found with: " + username);
         }
         return user;
     }
 
-//    @Override
-//    public ApiResponse updateUserProfile(UserDto userDto) throws UserNotFoundException {
-//        GetUserUtil userUtil = new GetUserUtil();
-//        String username = userUtil.getUserEmail();
-//        Optional<User> user = this.userRepository.findByEmail(username);
-//        if (user.isEmpty()) {
-//            throw new UserNotFoundException("User not found with: " + username);
-//        }
-//        user.get().setFullName(userDto.getFullName());
-//        this.userRepository.save(user.get());
-//        return new ApiResponse("Update user profile successfully", HttpStatus.OK);
-//    }
-//
-//    @Override
-//    public ApiResponse updateAvatar(MultipartFile file) throws UserNotFoundException, IOException {
-//        GetUserUtil userUtil = new GetUserUtil();
-//        String username = userUtil.getUserEmail();
-//        Optional<User> user = this.userRepository.findByEmail(username);
-//        if (user.isEmpty()) {
-//            throw new UserNotFoundException("User not found with: " + username);
-//        }
-//
-//        Map uploadResult = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.emptyMap());
-//        String imageUrl = (String) uploadResult.get("url");
-//
-//        User _user = user.get();
-//        _user.setAvatar(imageUrl);
-//        this.userRepository.save(_user);
-//        return new ApiResponse("Image updated successfully!", HttpStatus.OK);
-//    }
+    @Override
+    public ApiResponse updateUserProfile(UserDto userDto) throws DataExitsException {
+        GetUserUtil userUtil = new GetUserUtil();
+        String username = userUtil.getUserEmail();
+        Optional<User> user = this.userRepository.findByEmail(username);
+        if (user.isEmpty()) {
+            throw new DataExitsException("User not found with: " + username);
+        }
+        User _user = user.get();
+        _user.setFullName(userDto.getFullName());
+        _user.setEmail(userDto.getEmail());
+
+        this.userRepository.save(user.get());
+        return new ApiResponse("Update user profile successfully", HttpStatus.OK);
+    }
+
+    @Override
+    public ApiResponse updateAvatar(MultipartFile file) throws DataExitsException, IOException {
+        GetUserUtil userUtil = new GetUserUtil();
+        String username = userUtil.getUserEmail();
+        Optional<User> user = this.userRepository.findByEmail(username);
+        if (user.isEmpty()) {
+            throw new DataExitsException("User not found with: " + username);
+        }
+
+        var uploadResult = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.emptyMap());
+        String imageUrl = (String) uploadResult.get("url");
+
+        User _user = user.get();
+        _user.setAvatar(imageUrl);
+        this.userRepository.save(_user);
+        return new ApiResponse("Image updated successfully!", HttpStatus.OK);
+    }
+
+    @Override
+    public ApiResponse changePassword(PasswordRequest request) throws DataExitsException {
+        Optional<User> user = this.userRepository.findById(request.getUserId());
+        if (user.isEmpty()) {
+            throw new DataExitsException("User not found with: " + request.getUserId());
+        }
+
+        if (!encoder.matches(request.getOldPassword(), user.get().getPassword())) {
+            Map<String, String> errorDetails = new HashMap<>();
+            errorDetails.put("error", "Old password is incorrect");
+            return new ApiResponse("An error!", errorDetails, HttpStatus.BAD_REQUEST);
+        }
+
+        User _user = user.get();
+        _user.setPassword(encoder.encode(request.getNewPassword()));
+        this.userRepository.save(_user);
+        return new ApiResponse("Password change successfully!", HttpStatus.OK);
+    }
+
+    @Override
+    public ApiResponse deleteUser(String userId) throws DataExitsException {
+        Optional<User> user = this.userRepository.findById(userId);
+        if (user.isEmpty()) {
+            throw new DataExitsException("User not found!");
+        }
+        List<UserToken> userTokens = this.userTokenRepository.findByUserId(userId);
+
+        System.out.println("User token: " + userTokens);
+
+        if (!userTokens.isEmpty()) {
+            this.userTokenRepository.deleteByUserId(userId);
+        }
+
+        this.userRepository.deleteById(userId);
+        return new ApiResponse("User deleted successfully", HttpStatus.OK);
+    }
 }
