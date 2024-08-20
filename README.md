@@ -56,3 +56,44 @@ Swagger is automatically configured in this project. However, if you need to cus
 - If you encounter a 404 error when accessing `http://localhost:8080/swagger-ui.html`, ensure that the `springdoc-openapi-ui` dependency is included in your `pom.xml` or `build.gradle` file.
 
 - If the application is not running on port 8080, replace `8080` in the URL with the correct port number.
+
+  
+
+  # Client
+
+This project is the frontend, built with Vite, React, and communicates with a backend API documented using Swagger.
+
+### Started Project
+
+Make sure database and backend are running
+
+1. Prerequisites:
+
+  Ensure you have Node.js and npm (or yarn) installed on your system.
+
+2. Installation:
+
+- Clone the repository:
+
+     ```bash
+     git clone https://github.com/norsindark/Graduation-Project.git
+     ```
+- Navigate to the project directory:
+
+      cd Client
+
+- Running the Application:
+
+      npm install
+
+3. Running the Application:
+
+Start the development server: npm run dev
+Access the app at: http://localhost:3000
+
+### Troubleshooting
+
+-   If issues arise, ensure dependencies are installed: npm install
+
+-   For ESLint issues, check the .eslintrc configuration.
+
