@@ -1,23 +1,19 @@
 package com.restaurant_management.controllers;
 
-import com.restaurant_management.exceptions.DataExitsException;
+import com.restaurant_management.exceptions.SignInException;
+import com.restaurant_management.exceptions.SignUpException;
 import com.restaurant_management.payloads.requests.ResetPasswordRequest;
 import com.restaurant_management.payloads.requests.SignInRequest;
 import com.restaurant_management.payloads.requests.SignUpRequest;
 import com.restaurant_management.payloads.responses.ApiResponse;
 import com.restaurant_management.services.interfaces.AuthService;
-import com.restaurant_management.services.interfaces.TokenService;
-import com.restaurant_management.utils.JwtProviderUtil;
 import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
 import java.io.UnsupportedEncodingException;
 
 @RestController
@@ -30,13 +26,13 @@ public class AuthController {
 
     @PostMapping("/sign-up")
     public ResponseEntity<?> signUp(@Valid @RequestBody SignUpRequest request)
-            throws DataExitsException, MessagingException, UnsupportedEncodingException {
+            throws SignUpException, MessagingException, UnsupportedEncodingException {
         return new ResponseEntity<>(authService.signUp(request), HttpStatus.CREATED);
     }
 
     @PostMapping("/sign-in")
     public ResponseEntity<?> singIn(@Valid @RequestBody SignInRequest request)
-            throws DataExitsException {
+            throws SignInException {
         return new ResponseEntity<>(authService.signIn(request), HttpStatus.OK);
     }
 
@@ -47,20 +43,17 @@ public class AuthController {
 
     @GetMapping("/resend-verification-email")
     public ResponseEntity<ApiResponse> resendVerificationEmail(@RequestParam("email") String email)
-            throws MessagingException, UnsupportedEncodingException, DataExitsException {
+            throws MessagingException, UnsupportedEncodingException, SignInException {
         return ResponseEntity.ok(authService.resendVerificationEmail(email));
     }
 
     @GetMapping("/forgot-password")
     public ResponseEntity<ApiResponse> forgotPassword(@RequestParam("email") String email)
-            throws MessagingException, UnsupportedEncodingException, DataExitsException {
+            throws MessagingException, UnsupportedEncodingException, SignInException {
         return ResponseEntity.ok(authService.forgotPassword(email));
     }
 
-    @PostMapping("/reset-password")public ResponseEntity<ApiResponse> resetPassword(@RequestBody ResetPasswordRequest request)throws DataExitsException {
+    @PostMapping("/reset-password")public ResponseEntity<ApiResponse> resetPassword(@RequestBody ResetPasswordRequest request)throws SignInException {
         return ResponseEntity.ok(authService.resetPassword(request));
     }
-
-
-
 }
