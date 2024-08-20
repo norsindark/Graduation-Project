@@ -6,7 +6,6 @@ import com.restaurant_management.payloads.requests.SignInRequest;
 import com.restaurant_management.payloads.requests.SignUpRequest;
 import com.restaurant_management.payloads.responses.ApiResponse;
 import com.restaurant_management.services.interfaces.AuthService;
-import com.restaurant_management.services.interfaces.TokenService;
 import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +13,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
 import java.io.UnsupportedEncodingException;
 
 @RestController
@@ -24,8 +22,6 @@ import java.io.UnsupportedEncodingException;
 public class AuthController {
 
     private final AuthService authService;
-
-    private final TokenService tokenService;
 
     @PostMapping("/sign-up")
     public ResponseEntity<?> signUp(@Valid @RequestBody SignUpRequest request)
@@ -59,5 +55,4 @@ public class AuthController {
     @PostMapping("/reset-password")public ResponseEntity<ApiResponse> resetPassword(@RequestBody ResetPasswordRequest request)throws DataExitsException {
         return ResponseEntity.ok(authService.resetPassword(request));
     }
-
 }
