@@ -57,9 +57,10 @@ Swagger is automatically configured in this project. However, if you need to cus
 
 - If the application is not running on port 8080, replace `8080` in the URL with the correct port number.
 
-  
 
-  # Client
+
+# Client
+
 
 This project is the frontend, built with Vite, React, and communicates with a backend API documented using Swagger.
 

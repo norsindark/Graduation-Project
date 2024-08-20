@@ -1,9 +1,11 @@
+import {NavLink} from "react-router-dom";
+
 const Auth = () => {
     return (
         <li>
-            <a href="dashboard.html">
+            <NavLink to={"/register"}>
                 <i className="fas fa-user"></i>
-            </a>
+            </NavLink>
         </li>
     )
 }

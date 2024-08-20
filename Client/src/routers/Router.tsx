@@ -2,7 +2,7 @@ import {createBrowserRouter} from "react-router-dom";
 import LayoutPublic from "../pages/public/LayoutPublic.tsx";
 import LayoutAdmin from "../pages/admin/LayoutAdmin.tsx";
 import HomePage from "../pages/public/HomePage.tsx";
-import RegisterPage from "../pages/public/RegisterPage.tsx";
+import RegisterModal from "../pages/public/RegisterModal.tsx";
 import LoginPage from "../pages/public/LoginPage.tsx";
 
 export const router = createBrowserRouter([
@@ -16,7 +16,7 @@ export const router = createBrowserRouter([
             },
             {
                 path: "/register",
-                element: <RegisterPage/>
+                element: <RegisterModal/>
             },
             {
                 path: "/login",
