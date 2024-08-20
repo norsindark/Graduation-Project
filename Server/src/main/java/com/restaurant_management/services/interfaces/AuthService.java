@@ -14,9 +14,7 @@ import java.io.UnsupportedEncodingException;
 
 public interface AuthService {
     ApiResponse signUp(SignUpRequest signUpRequest) throws DataExitsException, MessagingException, UnsupportedEncodingException;
-    ApiResponse signUp(SignUpRequest signUpRequest) throws DataExitsException, MessagingException, UnsupportedEncodingException;
 
-    JwtResponse signIn(SignInRequest signInRequest) throws DataExitsException;
     JwtResponse signIn(SignInRequest signInRequest) throws DataExitsException;
 
     ApiResponse verifyEmail(String token);
