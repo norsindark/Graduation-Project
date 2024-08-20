@@ -7,6 +7,7 @@ import com.restaurant_management.payloads.requests.SignUpRequest;
 import com.restaurant_management.payloads.responses.ApiResponse;
 import com.restaurant_management.payloads.responses.JwtResponse;
 import jakarta.mail.MessagingException;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 
 import java.io.UnsupportedEncodingException;
 
@@ -22,4 +23,5 @@ public interface AuthService {
     ApiResponse forgotPassword(String email) throws MessagingException, UnsupportedEncodingException, DataExitsException;
 
     ApiResponse resetPassword(ResetPasswordRequest request) throws DataExitsException;
+
 }
