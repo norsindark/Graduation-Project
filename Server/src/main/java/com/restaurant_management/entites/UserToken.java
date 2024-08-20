@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "user_token")
+@Table(name = "user_tokens")
 public class UserToken {
 
     @Id
@@ -24,8 +24,8 @@ public class UserToken {
 
     private String token;
 
-    @ManyToOne(targetEntity = User.class, fetch = FetchType.EAGER)
-    @JoinColumn(nullable = false, name = "user_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", referencedColumnName = "user_id")
     @JsonBackReference
     private User user;
 

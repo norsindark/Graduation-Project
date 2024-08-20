@@ -1,17 +1,18 @@
 package com.restaurant_management.advices;
 
-import com.restaurant_management.exceptions.InvalidTokenException;
-import com.restaurant_management.exceptions.SignInException;
-import com.restaurant_management.exceptions.SignUpException;
-import com.restaurant_management.exceptions.UserNotFoundException;
+import com.restaurant_management.exceptions.*;
 import com.restaurant_management.payloads.responses.ApiResponse;
+import io.jsonwebtoken.ExpiredJwtException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.context.request.WebRequest;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -32,17 +33,10 @@ public class ApplicationExceptionHandle {
         return new ResponseEntity<>(apiResponse, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(SignUpException.class)
+    @ExceptionHandler(DataExitsException.class)
     @ResponseBody
-    public ResponseEntity<ApiResponse> handleSignUpException(SignUpException e) {
-        ApiResponse apiResponse = new ApiResponse("Sign up error: " + e.getMessage(), HttpStatus.BAD_REQUEST);
-        return new ResponseEntity<>(apiResponse, HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler(SignInException.class)
-    @ResponseBody
-    public ResponseEntity<ApiResponse> handleSignInException(SignInException e) {
-        ApiResponse apiResponse = new ApiResponse("Sign in error: " + e.getMessage(), HttpStatus.BAD_REQUEST);
+    public ResponseEntity<ApiResponse> handleSignInException(DataExitsException e) {
+        ApiResponse apiResponse = new ApiResponse("An Error: " + e.getMessage(), HttpStatus.BAD_REQUEST);
         return new ResponseEntity<>(apiResponse, HttpStatus.BAD_REQUEST);
     }
 
@@ -53,18 +47,10 @@ public class ApplicationExceptionHandle {
         return new ResponseEntity<>(apiResponse, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(InvalidTokenException.class)
-    @ResponseBody
-    public ResponseEntity<ApiResponse> handleException(InvalidTokenException e) {
-        ApiResponse apiResponse = new ApiResponse("An error occurred: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-        return new ResponseEntity<>(apiResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<Object> handleAccessDeniedException(AccessDeniedException ex, WebRequest request) {
+        Map<String, String> response = new HashMap<>();
+        response.put("error", "You do not have permission to access this resource.");
+        return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
     }
-
-    @ExceptionHandler(UserNotFoundException.class)
-    @ResponseBody
-    public ResponseEntity<ApiResponse> handleUserNotFoundException(UserNotFoundException e) {
-        ApiResponse apiResponse = new ApiResponse("User not found: " + e.getMessage(), HttpStatus.NOT_FOUND);
-        return new ResponseEntity<>(apiResponse, HttpStatus.NOT_FOUND);
-    }
-
 }

@@ -6,6 +6,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
@@ -19,8 +20,8 @@ import java.util.function.Function;
 @Component
 public class JwtProviderUtil {
 
-//    @Value("RestaurantManagement.app.jwtSecret")
-    private final static String jwtSecret="99c7571de87176741a2d3132f82ea909fbd283a69059949b05a63e54d573e689";
+    @Value("${RestaurantManagement.app.jwtSecret}")
+    private  String jwtSecret;
 
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);

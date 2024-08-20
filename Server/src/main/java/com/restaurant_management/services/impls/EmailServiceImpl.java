@@ -30,9 +30,9 @@ public class EmailServiceImpl implements EmailService {
     public void sendVerificationEmail(String email, String token)
             throws MessagingException, UnsupportedEncodingException {
         String fromAddress = "dvan78281@gmail.com";
-        String senderName = "Sin Store";
+        String senderName = "Restaurant";
         String subject = "Please click this URL to verify your email";
-        String content = "Dear [[name]],<br>"
+        String content = "<br>"
                 + "Please click the link below to verify your email address:<br>"
                 + "<h3><a href=\"[[URL]]\" target=\"_self\">VERIFY EMAIL</a></h3>"
                 + "Thank you,<br>"
@@ -57,10 +57,10 @@ public class EmailServiceImpl implements EmailService {
     @Override
     public void sendPasswordResetEmail(String email, String token) throws MessagingException, UnsupportedEncodingException {
         String fromAddress = "dvan78281@gmail.com";
-        String senderName = "Sin Store";
+        String senderName = "Restaurant";
         String subject = "Please click this URL to change your password";
 
-        String content = "Dear [[name]],<br>"
+        String content = "<br>"
                 + "Please click the link below to change your password:<br>"
                 + "<h3><a href=\"[[URL]]\" target=\"_self\">CHANGE PASSWORD</a></h3>"
                 + "Thank you,<br>"

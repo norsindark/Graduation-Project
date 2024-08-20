@@ -3,7 +3,7 @@ package com.restaurant_management.services.impls;
 import com.restaurant_management.entites.User;
 import com.restaurant_management.entites.UserToken;
 import com.restaurant_management.enums.TokenType;
-import com.restaurant_management.exceptions.InvalidTokenException;
+import com.restaurant_management.exceptions.DataExitsException;
 import com.restaurant_management.payloads.requests.RefreshTokenRequest;
 import com.restaurant_management.payloads.responses.JwtResponse;
 import com.restaurant_management.repositories.UserTokenRepository;
@@ -70,13 +70,13 @@ public class TokenServiceImpl implements TokenService {
     }
 
     @Override
-    public JwtResponse refreshAccessToken(RefreshTokenRequest refreshToken) throws InvalidTokenException {
+    public JwtResponse refreshAccessToken(RefreshTokenRequest refreshToken) throws DataExitsException {
         UserToken userToken = userTokenRepository.findByToken(refreshToken.getRefreshToken());
 
         if (userToken == null
                 || userToken.getExpiryDate().isBefore(LocalDateTime.now())
                 || userToken.getTokenType() != TokenType.REFRESH_TOKEN) {
-            throw new InvalidTokenException("Invalid or expired refresh token");
+            throw new DataExitsException("Invalid or expired refresh token");
         }
 
         User _user = userToken.getUser();
@@ -100,5 +100,13 @@ public class TokenServiceImpl implements TokenService {
         accessToken.setExpiryDate(LocalDateTime.now().plusMinutes(15));
         accessToken.setTokenType(TokenType.ACCESS_TOKEN);
         userTokenRepository.save(accessToken);
+    }
+
+    @Override
+    public void invalidateToken(String token) {
+        UserToken userToken = userTokenRepository.findByToken(token);
+        if (userToken != null) {
+            userTokenRepository.delete(userToken);
+        }
     }
 }
