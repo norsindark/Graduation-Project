@@ -53,7 +53,7 @@ public class SecurityConfig {
 
 
     public static final String[] ADMIN_SECRET_URLS = {
-            "/api/v1/admin/dashboard/**"
+            "/api/v1/dashboard/**"
     };
 
     public static final String[] USER_SECRET_URLS = {
