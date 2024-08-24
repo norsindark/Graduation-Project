@@ -4,6 +4,7 @@ import com.restaurant_management.entites.Role;
 import com.restaurant_management.entites.User;
 import com.restaurant_management.entites.UserToken;
 import com.restaurant_management.enums.RoleName;
+import com.restaurant_management.enums.StatusType;
 import com.restaurant_management.enums.TokenType;
 import com.restaurant_management.exceptions.DataExitsException;
 import com.restaurant_management.payloads.requests.ResetPasswordRequest;
@@ -61,7 +62,7 @@ public class AuthServiceImpl implements AuthService {
     public ApiResponse signUp(SignUpRequest signUpRequest) throws DataExitsException, MessagingException, UnsupportedEncodingException {
         String email = signUpRequest.getEmail();
         if (userRepository.existsByEmail(email)) {
-            throw new DataExitsException("This email: " + email + "already exist!");
+            throw new DataExitsException("This email: " + email + " already exist!");
         } else {
             Role role = roleRepository.findByName(RoleName.USER.toString());
 
@@ -69,6 +70,7 @@ public class AuthServiceImpl implements AuthService {
                     .fullName(signUpRequest.getFullName())
                     .email(signUpRequest.getEmail())
                     .password(passwordEncoder.encode(signUpRequest.getPassword()))
+                    .status(StatusType.INACTIVE.toString())
                     .role(role)
                     .enabled(false)
                     .build();
@@ -116,6 +118,7 @@ public class AuthServiceImpl implements AuthService {
 
         User user = userToken.getUser();
         user.setEnabled(true);
+        user.setStatus(StatusType.ACTIVE.toString());
         user.setEmailVerifiedAt(Timestamp.valueOf(LocalDateTime.now()));
         this.userRepository.save(user);
 
