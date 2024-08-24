@@ -9,6 +9,7 @@ import com.restaurant_management.payloads.responses.ApiResponse;
 import com.restaurant_management.payloads.responses.UserResponse;
 import com.restaurant_management.repositories.RoleRepository;
 import com.restaurant_management.repositories.UserRepository;
+import com.restaurant_management.repositories.UserTokenRepository;
 import com.restaurant_management.services.interfaces.AdminService;
 import com.restaurant_management.utils.ApiUtil;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +33,8 @@ public class AdminServiceImpl implements AdminService {
     private final UserRepository userRepository;
 
     private final RoleRepository roleRepository;
+
+    private final UserTokenRepository userTokenRepository;
 
     private final PasswordEncoder encoder;
 
@@ -71,6 +74,7 @@ public class AdminServiceImpl implements AdminService {
     public ApiResponse deleteUser(String id) {
         Optional<User> user = userRepository.findById(id);
         if (user.isPresent()) {
+            this.userTokenRepository.deleteByUserId(id);
             userRepository.delete(user.get());
             return new ApiResponse("User deleted successfully", HttpStatus.OK);
         }
