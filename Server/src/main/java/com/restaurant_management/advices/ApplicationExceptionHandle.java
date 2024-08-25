@@ -2,6 +2,7 @@ package com.restaurant_management.advices;
 
 import com.restaurant_management.exceptions.*;
 import com.restaurant_management.payloads.responses.ApiResponse;
+import com.restaurant_management.utils.ApiUtil;
 import io.jsonwebtoken.ExpiredJwtException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,14 +30,14 @@ public class ApplicationExceptionHandle {
             String errorMessage = error.getDefaultMessage();
             errors.put(fieldName, errorMessage);
         });
-        ApiResponse apiResponse = new ApiResponse("Validation error(s) occurred", errors, HttpStatus.BAD_REQUEST);
+        ApiResponse apiResponse = new ApiResponse("Validation error(s) occurred"+ errors, HttpStatus.BAD_REQUEST);
         return new ResponseEntity<>(apiResponse, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(DataExitsException.class)
     @ResponseBody
     public ResponseEntity<ApiResponse> handleSignInException(DataExitsException e) {
-        ApiResponse apiResponse = new ApiResponse("An Error: " + e.getMessage(), HttpStatus.BAD_REQUEST);
+        ApiResponse apiResponse = new ApiResponse("An Error: ", ApiUtil.createErrorDetails(e.getMessage()) , HttpStatus.BAD_REQUEST);
         return new ResponseEntity<>(apiResponse, HttpStatus.BAD_REQUEST);
     }
 
