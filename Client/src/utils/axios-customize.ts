@@ -32,12 +32,12 @@ instance.interceptors.response.use(
     (response: AxiosResponse<any>) => {
         // Mã trạng thái nằm trong phạm vi 2xx sẽ kích hoạt hàm này
         // Làm điều gì đó với dữ liệu phản hồi
-        return response.data;
+        return response;
     },
     (error: AxiosError) => {
         // Mã trạng thái nằm ngoài phạm vi 2xx sẽ kích hoạt hàm này
         // Xử lý lỗi phản hồi
-        return Promise.reject(error.response?.data);
+        return Promise.reject(error.response);
     }
 );
 
