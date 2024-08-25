@@ -1,9 +1,8 @@
-import { Form, Modal, Input, Button } from 'antd';
+import { Form, Modal, Input, Button, Checkbox } from 'antd';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useEffect, useState, useRef } from 'react';
-import { callRegister } from "../../services/clientApi.ts";
 
-const RegisterModal = () => {
+const LoginModal = () => {
     const hasWindow = typeof window !== 'undefined';
     const [modalWidth, setModalWidth] = useState<number>(hasWindow ? window.innerWidth : 650);
     const navigate = useNavigate();
@@ -22,7 +21,6 @@ const RegisterModal = () => {
             }
         };
 
-        // Handle resize with debouncing
         const resizeListener = () => {
             if (timeOutId.current) {
                 clearTimeout(timeOutId.current);
@@ -31,8 +29,6 @@ const RegisterModal = () => {
         };
 
         window.addEventListener('resize', resizeListener);
-
-        // Initial check
         handleResize();
 
         return () => {
@@ -47,25 +43,14 @@ const RegisterModal = () => {
         navigate('/'); // Close the modal and navigate back to the homepage
     };
 
-    const onFinish = async (values: any) => {
-        const { fullName, email, password, confirmPassword } = values;
-
-        if (password === confirmPassword) {
-            try {
-                const response = await callRegister({ email, password, fullName });
-                console.log(response)
-            } catch (error) {
-                // Xử lý lỗi khi gọi API
-                console.error("Lỗi đăng ký:", error);
-            }
-        } else {
-            console.error("Mật khẩu và xác nhận mật khẩu không khớp!");
-        }
+    const onFinish = (values: any) => {
+        console.log('Form values:', values);
+        navigate('/'); // Close the modal after successful submission
     };
 
     return (
         <Modal
-            open={location.pathname === '/register'}
+            open={location.pathname === '/login'}
             onCancel={handleCancel}
             footer={null}
             width={modalWidth}
@@ -85,15 +70,8 @@ const RegisterModal = () => {
                             <div className="col-xxl-12 col-xl-12 col-md-12 col-lg-12 m-auto">
                                 <div className="fp__login_area">
                                     <h2>Welcome back!</h2>
-                                    <p>Sign up to continue</p>
-                                    <Form layout="vertical" onFinish={onFinish}>
-                                        <Form.Item
-                                            label="Full Name"
-                                            name="fullName"
-                                            rules={[{ required: true, message: 'Please input your full name!' }]}
-                                        >
-                                            <Input placeholder="Full Name" autoComplete="fullname" />
-                                        </Form.Item>
+                                    <p>Sign In to continue</p>
+                                    <Form layout="vertical" onFinish={onFinish} initialValues={{ rememberme: false }}>
                                         <Form.Item
                                             label="Email"
                                             name="email"
@@ -106,18 +84,22 @@ const RegisterModal = () => {
                                             name="password"
                                             rules={[{ required: true, message: 'Please input your password!' }]}
                                         >
-                                            <Input.Password placeholder="Password" autoComplete="new-password" />
+                                            <Input.Password placeholder="Password" autoComplete="current-password" />
                                         </Form.Item>
                                         <Form.Item
-                                            label="Confirm Password"
-                                            name="confirmPassword"
-                                            rules={[{ required: true, message: 'Please confirm your password!' }]}
+                                            name="rememberme"
+                                            valuePropName="checked"
                                         >
-                                            <Input.Password placeholder="Confirm Password" autoComplete="new-password" />
+                                            <div>
+                                                <Checkbox>Remember Me</Checkbox>
+                                                <Link to="/forgot-password" style={{ float: 'right' }}>
+                                                    Forgot Password?
+                                                </Link>
+                                            </div>
                                         </Form.Item>
                                         <Form.Item>
                                             <Button type="primary" htmlType="submit" block size="large">
-                                                <div className="w-14 font-medium">Register</div>
+                                                <div className="w-14 font-medium">Login</div>
                                             </Button>
                                         </Form.Item>
                                     </Form>
@@ -128,7 +110,7 @@ const RegisterModal = () => {
                                         <li><a href="#"><i className="fab fa-twitter"></i></a></li>
                                         <li><a href="#"><i className="fab fa-google-plus-g"></i></a></li>
                                     </ul>
-                                    <p className="create_account">Already have an account? <Link to="/login">Login</Link></p>
+                                    <p className="create_account">Don’t have an account? <Link to="/register">Register</Link></p>
                                 </div>
                             </div>
                         </div>
@@ -139,4 +121,4 @@ const RegisterModal = () => {
     );
 };
 
-export default RegisterModal;
+export default LoginModal;

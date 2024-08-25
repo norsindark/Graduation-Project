@@ -4,9 +4,9 @@ import com.restaurant_management.entites.Role;
 import com.restaurant_management.entites.User;
 import com.restaurant_management.entites.UserToken;
 import com.restaurant_management.enums.RoleName;
+import com.restaurant_management.enums.StatusType;
 import com.restaurant_management.enums.TokenType;
-import com.restaurant_management.exceptions.SignInException;
-import com.restaurant_management.exceptions.SignUpException;
+import com.restaurant_management.exceptions.DataExitsException;
 import com.restaurant_management.payloads.requests.ResetPasswordRequest;
 import com.restaurant_management.payloads.requests.SignInRequest;
 import com.restaurant_management.payloads.requests.SignUpRequest;
@@ -17,6 +17,7 @@ import com.restaurant_management.repositories.UserRepository;
 import com.restaurant_management.repositories.UserTokenRepository;
 import com.restaurant_management.services.interfaces.AuthService;
 import com.restaurant_management.services.interfaces.TokenService;
+import com.restaurant_management.utils.ApiUtil;
 import com.restaurant_management.utils.JwtProviderUtil;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +26,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -57,10 +59,10 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional
-    public ApiResponse signUp(SignUpRequest signUpRequest) throws SignUpException, MessagingException, UnsupportedEncodingException {
+    public ApiResponse signUp(SignUpRequest signUpRequest) throws DataExitsException, MessagingException, UnsupportedEncodingException {
         String email = signUpRequest.getEmail();
         if (userRepository.existsByEmail(email)) {
-            throw new SignUpException("This email: " + email + "already exist!");
+            throw new DataExitsException("This email: " + email + " already exist!");
         } else {
             Role role = roleRepository.findByName(RoleName.USER.toString());
 
@@ -68,6 +70,7 @@ public class AuthServiceImpl implements AuthService {
                     .fullName(signUpRequest.getFullName())
                     .email(signUpRequest.getEmail())
                     .password(passwordEncoder.encode(signUpRequest.getPassword()))
+                    .status(StatusType.INACTIVE.toString())
                     .role(role)
                     .enabled(false)
                     .build();
@@ -80,7 +83,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public JwtResponse signIn(SignInRequest signInRequest) throws SignInException {
+    public JwtResponse signIn(SignInRequest signInRequest) throws DataExitsException {
         try {
             authenticate.authenticate(
                     new UsernamePasswordAuthenticationToken(
@@ -88,7 +91,7 @@ public class AuthServiceImpl implements AuthService {
                             signInRequest.getPassword()
                     ));
             User _user = this.userRepository.findByEmail(signInRequest.getEmail())
-                    .orElseThrow(() -> new SignInException("Email or password is invalid!"));
+                    .orElseThrow(() -> new DataExitsException("Email or password is invalid!"));
 
             var token = this.jwtProviderUtil.generaTokenUsingEmail(_user);
             tokenService.saveAccessToken(_user, token);
@@ -97,7 +100,7 @@ public class AuthServiceImpl implements AuthService {
                     .accessToken(token)
                     .build();
         } catch (AuthenticationException e) {
-            throw new SignInException("The account has not been verified!");
+            throw new DataExitsException("The account has not been verified!");
         }
     }
 
@@ -108,43 +111,45 @@ public class AuthServiceImpl implements AuthService {
         if (userToken == null
                 || userToken.getExpiryDate().isBefore(LocalDateTime.now())
                 || userToken.getTokenType() != TokenType.EMAIL_VERIFICATION) {
-            return new ApiResponse("Invalid or expired token", HttpStatus.BAD_REQUEST);
-
+            return new ApiResponse("An error",
+                    ApiUtil.createErrorDetails("Invalid or expired token"),
+                    HttpStatus.BAD_REQUEST);
         }
 
         User user = userToken.getUser();
         user.setEnabled(true);
+        user.setStatus(StatusType.ACTIVE.toString());
         user.setEmailVerifiedAt(Timestamp.valueOf(LocalDateTime.now()));
         this.userRepository.save(user);
 
         this.userTokenRepository.delete(userToken);
-
         return new ApiResponse("Email verified successfully!", HttpStatus.OK);
     }
 
     @Override
-    public ApiResponse resendVerificationEmail(String email) throws MessagingException, UnsupportedEncodingException, SignInException {
+    public ApiResponse resendVerificationEmail(String email) throws MessagingException, UnsupportedEncodingException, DataExitsException {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new SignInException("Email not found!"));
+                .orElseThrow(() -> new DataExitsException("Email not found!"));
 
         if (user.isEnabled()) {
-            return new ApiResponse("This account has already been verified!", HttpStatus.BAD_REQUEST);
+            return new ApiResponse("An error!"
+                    ,ApiUtil.createErrorDetails("This account has already been verified")
+                    ,HttpStatus.BAD_REQUEST);
         }
 
         UserToken _userToken = userTokenRepository.findByUserAndTokenType(user, TokenType.EMAIL_VERIFICATION);
         if (_userToken != null) {
             userTokenRepository.delete(_userToken);
         }
-
         tokenService.createEmailVerificationToken(user);
 
         return new ApiResponse("Verification email sent successfully!", HttpStatus.OK);
     }
 
     @Override
-    public ApiResponse forgotPassword(String email) throws MessagingException, UnsupportedEncodingException, SignInException {
+    public ApiResponse forgotPassword(String email) throws MessagingException, UnsupportedEncodingException, DataExitsException {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new SignInException("Email not found!"));
+                .orElseThrow(() -> new DataExitsException("Email not found!"));
 
         UserToken _userToken = userTokenRepository.findByUserAndTokenType(user, TokenType.PASSWORD_RESET);
         if (_userToken != null) {
@@ -163,7 +168,9 @@ public class AuthServiceImpl implements AuthService {
         if (userToken == null
                 || userToken.getExpiryDate().isBefore(LocalDateTime.now())
                 || userToken.getTokenType() != TokenType.PASSWORD_RESET) {
-            return new ApiResponse("Invalid or expired token", HttpStatus.BAD_REQUEST);
+            return new ApiResponse("An error!",
+                    ApiUtil.createErrorDetails("Token is invalid or expired"),
+                    HttpStatus.BAD_REQUEST);
         }
 
         User user = userToken.getUser();
@@ -172,6 +179,6 @@ public class AuthServiceImpl implements AuthService {
 
         userTokenRepository.delete(userToken);
 
-        return new ApiResponse("Password reset successfully!", HttpStatus.OK);
+        return new ApiResponse("Password change successfully!", HttpStatus.OK);
     }
 }

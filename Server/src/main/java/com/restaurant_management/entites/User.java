@@ -60,9 +60,12 @@ public class User implements UserDetails {
     @Column(name = "enable")
     private boolean enabled;
 
+    @Column(name = "status")
+    private String status;
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
-    private Set<Address> addresses = new HashSet<>();
+    private List<Address> addresses;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
