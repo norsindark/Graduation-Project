@@ -4,7 +4,6 @@ import {useEffect, useState, useRef} from 'react';
 import {callRegister} from "../../services/clientApi.ts";
 
 const RegisterModal = () => {
-
     const hasWindow = typeof window !== 'undefined';
     const [modalWidth, setModalWidth] = useState<number>(hasWindow ? window.innerWidth : 650);
     const navigate = useNavigate();
@@ -55,10 +54,9 @@ const RegisterModal = () => {
         if (password === confirmPassword) {
 
             setIsSubmit(true);
-            const res = await callRegister({email, password, fullName});
+            const res = await callRegister(email, password, fullName);
             setIsSubmit(false);
-            console.log(res)
-            if (res?.status == 201) {
+            if (res?.data?.httpStatus === "CREATED") {
                 message.success(res?.data?.message);
                 navigate('/login')
             } else {
