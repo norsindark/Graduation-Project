@@ -17,11 +17,12 @@ import java.io.UnsupportedEncodingException;
 
 @RestController
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*", allowedHeaders = "*")
+//@CrossOrigin(origins = "http://localhost:3000", allowedHeaders = "*", allowCredentials = "true")
 @RequestMapping("/api/v1/auth")
 public class AuthController {
 
     private final AuthService authService;
+
 
     @PostMapping("/sign-up")
     public ResponseEntity<?> signUp(@Valid @RequestBody SignUpRequest request)
@@ -30,6 +31,7 @@ public class AuthController {
     }
 
     @PostMapping("/sign-in")
+//    @CrossOrigin(origins = "*", allowedHeaders = "*")
     public ResponseEntity<?> singIn(@Valid @RequestBody SignInRequest request)
             throws DataExitsException {
         return new ResponseEntity<>(authService.signIn(request), HttpStatus.OK);
