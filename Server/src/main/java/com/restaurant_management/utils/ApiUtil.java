@@ -9,4 +9,10 @@ public class ApiUtil {
         errorDetails.put("error", errorMessage);
         return errorDetails;
     }
+
+    public static Map<String, String> createDataDetails(String name, String errorMessage) {
+        Map<String, String> dataDetails = new HashMap<>();
+        dataDetails.put(name, errorMessage);
+        return dataDetails;
+    }
 }
