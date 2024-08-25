@@ -31,7 +31,6 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public Page<CategoryResponse> getAllCategories(int pageNo, int pageSize, String sortBy)
             throws DataExitsException {
-
         Pageable paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy));
 
         Page<Category> pagedResult = categoryRepository.findAll(paging);

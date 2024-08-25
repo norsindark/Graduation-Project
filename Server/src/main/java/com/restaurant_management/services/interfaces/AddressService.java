@@ -13,7 +13,7 @@ public interface AddressService {
 
     ApiResponse updateAddress(AddressDto addressDto) throws DataExitsException;
 
-    ApiResponse deleteAddress(String addressId);
+    ApiResponse deleteAddress(String addressId) throws DataExitsException;
 
     AddressResponse getAddress(String addressId) throws DataExitsException;
 

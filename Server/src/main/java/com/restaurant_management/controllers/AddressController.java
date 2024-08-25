@@ -54,7 +54,7 @@ public class AddressController {
 
     @DeleteMapping("/delete/{addressId}")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<ApiResponse> deleteAddress(@PathVariable String addressId) {
+    public ResponseEntity<ApiResponse> deleteAddress(@PathVariable String addressId) throws DataExitsException {
         return ResponseEntity.ok(this.addressService.deleteAddress(addressId));
     }
 

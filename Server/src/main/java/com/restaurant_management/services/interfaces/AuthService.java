@@ -17,7 +17,7 @@ public interface AuthService {
 
     JwtResponse signIn(SignInRequest signInRequest) throws DataExitsException;
 
-    ApiResponse verifyEmail(String token);
+    ApiResponse verifyEmail(String token) throws DataExitsException;
 
     ApiResponse resendVerificationEmail(String email) throws MessagingException, UnsupportedEncodingException, DataExitsException;
 

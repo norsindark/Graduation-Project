@@ -38,7 +38,7 @@ public class AuthController {
     }
 
     @GetMapping("/verify-email")
-    public ResponseEntity<ApiResponse> verifyEmail(@RequestParam("token") String token) {
+    public ResponseEntity<ApiResponse> verifyEmail(@RequestParam("token") String token) throws DataExitsException {
         return ResponseEntity.ok(authService.verifyEmail(token));
     }
 
