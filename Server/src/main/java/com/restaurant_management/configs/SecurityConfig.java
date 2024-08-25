@@ -44,7 +44,8 @@ public class SecurityConfig {
             "/swagger-ui.html",
             "/v3/api-docs/**",
             "/swagger-ui/**",
-            "api/v1/oauth2/**"
+            "api/v1/oauth2/**",
+            "/api/v1/category/**"
     };
 
     public static final String[] OAUTH2_SECRET_URLS = {

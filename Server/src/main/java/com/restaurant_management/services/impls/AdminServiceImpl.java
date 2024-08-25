@@ -3,6 +3,7 @@ package com.restaurant_management.services.impls;
 import com.restaurant_management.entites.Role;
 import com.restaurant_management.entites.User;
 import com.restaurant_management.enums.StatusType;
+import com.restaurant_management.exceptions.DataExitsException;
 import com.restaurant_management.payloads.requests.SignUpRequest;
 import com.restaurant_management.payloads.requests.UserRequest;
 import com.restaurant_management.payloads.responses.ApiResponse;
@@ -16,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -41,13 +43,11 @@ public class AdminServiceImpl implements AdminService {
 
 
     @Override
-    public ApiResponse addNewUser(SignUpRequest signUpRequest) {
+    public ApiResponse addNewUser(SignUpRequest signUpRequest) throws DataExitsException {
         Optional<User> user = userRepository.findByEmail(signUpRequest.getEmail());
 
         if (user.isPresent()) {
-            return new ApiResponse("An error:"
-                    , ApiUtil.createErrorDetails("This email: " + signUpRequest.getEmail() + " already exist!")
-                    , HttpStatus.BAD_REQUEST);
+            throw new DataExitsException("User already exists!");
         }
         Role role = roleRepository.findByName(signUpRequest.getRole());
 
@@ -65,39 +65,41 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public Page<UserResponse> getAllUsers(int pageNo, int pageSize) {
+    public Page<UserResponse> getAllUsers(int pageNo, int pageSize){
         Pageable pageable = PageRequest.of(pageNo, pageSize);
         Page<User> users = userRepository.findAllUser(pageable);
+        if (users.isEmpty()) {
+            return Page.empty();
+        }
         return users.map(UserResponse::new);
     }
 
     @Override
-    public ApiResponse deleteUser(String id) {
+    public ApiResponse deleteUser(String id) throws DataExitsException {
         Optional<User> user = userRepository.findById(id);
-        if (user.isPresent()) {
-            this.userTokenRepository.deleteByUserId(id);
-
-            userRepository.delete(user.get());
-            return new ApiResponse("User deleted successfully", HttpStatus.OK);
+        if (user.isEmpty()) {
+            throw new DataExitsException("User not found!");
         }
-        return new ApiResponse("User not found", HttpStatus.NOT_FOUND);
+        this.userTokenRepository.deleteByUserId(id);
+        userRepository.delete(user.get());
+        return new ApiResponse("User deleted successfully", HttpStatus.OK);
     }
 
     @Override
-    public ApiResponse updateUser(UserRequest userRequest) {
+    public ApiResponse updateUser(UserRequest userRequest) throws DataExitsException {
         Optional<User> user = userRepository.findById(userRequest.getId());
-        if (user.isPresent()) {
-            Role role = roleRepository.findByName(userRequest.getRole());
-
-            user.get().setRole(role);
-            user.get().setFullName(userRequest.getFullName());
-            user.get().setEmail(userRequest.getEmail());
-            user.get().setStatus(StatusType.valueOf(userRequest.getStatus()).toString());
-
-            this.userRepository.save(user.get());
-
-            return new ApiResponse("User updated successfully", HttpStatus.OK);
+        if (user.isEmpty()) {
+            throw new DataExitsException("User not found!");
         }
-        return new ApiResponse("An error:",ApiUtil.createErrorDetails("User not found!"), HttpStatus.NOT_FOUND);
+        Role role = roleRepository.findByName(userRequest.getRole());
+
+        user.get().setRole(role);
+        user.get().setFullName(userRequest.getFullName());
+        user.get().setEmail(userRequest.getEmail());
+        user.get().setStatus(StatusType.valueOf(userRequest.getStatus()).toString());
+
+        this.userRepository.save(user.get());
+
+        return new ApiResponse("User updated successfully", HttpStatus.OK);
     }
 }
