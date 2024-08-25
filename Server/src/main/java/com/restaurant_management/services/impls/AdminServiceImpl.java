@@ -36,6 +36,7 @@ public class AdminServiceImpl implements AdminService {
 
     private final UserTokenRepository userTokenRepository;
 
+
     private final PasswordEncoder encoder;
 
 
@@ -75,6 +76,7 @@ public class AdminServiceImpl implements AdminService {
         Optional<User> user = userRepository.findById(id);
         if (user.isPresent()) {
             this.userTokenRepository.deleteByUserId(id);
+
             userRepository.delete(user.get());
             return new ApiResponse("User deleted successfully", HttpStatus.OK);
         }

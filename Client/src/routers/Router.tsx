@@ -3,7 +3,8 @@ import LayoutPublic from "../pages/public/LayoutPublic.tsx";
 import LayoutAdmin from "../pages/admin/LayoutAdmin.tsx";
 import HomePage from "../pages/public/HomePage.tsx";
 import RegisterModal from "../pages/public/RegisterModal.tsx";
-import LoginPage from "../pages/public/LoginPage.tsx";
+
+import LoginModal from "../pages/public/LoginModal.tsx";
 
 export const router = createBrowserRouter([
     {
@@ -20,7 +21,7 @@ export const router = createBrowserRouter([
             },
             {
                 path: "/login",
-                element: <LoginPage/>
+                element: <LoginModal/>
             }
         ]
     },
