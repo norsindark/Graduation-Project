@@ -1,11 +1,15 @@
 # Server
 
-### Setting apache and jdk
-1. **Download this folder**:
+### Setting Maven 3.9.8 and JDK 21
+1. **Download this**:
    ```bash
      https://drive.google.com/file/d/1mRmpALO5WBx_CeTnslZdllfW0egKsmva/view?usp=drive_link
    ```
-2. **Set JAVA_HOME and MAVEN_HOME**:
+
+   ```bash
+      https://www.java.com/en/download/
+   ```
+1. **Set JAVA_HOME and MAVEN_HOME**:
    
    follow the instructions below:
 
@@ -54,7 +58,9 @@ Swagger is automatically configured in this project. However, if you need to cus
 - If the application is not running on port 8080, replace `8080` in the URL with the correct port number.
 
 
+
 # Client
+
 
 This project is the frontend, built with Vite, React, and communicates with a backend API documented using Swagger.
 
@@ -91,3 +97,4 @@ Access the app at: http://localhost:3000
 -   If issues arise, ensure dependencies are installed: npm install
 
 -   For ESLint issues, check the .eslintrc configuration.
+
