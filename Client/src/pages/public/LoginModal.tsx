@@ -1,6 +1,7 @@
-import { Form, Modal, Input, Button, Checkbox } from 'antd';
+import {Form, Modal, Input, Button, Checkbox, message, notification} from 'antd';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useEffect, useState, useRef } from 'react';
+import {callLogin} from "../../services/clientApi.ts";
 
 const LoginModal = () => {
     const hasWindow = typeof window !== 'undefined';
@@ -43,10 +44,31 @@ const LoginModal = () => {
         navigate('/'); // Close the modal and navigate back to the homepage
     };
 
-    const onFinish = (values: any) => {
-        console.log('Form values:', values);
-        navigate('/'); // Close the modal after successful submission
+    const onFinish = async (values: any) => {
+        const { email, password } = values;
+        console.log("Payload:", { email, password }); // Debug log to check payload
+        try {
+            const res = await callLogin(email, password);
+            console.log(res)
+            if(res?.status === 200) {
+                message.success('Đăng nhập tài khoản thành công!');
+                navigate('/');
+            } else {
+                notification.error({
+                    message: "Có lỗi xảy ra",
+                    description: "Tài khoản hoặc mật khẩu không đúng",
+                    duration: 5
+                });
+            }
+        } catch (error) {
+            notification.error({
+                message: "Có lỗi xảy ra",
+                description:  "Đã có lỗi xảy ra, vui lòng thử lại sau.",
+                duration: 5
+            });
+        }
     };
+
 
     return (
         <Modal
@@ -71,7 +93,7 @@ const LoginModal = () => {
                                 <div className="fp__login_area">
                                     <h2>Welcome back!</h2>
                                     <p>Sign In to continue</p>
-                                    <Form layout="vertical" onFinish={onFinish} initialValues={{ rememberme: false }}>
+                                    <Form layout="vertical" onFinish={onFinish} initialValues={{ remember: false }}>
                                         <Form.Item
                                             label="Email"
                                             name="email"
@@ -87,7 +109,7 @@ const LoginModal = () => {
                                             <Input.Password placeholder="Password" autoComplete="current-password" />
                                         </Form.Item>
                                         <Form.Item
-                                            name="rememberme"
+                                            name="remember"
                                             valuePropName="checked"
                                         >
                                             <div>

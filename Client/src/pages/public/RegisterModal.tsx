@@ -1,7 +1,7 @@
-import { Form, Modal, Input, Button } from 'antd';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { useEffect, useState, useRef } from 'react';
-import { callRegister } from "../../services/clientApi.ts";
+import {Form, Modal, Input, Button, notification, message} from 'antd';
+import {Link, useLocation, useNavigate} from 'react-router-dom';
+import {useEffect, useState, useRef} from 'react';
+import {callRegister} from "../../services/clientApi.ts";
 
 const RegisterModal = () => {
     const hasWindow = typeof window !== 'undefined';
@@ -9,7 +9,7 @@ const RegisterModal = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const timeOutId = useRef<number | null>(null);
-
+    const [isSubmit, setIsSubmit] = useState(false);
     useEffect(() => {
         const handleResize = () => {
             const width = window.innerWidth;
@@ -47,21 +47,36 @@ const RegisterModal = () => {
         navigate('/'); // Close the modal and navigate back to the homepage
     };
 
+
     const onFinish = async (values: any) => {
-        const { fullName, email, password, confirmPassword } = values;
+        const {fullName, email, password, confirmPassword} = values;
 
         if (password === confirmPassword) {
-            try {
-                const response = await callRegister({ email, password, fullName });
-                console.log(response)
-            } catch (error) {
-                // Xử lý lỗi khi gọi API
-                console.error("Lỗi đăng ký:", error);
+
+            setIsSubmit(true);
+            const res = await callRegister(email, password, fullName);
+            setIsSubmit(false);
+            if (res?.data?.httpStatus === "CREATED") {
+                message.success(res?.data?.message);
+                navigate('/login')
+            } else {
+                notification.error({
+                    message: "Registration failed",
+                    description: res?.data?.errors.error,
+                    duration: 5,
+                    showProgress: true
+                })
             }
         } else {
-            console.error("Mật khẩu và xác nhận mật khẩu không khớp!");
+            notification.error({
+                message: "Registration failed",
+                description: "Password and confirm password do not match!",
+                duration: 5,
+                showProgress: true
+            })
         }
     };
+
 
     return (
         <Modal
@@ -78,7 +93,7 @@ const RegisterModal = () => {
                 </div>
             }
         >
-            <section className="fp__signup" style={{ backgroundImage: 'url(images/login_bg.jpg)' }}>
+            <section className="fp__signup" style={{backgroundImage: 'url(images/login_bg.jpg)'}}>
                 <div className="fp__signup_overlay pt_45 xs_pt_45 pb_45 xs_pb_45">
                     <div className="container">
                         <div className="row wow fadeInUp" data-wow-duration="1s">
@@ -90,33 +105,34 @@ const RegisterModal = () => {
                                         <Form.Item
                                             label="Full Name"
                                             name="fullName"
-                                            rules={[{ required: true, message: 'Please input your full name!' }]}
+                                            rules={[{required: true, message: 'Please input your full name!'}]}
                                         >
-                                            <Input placeholder="Full Name" autoComplete="fullname" />
+                                            <Input placeholder="Full Name" autoComplete="fullname"/>
                                         </Form.Item>
                                         <Form.Item
                                             label="Email"
                                             name="email"
-                                            rules={[{ required: true, message: 'Please input your email!' }]}
+                                            rules={[{required: true, message: 'Please input your email!'}]}
                                         >
-                                            <Input type="email" placeholder="Email" autoComplete="email" />
+                                            <Input type="email" placeholder="Email" autoComplete="email"/>
                                         </Form.Item>
                                         <Form.Item
                                             label="Password"
                                             name="password"
-                                            rules={[{ required: true, message: 'Please input your password!' }]}
+                                            rules={[{required: true, message: 'Please input your password!'}]}
                                         >
-                                            <Input.Password placeholder="Password" autoComplete="new-password" />
+                                            <Input.Password placeholder="Password" autoComplete="new-password"/>
                                         </Form.Item>
                                         <Form.Item
                                             label="Confirm Password"
                                             name="confirmPassword"
-                                            rules={[{ required: true, message: 'Please confirm your password!' }]}
+                                            rules={[{required: true, message: 'Please confirm your password!'}]}
                                         >
-                                            <Input.Password placeholder="Confirm Password" autoComplete="new-password" />
+                                            <Input.Password placeholder="Confirm Password" autoComplete="new-password"/>
                                         </Form.Item>
                                         <Form.Item>
-                                            <Button type="primary" htmlType="submit" block size="large">
+                                            <Button type="primary" htmlType="submit" block size="large"
+                                                    loading={isSubmit}>
                                                 <div className="w-14 font-medium">Register</div>
                                             </Button>
                                         </Form.Item>
@@ -128,7 +144,8 @@ const RegisterModal = () => {
                                         <li><a href="#"><i className="fab fa-twitter"></i></a></li>
                                         <li><a href="#"><i className="fab fa-google-plus-g"></i></a></li>
                                     </ul>
-                                    <p className="create_account">Already have an account? <Link to="/login">Login</Link></p>
+                                    <p className="create_account">Already have an account? <Link
+                                        to="/login">Login</Link></p>
                                 </div>
                             </div>
                         </div>
