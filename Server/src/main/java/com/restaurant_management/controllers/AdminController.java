@@ -1,5 +1,6 @@
 package com.restaurant_management.controllers;
 
+import com.restaurant_management.exceptions.DataExitsException;
 import com.restaurant_management.payloads.requests.SignUpRequest;
 import com.restaurant_management.payloads.requests.UserRequest;
 import com.restaurant_management.payloads.responses.ApiResponse;
@@ -26,26 +27,26 @@ public class AdminController {
 
     @PostMapping("/user/add-user")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse> addNewUser(@Valid @RequestBody SignUpRequest signUpRequest) {
+    public ResponseEntity<ApiResponse> addNewUser(@Valid @RequestBody SignUpRequest signUpRequest) throws DataExitsException {
         return ResponseEntity.ok(adminService.addNewUser(signUpRequest));
     }
 
     @GetMapping("/user/users")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Page<UserResponse>> getAllUsers(@RequestParam int pageNo,
-                                                          @RequestParam int pageSize) {
+                                                          @RequestParam int pageSize) throws DataExitsException {
         return ResponseEntity.ok(adminService.getAllUsers(pageNo, pageSize));
     }
 
     @PutMapping("/user/update-user")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse> updateUser(@Valid @RequestBody UserRequest userRequest) {
+    public ResponseEntity<ApiResponse> updateUser(@Valid @RequestBody UserRequest userRequest) throws DataExitsException {
         return ResponseEntity.ok(adminService.updateUser(userRequest));
     }
 
     @DeleteMapping("/user/delete-user/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse> deleteUser(@PathVariable String id) {
+    public ResponseEntity<ApiResponse> deleteUser(@PathVariable String id) throws DataExitsException {
         return ResponseEntity.ok(adminService.deleteUser(id));
     }
 }

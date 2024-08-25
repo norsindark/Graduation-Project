@@ -85,13 +85,16 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public JwtResponse signIn(SignInRequest signInRequest) throws DataExitsException {
         try {
+            User _user = this.userRepository.findByEmail(signInRequest.getEmail())
+                    .orElseThrow(() -> new DataExitsException("Email or password is invalid!"));
+            if (!_user.isEnabled()) {
+                throw new DataExitsException("Email not verified!");
+            }
             authenticate.authenticate(
                     new UsernamePasswordAuthenticationToken(
                             signInRequest.getEmail(),
                             signInRequest.getPassword()
                     ));
-            User _user = this.userRepository.findByEmail(signInRequest.getEmail())
-                    .orElseThrow(() -> new DataExitsException("Email or password is invalid!"));
 
             var token = this.jwtProviderUtil.generaTokenUsingEmail(_user);
             tokenService.saveAccessToken(_user, token);
@@ -100,20 +103,18 @@ public class AuthServiceImpl implements AuthService {
                     .accessToken(token)
                     .build();
         } catch (AuthenticationException e) {
-            throw new DataExitsException("The account has not been verified!");
+            throw new DataExitsException("Email or password is invalid!");
         }
     }
 
     @Override
-    public ApiResponse verifyEmail(String token) {
+    public ApiResponse verifyEmail(String token) throws DataExitsException {
         UserToken userToken = userTokenRepository.findByToken(token);
 
         if (userToken == null
                 || userToken.getExpiryDate().isBefore(LocalDateTime.now())
                 || userToken.getTokenType() != TokenType.EMAIL_VERIFICATION) {
-            return new ApiResponse("An error",
-                    ApiUtil.createErrorDetails("Invalid or expired token"),
-                    HttpStatus.BAD_REQUEST);
+           throw new DataExitsException("Invalid or expired token!");
         }
 
         User user = userToken.getUser();
@@ -132,9 +133,7 @@ public class AuthServiceImpl implements AuthService {
                 .orElseThrow(() -> new DataExitsException("Email not found!"));
 
         if (user.isEnabled()) {
-            return new ApiResponse("An error!"
-                    ,ApiUtil.createErrorDetails("This account has already been verified")
-                    ,HttpStatus.BAD_REQUEST);
+            throw new DataExitsException("Email already verified!");
         }
 
         UserToken _userToken = userTokenRepository.findByUserAndTokenType(user, TokenType.EMAIL_VERIFICATION);
@@ -162,15 +161,13 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public ApiResponse resetPassword(ResetPasswordRequest request) {
+    public ApiResponse resetPassword(ResetPasswordRequest request) throws DataExitsException {
         UserToken userToken = userTokenRepository.findByToken(request.getToken());
 
         if (userToken == null
                 || userToken.getExpiryDate().isBefore(LocalDateTime.now())
                 || userToken.getTokenType() != TokenType.PASSWORD_RESET) {
-            return new ApiResponse("An error!",
-                    ApiUtil.createErrorDetails("Token is invalid or expired"),
-                    HttpStatus.BAD_REQUEST);
+            throw new DataExitsException("Invalid or expired token!");
         }
 
         User user = userToken.getUser();

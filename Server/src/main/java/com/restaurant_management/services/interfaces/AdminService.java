@@ -10,11 +10,11 @@ import org.springframework.data.domain.Page;
 
 public interface AdminService {
 
-    ApiResponse addNewUser(SignUpRequest signUpRequest);
+    ApiResponse addNewUser(SignUpRequest signUpRequest) throws DataExitsException;
 
-    Page<UserResponse> getAllUsers(int pageNo, int pageSize);
+    Page<UserResponse> getAllUsers(int pageNo, int pageSize) throws DataExitsException;
 
-    ApiResponse deleteUser(String id);
+    ApiResponse deleteUser(String id) throws DataExitsException;
 
-    ApiResponse updateUser(UserRequest userRequest);
+    ApiResponse updateUser(UserRequest userRequest) throws DataExitsException;
 }

@@ -111,9 +111,7 @@ public class UserServiceImpl implements UserService {
         }
 
         if (!encoder.matches(request.getOldPassword(), user.get().getPassword())) {
-            Map<String, String> errorDetails = new HashMap<>();
-            errorDetails.put("error", "Old password is incorrect");
-            return new ApiResponse("An error!", errorDetails, HttpStatus.BAD_REQUEST);
+           throw new DataExitsException("Old password is incorrect");
         }
 
         User _user = user.get();

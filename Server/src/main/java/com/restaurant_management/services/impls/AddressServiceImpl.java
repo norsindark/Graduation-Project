@@ -40,13 +40,6 @@ public class AddressServiceImpl implements AddressService {
             throw new DataExitsException("User not found");
         }
 
-
-        if(currentUserName != null && !currentUserName.equals(user.get().getEmail())){
-            return new ApiResponse("An error!"
-                    , ApiUtil.createErrorDetails("You are not allowed to add address for this user")
-                    , HttpStatus.FORBIDDEN);
-        }
-
         Address newAddress = addressDto.toAddress(user.get());
 
         User _user = user.get();
@@ -85,12 +78,10 @@ public class AddressServiceImpl implements AddressService {
     }
 
     @Override
-    public ApiResponse deleteAddress(String addressId) {
+    public ApiResponse deleteAddress(String addressId) throws DataExitsException {
         Optional<Address> address = this.addressRepository.findById(addressId);
         if (address.isEmpty()) {
-            return new ApiResponse("An error!"
-                    , ApiUtil.createErrorDetails("Address not found")
-                    , HttpStatus.NOT_FOUND);
+            throw new DataExitsException("Address not found");
         }
         this.addressRepository.deleteById(addressId);
         return new ApiResponse("Address deleted successfully", HttpStatus.OK);
