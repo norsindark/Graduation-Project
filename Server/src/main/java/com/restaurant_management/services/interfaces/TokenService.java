@@ -17,9 +17,4 @@ public interface TokenService {
 
     public JwtResponse refreshAccessToken(RefreshTokenRequest refreshToken, HttpServletResponse response) throws DataExitsException;
 
-//    public UserToken generaRefreshToken(User user);
-//
-//    public  void saveAccessToken(User user, String token);
-
-    public void invokerRefreshToken();
 }

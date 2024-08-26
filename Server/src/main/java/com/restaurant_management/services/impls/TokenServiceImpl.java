@@ -10,13 +10,16 @@ import com.restaurant_management.repositories.UserRepository;
 import com.restaurant_management.repositories.UserTokenRepository;
 import com.restaurant_management.services.interfaces.EmailService;
 import com.restaurant_management.services.interfaces.TokenService;
+import com.restaurant_management.utils.CookieUtils;
 import com.restaurant_management.utils.GetUserUtil;
 import com.restaurant_management.utils.JwtProviderUtil;
+import io.jsonwebtoken.*;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
@@ -37,6 +40,11 @@ public class TokenServiceImpl implements TokenService {
     private final EmailService emailService;
 
     private final JwtProviderUtil jwtProviderUtil;
+
+    private final UserDetailsService userDetailsService;
+
+    @Value("${RestaurantManagement.app.jwtSecret}")
+    private String SECRET_KEY;
 
     @Value("${restaurantManagement.app.refreshTokenExpired}")
     private int refreshTokenExpired;
@@ -66,75 +74,27 @@ public class TokenServiceImpl implements TokenService {
     }
 
 
-
     @Override
     public JwtResponse refreshAccessToken(RefreshTokenRequest refreshToken, HttpServletResponse response) throws DataExitsException {
-        UserToken userToken = userTokenRepository.findByToken(refreshToken.getRefreshToken());
+        try {
+            Jws<Claims> claims = Jwts.parser()
+                    .setSigningKey(SECRET_KEY)
+                    .parseClaimsJws(refreshToken.getRefreshToken());
+            String username = claims.getBody().getSubject();
+            User _user = (User) userDetailsService.loadUserByUsername(username);
 
-        if (userToken == null
-                || userToken.getExpiryDate().isBefore(LocalDateTime.now())
-                || userToken.getTokenType() != TokenType.REFRESH_TOKEN) {
-            throw new DataExitsException("Invalid or expired refresh token");
+            String newAccessToken = jwtProviderUtil.generaTokenUsingEmail(_user);
+            var _refreshToken = jwtProviderUtil.generaRefreshTokenUsingEmail(_user);
+
+            CookieUtils.addRefreshTokenCookie(response, _refreshToken, refreshTokenExpired);
+
+            return JwtResponse.builder()
+                    .accessToken(newAccessToken)
+                    .build();
+        } catch (ExpiredJwtException e) {
+            throw new DataExitsException("Refresh token is expired");
         }
 
-        User _user = userToken.getUser();
-        String newAccessToken = jwtProviderUtil.generaTokenUsingEmail(_user);
-        var _refreshToken = jwtProviderUtil.generaRefreshTokenUsingEmail(_user);
-
-        Cookie refreshTokenCookie = new Cookie("refreshToken", _refreshToken);
-        refreshTokenCookie.setHttpOnly(true);
-        refreshTokenCookie.setSecure(true);
-        refreshTokenCookie.setPath("/");
-        refreshTokenCookie.setMaxAge(refreshTokenExpired);
-        response.addCookie(refreshTokenCookie);
-
-        return JwtResponse.builder()
-                .accessToken(newAccessToken)
-                .build();
     }
 
-//    @Override
-//    public UserToken generaRefreshToken(User user) {
-//        UserToken _refreshToken = userTokenRepository.findByUserAndTokenType(user, TokenType.REFRESH_TOKEN);
-//        if (_refreshToken != null) {
-//            userTokenRepository.delete(_refreshToken);
-//        }
-//
-//        UserToken refreshToken = new UserToken();
-//        refreshToken.setToken(UUID.randomUUID().toString());
-//        refreshToken.setUser(user);
-//        refreshToken.setExpiryDate(LocalDateTime.now().plusDays(7));
-//        refreshToken.setTokenType(TokenType.REFRESH_TOKEN);
-//        userTokenRepository.save(refreshToken);
-//        return refreshToken;
-//    }
-
-//    @Override
-//    public void saveAccessToken(User user, String token) {
-//        UserToken _accessToken = userTokenRepository.findByUserAndTokenType(user, TokenType.ACCESS_TOKEN);
-//        if (_accessToken != null) {
-//            userTokenRepository.delete(_accessToken);
-//        }
-//
-//        UserToken accessToken = new UserToken();
-//        accessToken.setToken(token);
-//        accessToken.setUser(user);
-//        accessToken.setExpiryDate(LocalDateTime.now().plusMinutes(15));
-//        accessToken.setTokenType(TokenType.ACCESS_TOKEN);
-//        userTokenRepository.save(accessToken);
-//    }
-
-    @Override
-    public void invokerRefreshToken() {
-        GetUserUtil getUserUtil = new GetUserUtil();
-        String userEmail = getUserUtil.getUserEmail();
-        Optional<User> user = userRepository.findByEmail(userEmail);
-        if (user.isEmpty()) {
-            return;
-        }
-        UserToken userToken = userTokenRepository.findByUserAndTokenType(user.get(),TokenType.REFRESH_TOKEN);
-        if (userToken != null) {
-            userTokenRepository.delete(userToken);
-        }
-    }
 }

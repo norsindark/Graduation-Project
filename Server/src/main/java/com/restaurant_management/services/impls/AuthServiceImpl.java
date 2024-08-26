@@ -17,11 +17,13 @@ import com.restaurant_management.repositories.UserRepository;
 import com.restaurant_management.repositories.UserTokenRepository;
 import com.restaurant_management.services.interfaces.AuthService;
 import com.restaurant_management.services.interfaces.TokenService;
+import com.restaurant_management.utils.CookieUtils;
 import com.restaurant_management.utils.JwtProviderUtil;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -53,6 +55,9 @@ public class AuthServiceImpl implements AuthService {
     private final TokenService tokenService;
 
     private final UserTokenRepository userTokenRepository;
+
+    @Value("${restaurantManagement.app.refreshTokenExpired}")
+    private int refreshTokenExpired;
 
     private final static String clientUrl = "http://localhost:3000/";
 
@@ -99,12 +104,9 @@ public class AuthServiceImpl implements AuthService {
             var token = this.jwtProviderUtil.generaTokenUsingEmail(_user);
             var refreshToken = this.jwtProviderUtil.generaRefreshTokenUsingEmail(_user);
 
-            Cookie refreshTokenCookie = new Cookie("refreshToken", refreshToken);
-            refreshTokenCookie.setHttpOnly(true);
-            refreshTokenCookie.setSecure(true);
-            refreshTokenCookie.setPath("/");
-            refreshTokenCookie.setMaxAge(6 * 60 * 60);
-            response.addCookie(refreshTokenCookie);
+            System.out.println("Refresh Token: " + refreshToken + " " + refreshTokenExpired);
+
+            CookieUtils.addRefreshTokenCookie(response, refreshToken,refreshTokenExpired );
 
             return JwtResponse.builder()
                     .accessToken(token)
