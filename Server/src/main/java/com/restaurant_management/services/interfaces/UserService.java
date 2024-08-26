@@ -5,6 +5,7 @@ import com.restaurant_management.entites.User;
 import com.restaurant_management.exceptions.DataExitsException;
 import com.restaurant_management.payloads.requests.PasswordRequest;
 import com.restaurant_management.payloads.responses.ApiResponse;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -23,4 +24,6 @@ public interface UserService {
     ApiResponse changePassword(PasswordRequest request) throws DataExitsException;
 
     ApiResponse deleteUser(String userId) throws DataExitsException;
+
+//    public void logOut(HttpServletResponse response) throws DataExitsException;
 }

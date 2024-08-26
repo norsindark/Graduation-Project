@@ -4,6 +4,7 @@ import {useState} from 'react';
 import {callRegister} from "../../services/clientApi.ts";
 import useResponsiveModalWidth from "../../hooks/useResponsiveModalWidth.tsx";
 
+
 const RegisterModal = () => {
     const navigate = useNavigate();
     const location = useLocation();
@@ -14,8 +15,10 @@ const RegisterModal = () => {
         navigate('/'); // Close the modal and navigate back to the homepage
     };
 
+
     const onFinish = async (values: any) => {
         const {fullName, email, password, confirmPassword} = values;
+
         if (password === confirmPassword) {
             setIsSubmit(true);
             const res = await callRegister(email, password, fullName);
@@ -40,6 +43,7 @@ const RegisterModal = () => {
             })
         }
     };
+
 
     return (
         <Modal

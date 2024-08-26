@@ -13,6 +13,8 @@ import com.restaurant_management.repositories.UserTokenRepository;
 import com.restaurant_management.services.interfaces.UserService;
 import com.restaurant_management.utils.ApiUtil;
 import com.restaurant_management.utils.GetUserUtil;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -137,4 +139,20 @@ public class UserServiceImpl implements UserService {
         this.userRepository.deleteById(userId);
         return new ApiResponse("User deleted successfully", HttpStatus.OK);
     }
+
+//    @Override
+//    public void logOut(HttpServletResponse response) throws DataExitsException {
+//        GetUserUtil getUserUtil = new GetUserUtil();
+//        String userEmail = getUserUtil.getUserEmail();
+//        Optional<User> user = userRepository.findByEmail(userEmail);
+//        if (user.isEmpty()) {
+//            throw new DataExitsException("User not login!");
+//        }
+//        Cookie refreshTokenCookie = new Cookie("refreshToken", null);
+//        refreshTokenCookie.setHttpOnly(true);
+//        refreshTokenCookie.setSecure(true);
+//        refreshTokenCookie.setPath("/");
+//        refreshTokenCookie.setMaxAge(0);
+//        response.addCookie(refreshTokenCookie);
+//    }
 }

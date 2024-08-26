@@ -4,6 +4,7 @@ import {useState} from 'react';
 import {callLogin} from "../../services/clientApi.ts";
 import useResponsiveModalWidth from "../../hooks/useResponsiveModalWidth.tsx";
 
+
 const LoginModal = () => {
     const navigate = useNavigate();
     const location = useLocation();
@@ -57,6 +58,7 @@ const LoginModal = () => {
                                     <h2>Welcome back!</h2>
                                     <p>Sign In to continue</p>
                                     <Form layout="vertical" onFinish={onFinish} initialValues={{remember: false}}>
+                                    <Form layout="vertical" onFinish={onFinish} initialValues={{ remember: false }}>
                                         <Form.Item
                                             label="Email"
                                             name="email"
