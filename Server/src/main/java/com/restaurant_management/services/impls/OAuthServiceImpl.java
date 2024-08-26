@@ -10,6 +10,8 @@ import com.restaurant_management.repositories.UserRepository;
 import com.restaurant_management.services.interfaces.OAuthService;
 import com.restaurant_management.services.interfaces.TokenService;
 import com.restaurant_management.utils.JwtProviderUtil;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -57,7 +59,7 @@ public class OAuthServiceImpl implements OAuthService {
     private RestTemplate restTemplate;
 
     @Override
-    public JwtResponse handleOAuth2Callback(String code, String state){
+    public JwtResponse handleOAuth2Callback(String code, String state, HttpServletResponse response){
         String accessToken = getAccessToken(code);
         String email = getUserEmailFromAccessToken(accessToken);
 
@@ -82,8 +84,14 @@ public class OAuthServiceImpl implements OAuthService {
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         var token = jwtProviderUtil.generaTokenUsingEmail(user);
-        tokenService.saveAccessToken(user, token);
-        tokenService.saveRefreshToken(user);
+        var refreshToken = jwtProviderUtil.generaRefreshTokenUsingEmail(user);
+
+        Cookie cookie = new Cookie("refreshToken", refreshToken);
+        cookie.setHttpOnly(true);
+        cookie.setMaxAge(30 * 24 * 60 * 60);
+        cookie.setPath("/");
+        cookie.setSecure(true);
+        response.addCookie(cookie);
 
         return JwtResponse.builder()
                 .accessToken(token)

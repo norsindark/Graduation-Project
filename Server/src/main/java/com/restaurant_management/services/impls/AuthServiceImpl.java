@@ -17,16 +17,16 @@ import com.restaurant_management.repositories.UserRepository;
 import com.restaurant_management.repositories.UserTokenRepository;
 import com.restaurant_management.services.interfaces.AuthService;
 import com.restaurant_management.services.interfaces.TokenService;
-import com.restaurant_management.utils.ApiUtil;
 import com.restaurant_management.utils.JwtProviderUtil;
 import jakarta.mail.MessagingException;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -83,7 +83,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public JwtResponse signIn(SignInRequest signInRequest) throws DataExitsException {
+    public JwtResponse signIn(SignInRequest signInRequest, HttpServletResponse response) throws DataExitsException {
         try {
             User _user = this.userRepository.findByEmail(signInRequest.getEmail())
                     .orElseThrow(() -> new DataExitsException("Email or password is invalid!"));
@@ -97,8 +97,15 @@ public class AuthServiceImpl implements AuthService {
                     ));
 
             var token = this.jwtProviderUtil.generaTokenUsingEmail(_user);
-            tokenService.saveAccessToken(_user, token);
-            tokenService.saveRefreshToken(_user);
+            var refreshToken = this.jwtProviderUtil.generaRefreshTokenUsingEmail(_user);
+
+            Cookie refreshTokenCookie = new Cookie("refreshToken", refreshToken);
+            refreshTokenCookie.setHttpOnly(true);
+            refreshTokenCookie.setSecure(true);
+            refreshTokenCookie.setPath("/");
+            refreshTokenCookie.setMaxAge(6 * 60 * 60);
+            response.addCookie(refreshTokenCookie);
+
             return JwtResponse.builder()
                     .accessToken(token)
                     .build();
@@ -114,7 +121,7 @@ public class AuthServiceImpl implements AuthService {
         if (userToken == null
                 || userToken.getExpiryDate().isBefore(LocalDateTime.now())
                 || userToken.getTokenType() != TokenType.EMAIL_VERIFICATION) {
-           throw new DataExitsException("Invalid or expired token!");
+            throw new DataExitsException("Invalid or expired token!");
         }
 
         User user = userToken.getUser();

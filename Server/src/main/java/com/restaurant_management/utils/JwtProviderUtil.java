@@ -21,7 +21,7 @@ import java.util.function.Function;
 public class JwtProviderUtil {
 
     @Value("${RestaurantManagement.app.jwtSecret}")
-    private  String jwtSecret;
+    private String jwtSecret;
 
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
@@ -32,8 +32,12 @@ public class JwtProviderUtil {
         return claimsResolver.apply(claims);
     }
 
-    public String  generaTokenUsingEmail(UserDetails userDetails) {
+    public String generaTokenUsingEmail(UserDetails userDetails) {
         return generaToken(new HashMap<>(), userDetails);
+    }
+
+    public String generaRefreshTokenUsingEmail(UserDetails userDetails) {
+        return generaRefreshToken(new HashMap<>(), userDetails);
     }
 
     public Boolean isTokenValid(String token, UserDetails userDetails) {
@@ -58,7 +62,20 @@ public class JwtProviderUtil {
                 .setClaims(extraClaims)
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() +1000 * 60 * 15))
+                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 15))
+                .signWith(getSignInKey(), SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+    public String generaRefreshToken(
+            Map<String, Object> extraClaims, UserDetails userDetails
+    ) {
+        return Jwts
+                .builder()
+                .setClaims(extraClaims)
+                .setSubject(userDetails.getUsername())
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24 * 7))
                 .signWith(getSignInKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
