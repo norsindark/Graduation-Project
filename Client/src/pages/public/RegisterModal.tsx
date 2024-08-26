@@ -18,31 +18,40 @@ const RegisterModal = () => {
 
     const onFinish = async (values: any) => {
         const {fullName, email, password, confirmPassword} = values;
-
-        if (password === confirmPassword) {
-            setIsSubmit(true);
-            const res = await callRegister(email, password, fullName);
-            setIsSubmit(false);
-            if (res?.status == 201) {
-                message.success(res?.data?.message || "Registration successful!");
-                navigate('/login')
+        setIsSubmit(true);
+        try {
+            if (password === confirmPassword) {
+                const res = await callRegister(email, password, fullName);
+                if (res?.status == 201) {
+                    message.success(res?.data?.message || "Registration successful!");
+                    navigate('/login')
+                } else {
+                    notification.error({
+                        message: "Registration failed",
+                        description: res?.data?.errors?.error || "Something went wrong!",
+                        duration: 5,
+                        showProgress: true
+                    })
+                }
             } else {
                 notification.error({
                     message: "Registration failed",
-                    description: res?.data?.errors.error || "Something went wrong!",
+                    description: "Password and confirm password do not match!",
                     duration: 5,
                     showProgress: true
                 })
             }
-        } else {
+        } catch (loginError: any) {
             notification.error({
-                message: "Registration failed",
-                description: "Password and confirm password do not match!",
+                message: "registration error!",
+                description: loginError?.message || "Error during registration process!",
                 duration: 5,
                 showProgress: true
-            })
+            });
+        } finally {
+            setIsSubmit(false);
         }
-    };
+    }
 
 
     return (

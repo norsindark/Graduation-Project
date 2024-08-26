@@ -1,35 +1,51 @@
 import {Form, Modal, Input, Button, Checkbox, message, notification} from 'antd';
 import {Link, useLocation, useNavigate} from 'react-router-dom';
 import {useState} from 'react';
-import {callLogin} from "../../services/clientApi.ts";
+import {callLogin, callProfile} from "../../services/clientApi.ts";
 import useResponsiveModalWidth from "../../hooks/useResponsiveModalWidth.tsx";
-
+import {useDispatch} from "react-redux";
+import {doLoginAction} from "../../redux/account/accountSlice.tsx";
 
 const LoginModal = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const [isSubmit, setIsSubmit] = useState(false);
     const modalWidth = useResponsiveModalWidth();
-
+    const dispatch = useDispatch();
     const handleCancel = () => {
-        navigate('/'); // Close the modal and navigate back to the homepage
+        navigate('/');
     };
 
     const onFinish = async (values: any) => {
         const {email, password} = values;
         setIsSubmit(true);
-        const res = await callLogin(email, password);
-        setIsSubmit(false);
-        if (res?.status === 200) {
-            localStorage.setItem('accessToken', res.data.accessToken)
-            message.success('Login successful!');
-            navigate('/');
-        } else {
+        try {
+            const loginRes = await callLogin(email, password);
+            if (loginRes?.status == 200) {
+                localStorage.setItem('accessToken', loginRes.data.accessToken);
+                const profileRes = await callProfile();
+                if (profileRes?.status === 200) {
+                    dispatch(doLoginAction(profileRes.data));
+                    message.success('Login successful!');
+                    navigate('/');
+                }
+            } else {
+                notification.error({
+                    message: "Login failed!",
+                    description: loginRes.data.errors?.error || "Something went wrong!",
+                    duration: 5,
+                    showProgress: true
+                });
+            }
+        } catch (loginError: any) {
             notification.error({
-                message: "Login failed!",
-                description: res.data.errors.error || "Something went wrong!",
-                duration: 5
+                message: "Login error!",
+                description: loginError?.message || "Error during login process.",
+                duration: 5,
+                showProgress: true
             });
+        } finally {
+            setIsSubmit(false);
         }
     };
 
@@ -58,7 +74,6 @@ const LoginModal = () => {
                                     <h2>Welcome back!</h2>
                                     <p>Sign In to continue</p>
                                     <Form layout="vertical" onFinish={onFinish} initialValues={{remember: false}}>
-                                    <Form layout="vertical" onFinish={onFinish} initialValues={{ remember: false }}>
                                         <Form.Item
                                             label="Email"
                                             name="email"
