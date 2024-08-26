@@ -7,6 +7,7 @@ import com.restaurant_management.payloads.requests.PasswordRequest;
 import com.restaurant_management.payloads.responses.ApiResponse;
 import com.restaurant_management.repositories.UserRepository;
 import com.restaurant_management.services.interfaces.UserService;
+import com.restaurant_management.utils.CookieUtils;
 import com.restaurant_management.utils.GetUserUtil;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
@@ -68,7 +69,7 @@ public class UserController {
     }
 
     @GetMapping("/logout")
-    @PreAuthorize("hasRole('USER') or hasRole('ADMIN') or hasRole('EMPOYEE')")
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN') or hasRole('EMPLOYEE')")
     public ResponseEntity<Void> logOut(HttpServletResponse response) throws DataExitsException {
         GetUserUtil getUserUtil = new GetUserUtil();
         String userEmail = getUserUtil.getUserEmail();
@@ -76,12 +77,7 @@ public class UserController {
         if (user.isEmpty()) {
             throw new DataExitsException("User not login!");
         }
-        Cookie refreshTokenCookie = new Cookie("refreshToken", null);
-        refreshTokenCookie.setHttpOnly(true);
-        refreshTokenCookie.setSecure(true);
-        refreshTokenCookie.setPath("/");
-        refreshTokenCookie.setMaxAge(0);
-        response.addCookie(refreshTokenCookie);
+        CookieUtils.addRefreshTokenCookie(response, null,0);
         return ResponseEntity.ok().build();
     }
 }
