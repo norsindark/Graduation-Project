@@ -2,11 +2,12 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 interface UserState {
     email: string;
-    phone: string;
     fullName: string;
     role: string;
     avatar: string;
     id: string;
+    status: string;
+    addresses: [];
 }
 
 interface AccountState {
@@ -20,11 +21,12 @@ const initialState: AccountState = {
     isLoading: true,
     user: {
         email: "",
-        phone: "",
         fullName: "",
         role: "",
         avatar: "",
-        id: ""
+        id: "",
+        status: "",
+        addresses: [],
     }
 };
 
@@ -45,13 +47,15 @@ export const accountSlice = createSlice({
         doLogoutAction: (state) => {
             localStorage.removeItem('access_token');
             state.isAuthenticated = false;
+            state.isLoading = false;
             state.user = {
                 email: "",
-                phone: "",
                 fullName: "",
                 role: "",
                 avatar: "",
-                id: ""
+                id: "",
+                status: "",
+                addresses: [],
             };
         },
     },

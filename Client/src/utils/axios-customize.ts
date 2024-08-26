@@ -19,6 +19,10 @@ const instance = axios.create({
 instance.interceptors.request.use(
     (config: InternalAxiosRequestConfig) => {
         // Làm điều gì đó trước khi yêu cầu được gửi
+        const token = localStorage.getItem('accessToken');
+        if (token) {
+            config.headers['Authorization'] = `Bearer ${token}`;
+        }
         return config;
     },
     (error: AxiosError) => {
