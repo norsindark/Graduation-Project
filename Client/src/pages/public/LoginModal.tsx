@@ -1,69 +1,33 @@
 import {Form, Modal, Input, Button, Checkbox, message, notification} from 'antd';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { useEffect, useState, useRef } from 'react';
+import {Link, useLocation, useNavigate} from 'react-router-dom';
+import {useState} from 'react';
 import {callLogin} from "../../services/clientApi.ts";
+import useResponsiveModalWidth from "../../hooks/useResponsiveModalWidth.tsx";
+
 
 const LoginModal = () => {
-    const hasWindow = typeof window !== 'undefined';
-    const [modalWidth, setModalWidth] = useState<number>(hasWindow ? window.innerWidth : 650);
     const navigate = useNavigate();
     const location = useLocation();
-    const timeOutId = useRef<number | null>(null);
-
-    useEffect(() => {
-        const handleResize = () => {
-            const width = window.innerWidth;
-            if (width < 500) {
-                setModalWidth(380);
-            } else if (width >= 500 && width < 1000) {
-                setModalWidth(480);
-            } else {
-                setModalWidth(680);
-            }
-        };
-
-        const resizeListener = () => {
-            if (timeOutId.current) {
-                clearTimeout(timeOutId.current);
-            }
-            timeOutId.current = window.setTimeout(handleResize, 500);
-        };
-
-        window.addEventListener('resize', resizeListener);
-        handleResize();
-
-        return () => {
-            if (timeOutId.current) {
-                clearTimeout(timeOutId.current);
-            }
-            window.removeEventListener('resize', resizeListener);
-        };
-    }, []);
+    const [isSubmit, setIsSubmit] = useState(false);
+    const modalWidth = useResponsiveModalWidth();
 
     const handleCancel = () => {
         navigate('/'); // Close the modal and navigate back to the homepage
     };
 
     const onFinish = async (values: any) => {
-        const { email, password } = values;
-        console.log("Payload:", { email, password }); // Debug log to check payload
-        try {
-            const res = await callLogin(email, password);
-            console.log(res)
-            if(res?.status === 200) {
-                message.success('Đăng nhập tài khoản thành công!');
-                navigate('/');
-            } else {
-                notification.error({
-                    message: "Có lỗi xảy ra",
-                    description: "Tài khoản hoặc mật khẩu không đúng",
-                    duration: 5
-                });
-            }
-        } catch (error) {
+        const {email, password} = values;
+        setIsSubmit(true);
+        const res = await callLogin(email, password);
+        setIsSubmit(false);
+        if (res?.status === 200) {
+            localStorage.setItem('accessToken', res.data.accessToken)
+            message.success('Login successful!');
+            navigate('/');
+        } else {
             notification.error({
-                message: "Có lỗi xảy ra",
-                description:  "Đã có lỗi xảy ra, vui lòng thử lại sau.",
+                message: "Login failed!",
+                description: res.data.errors.error || "Something went wrong!",
                 duration: 5
             });
         }
@@ -85,7 +49,7 @@ const LoginModal = () => {
                 </div>
             }
         >
-            <section className="fp__signup" style={{ backgroundImage: 'url(images/login_bg.jpg)' }}>
+            <section className="fp__signup" style={{backgroundImage: 'url(images/login_bg.jpg)'}}>
                 <div className="fp__signup_overlay pt_45 xs_pt_45 pb_45 xs_pb_45">
                     <div className="container">
                         <div className="row wow fadeInUp" data-wow-duration="1s">
@@ -93,20 +57,21 @@ const LoginModal = () => {
                                 <div className="fp__login_area">
                                     <h2>Welcome back!</h2>
                                     <p>Sign In to continue</p>
+                                    <Form layout="vertical" onFinish={onFinish} initialValues={{remember: false}}>
                                     <Form layout="vertical" onFinish={onFinish} initialValues={{ remember: false }}>
                                         <Form.Item
                                             label="Email"
                                             name="email"
-                                            rules={[{ required: true, message: 'Please input your email!' }]}
+                                            rules={[{required: true, message: 'Please input your email!'}]}
                                         >
-                                            <Input type="email" placeholder="Email" autoComplete="email" />
+                                            <Input type="email" placeholder="Email" autoComplete="email"/>
                                         </Form.Item>
                                         <Form.Item
                                             label="Password"
                                             name="password"
-                                            rules={[{ required: true, message: 'Please input your password!' }]}
+                                            rules={[{required: true, message: 'Please input your password!'}]}
                                         >
-                                            <Input.Password placeholder="Password" autoComplete="current-password" />
+                                            <Input.Password placeholder="Password" autoComplete="current-password"/>
                                         </Form.Item>
                                         <Form.Item
                                             name="remember"
@@ -114,13 +79,14 @@ const LoginModal = () => {
                                         >
                                             <div>
                                                 <Checkbox>Remember Me</Checkbox>
-                                                <Link to="/forgot-password" style={{ float: 'right' }}>
+                                                <Link to="/forgot-password" style={{float: 'right'}}>
                                                     Forgot Password?
                                                 </Link>
                                             </div>
                                         </Form.Item>
                                         <Form.Item>
-                                            <Button type="primary" htmlType="submit" block size="large">
+                                            <Button type="primary" htmlType="submit" block size="large"
+                                                    loading={isSubmit}>
                                                 <div className="w-14 font-medium">Login</div>
                                             </Button>
                                         </Form.Item>
@@ -132,7 +98,8 @@ const LoginModal = () => {
                                         <li><a href="#"><i className="fab fa-twitter"></i></a></li>
                                         <li><a href="#"><i className="fab fa-google-plus-g"></i></a></li>
                                     </ul>
-                                    <p className="create_account">Don’t have an account? <Link to="/register">Register</Link></p>
+                                    <p className="create_account">Don’t have an account? <Link
+                                        to="/register">Register</Link></p>
                                 </div>
                             </div>
                         </div>

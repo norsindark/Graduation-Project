@@ -1,47 +1,15 @@
 import {Form, Modal, Input, Button, notification, message} from 'antd';
 import {Link, useLocation, useNavigate} from 'react-router-dom';
-import {useEffect, useState, useRef} from 'react';
+import {useState} from 'react';
 import {callRegister} from "../../services/clientApi.ts";
+import useResponsiveModalWidth from "../../hooks/useResponsiveModalWidth.tsx";
+
 
 const RegisterModal = () => {
-    const hasWindow = typeof window !== 'undefined';
-    const [modalWidth, setModalWidth] = useState<number>(hasWindow ? window.innerWidth : 650);
     const navigate = useNavigate();
     const location = useLocation();
-    const timeOutId = useRef<number | null>(null);
     const [isSubmit, setIsSubmit] = useState(false);
-    useEffect(() => {
-        const handleResize = () => {
-            const width = window.innerWidth;
-            if (width < 500) {
-                setModalWidth(380);
-            } else if (width >= 500 && width < 1000) {
-                setModalWidth(480);
-            } else {
-                setModalWidth(680);
-            }
-        };
-
-        // Handle resize with debouncing
-        const resizeListener = () => {
-            if (timeOutId.current) {
-                clearTimeout(timeOutId.current);
-            }
-            timeOutId.current = window.setTimeout(handleResize, 500);
-        };
-
-        window.addEventListener('resize', resizeListener);
-
-        // Initial check
-        handleResize();
-
-        return () => {
-            if (timeOutId.current) {
-                clearTimeout(timeOutId.current);
-            }
-            window.removeEventListener('resize', resizeListener);
-        };
-    }, []);
+    const modalWidth = useResponsiveModalWidth();
 
     const handleCancel = () => {
         navigate('/'); // Close the modal and navigate back to the homepage
@@ -52,17 +20,16 @@ const RegisterModal = () => {
         const {fullName, email, password, confirmPassword} = values;
 
         if (password === confirmPassword) {
-
             setIsSubmit(true);
             const res = await callRegister(email, password, fullName);
             setIsSubmit(false);
-            if (res?.data?.httpStatus === "CREATED") {
-                message.success(res?.data?.message);
+            if (res?.status == 201) {
+                message.success(res?.data?.message || "Registration successful!");
                 navigate('/login')
             } else {
                 notification.error({
                     message: "Registration failed",
-                    description: res?.data?.errors.error,
+                    description: res?.data?.errors.error || "Something went wrong!",
                     duration: 5,
                     showProgress: true
                 })
