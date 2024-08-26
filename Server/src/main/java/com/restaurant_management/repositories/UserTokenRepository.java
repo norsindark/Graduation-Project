@@ -13,6 +13,7 @@ import java.util.List;
 
 public interface UserTokenRepository extends JpaRepository<UserToken, String> {
     UserToken findByToken(String token);
+    UserToken findByTokenType(TokenType tokenType);
     UserToken findByUserAndTokenType(User user, TokenType tokenType);
 
     List<UserToken> findByUserId(String userId);
