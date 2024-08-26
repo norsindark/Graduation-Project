@@ -37,7 +37,7 @@ instance.interceptors.response.use(
     (error: AxiosError) => {
         // Mã trạng thái nằm ngoài phạm vi 2xx sẽ kích hoạt hàm này
         // Xử lý lỗi phản hồi
-        return Promise.reject(error.response);
+        return error.response ;
     }
 );
 

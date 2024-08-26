@@ -62,10 +62,7 @@ public class AuthServiceImpl implements AuthService {
     public ApiResponse signUp(SignUpRequest signUpRequest) throws DataExitsException, MessagingException, UnsupportedEncodingException {
         String email = signUpRequest.getEmail();
         if (userRepository.existsByEmail(email)) {
-//             throw new DataExitsException("This email: " + email + " already exist!");
-             return new ApiResponse("An error:"
-                                            , ApiUtil.createErrorDetails("This email: " + email + " already exist!")
-                                            , HttpStatus.BAD_REQUEST);
+             throw new DataExitsException("This email: " + email + " already exist!");
         } else {
             Role role = roleRepository.findByName(RoleName.USER.toString());
 
