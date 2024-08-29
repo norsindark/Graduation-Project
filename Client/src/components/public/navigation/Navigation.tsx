@@ -14,12 +14,12 @@ const Navigation = () => {
                     </li>
                     <li className="nav-item">
                         <a className="nav-link" href="/">
-                            About
+                            Menu
                         </a>
                     </li>
                     <li className="nav-item">
                         <a className="nav-link" href="/">
-                            Menu
+                            About
                         </a>
                     </li>
                     <li className="nav-item">

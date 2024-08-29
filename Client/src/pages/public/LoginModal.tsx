@@ -32,7 +32,7 @@ const LoginModal = () => {
             } else {
                 notification.error({
                     message: "Login failed!",
-                    description: loginRes.data.errors?.error || "Something went wrong!",
+                    description: loginRes.data.errors?.error || loginRes.data.message || "Something went wrong!",
                     duration: 5,
                     showProgress: true
                 });

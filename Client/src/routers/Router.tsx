@@ -6,15 +6,16 @@ import RegisterModal from "../pages/public/RegisterModal.tsx";
 
 import LoginModal from "../pages/public/LoginModal.tsx";
 import NotFound from "../components/NotFound/NotFound.tsx";
+import ProtectedRoute from "../components/ProtectedRoute/ProtectedRoute.tsx";
 
 export const router = createBrowserRouter([
     {
         path: "/",
         element: <LayoutPublic/>,
-        errorElement: <NotFound />,
+        errorElement: <NotFound/>,
         children: [
             {
-                index:true,
+                index: true,
                 element: <HomePage/>
             },
             {
@@ -30,11 +31,14 @@ export const router = createBrowserRouter([
     {
         path: "/admin",
         element: <LayoutAdmin/>,
-        errorElement: <NotFound />,
+        errorElement: <NotFound/>,
         children: [
             {
-                index:true,
-                element: <h1>admin</h1>
+                index: true,
+                element:
+                    <ProtectedRoute>
+                        <h1>admin</h1>
+                    </ProtectedRoute>
             }
         ]
     },

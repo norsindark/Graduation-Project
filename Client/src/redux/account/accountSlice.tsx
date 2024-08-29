@@ -1,33 +1,30 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
+interface Role {
+    id: string;
+    name: string;
+}
+
 interface UserState {
     email: string;
     fullName: string;
-    role: string;
+    role: Role;
     avatar: string;
     id: string;
     status: string;
-    addresses: [];
+    addresses: any[];
 }
 
 interface AccountState {
     isAuthenticated: boolean;
     isLoading: boolean;
-    user: UserState;
+    user: UserState | null;
 }
 
 const initialState: AccountState = {
     isAuthenticated: false,
-    isLoading: true,
-    user: {
-        email: "",
-        fullName: "",
-        role: "",
-        avatar: "",
-        id: "",
-        status: "",
-        addresses: [],
-    }
+    isLoading: false,
+    user: null,
 };
 
 export const accountSlice = createSlice({
@@ -39,28 +36,24 @@ export const accountSlice = createSlice({
             state.isLoading = false;
             state.user = action.payload;
         },
-        doGetAccountAction: (state, action: PayloadAction<{ user: UserState }>) => {
+        doGetAccountAction: (state, action: PayloadAction<UserState>) => {
             state.isAuthenticated = true;
             state.isLoading = false;
-            state.user = action.payload.user;
+            state.user = action.payload;
         },
         doLogoutAction: (state) => {
-            localStorage.removeItem('access_token');
+            localStorage.removeItem('accessToken');
             state.isAuthenticated = false;
             state.isLoading = false;
-            state.user = {
-                email: "",
-                fullName: "",
-                role: "",
-                avatar: "",
-                id: "",
-                status: "",
-                addresses: [],
-            };
+            state.user = null; // Reset user state to `null`
         },
     },
 });
 
-export const { doLoginAction, doGetAccountAction, doLogoutAction } = accountSlice.actions;
+export const {
+    doLoginAction,
+    doGetAccountAction,
+    doLogoutAction,
+} = accountSlice.actions;
 
 export default accountSlice.reducer;

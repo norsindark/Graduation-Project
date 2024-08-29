@@ -430,7 +430,7 @@ button {
 }
 
 .main_menu .menu_icon li:last-child a {
-    padding: 10px 25px !important;
+    padding: 10px 25px ;
     margin-right: 0;
 }
 

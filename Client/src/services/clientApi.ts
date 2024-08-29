@@ -9,11 +9,5 @@ export const callLogin = (email: string, password: string) => {
 }
 
 export const callProfile = () => {
-    return axios.get('/api/v1/client/user/profile'
-        ,{
-        headers: {
-            Authorization: `Bearer ${localStorage.getItem('accessToken')}`
-        }
-    }
-    )
+    return axios.get('/api/v1/client/user/profile')
 }
