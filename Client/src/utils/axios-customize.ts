@@ -15,10 +15,6 @@ const instance = axios.create({
     }
 });
 
-
-
-
-
 // Thêm interceptor cho yêu cầu
 instance.interceptors.request.use(
     (config: InternalAxiosRequestConfig) => {
@@ -37,7 +33,7 @@ instance.interceptors.request.use(
 
 // Thêm interceptor cho phản hồi
 instance.interceptors.response.use(
-    (response: AxiosResponse<any>) => {
+    (response: AxiosResponse<unknown>) => {
         // Mã trạng thái nằm trong phạm vi 2xx sẽ kích hoạt hàm này
         // Làm điều gì đó với dữ liệu phản hồi
         return response;
@@ -45,7 +41,7 @@ instance.interceptors.response.use(
     (error: AxiosError) => {
         // Mã trạng thái nằm ngoài phạm vi 2xx sẽ kích hoạt hàm này
         // Xử lý lỗi phản hồi
-        return error.response ;
+        return error.response;
     }
 );
 

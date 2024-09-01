@@ -15,7 +15,6 @@ const RegisterModal = () => {
         navigate('/'); // Close the modal and navigate back to the homepage
     };
 
-
     const onFinish = async (values: { fullName: string; email: string; password: string; confirmPassword: string }) => {
         const { fullName, email, password, confirmPassword } = values;
         setIsSubmit(true);
@@ -52,7 +51,6 @@ const RegisterModal = () => {
             setIsSubmit(false);
         }
     }
-
 
     return (
         <Modal
