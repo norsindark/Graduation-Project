@@ -12,7 +12,7 @@ interface UserState {
     avatar: string;
     id: string;
     status: string;
-    addresses: any[];
+    addresses: [];
 }
 
 interface AccountState {
@@ -23,7 +23,7 @@ interface AccountState {
 
 const initialState: AccountState = {
     isAuthenticated: false,
-    isLoading: false,
+    isLoading: true,  // Initial load shows loading until user is fetched
     user: null,
 };
 
@@ -36,24 +36,18 @@ export const accountSlice = createSlice({
             state.isLoading = false;
             state.user = action.payload;
         },
-        doGetAccountAction: (state, action: PayloadAction<UserState>) => {
-            state.isAuthenticated = true;
-            state.isLoading = false;
-            state.user = action.payload;
-        },
         doLogoutAction: (state) => {
             localStorage.removeItem('accessToken');
             state.isAuthenticated = false;
             state.isLoading = false;
-            state.user = null; // Reset user state to `null`
+            state.user = null;
+        },
+        setLoading: (state, action: PayloadAction<boolean>) => {
+            state.isLoading = action.payload;
         },
     },
 });
 
-export const {
-    doLoginAction,
-    doGetAccountAction,
-    doLogoutAction,
-} = accountSlice.actions;
+export const { doLoginAction, doLogoutAction, setLoading } = accountSlice.actions;
 
 export default accountSlice.reducer;

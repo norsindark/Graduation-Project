@@ -1,6 +1,6 @@
 const Reservation = () => {
     return (
-        <li>
+        <li className="md:px-1">
             <a className="common_btn" href="#" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
                 Reservation
             </a>

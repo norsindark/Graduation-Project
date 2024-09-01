@@ -1,14 +1,13 @@
 import { configureStore } from '@reduxjs/toolkit';
-import counterReducer from '../redux/counter/counterSlice';
-import accountSlice from "./account/accountSlice.tsx";
+import accountReducer from './account/accountSlice';
 
 export const store = configureStore({
   reducer: {
-    counter: counterReducer,
-    account: accountSlice
+    account: accountReducer
   },
 });
 
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
+
 
