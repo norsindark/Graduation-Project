@@ -13,7 +13,5 @@ export const callProfile = () => {
 }
 
 export const callLogout = () => {
-    return axios.post('/api/v1/client/user/logout', {}, {
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('accessToken')}` }
-    })
+    return axios.get('/api/v1/client/user/logout')
 }

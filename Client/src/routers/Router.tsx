@@ -1,37 +1,37 @@
-import {createBrowserRouter} from "react-router-dom";
-import LayoutPublic from "../pages/public/LayoutPublic.tsx";
-import LayoutAdmin from "../pages/admin/LayoutAdmin.tsx";
-import HomePage from "../pages/public/HomePage.tsx";
-import RegisterModal from "../pages/public/RegisterModal.tsx";
+import { createBrowserRouter } from "react-router-dom";
+import LayoutPublic from "../pages/public/LayoutPublic";
+import LayoutAdmin from "../pages/admin/LayoutAdmin";
+import HomePage from "../pages/public/HomePage";
+import RegisterModal from "../pages/public/RegisterModal";
 
-import LoginModal from "../pages/public/LoginModal.tsx";
-import NotFound from "../components/NotFound/NotFound.tsx";
-import ProtectedRoute from "../components/ProtectedRoute/ProtectedRoute.tsx";
+import LoginModal from "../pages/public/LoginModal";
+import NotFound from "../components/NotFound/NotFound";
+import ProtectedRoute from "../components/ProtectedRoute/ProtectedRoute";
 
 export const router = createBrowserRouter([
     {
         path: "/",
-        element: <LayoutPublic/>,
-        errorElement: <NotFound/>,
+        element: <LayoutPublic />,
+        errorElement: <NotFound />,
         children: [
             {
                 index: true,
-                element: <HomePage/>
+                element: <HomePage />
             },
             {
                 path: "/register",
-                element: <RegisterModal/>
+                element: <RegisterModal />
             },
             {
                 path: "/login",
-                element: <LoginModal/>
+                element: <LoginModal />
             }
         ]
     },
     {
         path: "/admin",
-        element: <LayoutAdmin/>,
-        errorElement: <NotFound/>,
+        element: <LayoutAdmin />,
+        errorElement: <NotFound />,
         children: [
             {
                 index: true,
