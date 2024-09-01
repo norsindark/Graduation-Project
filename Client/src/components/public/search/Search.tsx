@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import {Modal, Input, Button, } from 'antd';
+import { Modal, Input, Button, } from 'antd';
 
 
 const Search = () => {
@@ -40,7 +40,7 @@ const Search = () => {
     };
 
     return (
-        <li>
+        <li className="md:px-1">
             <a href="#" className="menu_search" onClick={showModal}>
                 <i className="far fa-search"></i>
             </a>
@@ -58,7 +58,7 @@ const Search = () => {
                     <Button key="cancel" type="default" size="large" onClick={handleCancel}>
                         Cancel
                     </Button>,
-                    <Button key="submit" type="primary" size="large"  onClick={handleOk}>
+                    <Button key="submit" type="primary" size="large" onClick={handleOk}>
                         <div className="w-14">Search</div>
                     </Button>,
                 ]}
@@ -75,17 +75,17 @@ const Search = () => {
                             {items.length > 0 ? (
                                 items.map((item, index) => (
                                     <div key={index} className="col-xl-6 col-sm-6 col-lg-4 burger pizza wow fadeInUp"
-                                         data-wow-duration="1s">
+                                        data-wow-duration="1s">
                                         <div className="fp__menu_item">
                                             <div className="fp__menu_item_img">
-                                                <img src={item.img} alt="menu" className="img-fluid w-100"/>
+                                                <img src={item.img} alt="menu" className="img-fluid w-100" />
                                                 <a className="category" href="#">{item.category}</a>
                                             </div>
                                             <div className="fp__menu_item_text">
                                                 <p className="rating">
                                                     {[...Array(5)].map((_, i) => (
                                                         <i key={i}
-                                                           className={i < Math.floor(item.rating) ? "fas fa-star" : "far fa-star"}></i>
+                                                            className={i < Math.floor(item.rating) ? "fas fa-star" : "far fa-star"}></i>
                                                     ))}
                                                     <span>{Math.floor(item.rating * 10)}</span>
                                                 </p>
@@ -93,8 +93,8 @@ const Search = () => {
                                                 <h5 className="price">{item.price}</h5>
                                                 <ul className="d-flex flex-wrap justify-content-center">
                                                     <li><a href="#" data-bs-toggle="modal"
-                                                           data-bs-target="#cartModal"><i
-                                                        className="fas fa-shopping-basket"></i></a></li>
+                                                        data-bs-target="#cartModal"><i
+                                                            className="fas fa-shopping-basket"></i></a></li>
                                                     <li><a href="#"><i className="fal fa-heart"></i></a></li>
                                                     <li><a href="#"><i className="far fa-eye"></i></a></li>
                                                 </ul>

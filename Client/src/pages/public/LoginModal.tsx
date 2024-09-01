@@ -1,10 +1,10 @@
-import {Form, Modal, Input, Button, Checkbox, message, notification} from 'antd';
-import {Link, useLocation, useNavigate} from 'react-router-dom';
-import {useState} from 'react';
-import {callLogin, callProfile} from "../../services/clientApi.ts";
-import useResponsiveModalWidth from "../../hooks/useResponsiveModalWidth.tsx";
-import {useDispatch} from "react-redux";
-import {doLoginAction} from "../../redux/account/accountSlice.tsx";
+import { Form, Modal, Input, Button, Checkbox, message, notification } from 'antd';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useState } from 'react';
+import { callLogin, callProfile } from "../../services/clientApi";
+import useResponsiveModalWidth from "../../hooks/useResponsiveModalWidth";
+import { useDispatch } from "react-redux";
+import { doLoginAction } from "../../redux/account/accountSlice";
 
 const LoginModal = () => {
     const navigate = useNavigate();
@@ -16,8 +16,8 @@ const LoginModal = () => {
         navigate('/');
     };
 
-    const onFinish = async (values: any) => {
-        const {email, password} = values;
+    const onFinish = async (values: { email: string; password: string }) => {
+        const { email, password } = values;
         setIsSubmit(true);
         try {
             const loginRes = await callLogin(email, password);
@@ -32,15 +32,15 @@ const LoginModal = () => {
             } else {
                 notification.error({
                     message: "Login failed!",
-                    description: loginRes.data.errors?.error || "Something went wrong!",
+                    description: loginRes.data.errors?.error || loginRes.data.message || "Something went wrong!",
                     duration: 5,
                     showProgress: true
                 });
             }
-        } catch (loginError: any) {
+        } catch (loginError) {
             notification.error({
                 message: "Login error!",
-                description: loginError?.message || "Error during login process.",
+                description: loginError instanceof Error ? loginError.message : "Error during registration process!",
                 duration: 5,
                 showProgress: true
             });
@@ -65,7 +65,7 @@ const LoginModal = () => {
                 </div>
             }
         >
-            <section className="fp__signup" style={{backgroundImage: 'url(images/login_bg.jpg)'}}>
+            <section className="fp__signup" style={{ backgroundImage: 'url(images/login_bg.jpg)' }}>
                 <div className="fp__signup_overlay pt_45 xs_pt_45 pb_45 xs_pb_45">
                     <div className="container">
                         <div className="row wow fadeInUp" data-wow-duration="1s">
@@ -73,20 +73,20 @@ const LoginModal = () => {
                                 <div className="fp__login_area">
                                     <h2>Welcome back!</h2>
                                     <p>Sign In to continue</p>
-                                    <Form layout="vertical" onFinish={onFinish} initialValues={{remember: false}}>
+                                    <Form layout="vertical" onFinish={onFinish} initialValues={{ remember: false }}>
                                         <Form.Item
                                             label="Email"
                                             name="email"
-                                            rules={[{required: true, message: 'Please input your email!'}]}
+                                            rules={[{ required: true, message: 'Please input your email!' }]}
                                         >
-                                            <Input type="email" placeholder="Email" autoComplete="email"/>
+                                            <Input type="email" placeholder="Email" autoComplete="email" />
                                         </Form.Item>
                                         <Form.Item
                                             label="Password"
                                             name="password"
-                                            rules={[{required: true, message: 'Please input your password!'}]}
+                                            rules={[{ required: true, message: 'Please input your password!' }]}
                                         >
-                                            <Input.Password placeholder="Password" autoComplete="current-password"/>
+                                            <Input.Password placeholder="Password" autoComplete="current-password" />
                                         </Form.Item>
                                         <Form.Item
                                             name="remember"
@@ -94,14 +94,14 @@ const LoginModal = () => {
                                         >
                                             <div>
                                                 <Checkbox>Remember Me</Checkbox>
-                                                <Link to="/forgot-password" style={{float: 'right'}}>
+                                                <Link to="/forgot-password" style={{ float: 'right' }}>
                                                     Forgot Password?
                                                 </Link>
                                             </div>
                                         </Form.Item>
                                         <Form.Item>
                                             <Button type="primary" htmlType="submit" block size="large"
-                                                    loading={isSubmit}>
+                                                loading={isSubmit}>
                                                 <div className="w-14 font-medium">Login</div>
                                             </Button>
                                         </Form.Item>
