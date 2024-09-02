@@ -7,7 +7,6 @@ import com.restaurant_management.payloads.requests.SignUpRequest;
 import com.restaurant_management.payloads.responses.ApiResponse;
 import com.restaurant_management.services.interfaces.AuthService;
 import jakarta.mail.MessagingException;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -33,9 +32,9 @@ public class AuthController {
 
     @PostMapping("/sign-in")
 //    @CrossOrigin(origins = "*", allowedHeaders = "*")
-    public ResponseEntity<?> singIn(@Valid @RequestBody SignInRequest request, HttpServletResponse response)
+    public ResponseEntity<?> singIn(@Valid @RequestBody SignInRequest request)
             throws DataExitsException {
-        return new ResponseEntity<>(authService.signIn(request, response), HttpStatus.OK);
+        return new ResponseEntity<>(authService.signIn(request), HttpStatus.OK);
     }
 
     @GetMapping("/verify-email")
