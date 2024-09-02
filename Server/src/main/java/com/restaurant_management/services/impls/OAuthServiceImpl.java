@@ -3,20 +3,16 @@ package com.restaurant_management.services.impls;
 import com.restaurant_management.entites.Role;
 import com.restaurant_management.entites.User;
 import com.restaurant_management.enums.RoleName;
-import com.restaurant_management.exceptions.DataExitsException;
 import com.restaurant_management.payloads.responses.JwtResponse;
 import com.restaurant_management.repositories.RoleRepository;
 import com.restaurant_management.repositories.UserRepository;
 import com.restaurant_management.services.interfaces.OAuthService;
 import com.restaurant_management.services.interfaces.TokenService;
 import com.restaurant_management.utils.JwtProviderUtil;
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -59,7 +55,7 @@ public class OAuthServiceImpl implements OAuthService {
     private RestTemplate restTemplate;
 
     @Override
-    public JwtResponse handleOAuth2Callback(String code, String state, HttpServletResponse response){
+    public JwtResponse handleOAuth2Callback(String code, String state){
         String accessToken = getAccessToken(code);
         String email = getUserEmailFromAccessToken(accessToken);
 
@@ -86,15 +82,9 @@ public class OAuthServiceImpl implements OAuthService {
         var token = jwtProviderUtil.generaTokenUsingEmail(user);
         var refreshToken = jwtProviderUtil.generaRefreshTokenUsingEmail(user);
 
-        Cookie cookie = new Cookie("refreshToken", refreshToken);
-        cookie.setHttpOnly(true);
-        cookie.setMaxAge(30 * 24 * 60 * 60);
-        cookie.setPath("/");
-        cookie.setSecure(true);
-        response.addCookie(cookie);
-
         return JwtResponse.builder()
                 .accessToken(token)
+                .refreshToken(refreshToken)
                 .build();
     }
 

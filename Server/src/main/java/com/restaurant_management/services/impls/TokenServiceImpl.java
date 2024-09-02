@@ -5,18 +5,17 @@ import com.restaurant_management.entites.UserToken;
 import com.restaurant_management.enums.TokenType;
 import com.restaurant_management.exceptions.DataExitsException;
 import com.restaurant_management.payloads.requests.RefreshTokenRequest;
-import com.restaurant_management.payloads.responses.JwtResponse;
+import com.restaurant_management.payloads.responses.RefreshTokenResponse;
 import com.restaurant_management.repositories.UserRepository;
 import com.restaurant_management.repositories.UserTokenRepository;
 import com.restaurant_management.services.interfaces.EmailService;
 import com.restaurant_management.services.interfaces.TokenService;
-import com.restaurant_management.utils.CookieUtils;
-import com.restaurant_management.utils.GetUserUtil;
 import com.restaurant_management.utils.JwtProviderUtil;
-import io.jsonwebtoken.*;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.Jws;
+import io.jsonwebtoken.Jwts;
 import jakarta.mail.MessagingException;
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -25,7 +24,6 @@ import org.springframework.stereotype.Service;
 
 import java.io.UnsupportedEncodingException;
 import java.time.LocalDateTime;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -73,9 +71,8 @@ public class TokenServiceImpl implements TokenService {
         emailService.sendPasswordResetEmail(user.getEmail(), token.getToken());
     }
 
-
     @Override
-    public JwtResponse refreshAccessToken(RefreshTokenRequest refreshToken, HttpServletResponse response) throws DataExitsException {
+    public RefreshTokenResponse refreshAccessToken(RefreshTokenRequest refreshToken) throws DataExitsException {
         try {
             Jws<Claims> claims = Jwts.parser()
                     .setSigningKey(SECRET_KEY)
@@ -86,15 +83,12 @@ public class TokenServiceImpl implements TokenService {
             String newAccessToken = jwtProviderUtil.generaTokenUsingEmail(_user);
             var _refreshToken = jwtProviderUtil.generaRefreshTokenUsingEmail(_user);
 
-            CookieUtils.addRefreshTokenCookie(response, _refreshToken, refreshTokenExpired);
 
-            return JwtResponse.builder()
+            return RefreshTokenResponse.builder()
                     .accessToken(newAccessToken)
                     .build();
         } catch (ExpiredJwtException e) {
             throw new DataExitsException("Refresh token is expired");
         }
-
     }
-
 }
