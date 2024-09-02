@@ -4,7 +4,6 @@ import com.restaurant_management.entites.User;
 import com.restaurant_management.entites.UserToken;
 import com.restaurant_management.enums.TokenType;
 import com.restaurant_management.exceptions.DataExitsException;
-import com.restaurant_management.payloads.requests.RefreshTokenRequest;
 import com.restaurant_management.payloads.responses.RefreshTokenResponse;
 import com.restaurant_management.repositories.UserRepository;
 import com.restaurant_management.repositories.UserTokenRepository;
@@ -16,6 +15,8 @@ import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
 import jakarta.mail.MessagingException;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -72,17 +73,26 @@ public class TokenServiceImpl implements TokenService {
     }
 
     @Override
-    public RefreshTokenResponse refreshAccessToken(RefreshTokenRequest refreshToken) throws DataExitsException {
+    public RefreshTokenResponse refreshAccessToken(HttpServletRequest request) throws DataExitsException {
         try {
+            var refreshToken = "";
+            Cookie[] cookies = request.getCookies();
+            if (cookies != null) {
+                for (Cookie cookie : cookies) {
+                    if ("refreshToken".equals(cookie.getName())) {
+                        refreshToken = cookie.getValue();
+                    }
+                }
+            }
+
             Jws<Claims> claims = Jwts.parser()
                     .setSigningKey(SECRET_KEY)
-                    .parseClaimsJws(refreshToken.getRefreshToken());
+                    .parseClaimsJws(refreshToken);
             String username = claims.getBody().getSubject();
             User _user = (User) userDetailsService.loadUserByUsername(username);
 
             String newAccessToken = jwtProviderUtil.generaTokenUsingEmail(_user);
             var _refreshToken = jwtProviderUtil.generaRefreshTokenUsingEmail(_user);
-
 
             return RefreshTokenResponse.builder()
                     .accessToken(newAccessToken)
