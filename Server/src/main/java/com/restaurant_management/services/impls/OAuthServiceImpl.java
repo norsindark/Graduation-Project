@@ -8,7 +8,9 @@ import com.restaurant_management.repositories.RoleRepository;
 import com.restaurant_management.repositories.UserRepository;
 import com.restaurant_management.services.interfaces.OAuthService;
 import com.restaurant_management.services.interfaces.TokenService;
+import com.restaurant_management.utils.CookieUtils;
 import com.restaurant_management.utils.JwtProviderUtil;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -41,6 +43,9 @@ public class OAuthServiceImpl implements OAuthService {
     @Value("${spring.security.oauth2.client.registration.google.redirect-uri}")
     private String redirectUri;
 
+    @Value("${restaurantManagement.app.refreshTokenExpired}")
+    private int refreshTokenExpired;
+
     private final UserRepository userRepository;
 
     private final RoleRepository roleRepository;
@@ -55,7 +60,7 @@ public class OAuthServiceImpl implements OAuthService {
     private RestTemplate restTemplate;
 
     @Override
-    public JwtResponse handleOAuth2Callback(String code, String state){
+    public JwtResponse handleOAuth2Callback(String code, String state, HttpServletResponse response) {
         String accessToken = getAccessToken(code);
         String email = getUserEmailFromAccessToken(accessToken);
 
@@ -82,9 +87,10 @@ public class OAuthServiceImpl implements OAuthService {
         var token = jwtProviderUtil.generaTokenUsingEmail(user);
         var refreshToken = jwtProviderUtil.generaRefreshTokenUsingEmail(user);
 
+        CookieUtils.addRefreshTokenCookie(response, refreshToken, refreshTokenExpired);
+
         return JwtResponse.builder()
                 .accessToken(token)
-                .refreshToken(refreshToken)
                 .build();
     }
 

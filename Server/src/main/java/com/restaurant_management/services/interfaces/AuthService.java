@@ -7,13 +7,14 @@ import com.restaurant_management.payloads.requests.SignUpRequest;
 import com.restaurant_management.payloads.responses.ApiResponse;
 import com.restaurant_management.payloads.responses.JwtResponse;
 import jakarta.mail.MessagingException;
+import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.UnsupportedEncodingException;
 
 public interface AuthService {
     ApiResponse signUp(SignUpRequest signUpRequest) throws DataExitsException, MessagingException, UnsupportedEncodingException;
 
-    JwtResponse signIn(SignInRequest signInRequest) throws DataExitsException;
+    JwtResponse signIn(SignInRequest signInRequest, HttpServletResponse response) throws DataExitsException;
 
     ApiResponse verifyEmail(String token) throws DataExitsException;
 

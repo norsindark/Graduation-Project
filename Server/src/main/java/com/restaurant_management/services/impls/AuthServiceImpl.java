@@ -17,8 +17,10 @@ import com.restaurant_management.repositories.UserRepository;
 import com.restaurant_management.repositories.UserTokenRepository;
 import com.restaurant_management.services.interfaces.AuthService;
 import com.restaurant_management.services.interfaces.TokenService;
+import com.restaurant_management.utils.CookieUtils;
 import com.restaurant_management.utils.JwtProviderUtil;
 import jakarta.mail.MessagingException;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -85,7 +87,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public JwtResponse signIn(SignInRequest signInRequest) throws DataExitsException {
+    public JwtResponse signIn(SignInRequest signInRequest, HttpServletResponse response) throws DataExitsException {
         try {
             User _user = this.userRepository.findByEmail(signInRequest.getEmail())
                     .orElseThrow(() -> new DataExitsException("Email or password is invalid!"));
@@ -101,9 +103,10 @@ public class AuthServiceImpl implements AuthService {
             var token = this.jwtProviderUtil.generaTokenUsingEmail(_user);
             var refreshToken = this.jwtProviderUtil.generaRefreshTokenUsingEmail(_user);
 
+            CookieUtils.addRefreshTokenCookie(response, refreshToken, refreshTokenExpired);
+
             return JwtResponse.builder()
                     .accessToken(token)
-                    .refreshToken(refreshToken)
                     .build();
         } catch (AuthenticationException e) {
             throw new DataExitsException("Email or password is invalid!");
