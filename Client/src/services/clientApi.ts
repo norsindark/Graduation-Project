@@ -9,11 +9,17 @@ export const callLogin = (email: string, password: string) => {
 }
 
 export const callProfile = () => {
-    return axios.get('/api/v1/client/user/profile'
-        ,{
-        headers: {
-            Authorization: `Bearer ${localStorage.getItem('accessToken')}`
-        }
-    }
-    )
+    return axios.get('/api/v1/client/user/profile')
 }
+
+export const callLogout = () => {
+    return axios.get('/api/v1/client/user/logout')
+}
+
+export const callForgotPassword = (params: string) => {
+    return axios.get(`/api/v1/auth/forgot-password?email=${params}`)
+}
+
+export const callResetPassword = (token: string, newPassword: string) => {
+    return axios.post('/api/v1/auth/reset-password', { token, newPassword });
+};

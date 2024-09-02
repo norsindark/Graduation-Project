@@ -399,7 +399,7 @@ button {
     color: var(--colorBlack);
     text-transform: capitalize;
     margin: 0px 10px;
-    padding: 0;
+
     position: relative;
     cursor: pointer;
     transition: all linear .3s;
@@ -430,8 +430,8 @@ button {
 }
 
 .main_menu .menu_icon li:last-child a {
-    padding: 10px 25px !important;
-    margin-right: 0;
+
+
 }
 
 .main_menu .menu_icon li:last-child a::after,

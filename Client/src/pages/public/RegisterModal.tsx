@@ -1,8 +1,8 @@
-import {Form, Modal, Input, Button, notification, message} from 'antd';
-import {Link, useLocation, useNavigate} from 'react-router-dom';
-import {useState} from 'react';
-import {callRegister} from "../../services/clientApi.ts";
-import useResponsiveModalWidth from "../../hooks/useResponsiveModalWidth.tsx";
+import { Form, Modal, Input, Button, notification, message } from 'antd';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useState } from 'react';
+import { callRegister } from "../../services/clientApi";
+import useResponsiveModalWidth from "../../hooks/useResponsiveModalWidth";
 
 
 const RegisterModal = () => {
@@ -15,9 +15,8 @@ const RegisterModal = () => {
         navigate('/'); // Close the modal and navigate back to the homepage
     };
 
-
-    const onFinish = async (values: any) => {
-        const {fullName, email, password, confirmPassword} = values;
+    const onFinish = async (values: { fullName: string; email: string; password: string; confirmPassword: string }) => {
+        const { fullName, email, password, confirmPassword } = values;
         setIsSubmit(true);
         try {
             if (password === confirmPassword) {
@@ -41,10 +40,10 @@ const RegisterModal = () => {
                     showProgress: true
                 })
             }
-        } catch (loginError: any) {
+        } catch (loginError) {
             notification.error({
-                message: "registration error!",
-                description: loginError?.message || "Error during registration process!",
+                message: "Registration error!",
+                description: loginError instanceof Error ? loginError.message : "Error during registration process!",
                 duration: 5,
                 showProgress: true
             });
@@ -52,7 +51,6 @@ const RegisterModal = () => {
             setIsSubmit(false);
         }
     }
-
 
     return (
         <Modal
@@ -69,7 +67,7 @@ const RegisterModal = () => {
                 </div>
             }
         >
-            <section className="fp__signup" style={{backgroundImage: 'url(images/login_bg.jpg)'}}>
+            <section className="fp__signup" style={{ backgroundImage: 'url(images/login_bg.jpg)' }}>
                 <div className="fp__signup_overlay pt_45 xs_pt_45 pb_45 xs_pb_45">
                     <div className="container">
                         <div className="row wow fadeInUp" data-wow-duration="1s">
@@ -81,34 +79,34 @@ const RegisterModal = () => {
                                         <Form.Item
                                             label="Full Name"
                                             name="fullName"
-                                            rules={[{required: true, message: 'Please input your full name!'}]}
+                                            rules={[{ required: true, message: 'Please input your full name!' }]}
                                         >
-                                            <Input placeholder="Full Name" autoComplete="fullname"/>
+                                            <Input placeholder="Full Name" autoComplete="fullname" />
                                         </Form.Item>
                                         <Form.Item
                                             label="Email"
                                             name="email"
-                                            rules={[{required: true, message: 'Please input your email!'}]}
+                                            rules={[{ required: true, message: 'Please input your email!' }]}
                                         >
-                                            <Input type="email" placeholder="Email" autoComplete="email"/>
+                                            <Input type="email" placeholder="Email" autoComplete="email" />
                                         </Form.Item>
                                         <Form.Item
                                             label="Password"
                                             name="password"
-                                            rules={[{required: true, message: 'Please input your password!'}]}
+                                            rules={[{ required: true, message: 'Please input your password!' }]}
                                         >
-                                            <Input.Password placeholder="Password" autoComplete="new-password"/>
+                                            <Input.Password placeholder="Password" autoComplete="new-password" />
                                         </Form.Item>
                                         <Form.Item
                                             label="Confirm Password"
                                             name="confirmPassword"
-                                            rules={[{required: true, message: 'Please confirm your password!'}]}
+                                            rules={[{ required: true, message: 'Please confirm your password!' }]}
                                         >
-                                            <Input.Password placeholder="Confirm Password" autoComplete="new-password"/>
+                                            <Input.Password placeholder="Confirm Password" autoComplete="new-password" />
                                         </Form.Item>
                                         <Form.Item>
                                             <Button type="primary" htmlType="submit" block size="large"
-                                                    loading={isSubmit}>
+                                                loading={isSubmit}>
                                                 <div className="w-14 font-medium">Register</div>
                                             </Button>
                                         </Form.Item>
