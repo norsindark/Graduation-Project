@@ -1,4 +1,4 @@
-import { Form, Modal, Input, Button, Checkbox, message, notification } from 'antd';
+import { Form, Modal, Input, Button, Checkbox, notification } from 'antd';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { callLogin, callProfile } from "../../services/clientApi";
@@ -12,6 +12,7 @@ const LoginModal = () => {
     const [isSubmit, setIsSubmit] = useState(false);
     const modalWidth = useResponsiveModalWidth();
     const dispatch = useDispatch();
+
     const handleCancel = () => {
         navigate('/');
     };
@@ -21,12 +22,17 @@ const LoginModal = () => {
         setIsSubmit(true);
         try {
             const loginRes = await callLogin(email, password);
+            console.log(loginRes);
             if (loginRes?.status == 200) {
                 localStorage.setItem('accessToken', loginRes.data.accessToken);
                 const profileRes = await callProfile();
                 if (profileRes?.status === 200) {
                     dispatch(doLoginAction(profileRes.data));
-                    message.success('Login successful!');
+                    notification.success({
+                        message: "Login successful!",
+                        duration: 5,
+                        showProgress: true
+                    })
                     navigate('/');
                 }
             } else {
@@ -102,7 +108,7 @@ const LoginModal = () => {
                                         <Form.Item>
                                             <Button type="primary" htmlType="submit" block size="large"
                                                 loading={isSubmit}>
-                                                <div className="w-14 font-medium">Login</div>
+                                                <div className="w-full font-medium text-center">Login</div>
                                             </Button>
                                         </Form.Item>
                                     </Form>
@@ -113,8 +119,8 @@ const LoginModal = () => {
                                         <li><a href="#"><i className="fab fa-twitter"></i></a></li>
                                         <li><a href="#"><i className="fab fa-google-plus-g"></i></a></li>
                                     </ul>
-                                    <p className="create_account">Don’t have an account? <Link
-                                        to="/register">Register</Link></p>
+                                    <p className="create_account">Don’t have an account?
+                                        <Link to="/register">Register</Link></p>
                                 </div>
                             </div>
                         </div>

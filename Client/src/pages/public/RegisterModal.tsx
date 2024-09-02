@@ -1,4 +1,4 @@
-import { Form, Modal, Input, Button, notification, message } from 'antd';
+import { Form, Modal, Input, Button, notification } from 'antd';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { callRegister } from "../../services/clientApi";
@@ -22,7 +22,12 @@ const RegisterModal = () => {
             if (password === confirmPassword) {
                 const res = await callRegister(email, password, fullName);
                 if (res?.status == 201) {
-                    message.success(res?.data?.message || "Registration successful!");
+                    notification.success({
+                        message: "Registration successful!",
+                        description: res?.data?.message || "Registration successful!",
+                        duration: 5,
+                        showProgress: true
+                    })
                     navigate('/login')
                 } else {
                     notification.error({
@@ -107,7 +112,7 @@ const RegisterModal = () => {
                                         <Form.Item>
                                             <Button type="primary" htmlType="submit" block size="large"
                                                 loading={isSubmit}>
-                                                <div className="w-14 font-medium">Register</div>
+                                                <div className="w-full font-medium text-center">Register</div>
                                             </Button>
                                         </Form.Item>
                                     </Form>

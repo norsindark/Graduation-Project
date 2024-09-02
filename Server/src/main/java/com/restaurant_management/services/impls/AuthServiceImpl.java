@@ -180,9 +180,6 @@ public class AuthServiceImpl implements AuthService {
         }
 
         User user = userToken.getUser();
-
-        System.out.println("request.getPassword()", user);
-
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         userRepository.save(user);
 

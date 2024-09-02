@@ -20,6 +20,6 @@ export const callForgotPassword = (params: string) => {
     return axios.get(`/api/v1/auth/forgot-password?email=${params}`)
 }
 
-export const callResetPassword = (token: string, newPassword: string) => {
-    return axios.post('/api/v1/auth/reset-password', { token, newPassword });
+export const callResetPassword = (token: string, password: string) => {
+    return axios.post('/api/v1/auth/reset-password', { token, password });
 };
