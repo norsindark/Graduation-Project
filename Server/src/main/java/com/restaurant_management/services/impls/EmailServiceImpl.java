@@ -45,7 +45,7 @@ public class EmailServiceImpl implements EmailService {
         helper.setTo(email);
         helper.setSubject(subject);
 
-        String verificationUrl = serverUrl + "verify-email?token=" + token;
+        String verificationUrl = clientUrl + "verify-email?token=" + token;
         content = content.replace("[[URL]]", verificationUrl);
 
         helper.setText(content, true);
@@ -55,7 +55,7 @@ public class EmailServiceImpl implements EmailService {
 
 
     @Override
-    public void sendPasswordResetEmail(String email, String token) throws MessagingException, UnsupportedEncodingException {
+      public void sendPasswordResetEmail(String email, String token) throws MessagingException, UnsupportedEncodingException {
         String fromAddress = "dvan78281@gmail.com";
         String senderName = "Restaurant";
         String subject = "Please click this URL to change your password";
@@ -73,7 +73,7 @@ public class EmailServiceImpl implements EmailService {
         helper.setTo(email);
         helper.setSubject(subject);
 
-        String changePasswordUrl = serverUrl + "/auth/reset-password?token=" + token;
+        String changePasswordUrl = clientUrl + "reset-password?token=" + token;
         content = content.replace("[[URL]]", changePasswordUrl);
 
         helper.setText(content, true);

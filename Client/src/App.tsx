@@ -39,14 +39,12 @@ function App() {
         if (token && !isAuthenticated) {
             dispatch(setLoading(true));
             setTimeout(() => {
-
                 getAccount().catch(err => console.error("Error during account fetch:", err));
             }, 1000);
         } else {
             dispatch(setLoading(false));
         }
     }, [isAuthenticated, getAccount, dispatch]);
-
     return (
         <>
             {isLoading ? (

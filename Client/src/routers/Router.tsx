@@ -7,6 +7,10 @@ import RegisterModal from "../pages/public/RegisterModal";
 import LoginModal from "../pages/public/LoginModal";
 import NotFound from "../components/NotFound/NotFound";
 import ProtectedRoute from "../components/ProtectedRoute/ProtectedRoute";
+import ForgotPassword from "../components/public/forgotpassword/ForgotPassword";
+import ResetPassword from "../components/public/resetpassword/ResetPassword";
+import ResendVerifyEmail from "../components/public/resendverifyemail/ResendVerifyEmail";
+import VerifyEmail from "../components/public/verifyemail/VerifyEmail";
 
 export const router = createBrowserRouter([
     {
@@ -25,6 +29,22 @@ export const router = createBrowserRouter([
             {
                 path: "/login",
                 element: <LoginModal />
+            },
+            {
+                path: "/forgot-password",
+                element: <ForgotPassword />
+            },
+            {
+                path: "/reset-password",
+                element: <ResetPassword />
+            },
+            {
+                path: "/resend-verification-email",
+                element: <ResendVerifyEmail />
+            },
+            {
+                path: "/verify-email",
+                element: <VerifyEmail />
             }
         ]
     },
@@ -42,5 +62,4 @@ export const router = createBrowserRouter([
             }
         ]
     },
-
 ])

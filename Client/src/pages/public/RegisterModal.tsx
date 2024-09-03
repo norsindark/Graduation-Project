@@ -1,4 +1,4 @@
-import { Form, Modal, Input, Button, notification, message } from 'antd';
+import { Form, Modal, Input, Button, notification } from 'antd';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { callRegister } from "../../services/clientApi";
@@ -11,8 +11,20 @@ const RegisterModal = () => {
     const [isSubmit, setIsSubmit] = useState(false);
     const modalWidth = useResponsiveModalWidth();
 
+    const [lastSentTime, setLastSentTime] = useState<number | null>(null);
+    const currentTime = Date.now();
+
+    if (lastSentTime && currentTime - lastSentTime < 10000) {
+        notification.warning({
+            message: 'Please wait 10 seconds before resending the verification email.',
+            duration: 5,
+            showProgress: true
+        });
+        return null;
+    }
+
     const handleCancel = () => {
-        navigate('/'); // Close the modal and navigate back to the homepage
+        navigate('/');
     };
 
     const onFinish = async (values: { fullName: string; email: string; password: string; confirmPassword: string }) => {
@@ -22,7 +34,12 @@ const RegisterModal = () => {
             if (password === confirmPassword) {
                 const res = await callRegister(email, password, fullName);
                 if (res?.status == 201) {
-                    message.success(res?.data?.message || "Registration successful!");
+                    notification.success({
+                        message: "Registration successful!",
+                        description: res?.data?.message || "Registration successful!",
+                        duration: 5,
+                        showProgress: true
+                    })
                     navigate('/login')
                 } else {
                     notification.error({
@@ -31,6 +48,7 @@ const RegisterModal = () => {
                         duration: 5,
                         showProgress: true
                     })
+                    setLastSentTime(currentTime);
                 }
             } else {
                 notification.error({
@@ -107,7 +125,7 @@ const RegisterModal = () => {
                                         <Form.Item>
                                             <Button type="primary" htmlType="submit" block size="large"
                                                 loading={isSubmit}>
-                                                <div className="w-14 font-medium">Register</div>
+                                                <div className="w-full max-w-16 font-medium text-center" >Register</div>
                                             </Button>
                                         </Form.Item>
                                     </Form>

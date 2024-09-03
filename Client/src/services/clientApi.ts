@@ -15,3 +15,21 @@ export const callProfile = () => {
 export const callLogout = () => {
     return axios.get('/api/v1/client/user/logout')
 }
+
+export const callForgotPassword = (params: string) => {
+    return axios.get(`/api/v1/auth/forgot-password?email=${params}`)
+}
+
+export const callResetPassword = (token: string, password: string) => {
+    return axios.post('/api/v1/auth/reset-password', { token, password });
+};
+
+export const callResendVerifyEmail = (params: string) => {
+    return axios.get(`/api/v1/auth/resend-verification-email?email=${params}`);
+};
+
+export const callVerifyEmail = (token: string) => {
+    return axios.get(`/api/v1/auth/verify-email?token=${token}`);
+};
+
+
