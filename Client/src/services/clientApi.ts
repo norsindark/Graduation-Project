@@ -31,3 +31,5 @@ export const callResendVerifyEmail = (params: string) => {
 export const callVerifyEmail = (token: string) => {
     return axios.get(`/api/v1/auth/verify-email?token=${token}`);
 };
+
+

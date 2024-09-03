@@ -27,7 +27,6 @@ const RegisterModal = () => {
         navigate('/');
     };
 
-
     const onFinish = async (values: { fullName: string; email: string; password: string; confirmPassword: string }) => {
         const { fullName, email, password, confirmPassword } = values;
         setIsSubmit(true);

@@ -7,6 +7,7 @@ import { doLogoutAction } from "../../../redux/account/accountSlice";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { notification } from "antd";
+
 import { Link } from "react-router-dom";
 const Auth = () => {
     const style = "w-[245px] h-[51px]";
@@ -37,7 +38,6 @@ const Auth = () => {
         try {
             setSubmit(true);
             const res = await callLogout();
-
             if (res?.status == 200) {
                 dispatch(doLogoutAction());
                 navigate('/');

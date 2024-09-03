@@ -6,7 +6,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "./redux/store";
 import { doLoginAction, doLogoutAction, setLoading } from "./redux/account/accountSlice";
 import { callProfile } from "./services/clientApi";
-// import Cookies from 'js-cookie';
 
 function App() {
     const dispatch = useDispatch();
@@ -46,13 +45,6 @@ function App() {
             dispatch(setLoading(false));
         }
     }, [isAuthenticated, getAccount, dispatch]);
-
-
-    // useEffect(() => {
-    //     const token = Cookies.get('refreshToken');
-    //     console.log(token); // Should log "12345"
-
-    // }, []);
     return (
         <>
             {isLoading ? (

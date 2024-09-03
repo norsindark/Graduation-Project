@@ -33,7 +33,6 @@ const LoginModal = () => {
         setIsSubmit(true);
         try {
             const loginRes = await callLogin(email, password);
-            console.log(loginRes);
             if (loginRes?.status == 200) {
                 localStorage.setItem('accessToken', loginRes.data.accessToken);
                 const profileRes = await callProfile();

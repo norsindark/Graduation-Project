@@ -20,7 +20,6 @@ import com.restaurant_management.services.interfaces.TokenService;
 import com.restaurant_management.utils.CookieUtils;
 import com.restaurant_management.utils.JwtProviderUtil;
 import jakarta.mail.MessagingException;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -104,9 +103,7 @@ public class AuthServiceImpl implements AuthService {
             var token = this.jwtProviderUtil.generaTokenUsingEmail(_user);
             var refreshToken = this.jwtProviderUtil.generaRefreshTokenUsingEmail(_user);
 
-            System.out.println("Refresh Token: " + refreshToken + " " + refreshTokenExpired);
-
-            CookieUtils.addRefreshTokenCookie(response, refreshToken,refreshTokenExpired );
+            CookieUtils.addRefreshTokenCookie(response, refreshToken, refreshTokenExpired);
 
             return JwtResponse.builder()
                     .accessToken(token)
