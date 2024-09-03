@@ -10,13 +10,24 @@ const ResetPassword = () => {
     const modalWidth = useResponsiveModalWidth();
     const navigate = useNavigate();
     const location = useLocation();
+    const [searchParams] = useSearchParams(); // Di chuyển lên đầu
+    const token = searchParams.get('token');
+
+    const [lastSentTime, setLastSentTime] = useState<number | null>(null);
+    const currentTime = Date.now();
+
+    if (lastSentTime && currentTime - lastSentTime < 10000) {
+        notification.warning({
+            message: 'Please wait 10 seconds before resending the verification email.',
+            duration: 5,
+            showProgress: true
+        });
+        return null; 
+    }
 
     const handleCancel = () => {
         navigate('/');
     };
-
-    const [searchParams] = useSearchParams();
-    const token = searchParams.get('token');
 
     const onFinish = async (values: { password: string, confirm_password: string }) => {
         setIsSubmit(true);
@@ -39,6 +50,7 @@ const ResetPassword = () => {
                     duration: 5,
                     showProgress: true
                 });
+                navigate('/login');
             } else {
                 notification.error({
                     message: 'Failed to reset password!',
@@ -46,6 +58,7 @@ const ResetPassword = () => {
                     duration: 5,
                     showProgress: true
                 });
+                setLastSentTime(currentTime);
             }
         } catch (error) {
             notification.error({
@@ -98,7 +111,7 @@ const ResetPassword = () => {
                                         </Form.Item>
                                         <Form.Item>
                                             <Button type="primary" htmlType="submit" block size="large" loading={isSubmit}>
-                                                <div className="font-medium text-center w-full">Reset Password</div>
+                                                <div className="font-medium text-center w-full max-w-26">Change Password</div>
                                             </Button>
                                         </Form.Item>
                                     </Form>

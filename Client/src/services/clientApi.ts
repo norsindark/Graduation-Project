@@ -23,3 +23,11 @@ export const callForgotPassword = (params: string) => {
 export const callResetPassword = (token: string, password: string) => {
     return axios.post('/api/v1/auth/reset-password', { token, password });
 };
+
+export const callResendVerifyEmail = (params: string) => {
+    return axios.get(`/api/v1/auth/resend-verification-email?email=${params}`);
+};
+
+export const callVerifyEmail = (token: string) => {
+    return axios.get(`/api/v1/auth/verify-email?token=${token}`);
+};

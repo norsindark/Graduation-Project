@@ -12,6 +12,17 @@ const LoginModal = () => {
     const [isSubmit, setIsSubmit] = useState(false);
     const modalWidth = useResponsiveModalWidth();
     const dispatch = useDispatch();
+    const [lastSentTime, setLastSentTime] = useState<number | null>(null);
+    const currentTime = Date.now();
+
+    if (lastSentTime && currentTime - lastSentTime < 10000) {
+        notification.warning({
+            message: 'Please wait 10 seconds before resending the verification email.',
+            duration: 5,
+            showProgress: true
+        });
+        return null;
+    }
 
     const handleCancel = () => {
         navigate('/');
@@ -42,6 +53,7 @@ const LoginModal = () => {
                     duration: 5,
                     showProgress: true
                 });
+                setLastSentTime(currentTime);
             }
         } catch (loginError) {
             notification.error({
@@ -108,7 +120,7 @@ const LoginModal = () => {
                                         <Form.Item>
                                             <Button type="primary" htmlType="submit" block size="large"
                                                 loading={isSubmit}>
-                                                <div className="w-full font-medium text-center">Login</div>
+                                                <div className="w-full max-w-16 font-medium text-center">Login</div>
                                             </Button>
                                         </Form.Item>
                                     </Form>

@@ -6,7 +6,7 @@ import { callLogout } from "../../../services/clientApi";
 import { doLogoutAction } from "../../../redux/account/accountSlice";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { message } from "antd";
+import { notification } from "antd";
 import { Link } from "react-router-dom";
 const Auth = () => {
     const style = "w-[245px] h-[51px]";
@@ -17,63 +17,54 @@ const Auth = () => {
     const userRole = user?.role?.name;
     const navigate = useNavigate();
     const dispatch = useDispatch();
+    const [submit, setSubmit] = useState(false);
 
-    const [messageApi, contextHolder] = message.useMessage();
-    const key = 'updatable';
-    const [messageContent, setMessageContent] = useState<{ type: 'loading' | 'success' | 'error', content: string } | null>(null);
+    const [lastSentTime, setLastSentTime] = useState<number | null>(null);
+    const currentTime = Date.now();
 
     useEffect(() => {
-        if (messageContent) {
-            messageApi.open({
-                key,
-                type: messageContent.type,
-                content: messageContent.content,
-                duration: messageContent.type === 'loading' ? 0 : 2,
+        if (lastSentTime && currentTime - lastSentTime < 10000) {
+            notification.warning({
+                message: 'Please wait 10 seconds before resending the verification email.',
+                duration: 5,
+                showProgress: true
             });
+            return;
         }
-    }, [messageContent, messageApi]);
+    }, [lastSentTime, currentTime]);
 
     const handleLogout = async () => {
         try {
-            setMessageContent({ type: 'loading', content: 'Loading logout...' });
-            messageApi.open({
-                key,
-                type: 'loading',
-                content: 'Loading logout...',
-            });
+            setSubmit(true);
             const res = await callLogout();
 
             if (res?.status == 200) {
                 dispatch(doLogoutAction());
                 navigate('/');
-                setTimeout(() => {
-                    messageApi.open({
-                        key,
-                        type: 'success',
-                        content: 'Logout success!',
-                        duration: 2,
-                    });
-                }, 1000);
+                notification.success({
+                    message: 'Logout success!',
+                    duration: 5,
+                    showProgress: true
+                });
             } else {
-                setTimeout(() => {
-                    messageApi.open({
-                        key,
-                        type: 'error',
-                        content: 'Logout failed!',
-                        duration: 2,
-                    });
-                }, 1000);
+                notification.error({
+                    message: 'Logout failed!',
+                    description: res?.data?.message || 'Something went wrong!',
+                    duration: 5,
+                    showProgress: true
+                });
+                setLastSentTime(currentTime);
             }
         } catch (error) {
-            setTimeout(() => {
-                messageApi.open({
-                    key,
-                    type: 'error',
-                    content: 'Logout failed: ' + (error instanceof Error ? error.message : 'Unknown error'),
-                    duration: 2,
-                });
-            }, 1000);
+            notification.error({
+                message: 'Logout failed!',
+                description: error instanceof Error ? error.message : 'Something went wrong!',
+                duration: 5,
+                showProgress: true
+            });
             console.error("Logout failed:", error);
+        } finally {
+            setSubmit(false);
         }
     }
 
@@ -105,8 +96,8 @@ const Auth = () => {
                 <Link
                     to="/"
                     onClick={() => handleLogout()}
-                    className={style} // Thêm class style vào đây
-                >Logout
+                    className={style}
+                >{submit ? 'Logging out...' : 'Logout'}
                 </Link>,
             key: '/',
         },
@@ -120,7 +111,6 @@ const Auth = () => {
 
     return (
         <>
-            {contextHolder}
             <div className="navbar-nav md:px-1" ref={menuRef}>
                 <li className="nav-item">
                     <button className="nav-link mx-1" onClick={toggleMenu}>
@@ -153,6 +143,14 @@ const Auth = () => {
                                             className={style}
                                         >
                                             Forgot Password
+                                        </NavLink>
+                                    </li>
+                                    <li className={style}>
+                                        <NavLink
+                                            to="/resend-verification-email"
+                                            className={style}
+                                        >
+                                            Resend Verify Email
                                         </NavLink>
                                     </li>
                                     <li className={style}>

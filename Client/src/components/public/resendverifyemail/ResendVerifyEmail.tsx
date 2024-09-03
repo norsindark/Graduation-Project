@@ -1,47 +1,49 @@
-import { Form, Input, Button, notification, Modal } from 'antd';
-import { useState } from 'react';
-import { callForgotPassword } from "../../../services/clientApi";
+import React, { useState } from 'react';
+import { notification } from 'antd';
+import { callResendVerifyEmail } from '../../../services/clientApi';
+import { Modal, Form, Input, Button } from 'antd';
+import { Link } from 'react-router-dom';
 import useResponsiveModalWidth from '../../../hooks/useResponsiveModalWidth';
-import { useNavigate, useLocation, Link } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
-const ForgotPassword = () => {
-    const [isSubmit, setIsSubmit] = useState(false);
-    const modalWidth = useResponsiveModalWidth();
-    const navigate = useNavigate();
+const ResendVerifyEmail = () => {
     const location = useLocation();
+    const navigate = useNavigate();
+    const modalWidth = useResponsiveModalWidth();
+    const [isSubmit, setIsSubmit] = useState(false);
     const [lastSentTime, setLastSentTime] = useState<number | null>(null);
-    const currentTime = Date.now();
-
-    if (lastSentTime && currentTime - lastSentTime < 10000) {
-        notification.warning({
-            message: 'Please wait 10 seconds before resending the verification email.',
-            duration: 5,
-            showProgress: true
-        });
-        return null;
-    }
 
     const handleCancel = () => {
         navigate('/');
     };
 
     const onFinish = async (values: { email: string }) => {
+        const { email } = values;
+        const currentTime = Date.now();
+
+        if (lastSentTime && currentTime - lastSentTime < 10000) {
+            notification.warning({
+                message: 'Please wait 10 seconds before resending the verification email.',
+                duration: 5,
+                showProgress: true
+            });
+            return null;
+        }
+
         setIsSubmit(true);
         try {
-            const res = await callForgotPassword(values.email);
-            console.log(res);
-            if (res?.status === 200) {
+            const response = await callResendVerifyEmail(email);
+            if (response.status === 200) {
                 notification.success({
-                    message: 'Password reset email sent successfully!',
-                    description: 'Please check your email for the reset link.',
+                    message: 'Verification email sent successfully!',
                     duration: 5,
                     showProgress: true
                 });
-                handleCancel();
+                navigate('/login');
             } else {
                 notification.error({
-                    message: 'Failed to send password reset email!',
-                    description: res?.data?.errors?.error || res?.data?.message || "Something went wrong!",
+                    message: 'Verification email failed!',
+                    description: response.data.message || 'Something went wrong!',
                     duration: 5,
                     showProgress: true
                 });
@@ -49,7 +51,8 @@ const ForgotPassword = () => {
             }
         } catch (error) {
             notification.error({
-                message: 'Error: ' + (error instanceof Error ? error.message : 'Unknown error'),
+                message: 'Error',
+                description: (error as Error).message || 'Something went wrong!',
                 duration: 5,
                 showProgress: true
             });
@@ -60,7 +63,7 @@ const ForgotPassword = () => {
 
     return (
         <Modal
-            open={location.pathname === '/forgot-password'}
+            open={location.pathname === '/resend-verification-email'}
             onCancel={handleCancel}
             footer={null}
             width={modalWidth}
@@ -80,7 +83,7 @@ const ForgotPassword = () => {
                             <div className="col-xxl-12 col-xl-12 col-md-12 col-lg-12 m-auto">
                                 <div className="fp__login_area">
                                     <h2>Welcome back!</h2>
-                                    <p>forgot password</p>
+                                    <p>Resend Verification Email</p>
                                     <Form layout="vertical" onFinish={onFinish}>
                                         <Form.Item
                                             label="Email"
@@ -109,5 +112,4 @@ const ForgotPassword = () => {
     );
 };
 
-export default ForgotPassword;
-
+export default ResendVerifyEmail;
