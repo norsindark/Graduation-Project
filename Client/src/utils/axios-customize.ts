@@ -17,11 +17,11 @@ const instance = axios.create({
     }
 });
 
-// const handleRefreshToken = async () => { 
-//     const res = await instance.post('/api/v1/auth/refresh-token');
-//     console.log("checkres<<<", res);
 
-// }
+const handleRefreshToken = async () => {
+    const res = await instance.get('/api/v1/auth/refresh-token');
+    console.log("checkres<<<", res);
+}
 
 // Thêm interceptor cho yêu cầu
 instance.interceptors.request.use(
@@ -50,9 +50,9 @@ instance.interceptors.response.use(
         // Mã trạng thái nằm ngoài phạm vi 2xx sẽ kích hoạt hàm này
         // Xử lý lỗi phản hồi
 
-        // if(error.config && error.response && +error.response.status === 401){
-        //     handleRefreshToken();
-        // }
+        if(error.config && error.response && +error.response.status === 401){
+            handleRefreshToken();
+        }
 
 
         return error.response;

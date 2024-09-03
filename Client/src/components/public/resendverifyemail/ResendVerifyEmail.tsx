@@ -11,7 +11,6 @@ const ResendVerifyEmail = () => {
     const navigate = useNavigate();
     const modalWidth = useResponsiveModalWidth();
     const [isSubmit, setIsSubmit] = useState(false);
-    const [lastSentTime, setLastSentTime] = useState<number | null>(null);
 
     const handleCancel = () => {
         navigate('/');
@@ -19,17 +18,6 @@ const ResendVerifyEmail = () => {
 
     const onFinish = async (values: { email: string }) => {
         const { email } = values;
-        const currentTime = Date.now();
-
-        if (lastSentTime && currentTime - lastSentTime < 10000) {
-            notification.warning({
-                message: 'Please wait 10 seconds before resending the verification email.',
-                duration: 5,
-                showProgress: true
-            });
-            return null;
-        }
-
         setIsSubmit(true);
         try {
             const response = await callResendVerifyEmail(email);
@@ -47,7 +35,6 @@ const ResendVerifyEmail = () => {
                     duration: 5,
                     showProgress: true
                 });
-                setLastSentTime(currentTime);
             }
         } catch (error) {
             notification.error({

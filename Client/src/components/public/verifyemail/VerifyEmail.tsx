@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { notification } from 'antd';
 import { callVerifyEmail } from '../../../services/clientApi';
@@ -8,19 +8,8 @@ const VerifyEmail = () => {
     const [searchParams] = useSearchParams();
     const token = searchParams.get('token');
     const navigate = useNavigate();
-    const [lastSentTime, setLastSentTime] = useState<number | null>(null);
-    const currentTime = Date.now();
 
     useEffect(() => {
-        if (lastSentTime && currentTime - lastSentTime < 10000) {
-            notification.warning({
-                message: 'Please wait 10 seconds before resending the verification email.',
-                duration: 5,
-                showProgress: true
-            });
-            return;
-        }
-
         const verifyEmail = async () => {
             if (token) {
                 try {
@@ -40,7 +29,6 @@ const VerifyEmail = () => {
                             duration: 5,
                             showProgress: true
                         });
-                        setLastSentTime(currentTime);
                     }
                 } catch (error) {
                     notification.error({
@@ -49,13 +37,12 @@ const VerifyEmail = () => {
                         duration: 5,
                         showProgress: true
                     });
-
                 }
             }
         };
 
         verifyEmail();
-    }, [token, navigate, lastSentTime, currentTime]);
+    }, [token, navigate]);
 
     return <></>;
 };
