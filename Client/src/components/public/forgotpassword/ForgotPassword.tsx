@@ -9,17 +9,6 @@ const ForgotPassword = () => {
     const modalWidth = useResponsiveModalWidth();
     const navigate = useNavigate();
     const location = useLocation();
-    const [lastSentTime, setLastSentTime] = useState<number | null>(null);
-    const currentTime = Date.now();
-
-    if (lastSentTime && currentTime - lastSentTime < 10000) {
-        notification.warning({
-            message: 'Please wait 10 seconds before resending the verification email.',
-            duration: 5,
-            showProgress: true
-        });
-        return null;
-    }
 
     const handleCancel = () => {
         navigate('/');
@@ -45,7 +34,6 @@ const ForgotPassword = () => {
                     duration: 5,
                     showProgress: true
                 });
-                setLastSentTime(currentTime);
             }
         } catch (error) {
             notification.error({

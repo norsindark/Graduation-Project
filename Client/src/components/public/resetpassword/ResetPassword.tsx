@@ -13,17 +13,6 @@ const ResetPassword = () => {
     const [searchParams] = useSearchParams(); // Di chuyển lên đầu
     const token = searchParams.get('token');
 
-    const [lastSentTime, setLastSentTime] = useState<number | null>(null);
-    const currentTime = Date.now();
-
-    if (lastSentTime && currentTime - lastSentTime < 10000) {
-        notification.warning({
-            message: 'Please wait 10 seconds before resending the verification email.',
-            duration: 5,
-            showProgress: true
-        });
-        return null; 
-    }
 
     const handleCancel = () => {
         navigate('/');
@@ -58,7 +47,6 @@ const ResetPassword = () => {
                     duration: 5,
                     showProgress: true
                 });
-                setLastSentTime(currentTime);
             }
         } catch (error) {
             notification.error({

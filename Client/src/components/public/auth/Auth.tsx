@@ -20,19 +20,6 @@ const Auth = () => {
     const dispatch = useDispatch();
     const [submit, setSubmit] = useState(false);
 
-    const [lastSentTime, setLastSentTime] = useState<number | null>(null);
-    const currentTime = Date.now();
-
-    useEffect(() => {
-        if (lastSentTime && currentTime - lastSentTime < 10000) {
-            notification.warning({
-                message: 'Please wait 10 seconds before resending the verification email.',
-                duration: 5,
-                showProgress: true
-            });
-            return;
-        }
-    }, [lastSentTime, currentTime]);
 
     const handleLogout = async () => {
         try {
@@ -53,7 +40,6 @@ const Auth = () => {
                     duration: 5,
                     showProgress: true
                 });
-                setLastSentTime(currentTime);
             }
         } catch (error) {
             notification.error({
