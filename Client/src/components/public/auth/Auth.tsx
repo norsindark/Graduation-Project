@@ -74,7 +74,7 @@ const Auth = () => {
 
     const items = [
         {
-            label: <label>Account management</label>,
+            label: <Link to="/account" className={style}>Account management</Link>,
             key: 'account',
         },
         {

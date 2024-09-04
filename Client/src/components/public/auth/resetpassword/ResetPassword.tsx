@@ -1,8 +1,8 @@
 import { Form, Input, Button, notification, Modal } from 'antd';
 import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { callResetPassword } from "../../../services/clientApi";
-import useResponsiveModalWidth from '../../../hooks/useResponsiveModalWidth';
+import { callResetPassword } from "../../../../services/clientApi";
+import useResponsiveModalWidth from '../../../../hooks/useResponsiveModalWidth';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 
 const ResetPassword = () => {

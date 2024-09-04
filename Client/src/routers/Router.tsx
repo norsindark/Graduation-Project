@@ -7,11 +7,11 @@ import RegisterModal from "../pages/public/RegisterModal";
 import LoginModal from "../pages/public/LoginModal";
 import NotFound from "../components/NotFound/NotFound";
 import ProtectedRoute from "../components/ProtectedRoute/ProtectedRoute";
-import ForgotPassword from "../components/public/forgotpassword/ForgotPassword";
-import ResetPassword from "../components/public/resetpassword/ResetPassword";
-import ResendVerifyEmail from "../components/public/resendverifyemail/ResendVerifyEmail";
-import VerifyEmail from "../components/public/verifyemail/VerifyEmail";
-
+import ForgotPassword from "../components/public/auth/forgotpassword/ForgotPassword";
+import ResetPassword from "../components/public/auth/resetpassword/ResetPassword";
+import ResendVerifyEmail from "../components/public/auth/resendverifyemail/ResendVerifyEmail";
+import VerifyEmail from "../components/public/auth/verifyemail/VerifyEmail";
+// import SocialLogin from "../components/public/sociallogin/SocialLogin";
 export const router = createBrowserRouter([
     {
         path: "/",
@@ -45,7 +45,11 @@ export const router = createBrowserRouter([
             {
                 path: "/verify-email",
                 element: <VerifyEmail />
-            }
+            },
+            // {
+            //     path: "/account",
+            //     element: <Account />
+            // }
         ]
     },
     {

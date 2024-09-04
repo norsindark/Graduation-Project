@@ -1,45 +1,43 @@
-import React, { useState } from 'react';
-import { notification } from 'antd';
-import { callResendVerifyEmail } from '../../../services/clientApi';
-import { Modal, Form, Input, Button } from 'antd';
-import { Link } from 'react-router-dom';
-import useResponsiveModalWidth from '../../../hooks/useResponsiveModalWidth';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { Form, Input, Button, notification, Modal } from 'antd';
+import { useState } from 'react';
+import { callForgotPassword } from '../../../../services/clientApi';
+import useResponsiveModalWidth from '../../../../hooks/useResponsiveModalWidth';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 
-const ResendVerifyEmail = () => {
-    const location = useLocation();
-    const navigate = useNavigate();
-    const modalWidth = useResponsiveModalWidth();
+const ForgotPassword = () => {
     const [isSubmit, setIsSubmit] = useState(false);
+    const modalWidth = useResponsiveModalWidth();
+    const navigate = useNavigate();
+    const location = useLocation();
 
     const handleCancel = () => {
         navigate('/');
     };
 
     const onFinish = async (values: { email: string }) => {
-        const { email } = values;
         setIsSubmit(true);
         try {
-            const response = await callResendVerifyEmail(email);
-            if (response.status === 200) {
+            const res = await callForgotPassword(values.email);
+            console.log(res);
+            if (res?.status === 200) {
                 notification.success({
-                    message: 'Verification email sent successfully!',
+                    message: 'Password reset email sent successfully!',
+                    description: 'Please check your email for the reset link.',
                     duration: 5,
                     showProgress: true
                 });
-                navigate('/login');
+                handleCancel();
             } else {
                 notification.error({
-                    message: 'Verification email failed!',
-                    description: response.data.message || 'Something went wrong!',
+                    message: 'Failed to send password reset email!',
+                    description: res?.data?.errors?.error || res?.data?.message || "Something went wrong!",
                     duration: 5,
                     showProgress: true
                 });
             }
         } catch (error) {
             notification.error({
-                message: 'Error',
-                description: (error as Error).message || 'Something went wrong!',
+                message: 'Error: ' + (error instanceof Error ? error.message : 'Unknown error'),
                 duration: 5,
                 showProgress: true
             });
@@ -50,7 +48,7 @@ const ResendVerifyEmail = () => {
 
     return (
         <Modal
-            open={location.pathname === '/resend-verification-email'}
+            open={location.pathname === '/forgot-password'}
             onCancel={handleCancel}
             footer={null}
             width={modalWidth}
@@ -70,7 +68,7 @@ const ResendVerifyEmail = () => {
                             <div className="col-xxl-12 col-xl-12 col-md-12 col-lg-12 m-auto">
                                 <div className="fp__login_area">
                                     <h2>Welcome back!</h2>
-                                    <p>Resend Verification Email</p>
+                                    <p>forgot password</p>
                                     <Form layout="vertical" onFinish={onFinish}>
                                         <Form.Item
                                             label="Email"
@@ -99,4 +97,5 @@ const ResendVerifyEmail = () => {
     );
 };
 
-export default ResendVerifyEmail;
+export default ForgotPassword;
+

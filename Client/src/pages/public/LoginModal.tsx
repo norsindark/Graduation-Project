@@ -5,6 +5,7 @@ import { callLogin, callProfile } from "../../services/clientApi";
 import useResponsiveModalWidth from "../../hooks/useResponsiveModalWidth";
 import { useDispatch } from "react-redux";
 import { doLoginAction } from "../../redux/account/accountSlice";
+import SocialLogin from '../../components/public/sociallogin/SocialLogin';
 
 const LoginModal = () => {
     const navigate = useNavigate();
@@ -113,14 +114,8 @@ const LoginModal = () => {
                                         </Form.Item>
                                     </Form>
                                     <p className="or"><span>or</span></p>
-                                    <ul className="d-flex">
-                                        <li><a href="#"><i className="fab fa-facebook-f"></i></a></li>
-                                        <li><a href="#"><i className="fab fa-linkedin-in"></i></a></li>
-                                        <li><a href="#"><i className="fab fa-twitter"></i></a></li>
-                                        <li><a href="#"><i className="fab fa-google-plus-g"></i></a></li>
-                                    </ul>
-                                    <p className="create_account">Don’t have an account?
-                                        <Link to="/register">Register</Link></p>
+                                    <SocialLogin />
+                                    <p className="create_account">Don’t have an account? <Link to="/register">Register</Link></p>
                                 </div>
                             </div>
                         </div>
