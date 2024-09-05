@@ -36,6 +36,3 @@ export const callRefreshToken = () => {
     return axios.get('/api/v1/auth/refresh-token');
 }
 
-// export const callGoogleLogin = () => {
-//     return axios.get('/api/v1/oauth2/google/callback');
-// }
