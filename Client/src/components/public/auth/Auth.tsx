@@ -8,7 +8,8 @@ import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { notification } from "antd";
 
-import { Link } from "react-router-dom";
+
+
 const Auth = () => {
     const style = "w-[245px] h-[51px]";
     const isAuthenticated = useSelector((state: RootState) => state.account.isAuthenticated);
@@ -74,24 +75,22 @@ const Auth = () => {
 
     const items = [
         {
-            label: <Link to="/account" className={style}>Account management</Link>,
+            label: 'Account management',
             key: 'account',
+            link: '/account'
         },
         {
-            label:
-                <Link
-                    to="/"
-                    onClick={() => handleLogout()}
-                    className={style}
-                >{submit ? 'Logging out...' : 'Logout'}
-                </Link>,
+            label: 'Logout',
             key: '/',
+            onClick: handleLogout,
+            loading: submit
         },
     ];
     if (userRole === 'ADMIN') {
         items.unshift({
-            label: <label>Dashboard</label>,
+            label: 'Dashboard',
             key: 'admin',
+            link: '/admin'
         })
     }
 
@@ -152,11 +151,13 @@ const Auth = () => {
                                 <>
                                     {items.map(item => (
                                         <li key={item.key} className={style}>
-                                            {item.key == '/' ? (
-                                                <span>{item.label}</span>
-                                            ) : (
-                                                <NavLink to={item.key}>{item.label}</NavLink>
-                                            )}
+                                            <NavLink
+                                                to={item.link || '#'}
+                                                onClick={item.onClick}
+                                                className={({ isActive }) => isActive ? `${style} ` : style}
+                                            >
+                                                {item.label}
+                                            </NavLink>
                                         </li>
                                     ))}
                                 </>
