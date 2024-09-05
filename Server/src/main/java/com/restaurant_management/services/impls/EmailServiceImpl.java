@@ -73,7 +73,7 @@ public class EmailServiceImpl implements EmailService {
         helper.setTo(email);
         helper.setSubject(subject);
 
-        String changePasswordUrl = serverUrl + "/auth/reset-password?token=" + token;
+        String changePasswordUrl = clientUrl + "reset-password?token=" + token;
         content = content.replace("[[URL]]", changePasswordUrl);
 
         helper.setText(content, true);

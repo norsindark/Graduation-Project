@@ -55,7 +55,8 @@ public class AuthController {
         return ResponseEntity.ok(authService.forgotPassword(email));
     }
 
-    @PostMapping("/reset-password")public ResponseEntity<ApiResponse> resetPassword(@RequestBody ResetPasswordRequest request)throws DataExitsException {
+    @PostMapping("/reset-password")public ResponseEntity<ApiResponse> resetPassword(
+            @RequestBody ResetPasswordRequest request)throws DataExitsException {
         return ResponseEntity.ok(authService.resetPassword(request));
     }
 }

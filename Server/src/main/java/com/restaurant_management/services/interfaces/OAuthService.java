@@ -1,10 +1,11 @@
 package com.restaurant_management.services.interfaces;
 
-import com.restaurant_management.payloads.responses.JwtResponse;
 import jakarta.servlet.http.HttpServletResponse;
+
+import java.io.IOException;
 
 public interface OAuthService {
 
-    JwtResponse handleOAuth2Callback(String code, String state, HttpServletResponse response);
+    void handleOAuth2Callback(String code, String state, HttpServletResponse response) throws IOException;
 
 }

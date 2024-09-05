@@ -3,7 +3,6 @@ package com.restaurant_management.services.impls;
 import com.restaurant_management.entites.Role;
 import com.restaurant_management.entites.User;
 import com.restaurant_management.enums.RoleName;
-import com.restaurant_management.payloads.responses.JwtResponse;
 import com.restaurant_management.repositories.RoleRepository;
 import com.restaurant_management.repositories.UserRepository;
 import com.restaurant_management.services.interfaces.OAuthService;
@@ -25,6 +24,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -60,7 +60,7 @@ public class OAuthServiceImpl implements OAuthService {
     private RestTemplate restTemplate;
 
     @Override
-    public JwtResponse handleOAuth2Callback(String code, String state, HttpServletResponse response) {
+    public void handleOAuth2Callback(String code, String state, HttpServletResponse response) throws IOException {
         String accessToken = getAccessToken(code);
         String email = getUserEmailFromAccessToken(accessToken);
 
@@ -89,9 +89,12 @@ public class OAuthServiceImpl implements OAuthService {
 
         CookieUtils.addRefreshTokenCookie(response, refreshToken, refreshTokenExpired);
 
-        return JwtResponse.builder()
-                .accessToken(token)
-                .build();
+        String redirectUrl = "http://localhost:3000/callback?access_token=" + token;
+        response.sendRedirect(redirectUrl);
+
+//        return JwtResponse.builder()
+//                .accessToken(token)
+//                .build();
     }
 
     private String getAccessToken(String code) {
