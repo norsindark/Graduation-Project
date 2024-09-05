@@ -32,4 +32,10 @@ export const callVerifyEmail = (token: string) => {
     return axios.get(`/api/v1/auth/verify-email?token=${token}`);
 };
 
+export const callRefreshToken = () => {
+    return axios.get('/api/v1/auth/refresh-token');
+}
 
+// export const callGoogleLogin = () => {
+//     return axios.get('/api/v1/oauth2/google/callback');
+// }

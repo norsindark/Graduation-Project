@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { notification } from 'antd';
-import { callVerifyEmail } from '../../../services/clientApi';
+import { callVerifyEmail } from '../../../../services/clientApi';
 import { useNavigate } from 'react-router-dom';
 
 const VerifyEmail = () => {

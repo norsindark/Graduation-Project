@@ -1,14 +1,13 @@
 // env.d.ts
 /// <reference types="vite/client" />
 // axiosConfig.ts
+import { notification } from 'antd';
 import axios, { AxiosResponse, AxiosError, InternalAxiosRequestConfig } from 'axios';
-// import { callRefreshToken } from '../services/clientApi';
+import { callRefreshToken } from '../services/clientApi';
 // Lấy URL cơ sở từ biến môi trường
 
 const baseUrl: string = import.meta.env.VITE_BACKEND_URL;
 
-
-// Tạo một instance của Axios với cấu hình URL cơ sở và tùy chọn gửi cookie
 const instance = axios.create({
     baseURL: baseUrl,
     withCredentials: true,
@@ -17,16 +16,37 @@ const instance = axios.create({
     }
 });
 
-
 const handleRefreshToken = async () => {
-    const res = await instance.get('/api/v1/auth/refresh-token');
-    console.log("checkres<<<", res);
+    // Xóa accessToken cũ
+    localStorage.removeItem('accessToken');
+    
+    try {
+        const res = await callRefreshToken();
+        const newAccessToken = res.data.accessToken;
+        localStorage.setItem('accessToken', newAccessToken);
+        return newAccessToken;
+    } catch (error) {
+        localStorage.removeItem('accessToken');
+        notification.error({
+            message: 'Login version has expired. Please log in again.',
+            description: 'Please log in again.',
+            duration: 5,
+            showProgress: true,
+        });
+        window.location.href = '/login';
+        throw error;
+    }
+}
+
+// Mở rộng kiểu InternalAxiosRequestConfig để thêm thuộc tính _retry
+interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
+    _retry?: boolean;
+    _retryCount?: number;
 }
 
 // Thêm interceptor cho yêu cầu
 instance.interceptors.request.use(
-    (config: InternalAxiosRequestConfig) => {
-        // Làm điều gì đó trước khi yêu cầu được gửi
+    (config: CustomAxiosRequestConfig) => {
         const token = localStorage.getItem('accessToken');
         if (token) {
             config.headers['Authorization'] = `Bearer ${token}`;
@@ -34,28 +54,50 @@ instance.interceptors.request.use(
         return config;
     },
     (error: AxiosError) => {
-        // Xử lý lỗi yêu cầu
         return Promise.reject(error);
     }
 );
 
 // Thêm interceptor cho phản hồi
 instance.interceptors.response.use(
-    (response: AxiosResponse<unknown>) => {
-        // Mã trạng thái nằm trong phạm vi 2xx sẽ kích hoạt hàm này
-        // Làm điều gì đó với dữ liệu phản hồi
+    (response: AxiosResponse) => {
         return response;
     },
-    (error: AxiosError) => {
-        // Mã trạng thái nằm ngoài phạm vi 2xx sẽ kích hoạt hàm này
-        // Xử lý lỗi phản hồi
+    async (error: AxiosError) => {
+        const originalRequest = error.config as CustomAxiosRequestConfig;
 
-        if(error.config && error.response && +error.response.status === 401){
-            handleRefreshToken();
+        if (originalRequest && error.response?.status === 401 && !originalRequest._retry) {
+            originalRequest._retry = true;
+            originalRequest._retryCount = (originalRequest._retryCount || 0) + 1;
+
+            if (originalRequest._retryCount <= 2) { // Giới hạn số lần thử lại là 2
+                try {
+                    // Xóa accessToken cũ trước khi gọi handleRefreshToken
+                    localStorage.removeItem('accessToken');
+                    const newAccessToken = await handleRefreshToken();
+                    originalRequest.headers['Authorization'] = `Bearer ${newAccessToken}`;
+                    return instance(originalRequest);
+                } catch (refreshError) {
+                    console.error("Refresh token failed", refreshError);
+                    return Promise.reject(refreshError);
+                }
+            } else {
+                // Xử lý khi refresh token thất bại sau 3 lần thử
+                console.error("Refresh token failed after 3 attempts");
+                // Có thể redirect người dùng đến trang đăng nhập hoặc hiển thị thông báo lỗi
+                window.location.href = '/login';
+                notification.error({
+                    message: 'Login version has expired. Please log in again.',
+                    description: 'Please log in again.',
+                    duration: 5,
+                    showProgress: true,
+                });
+                localStorage.removeItem('accessToken');
+                return Promise.reject(error);
+            }
         }
 
-
-        return error.response;
+        return Promise.reject(error);
     }
 );
 
