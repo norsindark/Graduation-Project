@@ -1,8 +1,8 @@
 import {Outlet} from "react-router-dom";
 
 // import Footer from "../../components/public/footer/Footer.tsx";
-import HeaderTop from "../../components/public/header/HeaderTop.tsx";
-import Header from "../../components/public/header/Header.tsx";
+import HeaderTop from "../../components/public/header/HeaderTop";
+import Header from "../../components/public/header/Header";
 
 
 const LayoutPublic = () => {

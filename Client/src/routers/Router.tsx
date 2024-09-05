@@ -11,7 +11,8 @@ import ForgotPassword from "../components/public/auth/forgotpassword/ForgotPassw
 import ResetPassword from "../components/public/auth/resetpassword/ResetPassword";
 import ResendVerifyEmail from "../components/public/auth/resendverifyemail/ResendVerifyEmail";
 import VerifyEmail from "../components/public/auth/verifyemail/VerifyEmail";
-import SocialLogin from "../components/public/sociallogin/SocialLogin";
+import Account from "../components/public/auth/account/Account";
+
 export const router = createBrowserRouter([
     {
         path: "/",
@@ -46,14 +47,14 @@ export const router = createBrowserRouter([
                 path: "/verify-email",
                 element: <VerifyEmail />
             },
-            // {
-            //     path: "/oauth2/authorization/google",
-            //     element: <SocialLogin />
-            // }
-            // {
-            //     path: "/account",
-            //     element: <Account />
-            // }
+            {
+                path: `/callback`,
+                element: <HomePage />
+            },
+            {
+                path: "/account",
+                element: <Account />
+            }
         ]
     },
     {
