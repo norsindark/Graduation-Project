@@ -1,5 +1,7 @@
-import {useNavigate} from "react-router-dom";
-import {Button} from 'antd';
+import { useNavigate } from "react-router-dom";
+import { Button } from 'antd';
+import image from '../../../public/images/404_img.png';
+
 
 const NotFound = () => {
     const navigate = useNavigate();
@@ -10,11 +12,11 @@ const NotFound = () => {
                     <div className="row">
                         <div className="col-xl-5 col-md-7 m-auto">
                             <div className="fp__404_text wow fadeInUp" data-wow-duration="1s">
-                                <img src="images/404_img.png" alt="404" className="img-fluid w-100"/>
+                                <img src={image} alt="404" className="img-fluid w-100" />
                                 <h2>That Page Doesn't Exist!</h2>
                                 <p>Sorry, the page you were looking for could not be found.</p>
                                 <Button shape="round" size="large" type="primary"
-                                        onClick={() => navigate('/')}
+                                    onClick={() => navigate('/')}
                                 ><span className="text-white">Back Home</span></Button>
                             </div>
                         </div>
