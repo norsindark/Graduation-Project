@@ -23,6 +23,12 @@ public class JwtProviderUtil {
     @Value("${RestaurantManagement.app.jwtSecret}")
     private String jwtSecret;
 
+    @Value("${restaurantManagement.app.jwtExpirationMs}")
+    private int jwtExpirationMs;
+
+    @Value("${restaurantManagement.app.refreshTokenExpired}")
+    private int jwtRefreshTokenExpired;
+
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
     }
@@ -62,7 +68,7 @@ public class JwtProviderUtil {
                 .setClaims(extraClaims)
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 15))
+                .setExpiration(new Date(System.currentTimeMillis() + jwtExpirationMs))
                 .signWith(getSignInKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
@@ -75,7 +81,7 @@ public class JwtProviderUtil {
                 .setClaims(extraClaims)
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24 * 7))
+                .setExpiration(new Date(System.currentTimeMillis() + jwtRefreshTokenExpired))
                 .signWith(getSignInKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
