@@ -5,21 +5,19 @@ import com.restaurant_management.payloads.requests.SignUpRequest;
 import com.restaurant_management.payloads.requests.UserRequest;
 import com.restaurant_management.payloads.responses.ApiResponse;
 import com.restaurant_management.payloads.responses.UserResponse;
-import com.restaurant_management.repositories.UserRepository;
 import com.restaurant_management.services.interfaces.AdminService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.web.PagedModel;
-import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
 //@CrossOrigin(origins = "*", allowedHeaders = "*")
+@Tag(name = "Admin")
 @RequestMapping("/api/v1/dashboard")
 public class AdminController {
 

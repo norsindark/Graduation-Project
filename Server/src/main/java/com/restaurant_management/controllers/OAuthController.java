@@ -1,6 +1,7 @@
 package com.restaurant_management.controllers;
 
 import com.restaurant_management.services.interfaces.OAuthService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,7 +13,7 @@ import java.io.IOException;
 
 @RestController
 @RequiredArgsConstructor
-//@CrossOrigin(origins = "*", allowedHeaders = "*")
+@Tag(name = "OAuth2")
 @RequestMapping("/api/v1/oauth2")
 public class OAuthController {
 

@@ -4,6 +4,7 @@ import com.restaurant_management.dtos.CategoryDto;
 import com.restaurant_management.exceptions.DataExitsException;
 import com.restaurant_management.payloads.responses.CategoryResponse;
 import com.restaurant_management.services.interfaces.CategoryService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
+@Tag(name = "Category")
 @RequestMapping("/api/v1/category")
 public class CategoryController {
 

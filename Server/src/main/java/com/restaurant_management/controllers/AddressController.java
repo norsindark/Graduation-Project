@@ -6,6 +6,7 @@ import com.restaurant_management.payloads.responses.AddressByUserIdResponse;
 import com.restaurant_management.payloads.responses.AddressResponse;
 import com.restaurant_management.payloads.responses.ApiResponse;
 import com.restaurant_management.services.interfaces.AddressService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 //@CrossOrigin(origins = "*", allowedHeaders = "*")
 @RequestMapping("/api/v1/client/address")
+@Tag(name = "Address")
 public class AddressController {
 
     private final AddressService addressService;

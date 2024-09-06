@@ -1,10 +1,10 @@
 package com.restaurant_management.configs;
 
+import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
-import io.swagger.v3.oas.models.Components;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -19,7 +19,7 @@ public class SwaggerConfig {
                         .version("1.0.0")
                         .description("API documentation for Spring Boot application"))
                 .addSecurityItem(new SecurityRequirement().addList("Bearer Authentication"))
-                .addSecurityItem(new SecurityRequirement().addList("Cookie Authentication"))
+                .addSecurityItem(new SecurityRequirement().addList("Basic Authentication"))
                 .components(new Components()
                         .addSecuritySchemes("Bearer Authentication",
                                 new SecurityScheme()
@@ -27,11 +27,11 @@ public class SwaggerConfig {
                                         .type(SecurityScheme.Type.HTTP)
                                         .scheme("bearer")
                                         .bearerFormat("JWT"))
-                        .addSecuritySchemes("Cookie Authentication",
+                        .addSecuritySchemes("Basic Authentication",
                                 new SecurityScheme()
-                                        .name("Cookie Authentication")
-                                        .type(SecurityScheme.Type.APIKEY)
-                                        .in(SecurityScheme.In.COOKIE)
-                                        .name("refreshToken")));
+                                        .name("Basic Authentication")
+                                        .type(SecurityScheme.Type.HTTP)
+                                        .scheme("basic")));
     }
+
 }
