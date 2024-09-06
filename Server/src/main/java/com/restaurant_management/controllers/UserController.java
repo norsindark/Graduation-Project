@@ -9,7 +9,7 @@ import com.restaurant_management.repositories.UserRepository;
 import com.restaurant_management.services.interfaces.UserService;
 import com.restaurant_management.utils.CookieUtils;
 import com.restaurant_management.utils.GetUserUtil;
-import jakarta.servlet.http.Cookie;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +22,7 @@ import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
-//@CrossOrigin(origins = "*", allowedHeaders = "*")
+@Tag(name = "User")
 @RequestMapping("/api/v1/client/user")
 public class UserController {
 

@@ -2,6 +2,7 @@ package com.restaurant_management.controllers;
 
 import com.restaurant_management.exceptions.DataExitsException;
 import com.restaurant_management.services.interfaces.TokenService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -11,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-//@CrossOrigin(origins = "*", allowedHeaders = "*")
+@Tag(name = "Token")
 @RequestMapping("/api/v1/auth")
 public class TokenController {
 

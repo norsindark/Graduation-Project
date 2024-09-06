@@ -6,6 +6,7 @@ import com.restaurant_management.payloads.requests.SignInRequest;
 import com.restaurant_management.payloads.requests.SignUpRequest;
 import com.restaurant_management.payloads.responses.ApiResponse;
 import com.restaurant_management.services.interfaces.AuthService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -18,7 +19,7 @@ import java.io.UnsupportedEncodingException;
 
 @RestController
 @RequiredArgsConstructor
-//@CrossOrigin(origins = "http://localhost:3000", allowedHeaders = "*", allowCredentials = "true")
+@Tag(name = "Auth")
 @RequestMapping("/api/v1/auth")
 public class AuthController {
 
