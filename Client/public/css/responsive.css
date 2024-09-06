@@ -1067,7 +1067,7 @@
     }
 
     .fp__topbar_info {
-        justify-content: center;
+        justify-content: space-around;
     }
 
     .fp__topbar_info li {
@@ -1958,7 +1958,7 @@
     }
 
     .fp__topbar_info {
-        justify-content: center;
+        justify-content: space-around;
     }
 
     .fp__topbar_info li {
