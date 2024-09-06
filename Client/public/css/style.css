@@ -399,7 +399,7 @@ button {
     color: var(--colorBlack);
     text-transform: capitalize;
     margin: 0px 10px;
-    padding: 0;
+
     position: relative;
     cursor: pointer;
     transition: all linear .3s;
@@ -430,8 +430,8 @@ button {
 }
 
 .main_menu .menu_icon li:last-child a {
-    padding: 10px 25px !important;
-    margin-right: 0;
+
+
 }
 
 .main_menu .menu_icon li:last-child a::after,
@@ -4639,15 +4639,15 @@ CHECKOUT PAGE START
 }
 
 .fp__login_area ul li a {
-    width: 35px;
+    width: 100px;
     height: 35px;
     background: var(--colorPrimary);
     color: var(--colorWhite);
     text-align: center;
     line-height: 35px;
-    border-radius: 50%;
-    margin-right: 5px;
-    font-size: 14px;
+    border-radius: 5px;
+    margin-right: 5px !important;
+    font-size: 18px;
     border: 1px solid transparent;
     transition: all 0.3s linear 0s;
     -webkit-transition: all 0.3s linear 0s;

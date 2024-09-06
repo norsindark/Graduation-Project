@@ -1,67 +1,61 @@
-import { Form, Modal, Input, Button } from 'antd';
+import { Form, Modal, Input, Button, notification } from 'antd';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { useEffect, useState, useRef } from 'react';
-import { callRegister } from "../../services/clientApi.ts";
+import { useState } from 'react';
+import { callRegister } from "../../services/clientApi";
+import useResponsiveModalWidth from "../../hooks/useResponsiveModalWidth";
+import SocialLogin from "../../components/public/sociallogin/SocialLogin";
 
 const RegisterModal = () => {
-    const hasWindow = typeof window !== 'undefined';
-    const [modalWidth, setModalWidth] = useState<number>(hasWindow ? window.innerWidth : 650);
     const navigate = useNavigate();
     const location = useLocation();
-    const timeOutId = useRef<number | null>(null);
-
-    useEffect(() => {
-        const handleResize = () => {
-            const width = window.innerWidth;
-            if (width < 500) {
-                setModalWidth(380);
-            } else if (width >= 500 && width < 1000) {
-                setModalWidth(480);
-            } else {
-                setModalWidth(680);
-            }
-        };
-
-        // Handle resize with debouncing
-        const resizeListener = () => {
-            if (timeOutId.current) {
-                clearTimeout(timeOutId.current);
-            }
-            timeOutId.current = window.setTimeout(handleResize, 500);
-        };
-
-        window.addEventListener('resize', resizeListener);
-
-        // Initial check
-        handleResize();
-
-        return () => {
-            if (timeOutId.current) {
-                clearTimeout(timeOutId.current);
-            }
-            window.removeEventListener('resize', resizeListener);
-        };
-    }, []);
+    const [isSubmit, setIsSubmit] = useState(false);
+    const modalWidth = useResponsiveModalWidth();
 
     const handleCancel = () => {
-        navigate('/'); // Close the modal and navigate back to the homepage
+        navigate('/');
     };
 
-    const onFinish = async (values: any) => {
+    const onFinish = async (values: { fullName: string; email: string; password: string; confirmPassword: string }) => {
         const { fullName, email, password, confirmPassword } = values;
-
-        if (password === confirmPassword) {
-            try {
-                const response = await callRegister({ email, password, fullName });
-                console.log(response)
-            } catch (error) {
-                // Xử lý lỗi khi gọi API
-                console.error("Lỗi đăng ký:", error);
+        setIsSubmit(true);
+        try {
+            if (password === confirmPassword) {
+                const res = await callRegister(email, password, fullName);
+                if (res?.status == 201) {
+                    notification.success({
+                        message: "Registration successful!",
+                        description: res?.data?.message || "Registration successful!",
+                        duration: 5,
+                        showProgress: true
+                    })
+                    navigate('/login')
+                } else {
+                    notification.error({
+                        message: "Registration failed",
+                        description: res?.data?.errors?.error || "Something went wrong!",
+                        duration: 5,
+                        showProgress: true
+                    })
+                }
+            } else {
+                notification.error({
+                    message: "Registration failed",
+                    description: "Password and confirm password do not match!",
+                    duration: 5,
+                    showProgress: true
+                })
             }
-        } else {
-            console.error("Mật khẩu và xác nhận mật khẩu không khớp!");
+        } catch (loginError) {
+            notification.error({
+                message: "Registration error!",
+                description: loginError instanceof Error ? loginError.message : "Error during registration process!",
+                duration: 5,
+                showProgress: true
+            });
+        } finally {
+            setIsSubmit(false);
         }
-    };
+    }
 
     return (
         <Modal
@@ -116,19 +110,16 @@ const RegisterModal = () => {
                                             <Input.Password placeholder="Confirm Password" autoComplete="new-password" />
                                         </Form.Item>
                                         <Form.Item>
-                                            <Button type="primary" htmlType="submit" block size="large">
-                                                <div className="w-14 font-medium">Register</div>
+                                            <Button type="primary" htmlType="submit" block size="large"
+                                                loading={isSubmit}>
+                                                <div className="w-full max-w-16 font-medium text-center" >Register</div>
                                             </Button>
                                         </Form.Item>
                                     </Form>
                                     <p className="or"><span>or</span></p>
-                                    <ul className="d-flex">
-                                        <li><a href="#"><i className="fab fa-facebook-f"></i></a></li>
-                                        <li><a href="#"><i className="fab fa-linkedin-in"></i></a></li>
-                                        <li><a href="#"><i className="fab fa-twitter"></i></a></li>
-                                        <li><a href="#"><i className="fab fa-google-plus-g"></i></a></li>
-                                    </ul>
-                                    <p className="create_account">Already have an account? <Link to="/login">Login</Link></p>
+                                    <SocialLogin />
+                                    <p className="create_account">Already have an account? <Link
+                                        to="/login">Login</Link></p>
                                 </div>
                             </div>
                         </div>

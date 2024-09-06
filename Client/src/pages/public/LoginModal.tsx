@@ -1,52 +1,61 @@
-import { Form, Modal, Input, Button, Checkbox } from 'antd';
+import { Form, Modal, Input, Button, Checkbox, notification } from 'antd';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { useEffect, useState, useRef } from 'react';
+import { useState } from 'react';
+import { callLogin, callProfile } from "../../services/clientApi";
+import useResponsiveModalWidth from "../../hooks/useResponsiveModalWidth";
+import { useDispatch } from "react-redux";
+import { doLoginAction } from "../../redux/account/accountSlice";
+import SocialLogin from '../../components/public/sociallogin/SocialLogin';
 
 const LoginModal = () => {
-    const hasWindow = typeof window !== 'undefined';
-    const [modalWidth, setModalWidth] = useState<number>(hasWindow ? window.innerWidth : 650);
     const navigate = useNavigate();
     const location = useLocation();
-    const timeOutId = useRef<number | null>(null);
+    const [isSubmit, setIsSubmit] = useState(false);
+    const modalWidth = useResponsiveModalWidth();
+    const dispatch = useDispatch();
 
-    useEffect(() => {
-        const handleResize = () => {
-            const width = window.innerWidth;
-            if (width < 500) {
-                setModalWidth(380);
-            } else if (width >= 500 && width < 1000) {
-                setModalWidth(480);
-            } else {
-                setModalWidth(680);
-            }
-        };
-
-        const resizeListener = () => {
-            if (timeOutId.current) {
-                clearTimeout(timeOutId.current);
-            }
-            timeOutId.current = window.setTimeout(handleResize, 500);
-        };
-
-        window.addEventListener('resize', resizeListener);
-        handleResize();
-
-        return () => {
-            if (timeOutId.current) {
-                clearTimeout(timeOutId.current);
-            }
-            window.removeEventListener('resize', resizeListener);
-        };
-    }, []);
 
     const handleCancel = () => {
-        navigate('/'); // Close the modal and navigate back to the homepage
+        navigate('/');
     };
 
-    const onFinish = (values: any) => {
-        console.log('Form values:', values);
-        navigate('/'); // Close the modal after successful submission
+    const onFinish = async (values: { email: string; password: string }) => {
+        const { email, password } = values;
+        setIsSubmit(true);
+        try {
+            const loginRes = await callLogin(email, password);
+            if (loginRes?.status == 200) {
+                localStorage.setItem('accessToken', loginRes.data.accessToken);
+                const profileRes = await callProfile();
+                if (profileRes?.status === 200) {
+                    dispatch(doLoginAction(profileRes.data));
+                    notification.success({
+                        message: "Login successful!",
+                        duration: 5,
+                        showProgress: true
+                    })
+                    navigate('/');
+                }
+            } else {
+                notification.error({
+                    message: "Login failed!",
+                    description: loginRes.data.errors?.error || loginRes.data.message || "Something went wrong!",
+                    duration: 5,
+                    showProgress: true
+                });
+            }
+        } catch (loginError) {
+            notification.error({
+                message: "Login error!",
+                description: loginError instanceof Error ? loginError.message : "Error during registration process!",
+                duration: 5,
+                showProgress: true
+            });
+        } finally {
+            setIsSubmit(false);
+        }
     };
+
 
     return (
         <Modal
@@ -71,7 +80,7 @@ const LoginModal = () => {
                                 <div className="fp__login_area">
                                     <h2>Welcome back!</h2>
                                     <p>Sign In to continue</p>
-                                    <Form layout="vertical" onFinish={onFinish} initialValues={{ rememberme: false }}>
+                                    <Form layout="vertical" onFinish={onFinish} initialValues={{ remember: false }}>
                                         <Form.Item
                                             label="Email"
                                             name="email"
@@ -87,7 +96,7 @@ const LoginModal = () => {
                                             <Input.Password placeholder="Password" autoComplete="current-password" />
                                         </Form.Item>
                                         <Form.Item
-                                            name="rememberme"
+                                            name="remember"
                                             valuePropName="checked"
                                         >
                                             <div>
@@ -98,19 +107,15 @@ const LoginModal = () => {
                                             </div>
                                         </Form.Item>
                                         <Form.Item>
-                                            <Button type="primary" htmlType="submit" block size="large">
-                                                <div className="w-14 font-medium">Login</div>
+                                            <Button type="primary" htmlType="submit" block size="large"
+                                                loading={isSubmit}>
+                                                <div className="w-full max-w-16 font-medium text-center">Login</div>
                                             </Button>
                                         </Form.Item>
                                     </Form>
                                     <p className="or"><span>or</span></p>
-                                    <ul className="d-flex">
-                                        <li><a href="#"><i className="fab fa-facebook-f"></i></a></li>
-                                        <li><a href="#"><i className="fab fa-linkedin-in"></i></a></li>
-                                        <li><a href="#"><i className="fab fa-twitter"></i></a></li>
-                                        <li><a href="#"><i className="fab fa-google-plus-g"></i></a></li>
-                                    </ul>
-                                    <p className="create_account">Don’t have an account? <Link to="/register">Register</Link></p>
+                                    <SocialLogin />
+                                    <p className="create_account">Don’t have an account? e<Link to="/register">Register</Link></p>
                                 </div>
                             </div>
                         </div>
