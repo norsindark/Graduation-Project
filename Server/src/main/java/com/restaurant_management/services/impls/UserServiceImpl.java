@@ -8,13 +8,11 @@ import com.restaurant_management.entites.UserToken;
 import com.restaurant_management.exceptions.DataExitsException;
 import com.restaurant_management.payloads.requests.PasswordRequest;
 import com.restaurant_management.payloads.responses.ApiResponse;
+import com.restaurant_management.payloads.responses.UserResponse;
 import com.restaurant_management.repositories.UserRepository;
 import com.restaurant_management.repositories.UserTokenRepository;
 import com.restaurant_management.services.interfaces.UserService;
-import com.restaurant_management.utils.ApiUtil;
 import com.restaurant_management.utils.GetUserUtil;
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -23,9 +21,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -41,35 +38,38 @@ public class UserServiceImpl implements UserService {
 
     private final Cloudinary cloudinary;
 
-//    @Override
-//    public Optional<UserProfileResponse> getUserByAccessToken() throws UserNotFoundException {
-//
-//        GetUserUtil userUtil = new GetUserUtil();
-//        String username = userUtil.getUserEmail();
-//        Optional<User> user = this.userRepository.findByEmail(username);
-//        if (user.isEmpty()) {
-//            throw new UserNotFoundException("User not found with: " + username);
-//        }
-//        UserProfileResponse userProfileResponse = new UserProfileResponse(
-//                user.get().getEmail(),
-//                user.get().getFullName(),
-//                user.get().getAvatar(),
-//                user.get().getAddresses()
-//        );
-//
-//        return Optional.of(userProfileResponse);
-//    }
-
     @Override
-    public Optional<User> getUserByAccessToken() throws DataExitsException {
+    public Optional<UserResponse> getUserByAccessToken() throws DataExitsException {
+
         GetUserUtil userUtil = new GetUserUtil();
         String username = userUtil.getUserEmail();
         Optional<User> user = this.userRepository.findByEmail(username);
         if (user.isEmpty()) {
             throw new DataExitsException("User not found with: " + username);
         }
-        return user;
+        UserResponse userProfileResponse = new UserResponse(
+                user.get().getId(),
+                user.get().getEmail(),
+                user.get().getFullName(),
+                user.get().getAvatar(),
+                user.get().getRole(),
+                user.get().getAddresses().isEmpty() ? null : new HashSet<>(user.get().getAddresses())
+        );
+
+
+        return Optional.of(userProfileResponse);
     }
+
+//    @Override
+//    public Optional<User> getUserByAccessToken() throws DataExitsException {
+//        GetUserUtil userUtil = new GetUserUtil();
+//        String username = userUtil.getUserEmail();
+//        Optional<User> user = this.userRepository.findByEmail(username);
+//        if (user.isEmpty()) {
+//            throw new DataExitsException("User not found with: " + username);
+//        }
+//        return user;
+//    }
 
     @Override
     public ApiResponse updateUserProfile(UserDto userDto) throws DataExitsException {

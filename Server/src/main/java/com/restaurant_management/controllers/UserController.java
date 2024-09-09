@@ -5,6 +5,7 @@ import com.restaurant_management.entites.User;
 import com.restaurant_management.exceptions.DataExitsException;
 import com.restaurant_management.payloads.requests.PasswordRequest;
 import com.restaurant_management.payloads.responses.ApiResponse;
+import com.restaurant_management.payloads.responses.UserResponse;
 import com.restaurant_management.repositories.UserRepository;
 import com.restaurant_management.services.interfaces.UserService;
 import com.restaurant_management.utils.CookieUtils;
@@ -32,7 +33,7 @@ public class UserController {
 
     @GetMapping("/profile")
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
-    public ResponseEntity<Optional<User>> getUserByAccessToken() throws DataExitsException {
+    public ResponseEntity<Optional<UserResponse>> getUserByAccessToken() throws DataExitsException {
         return ResponseEntity.ok(this.userService.getUserByAccessToken());
     }
 

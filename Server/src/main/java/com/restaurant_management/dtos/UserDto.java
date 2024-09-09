@@ -23,8 +23,6 @@ public class UserDto {
     private String email;
 
 
-    private String avatar;
-
 //    @NotBlank(message = "Password can't be empty")
 //    @Size(min = 6, max = 64, message = "Password length must be between 6 and 64 characters")
 //    @Pattern(regexp = "^.{6,}$", message = "Password need more than 6 characters")
