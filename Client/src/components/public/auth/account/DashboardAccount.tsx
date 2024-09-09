@@ -16,7 +16,6 @@ const DashboardAccount = () => {
         try {
             setIsLoading(true);
             const res = await callUpdateProfile(values.fullName, values.email);
-            console.log("res<<<", res);
             if (res?.status === 200) {
                 dispatch(updateUser({
                     fullName: values.fullName,

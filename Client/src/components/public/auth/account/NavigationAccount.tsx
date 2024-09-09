@@ -1,14 +1,9 @@
+import AvatarAccount from "./AvatarAccount";
+
 const NavigationAccount = () => {
     return (
         <div className="fp__dashboard_menu">
-            <div className="dasboard_header">
-                <div className="dasboard_header_img">
-                    <img src="images/comment_img_2.png" alt="user" className="img-fluid w-100" />
-                    <label htmlFor="upload"><i className="far fa-camera"></i></label>
-                    <input type="file" id="upload" hidden />
-                </div>
-                <h2>hasib ahmed</h2>
-            </div>
+            <AvatarAccount />
             <div className="nav flex-column nav-pills" id="v-pills-tab" role="tablist"
                 aria-orientation="vertical">
                 <button className="nav-link active" id="v-pills-home-tab" data-bs-toggle="pill"

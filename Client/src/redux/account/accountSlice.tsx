@@ -52,7 +52,7 @@ export const accountSlice = createSlice({
                     ...action.payload
                 };
             }
-        }
+        },
     },
 });
 
