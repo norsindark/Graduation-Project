@@ -1,11 +1,10 @@
 package com.restaurant_management.services.interfaces;
 
 import com.restaurant_management.dtos.UserDto;
-import com.restaurant_management.entites.User;
 import com.restaurant_management.exceptions.DataExitsException;
 import com.restaurant_management.payloads.requests.PasswordRequest;
 import com.restaurant_management.payloads.responses.ApiResponse;
-import jakarta.servlet.http.HttpServletResponse;
+import com.restaurant_management.payloads.responses.UserResponse;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -13,9 +12,9 @@ import java.util.Optional;
 
 public interface UserService {
 
-//    Optional<UserProfileResponse>  getUserByAccessToken() throws UserNotFoundException;
+    Optional<UserResponse>  getUserByAccessToken() throws DataExitsException;
 
-    Optional<User> getUserByAccessToken() throws DataExitsException;
+//    Optional<User> getUserByAccessToken() throws DataExitsException;
 
     ApiResponse updateUserProfile(UserDto userDto) throws DataExitsException;
 //

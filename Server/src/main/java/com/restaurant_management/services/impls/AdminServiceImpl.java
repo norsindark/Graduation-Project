@@ -7,17 +7,18 @@ import com.restaurant_management.exceptions.DataExitsException;
 import com.restaurant_management.payloads.requests.SignUpRequest;
 import com.restaurant_management.payloads.requests.UserRequest;
 import com.restaurant_management.payloads.responses.ApiResponse;
-import com.restaurant_management.payloads.responses.UserResponse;
+import com.restaurant_management.payloads.responses.GetUserResponse;
 import com.restaurant_management.repositories.RoleRepository;
 import com.restaurant_management.repositories.UserRepository;
 import com.restaurant_management.repositories.UserTokenRepository;
 import com.restaurant_management.services.interfaces.AdminService;
-import com.restaurant_management.utils.ApiUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PagedResourcesAssembler;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -38,6 +39,7 @@ public class AdminServiceImpl implements AdminService {
 
     private final UserTokenRepository userTokenRepository;
 
+    private final PagedResourcesAssembler<GetUserResponse> pagedResourcesAssembler;
 
     private final PasswordEncoder encoder;
 
@@ -65,14 +67,25 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public Page<UserResponse> getAllUsers(int pageNo, int pageSize){
+    public PagedModel<EntityModel<GetUserResponse>> getAllUsers(int pageNo, int pageSize) throws DataExitsException {
         Pageable pageable = PageRequest.of(pageNo, pageSize);
         Page<User> users = userRepository.findAllUser(pageable);
         if (users.isEmpty()) {
-            return Page.empty();
+            throw new DataExitsException("No user found!");
         }
-        return users.map(UserResponse::new);
+        Page<GetUserResponse> userResponses = users.map(GetUserResponse::new);
+        return pagedResourcesAssembler.toModel(userResponses);
     }
+
+//    @Override
+//    public Page<GetUserResponse> getAllUsers(int pageNo, int pageSize){
+//        Pageable pageable = PageRequest.of(pageNo, pageSize);
+//        Page<User> users = userRepository.findAllUser(pageable);
+//        if (users.isEmpty()) {
+//            return Page.empty();
+//        }
+//        return users.map(GetUserResponse::new);
+//    }
 
     @Override
     public ApiResponse deleteUser(String id) throws DataExitsException {
