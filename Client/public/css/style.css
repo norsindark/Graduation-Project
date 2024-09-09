@@ -5831,7 +5831,7 @@ CHECKOUT PAGE START
 .fp_dash_personal_info_edit {
     background: none;
     box-shadow: none;
-    display: none;
+    /* display: none; */
 }
 
 .fp_dash_personal_info.show .personal_info_text {
@@ -5870,7 +5870,7 @@ CHECKOUT PAGE START
     box-shadow: none;
 }
 
-.fp__change_password .fp__comment_imput_single {
+.fp__change_password .fp__comment_input_single {
     margin-top: 20px;
 }
 

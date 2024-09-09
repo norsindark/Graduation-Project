@@ -45,9 +45,17 @@ export const accountSlice = createSlice({
         setLoading: (state, action: PayloadAction<boolean>) => {
             state.isLoading = action.payload;
         },
+        updateUser: (state, action: PayloadAction<Partial<UserState>>) => {
+            if (state.user) {
+                state.user = {
+                    ...state.user,
+                    ...action.payload
+                };
+            }
+        }
     },
 });
 
-export const { doLoginAction, doLogoutAction, setLoading } = accountSlice.actions;
+export const { doLoginAction, doLogoutAction, setLoading, updateUser } = accountSlice.actions;
 
 export default accountSlice.reducer;
