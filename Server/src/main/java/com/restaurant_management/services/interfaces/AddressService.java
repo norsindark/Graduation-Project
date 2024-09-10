@@ -5,7 +5,8 @@ import com.restaurant_management.exceptions.DataExitsException;
 import com.restaurant_management.payloads.responses.AddressByUserIdResponse;
 import com.restaurant_management.payloads.responses.AddressResponse;
 import com.restaurant_management.payloads.responses.ApiResponse;
-import org.springframework.data.domain.Page;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.PagedModel;
 
 public interface AddressService {
 
@@ -17,6 +18,6 @@ public interface AddressService {
 
     AddressResponse getAddress(String addressId) throws DataExitsException;
 
-    Page<AddressByUserIdResponse> getAllAddressByUserId(String userId, int pageNo, int pageSize)
+    PagedModel<EntityModel<AddressByUserIdResponse>> getAllAddressByUserId(String userId, int pageNo, int pageSize, String sortBy)
             throws DataExitsException;
 }

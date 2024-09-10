@@ -55,8 +55,6 @@ public class UserServiceImpl implements UserService {
                 user.get().getRole(),
                 user.get().getAddresses().isEmpty() ? null : new HashSet<>(user.get().getAddresses())
         );
-
-
         return Optional.of(userProfileResponse);
     }
 
