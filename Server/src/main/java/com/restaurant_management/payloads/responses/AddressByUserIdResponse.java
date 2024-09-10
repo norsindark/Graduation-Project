@@ -29,6 +29,7 @@ public class AddressByUserIdResponse {
         List<AddressResponse> addressResponses = new ArrayList<>();
 
         AddressResponse addressRes = new AddressResponse();
+        addressRes.setId(address.getId());
         addressRes.setStreet(address.getStreet());
         addressRes.setCity(address.getCity());
         addressRes.setCountry(address.getCountry());

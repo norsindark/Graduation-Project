@@ -16,6 +16,8 @@ import java.util.stream.Collectors;
 @Builder
 public class AddressResponse {
 
+    private String id;
+
     private String street;
 
     private String city;
@@ -38,6 +40,7 @@ public class AddressResponse {
 
     public static AddressResponse toAddress(Address address) {
         return AddressResponse.builder()
+                .id(address.getId())
                 .street(address.getStreet())
                 .city(address.getCity())
                 .country(address.getCountry())

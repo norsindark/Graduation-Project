@@ -9,7 +9,8 @@ import com.restaurant_management.services.interfaces.AddressService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -45,12 +46,12 @@ public class AddressController {
 
     @GetMapping("/get-all-address")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<Page<AddressByUserIdResponse>> getAllAddressByUserId(
+    public ResponseEntity<PagedModel<EntityModel<AddressByUserIdResponse>>> getAllAddressByUserId(
             @RequestParam String userId,
             @RequestParam(defaultValue = "0") int pageNo,
-            @RequestParam(defaultValue = "10") int pageSize) throws DataExitsException {
-        Page<AddressByUserIdResponse> addressPage = addressService.getAllAddressByUserId(userId, pageNo, pageSize);
-        return ResponseEntity.ok(addressPage);
+            @RequestParam(defaultValue = "10") int pageSize,
+            @RequestParam(defaultValue = "addressType") String sortBy) throws DataExitsException {
+        return ResponseEntity.ok(addressService.getAllAddressByUserId(userId, pageNo, pageSize, sortBy));
     }
 
 

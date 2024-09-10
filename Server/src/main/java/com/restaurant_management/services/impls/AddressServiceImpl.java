@@ -10,12 +10,15 @@ import com.restaurant_management.payloads.responses.ApiResponse;
 import com.restaurant_management.repositories.AddressRepository;
 import com.restaurant_management.repositories.UserRepository;
 import com.restaurant_management.services.interfaces.AddressService;
-import com.restaurant_management.utils.ApiUtil;
 import com.restaurant_management.utils.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PagedResourcesAssembler;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
@@ -31,6 +34,8 @@ public class AddressServiceImpl implements AddressService {
     private final AddressRepository addressRepository;
 
     private final UserRepository userRepository;
+
+    private final PagedResourcesAssembler<AddressByUserIdResponse> pagedResourcesAssembler;
 
     @Override
     public ApiResponse addAddress(AddressDto addressDto) throws DataExitsException {
@@ -98,8 +103,9 @@ public class AddressServiceImpl implements AddressService {
     }
 
     @Override
-    public Page<AddressByUserIdResponse> getAllAddressByUserId(String userId, int pageNo, int pageSize) {
-        Pageable pageable = PageRequest.of(pageNo, pageSize);
+    public PagedModel<EntityModel<AddressByUserIdResponse>> getAllAddressByUserId(String userId, int pageNo, int pageSize, String sortBy)
+            throws DataExitsException {
+        Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(sortBy));
 
         Optional<User> user = userRepository.findById(userId);
         if (user.isEmpty()) {
@@ -108,6 +114,6 @@ public class AddressServiceImpl implements AddressService {
 
         Page<Address> addressPages = addressRepository.findByUserId(userId, pageable);
 
-        return addressPages.map(AddressByUserIdResponse::new);
+        return pagedResourcesAssembler.toModel(addressPages.map(AddressByUserIdResponse::new));
     }
 }
