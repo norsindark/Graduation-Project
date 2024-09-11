@@ -5,7 +5,7 @@ import { Form, Input, Button, notification } from "antd";
 import React, { useState } from "react";
 import { callUpdateProfile } from "../../../../services/clientApi";
 import { updateUser } from "../../../../redux/account/accountSlice";
-
+import { ProductOutlined } from "@ant-design/icons";
 const DashboardAccount = () => {
     const [isLoading, setIsLoading] = useState(false);
     const user = useSelector((state: RootState) => state.account.user);
@@ -50,8 +50,10 @@ const DashboardAccount = () => {
         <div className="tab-pane fade show active" id="v-pills-home" role="tabpanel"
             aria-labelledby="v-pills-home-tab">
             <div className="fp_dashboard_body">
-                <h3>Welcome to your Profile</h3>
-
+                <h3>
+                    <ProductOutlined style={{ fontSize: '24px', marginRight: '5px' }} />
+                    WELLCOME TO YOUR PROFILE
+                </h3>
                 <TotalOrder />
 
                 <div className="fp_dash_personal_info">
