@@ -114,7 +114,7 @@ button {
 }
 
 .common_btn:hover {
-    background: var(--colorBlack);
+    /* background: var(--colorBlack); */
 }
 
 .fp__section_heading h4 {
@@ -3635,6 +3635,12 @@ footer {
     font-weight: 500;
     color: var(--colorBlack);
     margin-top: 20px;
+}
+.text-medium label {
+    text-transform: capitalize;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--colorBlack);
 }
 
 .comment_input .fp__contact_form_input {
