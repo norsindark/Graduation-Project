@@ -58,9 +58,13 @@ const DashboardAccount = () => {
 
                 <div className="fp_dash_personal_info">
                     <h4>Personal Information
-                        <a className="dash_info_btn" onClick={() => setIsEditing(!isEditing)}>
-                            <span className="edit">{isEditing ? 'cancel' : 'edit'}</span>
-                        </a>
+                        <div className="row">
+                            <div className="col-md-12">
+                                <a className="dash_info_btn" onClick={() => setIsEditing(!isEditing)}>
+                                    <span className="edit text-center font-medium">{isEditing ? 'cancel' : 'edit'}</span>
+                                </a>
+                            </div>
+                        </div>
                     </h4>
 
                     {!isEditing ? (
@@ -81,11 +85,11 @@ const DashboardAccount = () => {
                                 <div className="row">
                                     <div className="col-6">
                                         <Form.Item
-                                            label="Name"
+                                            label="Full Name"
                                             name="fullName"
                                             rules={[{ required: true, message: 'Please input your name!' }]}
                                         >
-                                            <Input placeholder="Name" />
+                                            <Input placeholder="Full Name" />
                                         </Form.Item>
                                     </div>
                                     <div className="col-xl-6 col-lg-6">
