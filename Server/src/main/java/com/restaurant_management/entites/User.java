@@ -48,9 +48,6 @@ public class User implements UserDetails {
     @Column(name = "avatar")
     private String avatar;
 
-    @Column(name = "google_id")
-    private String googleId;
-
     @Column(name = "remember_token", length = 100)
     private String rememberToken;
 

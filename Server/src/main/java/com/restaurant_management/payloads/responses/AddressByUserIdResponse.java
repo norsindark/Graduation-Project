@@ -22,10 +22,6 @@ public class AddressByUserIdResponse {
     private List<AddressResponse> addresses;
 
     public AddressByUserIdResponse( Address address) {
-//        UserResponse userRes = new UserResponse();
-//        userRes.setFullName(user.getFullName());
-//        userRes.setEmail(user.getEmail());
-
         List<AddressResponse> addressResponses = new ArrayList<>();
 
         AddressResponse addressRes = new AddressResponse();
@@ -36,7 +32,6 @@ public class AddressByUserIdResponse {
         addressRes.setPostalCode(address.getPostalCode());
         addressRes.setState(address.getState());
         addressRes.setAddressType(address.getAddressType());
-        addressRes.setEmail(address.getEmail());
         addressRes.setPhoneNumber(address.getPhoneNumber());
         addressRes.setCreatedAt(address.getCreatedAt());
         addressRes.setUpdatedAt(address.getUpdatedAt());

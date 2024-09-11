@@ -75,7 +75,6 @@ public class AddressServiceImpl implements AddressService {
         _address.setAddressType(addressDto.getAddressType());
         _address.setState(addressDto.getState());
         _address.setPhoneNumber(addressDto.getPhoneNumber());
-        _address.setEmail(addressDto.getEmail());
 
         this.addressRepository.save(_address);
 
