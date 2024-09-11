@@ -45,7 +45,7 @@ const Search = () => {
                 <i className="far fa-search"></i>
             </a>
             <Modal
-                title={<div className=" text-center mx-auto w-1/2 block bg-colorPrimary size-8 font-medium h-10 text-3xl text-white">Search</div>}
+                title={<div className=" text-center mx-auto w-1/2 block rounded-full bg-colorPrimary size-8 font-medium h-10 text-3xl text-white">Search</div>}
                 centered
                 open={isModalVisible}
                 onOk={handleOk}
@@ -55,12 +55,12 @@ const Search = () => {
                 }
 
                 footer={[
-                    <Button key="cancel" type="default" size="large" onClick={handleCancel}>
-                        Cancel
+                    <Button key="submit" type="primary" shape="round" style={{ fontWeight: 'medium', margin: '0px' }} size="large" onClick={handleOk}>
+                        <div className="text-[16px]">Search</div>
                     </Button>,
-                    <Button key="submit" type="primary" size="large" onClick={handleOk}>
-                        <div className="w-14">Search</div>
-                    </Button>,
+                    <Button key="cancel" type="primary" style={{ fontWeight: 'medium', color: 'white !important', margin: '0 10px' }} danger shape="round" size="large" onClick={handleCancel}>
+                        <div className="text-[16px]">Cancel</div>
+                    </Button>
                 ]}
             >
 

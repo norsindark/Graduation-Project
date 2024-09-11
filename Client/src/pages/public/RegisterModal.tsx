@@ -86,7 +86,7 @@ const RegisterModal = () => {
                                             name="fullName"
                                             rules={[{ required: true, message: 'Please input your full name!' }]}
                                         >
-                                            <Input placeholder="Full Name" autoComplete="fullname" />
+                                            <Input placeholder="Full Name" autoComplete="full-name" />
                                         </Form.Item>
                                         <Form.Item
                                             label="Email"
@@ -110,7 +110,7 @@ const RegisterModal = () => {
                                             <Input.Password placeholder="Confirm Password" autoComplete="new-password" />
                                         </Form.Item>
                                         <Form.Item>
-                                            <Button type="primary" htmlType="submit" block size="large"
+                                            <Button type="primary" shape="round" htmlType="submit" block size="large"
                                                 loading={isSubmit}>
                                                 <div className="w-full max-w-16 font-medium text-center" >Register</div>
                                             </Button>

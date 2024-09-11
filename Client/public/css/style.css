@@ -4651,7 +4651,7 @@ CHECKOUT PAGE START
     color: var(--colorWhite);
     text-align: center;
     line-height: 35px;
-    border-radius: 5px;
+    border-radius: 20px;
     margin-right: 5px !important;
     font-size: 18px;
     border: 1px solid transparent;
