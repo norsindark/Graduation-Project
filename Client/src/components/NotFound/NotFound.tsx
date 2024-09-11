@@ -15,7 +15,7 @@ const NotFound = () => {
                                 <img src={image} alt="404" className="img-fluid w-100" />
                                 <h2>That Page Doesn't Exist!</h2>
                                 <p>Sorry, the page you were looking for could not be found.</p>
-                                <Button shape="round" size="large" type="primary"
+                                <Button size="large" shape="round" type="primary"
                                     onClick={() => navigate('/')}
                                 ><span className="text-white">Back Home</span></Button>
                             </div>

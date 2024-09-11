@@ -1,12 +1,12 @@
 import { Modal } from "antd";
 import { useLocation, useNavigate } from "react-router-dom";
 import NavigationAccount from "./NavigationAccount";
-import DashboardAccount from "./DashboardAccount";
+import DashboardAccount from "./dashboard/DashboardAccount";
 import AddressAccount from "./address/AddressAccount";
 import OrderAccount from "./OrderAccount";
 import WishListAccount from "./WishListAccount";
 import ReviewAccount from "./ReviewAccount";
-import ResetPasswordAccount from "./ResetPasswordAccount";
+import ResetPasswordAccount from "./changepassword/ResetPasswordAccount";
 
 const Account = () => {
     const location = useLocation();

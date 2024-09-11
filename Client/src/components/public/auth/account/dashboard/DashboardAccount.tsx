@@ -1,10 +1,10 @@
 import TotalOrder from "./TotalOrder";
 import { useSelector, useDispatch } from "react-redux";
-import { RootState } from "../../../../redux/store";
+import { RootState } from "../../../../../redux/store";
 import { Form, Input, Button, notification } from "antd";
 import React, { useState } from "react";
-import { callUpdateProfile } from "../../../../services/clientApi";
-import { updateUser } from "../../../../redux/account/accountSlice";
+import { callUpdateProfile } from "../../../../../services/clientApi";
+import { updateUser } from "../../../../../redux/account/accountSlice";
 import { ProductOutlined } from "@ant-design/icons";
 const DashboardAccount = () => {
     const [isLoading, setIsLoading] = useState(false);
@@ -60,9 +60,16 @@ const DashboardAccount = () => {
                     <h4>Personal Information
                         <div className="row">
                             <div className="col-md-12">
-                                <a className="dash_info_btn" onClick={() => setIsEditing(!isEditing)}>
-                                    <span className="edit text-center font-medium">{isEditing ? 'cancel' : 'edit'}</span>
-                                </a>
+                                <Button
+                                    onClick={() => setIsEditing(!isEditing)}
+                                    type="primary"
+                                    shape="round"
+                                    size="large"
+                                    loading={isLoading}
+                                    style={{ fontWeight: 'medium', color: 'white !important' }}
+                                >
+                                    <div className="text-[16px] font-medium text-center w-12">{isEditing ? 'Cancel' : 'Edit'}</div>
+                                </Button>
                             </div>
                         </div>
                     </h4>
@@ -102,8 +109,8 @@ const DashboardAccount = () => {
                                         </Form.Item>
                                     </div>
                                     <div className="col-xl-3">
-                                        <Button type="primary" htmlType="submit" block size="large" loading={isLoading}>
-                                            <div className="w-full font-medium text-center">Update Information</div>
+                                        <Button type="primary" shape="round" htmlType="submit" block size="large" loading={isLoading}>
+                                            <div className="font-medium text-center">Update Information</div>
                                         </Button>
                                     </div>
                                 </div>

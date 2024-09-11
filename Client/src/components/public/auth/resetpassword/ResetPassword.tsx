@@ -98,7 +98,7 @@ const ResetPassword = () => {
                                             <Input.Password placeholder="Confirm Password" autoComplete="confirm-password" />
                                         </Form.Item>
                                         <Form.Item>
-                                            <Button type="primary" htmlType="submit" block size="large" loading={isSubmit}>
+                                            <Button type="primary" shape="round" htmlType="submit" block size="large" loading={isSubmit}>
                                                 <div className="font-medium text-center w-full max-w-26">Change Password</div>
                                             </Button>
                                         </Form.Item>

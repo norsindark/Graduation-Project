@@ -53,10 +53,18 @@ export const callBulkAddress = (userId: string, pageNo: number, pageSize: number
     return axios.get(`/api/v1/client/address/get-all-address?userId=${userId}&pageNo=${pageNo}&pageSize=${pageSize}`);
 }
 
-export const callAddAddress = (street: string, country: string, city: string, postalCode: string, addressType: string, state: string, phoneNumber: string, email: string, userId: string) => {
-    return axios.post('/api/v1/client/address/add', { street, country, city, postalCode, addressType, state, phoneNumber, email, userId });
+export const callAddAddress = (street: string, country: string, city: string, postalCode: string, addressType: string, state: string, phoneNumber: string, userId: string) => {
+    return axios.post('/api/v1/client/address/add', {street, country, city, postalCode, addressType, state, phoneNumber, userId });
 }
 
-// export const callUpdateAddress = (street: string, country: string, city: string, postalCode: string, addressType: string, state: string, phoneNumber: string, email: string) => {
-//     return axios.put('/api/v1/client/user/update', {street, country, city, postalCode, addressType, state, phoneNumber, email});
-// }
+export const callUpdateAddress = (id: string, street: string, country: string, city: string, postalCode: string, addressType: string, state: string, phoneNumber: string, userId: string) => {
+    return axios.put('/api/v1/auth/address/update', {id, street, country, city, postalCode, addressType, state, phoneNumber, userId});
+}
+
+export const callDeleteAddress = (addressId : string) => {
+    return axios.delete(`/api/v1/client/address/delete/${addressId }`);
+}
+
+export const callChangePassword = (userId: string, oldPassword: string, newPassword: string) => {
+    return axios.put('/api/v1/client/user/change-password', {userId, oldPassword, newPassword});
+}

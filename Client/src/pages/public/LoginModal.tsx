@@ -107,7 +107,7 @@ const LoginModal = () => {
                                             </div>
                                         </Form.Item>
                                         <Form.Item>
-                                            <Button type="primary" htmlType="submit" block size="large"
+                                            <Button type="primary" shape="round" htmlType="submit" block size="large"
                                                 loading={isSubmit}>
                                                 <div className="w-full max-w-16 font-medium text-center">Login</div>
                                             </Button>
@@ -115,7 +115,7 @@ const LoginModal = () => {
                                     </Form>
                                     <p className="or"><span>or</span></p>
                                     <SocialLogin />
-                                    <p className="create_account">Don’t have an account? e<Link to="/register">Register</Link></p>
+                                    <p className="create_account">Don’t have an account? <Link to="/register">Register</Link></p>
                                 </div>
                             </div>
                         </div>
