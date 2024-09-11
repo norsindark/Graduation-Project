@@ -50,7 +50,7 @@ public class AddressController {
             @RequestParam String userId,
             @RequestParam(defaultValue = "0") int pageNo,
             @RequestParam(defaultValue = "10") int pageSize,
-            @RequestParam(defaultValue = "addressType") String sortBy) throws DataExitsException {
+            @RequestParam(defaultValue = "createdAt") String sortBy) throws DataExitsException {
         return ResponseEntity.ok(addressService.getAllAddressByUserId(userId, pageNo, pageSize, sortBy));
     }
 

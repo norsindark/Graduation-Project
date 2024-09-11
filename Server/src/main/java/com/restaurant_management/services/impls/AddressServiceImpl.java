@@ -105,7 +105,7 @@ public class AddressServiceImpl implements AddressService {
     @Override
     public PagedModel<EntityModel<AddressByUserIdResponse>> getAllAddressByUserId(String userId, int pageNo, int pageSize, String sortBy)
             throws DataExitsException {
-        Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(sortBy));
+        Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Order.asc(sortBy)));
 
         Optional<User> user = userRepository.findById(userId);
         if (user.isEmpty()) {
