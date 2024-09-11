@@ -2,7 +2,10 @@ package com.restaurant_management.dtos;
 
 import com.restaurant_management.entites.Address;
 import com.restaurant_management.entites.User;
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -41,10 +44,6 @@ public class AddressDto {
     @Size(min = 9, max = 15, message = "Phone number must be between 9 and 15 digits")
     private String phoneNumber;
 
-    @Email(message = "Invalid email")
-    @NotBlank(message = "Email cant be empty")
-    private String email;
-
     private String userId;
 
     public Address toAddress(User user) {
@@ -57,7 +56,6 @@ public class AddressDto {
         address.setAddressType(this.addressType);
         address.setState(this.state);
         address.setPhoneNumber(this.phoneNumber);
-        address.setEmail(this.email);
         return address;
     }
 

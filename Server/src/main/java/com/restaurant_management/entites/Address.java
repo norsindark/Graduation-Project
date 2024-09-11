@@ -24,9 +24,6 @@ public class Address {
     @Column(name = "addresses_id", length = 36, nullable = false)
     private String id;
 
-    @Column(name = "email")
-    private String email;
-
     @Column(name = "phone_number", length = 15)
     private String phoneNumber;
 

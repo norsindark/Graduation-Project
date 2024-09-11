@@ -30,8 +30,6 @@ public class AddressResponse {
 
     private String addressType;
 
-    private String email;
-
     private String phoneNumber;
 
     private Timestamp createdAt;
@@ -47,7 +45,6 @@ public class AddressResponse {
                 .postalCode(address.getPostalCode())
                 .state(address.getState())
                 .addressType(address.getAddressType())
-                .email(address.getEmail())
                 .phoneNumber(address.getPhoneNumber())
                 .createdAt(address.getCreatedAt())
                 .updatedAt(address.getUpdatedAt())
