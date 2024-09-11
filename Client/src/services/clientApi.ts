@@ -40,6 +40,14 @@ export const callUpdateProfile = (fullName: string, email: string) => {
     return axios.put('/api/v1/client/user/update', {fullName, email});
 }
 
-export const callUpdateAddress = (street: string, country: string, city: string, postalCode: string, addressType: string, state: string, phoneNumber: string, email: string) => {
-    return axios.put('/api/v1/client/user/update', {street, country, city, postalCode, addressType, state, phoneNumber, email});
-}
+export const callUpdateAvatar = (file: FormData) => {
+    return axios.put('/api/v1/client/user/update-avatar', file, {
+        headers: {
+            'Content-Type': 'multipart/form-data'
+        }
+    });
+};
+
+// export const callUpdateAddress = (street: string, country: string, city: string, postalCode: string, addressType: string, state: string, phoneNumber: string, email: string) => {
+//     return axios.put('/api/v1/client/user/update', {street, country, city, postalCode, addressType, state, phoneNumber, email});
+// }

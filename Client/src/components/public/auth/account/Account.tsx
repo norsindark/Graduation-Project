@@ -2,7 +2,7 @@ import { Modal } from "antd";
 import { useLocation, useNavigate } from "react-router-dom";
 import NavigationAccount from "./NavigationAccount";
 import DashboardAccount from "./DashboardAccount";
-import AddressAccount from "./AddressAccount";
+import AddressAccount from "./address/AddressAccount";
 import OrderAccount from "./OrderAccount";
 import WishListAccount from "./WishListAccount";
 import ReviewAccount from "./ReviewAccount";

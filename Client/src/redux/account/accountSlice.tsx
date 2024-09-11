@@ -5,6 +5,17 @@ interface Role {
     name: string;
 }
 
+interface Address {
+    street: string;
+    country: string;
+    city: string;
+    postalCode: number;
+    addressType: string;
+    state: string;
+    phoneNumber: string;
+    email: string;
+    userId: string;
+}
 interface UserState {
     email: string;
     fullName: string;
@@ -12,7 +23,7 @@ interface UserState {
     avatar: string;
     id: string;
     status: string;
-    addresses: [];
+    addresses: Address[];
 }
 
 interface AccountState {
@@ -52,7 +63,7 @@ export const accountSlice = createSlice({
                     ...action.payload
                 };
             }
-        }
+        },
     },
 });
 
