@@ -70,9 +70,9 @@ instance.interceptors.response.use(
             originalRequest._retry = true;
             originalRequest._retryCount = (originalRequest._retryCount || 0) + 1;
 
-            if (originalRequest._retryCount <= 2) { // Giới hạn số lần thử lại là 2
+            if (originalRequest._retryCount <= 2) {
                 try {
-                    // Xóa accessToken cũ trước khi gọi handleRefreshToken
+                    // Remove old access token before attempting to refresh
                     localStorage.removeItem('accessToken');
                     const newAccessToken = await handleRefreshToken();
                     originalRequest.headers['Authorization'] = `Bearer ${newAccessToken}`;
@@ -82,23 +82,22 @@ instance.interceptors.response.use(
                     return Promise.reject(refreshError);
                 }
             } else {
-                // Xử lý khi refresh token thất bại sau 3 lần thử
-                console.error("Refresh token failed after 3 attempts");
-                // Có thể redirect người dùng đến trang đăng nhập hoặc hiển thị thông báo lỗi
+                // Handle when refresh token fails after 3 attempts
+                console.error("Refresh token failed after 2 attempts");
                 window.location.href = '/login';
                 notification.error({
-                    message: 'Login version has expired. Please log in again.',
+                    message: 'Login session has expired. Please log in again.',
                     description: 'Please log in again.',
                     duration: 5,
-                    showProgress: true,
                 });
                 localStorage.removeItem('accessToken');
-                return Promise.reject(error);
+                return error.response || Promise.reject(error); // Return the response even in case of a failed retry
             }
         }
 
-        return Promise.reject(error);
+        return error.response || Promise.reject(error); // Return the error for other cases
     }
 );
+
 
 export default instance;

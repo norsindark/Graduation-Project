@@ -88,7 +88,12 @@ const ResetPasswordAccount = () => {
                                     <Form.Item
                                         label="New Password"
                                         name="newPassword"
-                                        rules={[{ required: true, message: 'Please input your new password!' }]}
+                                        rules={[{ required: true, message: 'Please input your new password!' },
+                                        {
+                                            pattern: /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,64}$/,
+                                            message: 'Password must be between 6 and 64 characters long and contain both letters and numbers!',
+                                        }
+                                        ]}
                                     >
                                         <Input.Password placeholder="New Password" autoComplete="new-password" />
                                     </Form.Item>
@@ -97,7 +102,18 @@ const ResetPasswordAccount = () => {
                                     <Form.Item
                                         label="Confirm Password"
                                         name="confirmPassword"
-                                        rules={[{ required: true, message: 'Please input your confirm password!' }]}
+                                        dependencies={['password']} // This makes sure confirmPassword depends on the password field
+                                        rules={[
+                                            { required: true, message: 'Please confirm your password!' },
+                                            ({ getFieldValue }) => ({
+                                                validator(_, value) {
+                                                    if (!value || getFieldValue('password') === value) {
+                                                        return Promise.resolve();
+                                                    }
+                                                    return Promise.reject(new Error('Passwords do not match!'));
+                                                },
+                                            }),
+                                        ]}
                                     >
                                         <Input.Password placeholder="Confirm Password" autoComplete="confirm-password" />
                                     </Form.Item>
