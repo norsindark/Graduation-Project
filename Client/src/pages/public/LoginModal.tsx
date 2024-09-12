@@ -23,9 +23,9 @@ const LoginModal = () => {
         const { email, password } = values;
         setIsSubmit(true);
         try {
-            const loginRes = await callLogin(email, password);
-            if (loginRes?.status == 200) {
-                localStorage.setItem('accessToken', loginRes.data.accessToken);
+            const res = await callLogin(email, password);
+            if (res?.status == 200) {
+                localStorage.setItem('accessToken', res.data.accessToken);
                 const profileRes = await callProfile();
                 if (profileRes?.status === 200) {
                     dispatch(doLoginAction(profileRes.data));
@@ -39,15 +39,15 @@ const LoginModal = () => {
             } else {
                 notification.error({
                     message: "Login failed!",
-                    description: loginRes.data.errors?.error || loginRes.data.message || "Something went wrong!",
+                    description: res.data.errors?.error || "Something went wrong!",
                     duration: 5,
                     showProgress: true
                 });
             }
-        } catch (loginError) {
+        } catch {
             notification.error({
                 message: "Login error!",
-                description: loginError instanceof Error ? loginError.message : "Error during registration process!",
+                description: "Error during login process!",
                 duration: 5,
                 showProgress: true
             });

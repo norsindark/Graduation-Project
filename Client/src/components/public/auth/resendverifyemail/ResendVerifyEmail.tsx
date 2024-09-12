@@ -31,7 +31,7 @@ const ResendVerifyEmail = () => {
             } else {
                 notification.error({
                     message: 'Verification email failed!',
-                    description: response.data.message || 'Something went wrong!',
+                    description: response.data.errors?.error || 'Something went wrong!',
                     duration: 5,
                     showProgress: true
                 });

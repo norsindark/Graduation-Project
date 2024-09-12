@@ -63,7 +63,7 @@ const AddressEdit = ({ currentAddress, onEditSuccess, setShowAddressEdit }: {
             } else {
                 notification.error({
                     message: "Address updated failed",
-                    description: response?.data?.errors?.error || "Something went wrong!",
+                    description: response.data.errors?.error || "Something went wrong!",
                     duration: 5,
                     showProgress: true
                 })

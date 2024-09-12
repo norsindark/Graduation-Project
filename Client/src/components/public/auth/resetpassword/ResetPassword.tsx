@@ -35,7 +35,7 @@ const ResetPassword = () => {
             const res = await callResetPassword(token, values.password);
             if (res?.status == 200) {
                 notification.success({
-                    message: res?.data?.message || 'Password changed successfully!',
+                    message: 'Password changed successfully!',
                     duration: 5,
                     showProgress: true
                 });
@@ -43,7 +43,7 @@ const ResetPassword = () => {
             } else {
                 notification.error({
                     message: 'Failed to reset password!',
-                    description: res?.data?.errors?.error || res?.data?.message || "Something went wrong!",
+                    description: res?.data?.errors?.error || "Something went wrong!",
                     duration: 5,
                     showProgress: true
                 });

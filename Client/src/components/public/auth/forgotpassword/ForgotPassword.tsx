@@ -30,7 +30,7 @@ const ForgotPassword = () => {
             } else {
                 notification.error({
                     message: 'Failed to send password reset email!',
-                    description: res?.data?.errors?.error || res?.data?.message || "Something went wrong!",
+                    description: res?.data?.errors?.error || "Something went wrong!",
                     duration: 5,
                     showProgress: true
                 });

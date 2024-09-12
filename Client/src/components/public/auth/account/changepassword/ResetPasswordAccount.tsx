@@ -39,7 +39,7 @@ const ResetPasswordAccount = () => {
                 } else {
                     notification.error({
                         message: "Password change failed",
-                        description: "Password change failed",
+                        description: response.data.errors?.error || "Password change failed",
                         duration: 5,
                         showProgress: true
                     });
