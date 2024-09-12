@@ -8,12 +8,14 @@ import com.restaurant_management.payloads.responses.ApiResponse;
 import com.restaurant_management.payloads.responses.CategoryResponse;
 import com.restaurant_management.repositories.CategoryRepository;
 import com.restaurant_management.services.interfaces.CategoryService;
-import com.restaurant_management.utils.ApiUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PagedResourcesAssembler;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
@@ -27,16 +29,18 @@ public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository categoryRepository;
 
+    private final PagedResourcesAssembler<CategoryResponse> pagedResourcesAssembler;
+
 
     @Override
-    public Page<CategoryResponse> getAllCategories(int pageNo, int pageSize, String sortBy)
+    public PagedModel<EntityModel<CategoryResponse>> getAllCategories(int pageNo, int pageSize, String sortBy)
             throws DataExitsException {
-        Pageable paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy));
+        Pageable paging = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Order.asc(sortBy)));
 
         Page<Category> pagedResult = categoryRepository.findAll(paging);
 
         if (pagedResult.hasContent()) {
-            return pagedResult.map(CategoryResponse::new);
+            return pagedResourcesAssembler.toModel(pagedResult.map(CategoryResponse::new));
         } else {
             throw new DataExitsException("No Category found");
         }

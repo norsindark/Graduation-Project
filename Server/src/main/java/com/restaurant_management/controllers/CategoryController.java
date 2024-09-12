@@ -6,7 +6,8 @@ import com.restaurant_management.payloads.responses.CategoryResponse;
 import com.restaurant_management.services.interfaces.CategoryService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -20,7 +21,7 @@ public class CategoryController {
     private final CategoryService categoryService;
 
     @GetMapping("/all")
-    public ResponseEntity<Page<CategoryResponse>> getAllCategories(
+    public ResponseEntity<PagedModel<EntityModel<CategoryResponse>>> getAllCategories(
             @RequestParam int pageNo,
             @RequestParam int pageSize,
             @RequestParam String sortBy) throws DataExitsException {
