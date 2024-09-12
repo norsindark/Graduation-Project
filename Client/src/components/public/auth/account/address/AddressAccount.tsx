@@ -143,13 +143,13 @@ const AddressAccount = () => {
                                                             {address.addressType}
                                                         </span>
                                                         <div className="p-2 bg-white shadow-md rounded-lg">
-                                                            <div className="grid md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2">
+                                                            <div className="grid md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-1">
                                                                 <div className="flex flex-col">
-                                                                    <div className="flex items-center mb-1">
+                                                                    <div className="flex items-center mb-1 ">
                                                                         <span className="font-semibold text-gray-700 mr-1">Phone:</span>
                                                                         <span className="text-gray-600">{address.phoneNumber}</span>
                                                                     </div>
-                                                                    <div className="flex items-center mb-1">
+                                                                    <div className="flex items-center mb-1 ">
                                                                         <span className="font-semibold text-gray-700 mr-1">Street:</span>
                                                                         <span className="text-gray-600">{address.street}</span>
                                                                     </div>
