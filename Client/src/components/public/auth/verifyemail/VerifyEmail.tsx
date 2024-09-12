@@ -25,7 +25,7 @@ const VerifyEmail = () => {
                     } else {
                         notification.error({
                             message: 'Email verification failed!',
-                            description: response.data.message || 'Something went wrong!',
+                            description: response.data.errors?.error || 'Something went wrong!',
                             duration: 5,
                             showProgress: true
                         });

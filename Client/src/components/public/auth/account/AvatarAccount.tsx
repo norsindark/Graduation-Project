@@ -57,7 +57,7 @@ const AvatarAccount: React.FC = () => {
                 } else {
                     notification.error({
                         message: "Failed to update avatar",
-                        description: "Something went wrong!",
+                        description: response.data.errors?.error || "Something went wrong!",
                         duration: 5,
                         showProgress: true,
                     });

@@ -55,7 +55,7 @@ const AddressNew = ({ onAddSuccess, setShowAddressNew }: { onAddSuccess: () => v
             } else {
                 notification.error({
                     message: "Address created failed",
-                    description: response?.data?.errors?.error || "Something went wrong!",
+                    description: response.data.errors?.error || "Something went wrong!",
                     duration: 5,
                     showProgress: true
                 })

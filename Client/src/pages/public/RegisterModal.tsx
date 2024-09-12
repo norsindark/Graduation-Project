@@ -32,7 +32,7 @@ const RegisterModal = () => {
                 } else {
                     notification.error({
                         message: "Registration failed",
-                        description: res?.data?.errors?.error  || "Something went wrong!",
+                        description: res?.data?.errors?.error || "Something went wrong!",
                         duration: 5,
                         showProgress: true
                     })
