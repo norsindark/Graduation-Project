@@ -1,17 +1,14 @@
 package com.restaurant_management.advices;
 
-import com.restaurant_management.exceptions.*;
+import com.restaurant_management.exceptions.DataExitsException;
 import com.restaurant_management.payloads.responses.ApiResponse;
 import com.restaurant_management.utils.ApiUtil;
-import io.jsonwebtoken.ExpiredJwtException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 
@@ -21,18 +18,35 @@ import java.util.Map;
 @RestControllerAdvice
 public class ApplicationExceptionHandle {
 
+//    @ExceptionHandler(MethodArgumentNotValidException.class)
+//    @ResponseBody
+//    public ResponseEntity<ApiResponse> handleInvalidArgument(MethodArgumentNotValidException e) {
+//        Map<String, String> errors = new HashMap<>();
+//        e.getBindingResult().getAllErrors().forEach(error -> {
+//            String errorMessage = error.getDefaultMessage();
+//            errors.put("error", errorMessage);
+//        });
+//        ApiResponse apiResponse = new ApiResponse("Validation error occurred",errors, HttpStatus.BAD_REQUEST);
+//        return new ResponseEntity<>(apiResponse, HttpStatus.BAD_REQUEST);
+//    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseBody
     public ResponseEntity<ApiResponse> handleInvalidArgument(MethodArgumentNotValidException e) {
         Map<String, String> errors = new HashMap<>();
+        StringBuilder errorMessageBuilder = new StringBuilder();
         e.getBindingResult().getAllErrors().forEach(error -> {
-            String fieldName = ((FieldError) error).getField();
             String errorMessage = error.getDefaultMessage();
-            errors.put(fieldName, errorMessage);
+            if (!errorMessageBuilder.isEmpty()) {
+                errorMessageBuilder.append(", ");
+            }
+            errorMessageBuilder.append(errorMessage);
         });
-        ApiResponse apiResponse = new ApiResponse("Validation error(s) occurred"+ errors, HttpStatus.BAD_REQUEST);
+        errors.put("error", errorMessageBuilder.toString());
+        ApiResponse apiResponse = new ApiResponse("Validation error occurred", errors, HttpStatus.BAD_REQUEST);
         return new ResponseEntity<>(apiResponse, HttpStatus.BAD_REQUEST);
     }
+
 
     @ExceptionHandler(DataExitsException.class)
     @ResponseBody
@@ -44,7 +58,7 @@ public class ApplicationExceptionHandle {
     @ExceptionHandler(IllegalArgumentException.class)
     @ResponseBody
     public ResponseEntity<ApiResponse> handleIllegalArgumentException(IllegalArgumentException e) {
-        ApiResponse apiResponse = new ApiResponse("Validation error: " + e.getMessage(), HttpStatus.BAD_REQUEST);
+        ApiResponse apiResponse = new ApiResponse("Validation error: ",ApiUtil.createErrorDetails( e.getMessage()), HttpStatus.BAD_REQUEST);
         return new ResponseEntity<>(apiResponse, HttpStatus.BAD_REQUEST);
     }
 
