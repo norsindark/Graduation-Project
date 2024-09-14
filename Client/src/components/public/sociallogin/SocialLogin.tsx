@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-
 import { Link } from 'react-router-dom';
+
 const SocialLogin = () => {
     const [loading, setLoading] = useState(false);
 
     const handleClick = () => {
         setLoading(true);
-        setTimeout(() => setLoading(false), 2000);
+        localStorage.setItem('googleLogin', 'true');
     };
 
     return (
