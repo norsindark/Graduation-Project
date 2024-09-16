@@ -14,18 +14,10 @@ import java.io.IOException;
 @RestController
 @RequiredArgsConstructor
 @Tag(name = "OAuth2")
-@RequestMapping("/api/v1/oauth2")
+@RequestMapping("/oauth2")
 public class OAuthController {
 
     private final OAuthService oAuthService;
-
-//    @GetMapping("/google/callback")
-//    public ResponseEntity<JwtResponse> handleOAuth2Callback(
-//            @RequestParam(name = "code") String code,
-//            @RequestParam(name = "state") String state,
-//            HttpServletResponse response) {
-//        return ResponseEntity.ok(oAuthService.handleOAuth2Callback(code, state, response));
-//    }
 
     @GetMapping("/google/callback")
     public void handleOAuth2Callback(

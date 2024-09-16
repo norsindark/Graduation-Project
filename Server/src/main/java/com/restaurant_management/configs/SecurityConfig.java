@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -18,14 +19,12 @@ import org.springframework.security.core.AuthenticationException;
 
 
 import java.io.IOException;
-
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
 
     private final AuthenticationProvider authProvider;
-
     private final JwtAuthTokenFilterConfig jwtAuthFilter;
 
     public static final String[] UN_SECRET_URLS = {
@@ -33,13 +32,13 @@ public class SecurityConfig {
             "/swagger-ui.html",
             "/v3/api-docs/**",
             "/swagger-ui/**",
-            "api/v1/oauth2/**"
+            "/auth/**"
     };
 
-    public static final String[] OAUTH2_SECRET_URLS = {
-            "/api/v1/google/**"
+    public static final String[] OAUTH2_URLS = {
+            "/oauth2/**",
+            "/login/**"
     };
-
 
     public static final String[] ADMIN_SECRET_URLS = {
             "/api/v1/dashboard/**"
@@ -49,20 +48,32 @@ public class SecurityConfig {
             "/api/v1/client/**",
     };
 
+    @Bean
+    @Order(1)
+    public SecurityFilterChain oauth2SecurityFilterChain(HttpSecurity http) throws Exception {
+        http
+                .securityMatcher(OAUTH2_URLS)
+                .authorizeHttpRequests(authorize -> authorize
+                        .anyRequest().permitAll())
+                .csrf(AbstractHttpConfigurer::disable)
+                .oauth2Login(Customizer.withDefaults())
+                .formLogin(Customizer.withDefaults())
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+        return http.build();
+    }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    @Order(2)
+    public SecurityFilterChain apiSecurityFilterChain(HttpSecurity http) throws Exception {
         http
+                .securityMatcher("/api/**")
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(UN_SECRET_URLS).permitAll()
-                        .requestMatchers(OAUTH2_SECRET_URLS).authenticated()
                         .requestMatchers(ADMIN_SECRET_URLS).hasAuthority("ADMIN")
                         .requestMatchers(USER_SECRET_URLS).hasAnyAuthority("USER", "ADMIN")
                         .anyRequest().authenticated())
-                .oauth2Login(Customizer.withDefaults())
-                .exceptionHandling(exception -> exception
-                        .authenticationEntryPoint(this::handleUnauthorized))
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authProvider)
@@ -70,10 +81,5 @@ public class SecurityConfig {
         return http.build();
     }
 
-    private void handleUnauthorized(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException {
-        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        response.setContentType("application/json");
-        response.getWriter().write("{\"error\": \"Unauthorized\"}");
-    }
 
 }
