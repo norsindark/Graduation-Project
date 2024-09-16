@@ -1,13 +1,17 @@
 package com.restaurant_management.services.impls;
 
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import com.restaurant_management.dtos.CategoryDto;
 import com.restaurant_management.entites.Category;
+import com.restaurant_management.entites.User;
 import com.restaurant_management.enums.StatusType;
 import com.restaurant_management.exceptions.DataExitsException;
 import com.restaurant_management.payloads.responses.ApiResponse;
 import com.restaurant_management.payloads.responses.CategoryResponse;
 import com.restaurant_management.repositories.CategoryRepository;
 import com.restaurant_management.services.interfaces.CategoryService;
+import com.restaurant_management.utils.GetUserUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -19,7 +23,9 @@ import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.Optional;
 
 @Service
@@ -30,6 +36,8 @@ public class CategoryServiceImpl implements CategoryService {
     private final CategoryRepository categoryRepository;
 
     private final PagedResourcesAssembler<CategoryResponse> pagedResourcesAssembler;
+
+    private final Cloudinary cloudinary;
 
     @Override
     public CategoryResponse getCategoryById(String id) throws DataExitsException {
@@ -85,6 +93,21 @@ public class CategoryServiceImpl implements CategoryService {
         _category.setSlug(categoryDto.getSlug());
         categoryRepository.save(_category);
         return new ApiResponse("Category updated successfully", HttpStatus.OK);
+    }
+
+    @Override
+    public ApiResponse updateThumbnail(MultipartFile file, String id) throws DataExitsException, IOException {
+        Optional<Category> category = categoryRepository.findById(id);
+        if (category.isEmpty()) {
+            throw new DataExitsException("Category not found");
+        }
+        var uploadResult = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.emptyMap());
+        String imageUrl = (String) uploadResult.get("url");
+
+        Category _category = category.get();
+        _category.setThumbnail(imageUrl);
+        this.categoryRepository.save(_category);
+        return new ApiResponse("Image updated successfully!", HttpStatus.OK);
     }
 
     @Override
