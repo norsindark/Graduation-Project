@@ -11,6 +11,9 @@ import org.springframework.hateoas.PagedModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 @RestController
 @RequiredArgsConstructor
@@ -45,6 +48,14 @@ public class CategoryController {
     @PreAuthorize("hasRole('ADMIN') or hasRole('EMPLOYEE')")
     public ResponseEntity<?> updateCategory(@RequestBody CategoryDto categoryDto) throws DataExitsException {
         return ResponseEntity.ok(categoryService.updateCategory(categoryDto));
+    }
+
+    @PutMapping("/update-category-thumbnail/{id}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('EMPLOYEE')")
+    public ResponseEntity<?> updateCategoryImage(@PathVariable String id,
+                                                 @RequestParam("file") MultipartFile file)
+            throws DataExitsException, IOException {
+        return ResponseEntity.ok(categoryService.updateThumbnail(file, id));
     }
 
     @DeleteMapping("/delete-category/{id}")
