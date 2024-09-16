@@ -30,6 +30,9 @@ public class Category {
     @Column(name = "slug")
     private String slug;
 
+    @Column(name = "thumbnail")
+    private String thumbnail;
+
     @Column(name = "status")
     private String status;
 

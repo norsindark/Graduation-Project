@@ -1,5 +1,7 @@
 package com.restaurant_management.configs;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -12,21 +14,15 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.core.AuthenticationException;
+
+
+import java.io.IOException;
 
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
-
-
-    @Value("${spring.security.oauth2.client.registration.google.client-id}")
-    private String clientId;
-
-    @Value("${spring.security.oauth2.client.registration.google.client-secret}")
-    private String clientSecret;
-
-//    @Value("${spring.security.oauth2.client.registration.google.redirect-uri}")
-//    private String redirectUri;
 
     private final AuthenticationProvider authProvider;
 
@@ -37,8 +33,7 @@ public class SecurityConfig {
             "/swagger-ui.html",
             "/v3/api-docs/**",
             "/swagger-ui/**",
-            "api/v1/oauth2/**",
-            "/api/v1/category/**"
+            "api/v1/oauth2/**"
     };
 
     public static final String[] OAUTH2_SECRET_URLS = {
@@ -66,11 +61,19 @@ public class SecurityConfig {
                         .requestMatchers(USER_SECRET_URLS).hasAnyAuthority("USER", "ADMIN")
                         .anyRequest().authenticated())
                 .oauth2Login(Customizer.withDefaults())
-//                .formLogin(Customizer.withDefaults())
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint(this::handleUnauthorized))
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authProvider)
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
+
+    private void handleUnauthorized(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException {
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        response.setContentType("application/json");
+        response.getWriter().write("{\"error\": \"Unauthorized\"}");
+    }
+
 }

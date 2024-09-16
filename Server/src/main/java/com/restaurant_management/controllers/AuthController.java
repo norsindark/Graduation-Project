@@ -33,7 +33,6 @@ public class AuthController {
     }
 
     @PostMapping("/sign-in")
-//    @CrossOrigin(origins = "*", allowedHeaders = "*")
     public ResponseEntity<?> singIn(@Valid @RequestBody SignInRequest request, HttpServletResponse response)
             throws DataExitsException {
         return new ResponseEntity<>(authService.signIn(request, response), HttpStatus.OK);

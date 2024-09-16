@@ -15,12 +15,13 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @Tag(name = "Category")
-@RequestMapping("/api/v1/category")
+@RequestMapping("/api/v1/dashboard/category")
 public class CategoryController {
 
     private final CategoryService categoryService;
 
     @GetMapping("/all")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('EMPLOYEE')")
     public ResponseEntity<PagedModel<EntityModel<CategoryResponse>>> getAllCategories(
             @RequestParam int pageNo,
             @RequestParam int pageSize,
@@ -28,19 +29,25 @@ public class CategoryController {
         return ResponseEntity.ok(categoryService.getAllCategories(pageNo, pageSize, sortBy));
     }
 
-    @PostMapping("/add")
+    @GetMapping("/get-by-id/{id}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('EMPLOYEE')")
+    public ResponseEntity<CategoryResponse> getCategoryById(@PathVariable String id) throws DataExitsException {
+        return ResponseEntity.ok(categoryService.getCategoryById(id));
+    }
+
+    @PostMapping("/add-category")
     @PreAuthorize("hasRole('ADMIN') or hasRole('EMPLOYEE')")
     public ResponseEntity<?> addCategory(@RequestBody CategoryDto categoryDto) throws DataExitsException {
         return ResponseEntity.ok(categoryService.addCategory(categoryDto));
     }
 
-    @PutMapping("/update")
+    @PutMapping("/update-category")
     @PreAuthorize("hasRole('ADMIN') or hasRole('EMPLOYEE')")
     public ResponseEntity<?> updateCategory(@RequestBody CategoryDto categoryDto) throws DataExitsException {
         return ResponseEntity.ok(categoryService.updateCategory(categoryDto));
     }
 
-    @DeleteMapping("/delete/{id}")
+    @DeleteMapping("/delete-category/{id}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('EMPLOYEE')")
     public ResponseEntity<?> deleteCategory(@PathVariable String id) throws DataExitsException {
         return ResponseEntity.ok(categoryService.deleteCategory(id));

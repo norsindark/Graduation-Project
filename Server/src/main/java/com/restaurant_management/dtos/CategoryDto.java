@@ -18,4 +18,8 @@ public class CategoryDto {
     @NotBlank(message = "Category name is required")
     @Pattern(regexp = "^[a-zA-Z ]+$", message = "Category name must be alphanumeric")
     private String name;
+
+    private String slug;
+
+    private String status;
 }

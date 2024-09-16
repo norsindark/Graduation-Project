@@ -5,16 +5,19 @@ import com.restaurant_management.payloads.requests.SignUpRequest;
 import com.restaurant_management.payloads.requests.UserRequest;
 import com.restaurant_management.payloads.responses.ApiResponse;
 import com.restaurant_management.payloads.responses.GetUserResponse;
+import com.restaurant_management.payloads.responses.UserResponse;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
+
+import java.util.Optional;
 
 public interface AdminService {
 
     ApiResponse addNewUser(SignUpRequest signUpRequest) throws DataExitsException;
 
-//    Page<GetUserResponse> getAllUsers(int pageNo, int pageSize) throws DataExitsException;
+    PagedModel<EntityModel<GetUserResponse>> getAllUsers(int pageNo, int pageSize, String sortBy) throws DataExitsException;
 
-    PagedModel<EntityModel<GetUserResponse>> getAllUsers(int pageNo, int pageSize) throws DataExitsException;
+    Optional<UserResponse> getUserById(String id) throws DataExitsException;
 
     ApiResponse deleteUser(String id) throws DataExitsException;
 

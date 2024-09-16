@@ -31,6 +31,14 @@ public class CategoryServiceImpl implements CategoryService {
 
     private final PagedResourcesAssembler<CategoryResponse> pagedResourcesAssembler;
 
+    @Override
+    public CategoryResponse getCategoryById(String id) throws DataExitsException {
+        Optional<Category> category = categoryRepository.findById(id);
+        if (category.isEmpty()) {
+            throw new DataExitsException("Category not found");
+        }
+        return new CategoryResponse(category.get());
+    }
 
     @Override
     public PagedModel<EntityModel<CategoryResponse>> getAllCategories(int pageNo, int pageSize, String sortBy)
@@ -66,11 +74,15 @@ public class CategoryServiceImpl implements CategoryService {
             throw new DataExitsException("Category not found");
         }
         Optional<Category> categoryName = categoryRepository.findByName(categoryDto.getName());
-        if (categoryName.isPresent()) {
+        if (categoryName.isPresent() && !categoryName.get().getId().equals(categoryDto.getId())) {
             throw new DataExitsException(categoryDto.getName() + " already exists");
         }
+        StatusType status = StatusType.valueOf(categoryDto.getStatus());
+
         Category _category = category.get();
         _category.setName(categoryDto.getName());
+        _category.setStatus(status.toString());
+        _category.setSlug(categoryDto.getSlug());
         categoryRepository.save(_category);
         return new ApiResponse("Category updated successfully", HttpStatus.OK);
     }

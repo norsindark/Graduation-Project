@@ -12,6 +12,8 @@ public interface CategoryService {
     PagedModel<EntityModel<CategoryResponse>> getAllCategories(int pageNo, int pageSize, String sortBy)
             throws DataExitsException;
 
+    CategoryResponse getCategoryById(String id) throws DataExitsException;
+
     ApiResponse addCategory(CategoryDto categoryDto) throws DataExitsException;
 
     ApiResponse updateCategory(CategoryDto categoryDto) throws DataExitsException;

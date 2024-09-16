@@ -2,6 +2,7 @@ package com.restaurant_management.payloads.responses;
 
 import com.restaurant_management.entites.Address;
 import com.restaurant_management.entites.Role;
+import com.restaurant_management.entites.User;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
