@@ -35,14 +35,12 @@ h6 {
 }
 
 p,
-a,
-span {
+a{
     font-size: 16px;
     font-weight: 400;
     margin: 0;
     color: var(--paraColor);
 }
-
 body {
     overflow-x: hidden;
     scroll-behavior: smooth;

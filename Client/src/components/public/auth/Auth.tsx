@@ -88,8 +88,8 @@ const Auth = () => {
     if (userRole === 'ADMIN') {
         items.unshift({
             label: 'Dashboard',
-            key: 'admin',
-            link: '/admin'
+            key: 'dashboard',
+            link: '/dashboard'
         })
     }
 
