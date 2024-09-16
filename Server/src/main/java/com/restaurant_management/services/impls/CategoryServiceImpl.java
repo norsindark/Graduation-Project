@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.text.Normalizer;
 import java.util.Optional;
 
 @Service
@@ -68,9 +69,12 @@ public class CategoryServiceImpl implements CategoryService {
         if (category.isPresent()) {
             throw new DataExitsException("Category already exists");
         }
+        String slug = generateSlug(categoryDto.getName());
+
         Category newCategory = new Category();
         newCategory.setName(categoryDto.getName());
         newCategory.setStatus(StatusType.INACTIVE.toString());
+        newCategory.setSlug(slug);
         categoryRepository.save(newCategory);
         return new ApiResponse("Category added successfully", HttpStatus.CREATED);
     }
@@ -118,5 +122,13 @@ public class CategoryServiceImpl implements CategoryService {
         }
         categoryRepository.deleteById(id);
         return new ApiResponse("Category deleted successfully", HttpStatus.OK);
+    }
+
+    private String generateSlug(String input) {
+        String normalized = Normalizer.normalize(input, Normalizer.Form.NFD);
+        return normalized.replaceAll("\\p{M}", "")
+                .replaceAll("[^\\w\\s-]", "")
+                .replaceAll("\\s+", "-")
+                .toLowerCase();
     }
 }
