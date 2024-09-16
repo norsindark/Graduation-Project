@@ -5,6 +5,7 @@ import com.restaurant_management.payloads.requests.SignUpRequest;
 import com.restaurant_management.payloads.requests.UserRequest;
 import com.restaurant_management.payloads.responses.ApiResponse;
 import com.restaurant_management.payloads.responses.GetUserResponse;
+import com.restaurant_management.payloads.responses.UserResponse;
 import com.restaurant_management.services.interfaces.AdminService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -14,6 +15,8 @@ import org.springframework.hateoas.PagedModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
@@ -30,19 +33,19 @@ public class AdminController {
         return ResponseEntity.ok(adminService.addNewUser(signUpRequest));
     }
 
-//    @GetMapping("/user/get-all-users")
-//    @PreAuthorize("hasRole('ADMIN')")
-//    public ResponseEntity<Page<GetUserResponse>> getAllUsers(@RequestParam int pageNo,
-//                                                             @RequestParam int pageSize) throws DataExitsException {
-//        return ResponseEntity.ok(adminService.getAllUsers(pageNo, pageSize));
-//    }
+    @GetMapping("/user/get-user/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Optional<UserResponse>> getUser(@PathVariable String id) throws DataExitsException {
+        return ResponseEntity.ok(adminService.getUserById(id));
+    }
 
     @GetMapping("/user/get-all-users")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<PagedModel<EntityModel<GetUserResponse>>>
-    getAllUsers(@RequestParam int pageNo,
-                @RequestParam int pageSize) throws DataExitsException {
-        return ResponseEntity.ok(adminService.getAllUsers(pageNo, pageSize));
+    getAllUsers(@RequestParam(defaultValue = "0") int pageNo,
+                @RequestParam(defaultValue = "10") int pageSize,
+                @RequestParam(defaultValue = "email") String sortBy) throws DataExitsException {
+        return ResponseEntity.ok(adminService.getAllUsers(pageNo, pageSize, sortBy));
     }
 
     @PutMapping("/user/update-user")
