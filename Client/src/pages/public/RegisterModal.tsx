@@ -21,10 +21,10 @@ const RegisterModal = () => {
         try {
             if (password === confirmPassword) {
                 const res = await callRegister(email, password, fullName);
+                console.log("res", res);
                 if (res?.status == 201) {
                     notification.success({
                         message: "Registration successful!",
-                        description: res?.data?.message || "Registration successful!",
                         duration: 5,
                         showProgress: true
                     })
@@ -45,10 +45,10 @@ const RegisterModal = () => {
                     showProgress: true
                 })
             }
-        } catch (loginError) {
+        } catch {
             notification.error({
                 message: "Registration error!",
-                description: loginError instanceof Error ? loginError.message : "Error during registration process!",
+                description: "Error during registration process!",
                 duration: 5,
                 showProgress: true
             });
@@ -84,33 +84,57 @@ const RegisterModal = () => {
                                         <Form.Item
                                             label="Full Name"
                                             name="fullName"
-                                            rules={[{ required: true, message: 'Please input your full name!' }]}
+                                            rules={[
+                                                { required: true, message: 'Please input your full name!' },
+                                                {
+                                                    pattern: /^[A-Za-zÀ-ỹ\s]+$/u, // Allows letters (with accents) and spaces
+                                                    message: 'Full Name can only contain letters, spaces, and accents!',
+                                                },
+                                            ]}
                                         >
-                                            <Input placeholder="Full Name" autoComplete="fullname" />
+                                            <Input placeholder="Full Name" autoComplete="full-name" />
                                         </Form.Item>
+
                                         <Form.Item
                                             label="Email"
                                             name="email"
-                                            rules={[{ required: true, message: 'Please input your email!' }]}
+                                            rules={[{ required: true, message: 'Please input your email!' }, { type: 'email', message: 'Please enter a valid email!' }]}
                                         >
                                             <Input type="email" placeholder="Email" autoComplete="email" />
                                         </Form.Item>
                                         <Form.Item
                                             label="Password"
                                             name="password"
-                                            rules={[{ required: true, message: 'Please input your password!' }]}
+                                            rules={[
+                                                { required: true, message: 'Please input your password!' },
+                                                {
+                                                    pattern: /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,64}$/,
+                                                    message: 'Password must be between 6 and 64 characters long and contain both letters and numbers!',
+                                                }
+                                            ]}
                                         >
                                             <Input.Password placeholder="Password" autoComplete="new-password" />
                                         </Form.Item>
                                         <Form.Item
                                             label="Confirm Password"
                                             name="confirmPassword"
-                                            rules={[{ required: true, message: 'Please confirm your password!' }]}
+                                            dependencies={['password']} // This makes sure confirmPassword depends on the password field
+                                            rules={[
+                                                { required: true, message: 'Please confirm your password!' },
+                                                ({ getFieldValue }) => ({
+                                                    validator(_, value) {
+                                                        if (!value || getFieldValue('password') === value) {
+                                                            return Promise.resolve();
+                                                        }
+                                                        return Promise.reject(new Error('Passwords do not match!'));
+                                                    },
+                                                }),
+                                            ]}
                                         >
                                             <Input.Password placeholder="Confirm Password" autoComplete="new-password" />
                                         </Form.Item>
                                         <Form.Item>
-                                            <Button type="primary" htmlType="submit" block size="large"
+                                            <Button type="primary" shape="round" htmlType="submit" block size="large"
                                                 loading={isSubmit}>
                                                 <div className="w-full max-w-16 font-medium text-center" >Register</div>
                                             </Button>
@@ -126,7 +150,7 @@ const RegisterModal = () => {
                     </div>
                 </div>
             </section>
-        </Modal>
+        </Modal >
     );
 };
 

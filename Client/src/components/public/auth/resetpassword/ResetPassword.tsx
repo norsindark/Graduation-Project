@@ -35,7 +35,7 @@ const ResetPassword = () => {
             const res = await callResetPassword(token, values.password);
             if (res?.status == 200) {
                 notification.success({
-                    message: res?.data?.message || 'Password changed successfully!',
+                    message: 'Password changed successfully!',
                     duration: 5,
                     showProgress: true
                 });
@@ -43,7 +43,7 @@ const ResetPassword = () => {
             } else {
                 notification.error({
                     message: 'Failed to reset password!',
-                    description: res?.data?.errors?.error || res?.data?.message || "Something went wrong!",
+                    description: res?.data?.errors?.error || "Something went wrong!",
                     duration: 5,
                     showProgress: true
                 });
@@ -98,7 +98,7 @@ const ResetPassword = () => {
                                             <Input.Password placeholder="Confirm Password" autoComplete="confirm-password" />
                                         </Form.Item>
                                         <Form.Item>
-                                            <Button type="primary" htmlType="submit" block size="large" loading={isSubmit}>
+                                            <Button type="primary" shape="round" htmlType="submit" block size="large" loading={isSubmit}>
                                                 <div className="font-medium text-center w-full max-w-26">Change Password</div>
                                             </Button>
                                         </Form.Item>

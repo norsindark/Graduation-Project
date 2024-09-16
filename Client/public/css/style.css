@@ -114,7 +114,7 @@ button {
 }
 
 .common_btn:hover {
-    background: var(--colorBlack);
+    /* background: var(--colorBlack); */
 }
 
 .fp__section_heading h4 {
@@ -3636,6 +3636,12 @@ footer {
     color: var(--colorBlack);
     margin-top: 20px;
 }
+.text-medium label {
+    text-transform: capitalize;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--colorBlack);
+}
 
 .comment_input .fp__contact_form_input {
     margin-top: 5px;
@@ -4645,7 +4651,7 @@ CHECKOUT PAGE START
     color: var(--colorWhite);
     text-align: center;
     line-height: 35px;
-    border-radius: 5px;
+    border-radius: 20px;
     margin-right: 5px !important;
     font-size: 18px;
     border: 1px solid transparent;
@@ -5130,14 +5136,13 @@ CHECKOUT PAGE START
 }
 
 .fp_dashboard_body h3 {
-    font-size: 24px;
+    font-size: 20px;
     font-weight: 700;
     color: var(--colorBlack);
     text-transform: capitalize;
     margin-bottom: 20px;
     display: flex;
     flex-wrap: wrap;
-    justify-content: space-between;
     align-items: center;
 }
 
@@ -5831,7 +5836,7 @@ CHECKOUT PAGE START
 .fp_dash_personal_info_edit {
     background: none;
     box-shadow: none;
-    display: none;
+    /* display: none; */
 }
 
 .fp_dash_personal_info.show .personal_info_text {
@@ -5870,7 +5875,7 @@ CHECKOUT PAGE START
     box-shadow: none;
 }
 
-.fp__change_password .fp__comment_imput_single {
+.fp__change_password .fp__comment_input_single {
     margin-top: 20px;
 }
 

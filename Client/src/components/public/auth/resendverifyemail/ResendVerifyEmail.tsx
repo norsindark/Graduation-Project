@@ -31,7 +31,7 @@ const ResendVerifyEmail = () => {
             } else {
                 notification.error({
                     message: 'Verification email failed!',
-                    description: response.data.message || 'Something went wrong!',
+                    description: response.data.errors?.error || 'Something went wrong!',
                     duration: 5,
                     showProgress: true
                 });
@@ -80,7 +80,7 @@ const ResendVerifyEmail = () => {
                                             <Input type="email" placeholder="Email" autoComplete="email" />
                                         </Form.Item>
                                         <Form.Item>
-                                            <Button type="primary" htmlType="submit" block size="large" loading={isSubmit}>
+                                            <Button type="primary" shape="round" htmlType="submit" block size="large" loading={isSubmit}>
                                                 <div className="w-full font-medium text-center max-w-20">Verify Mail</div>
                                             </Button>
                                         </Form.Item>

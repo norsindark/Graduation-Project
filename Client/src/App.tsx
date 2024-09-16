@@ -6,6 +6,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "./redux/store";
 import { doLoginAction, doLogoutAction, setLoading } from "./redux/account/accountSlice";
 import { callProfile } from "./services/clientApi";
+import { notification } from 'antd';
 
 function App() {
     const dispatch = useDispatch();
@@ -25,6 +26,17 @@ function App() {
             const res = await callProfile();
             if (res?.status === 200) {
                 dispatch(doLoginAction(res.data));
+                // Check for Google login status
+                const googleLogin = localStorage.getItem('googleLogin');
+                if (googleLogin === 'true') {
+                    notification.success({
+                        message: 'Login success!',
+                        description: 'You have successfully logged in with Google.',
+                        duration: 5,
+                        showProgress: true
+                    });
+                    localStorage.removeItem('googleLogin');
+                }
             } else {
                 dispatch(doLogoutAction());
             }
@@ -44,7 +56,10 @@ function App() {
         } else {
             dispatch(setLoading(false));
         }
+
+
     }, [isAuthenticated, getAccount, dispatch]);
+
     return (
         <>
             {isLoading ? (

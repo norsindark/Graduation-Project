@@ -37,19 +37,18 @@ const Auth = () => {
             } else {
                 notification.error({
                     message: 'Logout failed!',
-                    description: res?.data?.message || 'Something went wrong!',
+                    description: res?.data?.errors?.error || 'Something went wrong!',
                     duration: 5,
                     showProgress: true
                 });
             }
-        } catch (error) {
+        } catch {
             notification.error({
                 message: 'Logout failed!',
-                description: error instanceof Error ? error.message : 'Something went wrong!',
+                description: 'Something went wrong!',
                 duration: 5,
                 showProgress: true
             });
-            console.error("Logout failed:", error);
         } finally {
             setSubmit(false);
         }
