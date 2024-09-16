@@ -13,7 +13,7 @@ const SocialLogin = () => {
         <>
             <ul className="d-flex">
                 <li>
-                    <Link to={`${import.meta.env.VITE_BACKEND_URL}/auth/google`} onClick={handleClick}>
+                    <Link to={`${import.meta.env.VITE_BACKEND_URL}/oauth2/authorization/google`} onClick={handleClick}>
                         {loading ? <i className="fas fa-spinner fa-spin"></i> : <i className="fab fa-google-plus-g"></i>}
                     </Link>
                 </li>
