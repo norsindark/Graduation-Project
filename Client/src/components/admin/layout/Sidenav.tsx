@@ -1,13 +1,13 @@
-
 // import { useState } from "react";
-import React from "react";
-import { Menu } from "antd";
-import { NavLink, useLocation } from "react-router-dom";
+import React from 'react';
+import { Menu } from 'antd';
+import { NavLink, useLocation } from 'react-router-dom';
 // import logo from "../../../../public/images/logo.png";
 
 function Sidenav({ color }: { color: string }) {
   const { pathname } = useLocation();
-  const page = pathname.replace("/", "");
+  const page = pathname.replace('/', '');
+  const [openViewChildren, setOpenViewChildren] = React.useState(false);
 
   const dashboard = [
     <svg
@@ -54,7 +54,7 @@ function Sidenav({ color }: { color: string }) {
     </svg>,
   ];
 
-  const billing = [
+  const managerAccount = [
     <svg
       width="20"
       height="20"
@@ -76,71 +76,18 @@ function Sidenav({ color }: { color: string }) {
     </svg>,
   ];
 
-
-  const profile = [
-    <svg
-      width="20"
-      height="20"
-      viewBox="0 0 20 20"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      key={0}
-    >
-      <path
-        fillRule="evenodd"
-        clipRule="evenodd"
-        d="M18 10C18 14.4183 14.4183 18 10 18C5.58172 18 2 14.4183 2 10C2 5.58172 5.58172 2 10 2C14.4183 2 18 5.58172 18 10ZM12 7C12 8.10457 11.1046 9 10 9C8.89543 9 8 8.10457 8 7C8 5.89543 8.89543 5 10 5C11.1046 5 12 5.89543 12 7ZM9.99993 11C7.98239 11 6.24394 12.195 5.45374 13.9157C6.55403 15.192 8.18265 16 9.99998 16C11.8173 16 13.4459 15.1921 14.5462 13.9158C13.756 12.195 12.0175 11 9.99993 11Z"
-        fill={color}
-      ></path>
-    </svg>,
-  ];
-
-  const signin = [
-    <svg
-      width="20"
-      height="20"
-      viewBox="0 0 20 20"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      key={0}
-    >
-      <path
-        fillRule="evenodd"
-        clipRule="evenodd"
-        d="M6 2C5.44772 2 5 2.44772 5 3V4H4C2.89543 4 2 4.89543 2 6V16C2 17.1046 2.89543 18 4 18H16C17.1046 18 18 17.1046 18 16V6C18 4.89543 17.1046 4 16 4H15V3C15 2.44772 14.5523 2 14 2C13.4477 2 13 2.44772 13 3V4H7V3C7 2.44772 6.55228 2 6 2ZM6 7C5.44772 7 5 7.44772 5 8C5 8.55228 5.44772 9 6 9H14C14.5523 9 15 8.55228 15 8C15 7.44772 14.5523 7 14 7H6Z"
-        fill={color}
-      ></path>
-    </svg>,
-  ];
-
-  const signup = [
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="14"
-      height="14"
-      viewBox="0 0 14 14"
-      key={0}
-    >
-      <path
-        d="M0,2A2,2,0,0,1,2,0H8a2,2,0,0,1,2,2V8a2,2,0,0,1-2,2H2A2,2,0,0,1,0,8Z"
-        transform="translate(4 4)"
-        fill={color}
-      />
-      <path
-        d="M2,0A2,2,0,0,0,0,2V8a2,2,0,0,0,2,2V4A2,2,0,0,1,4,2h6A2,2,0,0,0,8,0Z"
-        fill={color}
-      />
-    </svg>,
-  ];
+  const handleOpen = () => {
+    setOpenViewChildren(!openViewChildren);
+  };
 
   const menuItems = [
     {
-      key: "1",
+      key: '1',
       label: (
         <NavLink to="/dashboard">
           <span
             className="icon"
-            style={{ background: page === "dashboard" ? color : "" }}
+            style={{ background: page === 'dashboard' ? color : '' }}
           >
             {dashboard}
           </span>
@@ -149,72 +96,38 @@ function Sidenav({ color }: { color: string }) {
       ),
     },
     {
-      key: "2",
+      key: '2',
       label: (
-        <NavLink to="/tables">
+        <NavLink to="/daily-sales">
           <span
             className="icon"
-            style={{ background: page === "tables" ? color : "" }}
+            style={{ background: page === 'tables' ? color : '' }}
           >
             {tables}
           </span>
-          <span className="label">Tables</span>
+          <span className="label">Daily Sales</span>
         </NavLink>
       ),
     },
     {
-      key: "3",
+      key: '2',
       label: (
-        <NavLink to="/billing">
+        <NavLink to="/daily-sales">
           <span
             className="icon"
-            style={{ background: page === "billing" ? color : "" }}
+            style={{ background: page === 'tables' ? color : '' }}
           >
-            {billing}
+            {tables}
           </span>
-          <span className="label">Billing</span>
+          <span className="label">Daily Sales</span>
         </NavLink>
       ),
     },
     {
-      key: "4",
+      key: '4',
       label: <div className="menu-item-header">Account Pages</div>,
     },
-    {
-      key: "5",
-      label: (
-        <NavLink to="/profile">
-          <span
-            className="icon"
-            style={{ background: page === "profile" ? color : "" }}
-          >
-            {profile}
-          </span>
-          <span className="label">Profile</span>
-        </NavLink>
-      ),
-    },
-    {
-      key: "7",
-      label: (
-        <NavLink to="/sign-in">
-          <span className="icon">{signin}</span>
-          <span className="label">Sign In</span>
-        </NavLink>
-      ),
-    },
-    {
-      key: "8",
-      label: (
-        <NavLink to="/sign-up">
-          <span className="icon">{signup}</span>
-          <span className="label">Sign Up</span>
-        </NavLink>
-      ),
-    },
   ];
-
-
 
   return (
     <>
@@ -229,3 +142,92 @@ function Sidenav({ color }: { color: string }) {
 }
 
 export default Sidenav;
+
+// const profile = [
+//   <svg
+//     width="20"
+//     height="20"
+//     viewBox="0 0 20 20"
+//     fill="none"
+//     xmlns="http://www.w3.org/2000/svg"
+//     key={0}
+//   >
+//     <path
+//       fillRule="evenodd"
+//       clipRule="evenodd"
+//       d="M18 10C18 14.4183 14.4183 18 10 18C5.58172 18 2 14.4183 2 10C2 5.58172 5.58172 2 10 2C14.4183 2 18 5.58172 18 10ZM12 7C12 8.10457 11.1046 9 10 9C8.89543 9 8 8.10457 8 7C8 5.89543 8.89543 5 10 5C11.1046 5 12 5.89543 12 7ZM9.99993 11C7.98239 11 6.24394 12.195 5.45374 13.9157C6.55403 15.192 8.18265 16 9.99998 16C11.8173 16 13.4459 15.1921 14.5462 13.9158C13.756 12.195 12.0175 11 9.99993 11Z"
+//       fill={color}
+//     ></path>
+//   </svg>,
+// ];
+
+// const signin = [
+//   <svg
+//     width="20"
+//     height="20"
+//     viewBox="0 0 20 20"
+//     fill="none"
+//     xmlns="http://www.w3.org/2000/svg"
+//     key={0}
+//   >
+//     <path
+//       fillRule="evenodd"
+//       clipRule="evenodd"
+//       d="M6 2C5.44772 2 5 2.44772 5 3V4H4C2.89543 4 2 4.89543 2 6V16C2 17.1046 2.89543 18 4 18H16C17.1046 18 18 17.1046 18 16V6C18 4.89543 17.1046 4 16 4H15V3C15 2.44772 14.5523 2 14 2C13.4477 2 13 2.44772 13 3V4H7V3C7 2.44772 6.55228 2 6 2ZM6 7C5.44772 7 5 7.44772 5 8C5 8.55228 5.44772 9 6 9H14C14.5523 9 15 8.55228 15 8C15 7.44772 14.5523 7 14 7H6Z"
+//       fill={color}
+//     ></path>
+//   </svg>,
+// ];
+
+// const signup = [
+//   <svg
+//     xmlns="http://www.w3.org/2000/svg"
+//     width="14"
+//     height="14"
+//     viewBox="0 0 14 14"
+//     key={0}
+//   >
+//     <path
+//       d="M0,2A2,2,0,0,1,2,0H8a2,2,0,0,1,2,2V8a2,2,0,0,1-2,2H2A2,2,0,0,1,0,8Z"
+//       transform="translate(4 4)"
+//       fill={color}
+//     />
+//     <path
+//       d="M2,0A2,2,0,0,0,0,2V8a2,2,0,0,0,2,2V4A2,2,0,0,1,4,2h6A2,2,0,0,0,8,0Z"
+//       fill={color}
+//     />
+//   </svg>,
+// ];
+
+// {
+//   key: "5",
+//   label: (
+//     <NavLink to="/profile">
+//       <span
+//         className="icon"
+//         style={{ background: page === "profile" ? color : "" }}
+//       >
+//         {profile}
+//       </span>
+//       <span className="label">Profile</span>
+//     </NavLink>
+//   ),
+// },
+// {
+//   key: "7",
+//   label: (
+//     <NavLink to="/sign-in">
+//       <span className="icon">{signin}</span>
+//       <span className="label">Sign In</span>
+//     </NavLink>
+//   ),
+// },
+// {
+//   key: "8",
+//   label: (
+//     <NavLink to="/sign-up">
+//       <span className="icon">{signup}</span>
+//       <span className="label">Sign Up</span>
+//     </NavLink>
+//   ),
+// },

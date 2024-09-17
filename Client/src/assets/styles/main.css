@@ -1,4 +1,3 @@
-
 /* body {
   padding: 0 0 30px 0;
   background-color: #fafafa;
@@ -800,7 +799,8 @@ ul.ant-menu.ant-menu-root.ant-menu-inline.ant-menu-light.left-nav
 }
 
 .shadow-lg {
-  box-shadow: 0 8px 26px -4px hsla(0, 0%, 8%, 0.15),
+  box-shadow:
+    0 8px 26px -4px hsla(0, 0%, 8%, 0.15),
     0 8px 9px -5px hsla(0, 0%, 8%, 0.06) !important;
 }
 .ant-menu-inline,
@@ -1248,7 +1248,7 @@ img {
 }
 
 .gradent {
-  background: url("../images/info-card-2.jpg") no-repeat center top;
+  background: url('../images/info-card-2.jpg') no-repeat center top;
   background-size: cover;
   padding: 15px;
   border-radius: 15px;
@@ -1397,7 +1397,9 @@ span.ismobile {
 .sidebarnav-color button {
   width: 100%;
   margin-right: 10px;
-  box-shadow: 0 3px 5px -1px rgb(0 0 0 / 9%), 0 2px 3px -1px rgb(0 0 0 / 7%);
+  box-shadow:
+    0 3px 5px -1px rgb(0 0 0 / 9%),
+    0 2px 3px -1px rgb(0 0 0 / 7%);
   height: 40px;
 }
 
@@ -1800,7 +1802,7 @@ body {
   background-size: cover;
   background-position: 50%;
   text-align: center;
-  background: url("../images/bg-signup.jpg") no-repeat center top;
+  background: url('../images/bg-signup.jpg') no-repeat center top;
 }
 .header-col.header-brand {
   white-space: nowrap;
@@ -2266,7 +2268,7 @@ section.ant-layout.layout-content .ant-layout-content.content-ant {
 }
 
 .card-credit {
-  background-image: url("../images/info-card-3.jpg");
+  background-image: url('../images/info-card-3.jpg');
   background-position: 50%;
   background-size: cover;
   border: none;
@@ -2314,7 +2316,7 @@ section.ant-layout.layout-content .ant-layout-content.content-ant {
   width: 100%;
 }
 .p-20 {
-  padding: "0px 20px 0px 0px";
+  padding: '0px 20px 0px 0px';
 }
 .layout-default .ant-layout-content.p-0 {
   padding: 0px;
@@ -2344,7 +2346,11 @@ section.ant-layout.layout-content .ant-layout-content.content-ant {
   margin-bottom: 0;
 }
 .widget-2 .ant-statistic-content {
-  font-family: open sans, Helvetica, Arial, sans-serif;
+  font-family:
+    open sans,
+    Helvetica,
+    Arial,
+    sans-serif;
   font-weight: 600;
   font-size: 20px;
   padding: 12px 16px;
@@ -3041,4 +3047,6 @@ section.ant-layout.ant-layout-has-sider.layout-dashboard.layout-profile
   fill: #8c8c8c;
 }
 
-
+.fix-pl {
+  padding-left: 0px !important;
+}

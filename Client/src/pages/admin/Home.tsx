@@ -1,16 +1,27 @@
-import React from "react";
-import {
-  Card,
-  Col,
-  Row,
-  Typography,
-} from "antd";
+import React, { useState } from 'react';
+import { Button, Card, Col, Row, Typography } from 'antd';
 
-import Echart from "../../components/admin/chart/EChart";
-import LineChart from "../../components/admin/chart/LineChart";
+import Echart from '../../components/admin/chart/EChart';
+import LineChart from '../../components/admin/chart/LineChart';
+import { Calendar, theme } from 'antd';
+import type { CalendarProps } from 'antd';
+import type { Dayjs } from 'dayjs';
 
 function Home() {
   const { Title } = Typography;
+
+  const [calendarVisible, setCalendarVisible] = useState(false);
+  const onPanelChange = (value: Dayjs, mode: CalendarProps<Dayjs>['mode']) => {
+    console.log(value.format('YYYY-MM-DD'), mode);
+  };
+  const { token } = theme.useToken();
+
+  const wrapperStyle: React.CSSProperties = {
+    width: 500,
+    border: `1px solid ${token.colorBorderSecondary}`,
+    borderRadius: token.borderRadiusLG,
+  };
+
   const dollor = [
     <svg
       width="22"
@@ -103,39 +114,54 @@ function Home() {
 
   const count = [
     {
-      today: "Today’s Sales",
-      title: "$53,000",
-      persent: "+30%",
+      today: 'Total Sales',
+      title: '$53,000',
+      persent: '+30%',
       icon: dollor,
-      bnb: "bnb2",
+      bnb: 'bnb2',
     },
     {
-      today: "Today’s Users",
-      title: "3,200",
-      persent: "+20%",
-      icon: profile,
-      bnb: "bnb2",
-    },
-    {
-      today: "New Clients",
-      title: "+1,200",
-      persent: "-20%",
-      icon: heart,
-      bnb: "redtext",
-    },
-    {
-      today: "New Orders",
-      title: "$13,200",
-      persent: "10%",
+      today: 'New Orders',
+      title: '$13,200',
+      persent: '10%',
       icon: cart,
-      bnb: "bnb2",
+      bnb: 'bnb2',
+    },
+    {
+      today: 'Total Order',
+      title: '+1,200',
+      persent: '-20%',
+      icon: heart,
+      bnb: 'redtext',
+    },
+    {
+      today: 'Daily Sales',
+      title: '3,200',
+      persent: '+20%',
+      icon: profile,
+      bnb: 'bnb2',
     },
   ];
-
 
   return (
     <>
       <div className="layout-content">
+        <Row gutter={[24, 0]}>
+          <Col xs={24} sm={24} md={24} lg={24} xl={24} className="mb-24">
+            <Button onClick={() => setCalendarVisible(!calendarVisible)}>
+              Search by calendar
+            </Button>
+            {calendarVisible && (
+              <div style={wrapperStyle}>
+                <Calendar
+                  fullscreen={false}
+                  onPanelChange={onPanelChange}
+                  onChange={(date) => console.log(date.format('YYYY-MM-DD'))}
+                />
+              </div>
+            )}
+          </Col>
+        </Row>
         <Row className="rowgap-vbox" gutter={[24, 0]}>
           {count.map((c, index) => (
             <Col
@@ -153,11 +179,18 @@ function Home() {
                     <Col xs={18}>
                       <span>{c.today}</span>
                       <Title level={3}>
-                        {c.title} <small className={c.bnb}>{c.persent}</small>
+                        {c.title}{' '}
+                        <small className={c.bnb}>
+                          {' '}
+                          <br />
+                          Today: {c.persent}
+                        </small>
                       </Title>
                     </Col>
                     <Col xs={6}>
-                      <div className="icon-box flex justify-center align-middle items-center">{c.icon}</div>
+                      <div className="icon-box flex justify-center align-middle items-center">
+                        {c.icon}
+                      </div>
                     </Col>
                   </Row>
                 </div>

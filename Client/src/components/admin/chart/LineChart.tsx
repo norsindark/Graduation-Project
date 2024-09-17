@@ -1,8 +1,8 @@
-import React from "react";
-import ReactApexChart from "react-apexcharts";
-import { Typography } from "antd";
-import { MinusOutlined } from "@ant-design/icons";
-import lineChart from "./configs/lineChart";
+import React from 'react';
+import ReactApexChart from 'react-apexcharts';
+import { Typography } from 'antd';
+import { MinusOutlined } from '@ant-design/icons';
+import lineChart from './configs/lineChart';
 
 const LineChart: React.FC = () => {
   const { Title, Paragraph } = Typography;
@@ -11,15 +11,15 @@ const LineChart: React.FC = () => {
     <>
       <div className="linechart">
         <div>
-          <Title level={5}>Active Users</Title>
+          <Title level={5}>Chart Total Sales</Title>
           <Paragraph className="lastweek">
             than last week <span className="bnb2">+30%</span>
           </Paragraph>
         </div>
         <div className="sales">
           <ul>
-            <li>{<MinusOutlined />} Traffic</li>
-            <li>{<MinusOutlined />} Sales</li>
+            <li>{<MinusOutlined />} Last week</li>
+            <li>{<MinusOutlined />} New week</li>
           </ul>
         </div>
       </div>
@@ -30,7 +30,7 @@ const LineChart: React.FC = () => {
         series={lineChart.series}
         type="area"
         height={350}
-        width={"100%"}
+        width={'100%'}
       />
     </>
   );
