@@ -9,7 +9,7 @@ interface RoleBaseRouteProps {
 }
 
 const RoleBaseRoute: React.FC<RoleBaseRouteProps> = ({ children }) => {
-    const isAdminRoute = window.location.pathname.startsWith('/admin');
+    const isAdminRoute = window.location.pathname.startsWith('/dashboard');
     const user = useSelector((state: RootState) => state.account.user);
     const userRole = user?.role?.name;
     if (isAdminRoute && userRole === 'ADMIN') {

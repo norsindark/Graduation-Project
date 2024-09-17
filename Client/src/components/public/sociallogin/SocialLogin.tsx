@@ -3,12 +3,10 @@ import { Link } from 'react-router-dom';
 
 const SocialLogin = () => {
     const [loading, setLoading] = useState(false);
-
     const handleClick = () => {
         setLoading(true);
         localStorage.setItem('googleLogin', 'true');
     };
-
     return (
         <>
             <ul className="d-flex">

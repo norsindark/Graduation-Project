@@ -1,6 +1,6 @@
 import { createBrowserRouter } from "react-router-dom";
-import LayoutPublic from "../pages/public/LayoutPublic";
-import LayoutAdmin from "../pages/admin/LayoutAdmin";
+import LayoutPublic from "../components/public/layout/LayoutPublic";
+// import LayoutAdmin from "../pages/admin/LayoutAdmin";
 import HomePage from "../pages/public/HomePage";
 import RegisterModal from "../pages/public/RegisterModal";
 
@@ -12,6 +12,8 @@ import ResetPassword from "../components/public/auth/resetpassword/ResetPassword
 import ResendVerifyEmail from "../components/public/auth/resendverifyemail/ResendVerifyEmail";
 import VerifyEmail from "../components/public/auth/verifyemail/VerifyEmail";
 import Account from "../components/public/auth/account/Account";
+import Main from "../components/admin/layout/Main";
+import Home from "../pages/admin/Home";
 
 export const router = createBrowserRouter([
     {
@@ -58,17 +60,21 @@ export const router = createBrowserRouter([
         ]
     },
     {
-        path: "/admin",
-        element: <LayoutAdmin />,
+        path: "/",
+        element:
+            <ProtectedRoute>
+                <Main />
+            </ProtectedRoute>,
         errorElement: <NotFound />,
         children: [
             {
                 index: true,
-                element:
-                    <ProtectedRoute>
-                        <h1>admin</h1>
-                    </ProtectedRoute>
-            }
+                element: <Home />
+            },
+            {
+                path: "/dashboard",
+                element: <Home />
+            },
         ]
     },
 ])

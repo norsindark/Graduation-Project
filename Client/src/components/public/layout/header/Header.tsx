@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import LogoHeader from "../logo/LogoHeader";
-import Navigation from "../navigation/Navigation";
-import Search from "../search/Search";
-import Cart from "../cart/Cart";
-import Auth from "../auth/Auth";
-import Reservation from "../reservation/Reservation";
+import LogoHeader from "../../logo/LogoHeader";
+import Navigation from "../../navigation/Navigation";
+import Search from "../../search/Search";
+import Cart from "../../cart/Cart";
+import Auth from "../../auth/Auth";
+import Reservation from "../../reservation/Reservation";
 
 
 const Header = () => {
