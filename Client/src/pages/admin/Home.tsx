@@ -1,26 +1,16 @@
 import React, { useState } from 'react';
 import { Button, Card, Col, Row, Typography } from 'antd';
+import { Table, Tag, Space } from 'antd';
 
 import Echart from '../../components/admin/chart/EChart';
 import LineChart from '../../components/admin/chart/LineChart';
 import { Calendar, theme } from 'antd';
 import type { CalendarProps } from 'antd';
 import type { Dayjs } from 'dayjs';
+import { stringify } from 'ajv';
 
 function Home() {
   const { Title } = Typography;
-
-  const [calendarVisible, setCalendarVisible] = useState(false);
-  const onPanelChange = (value: Dayjs, mode: CalendarProps<Dayjs>['mode']) => {
-    console.log(value.format('YYYY-MM-DD'), mode);
-  };
-  const { token } = theme.useToken();
-
-  const wrapperStyle: React.CSSProperties = {
-    width: 500,
-    border: `1px solid ${token.colorBorderSecondary}`,
-    borderRadius: token.borderRadiusLG,
-  };
 
   const dollor = [
     <svg
@@ -121,21 +111,21 @@ function Home() {
       bnb: 'bnb2',
     },
     {
-      today: 'New Orders',
-      title: '$13,200',
-      persent: '10%',
-      icon: cart,
-      bnb: 'bnb2',
-    },
-    {
-      today: 'Total Order',
+      today: 'Orders',
       title: '+1,200',
       persent: '-20%',
       icon: heart,
       bnb: 'redtext',
     },
     {
-      today: 'Daily Sales',
+      today: 'Discounted products',
+      title: '13,200',
+      persent: '10%',
+      icon: cart,
+      bnb: 'bnb2',
+    },
+    {
+      today: 'User',
       title: '3,200',
       persent: '+20%',
       icon: profile,
@@ -143,25 +133,121 @@ function Home() {
     },
   ];
 
+  const columns = [
+    {
+      title: 'Tracking ID',
+      dataIndex: 'trackingId',
+      key: 'trackingId',
+    },
+    {
+      title: 'Product',
+      dataIndex: 'product',
+      key: 'product',
+      sorter: (a: any, b: any) => a.age - b.age,
+    },
+    {
+      title: 'Customer',
+      dataIndex: 'customer',
+      key: 'customer',
+      sorter: (a: any, b: any) => a.age - b.age,
+    },
+    {
+      title: 'Date',
+      dataIndex: 'date',
+      key: 'date',
+      sorter: (a: any, b: any) => a.age - b.age,
+    },
+    {
+      title: 'Amount',
+      dataIndex: 'amount',
+      key: 'amount',
+      sorter: (a: any, b: any) => a.age - b.age,
+    },
+    {
+      title: 'Payment Method',
+      dataIndex: 'paymentMethod',
+      key: 'paymentMethod',
+      sorter: (a: any, b: any) => a.age - b.age,
+    },
+    {
+      title: 'Status',
+      dataIndex: 'status',
+      key: 'status',
+      render: (status: any) => {
+        let color =
+          status === 'Approved'
+            ? 'green'
+            : status === 'Pending'
+              ? 'orange'
+              : 'red';
+        return (
+          <Tag color={color} key={status}>
+            {status}
+          </Tag>
+        );
+      },
+    },
+  ];
+
+  const data = [
+    {
+      key: '1',
+      trackingId: '1141513',
+      product: 'Acer Nitro 5',
+      customer: 'John Smith',
+      date: '1 March',
+      amount: 730,
+      paymentMethod: 'Cash on Delivery',
+      status: 'Approved',
+    },
+    {
+      key: '2',
+      trackingId: '2422355',
+      product: 'Playstation 5',
+      customer: 'Michael Doe',
+      date: '1 March',
+      amount: 900,
+      paymentMethod: 'Online Payment',
+      status: 'Pending',
+    },
+    {
+      key: '3',
+      trackingId: '1184513',
+      product: 'Redragon S101',
+      customer: 'John Smith',
+      date: '1 March',
+      amount: 35,
+      paymentMethod: 'Cash on Delivery',
+      status: 'Approved',
+    },
+    {
+      key: '4',
+      trackingId: '2557411',
+      product: 'Razer Blade 15',
+      customer: 'Jane Smith',
+      date: '1 March',
+      amount: 920,
+      paymentMethod: 'Online Payment',
+      status: 'Pending',
+    },
+    {
+      key: '5',
+      trackingId: '2451023',
+      product: 'ASUS ROG Strix',
+      customer: 'Harold Carol',
+      date: '1 March',
+      amount: 2000,
+      paymentMethod: 'Online Payment',
+      status: 'Approved',
+    },
+  ];
+  // const onChange = (pagination, filters, sorter, extra) => {
+  //   console.log('params', pagination, filters, sorter, extra);
+  // };
+
   return (
     <>
       <div className="layout-content">
-        <Row gutter={[24, 0]}>
-          <Col xs={24} sm={24} md={24} lg={24} xl={24} className="mb-24">
-            <Button onClick={() => setCalendarVisible(!calendarVisible)}>
-              Search by calendar
-            </Button>
-            {calendarVisible && (
-              <div style={wrapperStyle}>
-                <Calendar
-                  fullscreen={false}
-                  onPanelChange={onPanelChange}
-                  onChange={(date) => console.log(date.format('YYYY-MM-DD'))}
-                />
-              </div>
-            )}
-          </Col>
-        </Row>
         <Row className="rowgap-vbox" gutter={[24, 0]}>
           {count.map((c, index) => (
             <Col
@@ -211,9 +297,56 @@ function Home() {
             </Card>
           </Col>
         </Row>
+        <Row gutter={[24, 0]}>
+          <Col xs={24} sm={24} md={24} lg={24} xl={24} className="mb-24">
+            <Table
+              className="def"
+              columns={columns}
+              dataSource={data}
+              // onChange={onChange}
+              rowKey="key"
+              rowHoverable={true}
+              pagination={{
+                current: 1,
+                pageSize: 5,
+                showSizeChanger: true,
+                total: 5,
+              }}
+            />
+          </Col>
+        </Row>
       </div>
     </>
   );
 }
 
 export default Home;
+
+//<Row gutter={[24, 0]}>
+//<Col xs={24} sm={24} md={24} lg={24} xl={24} className="mb-24">
+//  {/* <Button onClick={() => setCalendarVisible(!calendarVisible)}>
+//    Search by calendar
+//  </Button> */}
+//  {calendarVisible && (
+//    <div style={wrapperStyle}>
+//      <Calendar
+//        fullscreen={false}
+//        onPanelChange={onPanelChange}
+//        onChange={(date) => console.log(date.format('YYYY-MM-DD'))}
+//      />
+//    </div>
+//  )}
+//</Col>
+//</Row>
+
+// const wrapperStyle: React.CSSProperties = {
+//   width: 500,
+//   border: `1px solid ${token.colorBorderSecondary}`,
+//   borderRadius: token.borderRadiusLG,
+// };
+
+// const [calendarVisible, setCalendarVisible] = useState(false);
+// const onPanelChange = (value: Dayjs, mode: CalendarProps<Dayjs>['mode']) => {
+//   console.log(value.format('YYYY-MM-DD'), mode);
+// };
+// const { token } = theme.useToken();

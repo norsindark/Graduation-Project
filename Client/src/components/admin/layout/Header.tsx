@@ -1,6 +1,6 @@
-import React from "react";
-import { useState, useEffect } from "react";
-import type { DrawerProps } from "antd";
+import React from 'react';
+import { useState, useEffect } from 'react';
+import type { DrawerProps } from 'antd';
 import {
   Row,
   Col,
@@ -14,18 +14,18 @@ import {
   Drawer,
   Typography,
   Switch,
-} from "antd";
+} from 'antd';
 
 import {
   SearchOutlined,
   StarOutlined,
   TwitterOutlined,
   FacebookFilled,
-} from "@ant-design/icons";
+} from '@ant-design/icons';
 
-import { NavLink, Link } from "react-router-dom";
-import styled from "styled-components";
-import avtar from "../../../assets/images/team-2.jpg";
+import { NavLink, Link } from 'react-router-dom';
+import styled from 'styled-components';
+import avtar from '../../../assets/images/team-2.jpg';
 
 const ButtonContainer = styled.div`
   .ant-btn-primary {
@@ -136,19 +136,19 @@ const clockicon = [
 
 const data = [
   {
-    title: "New message from Sophie",
+    title: 'New message from Sophie',
     description: <>{clockicon} 2 days ago</>,
 
     avatar: avtar,
   },
   {
-    title: "New album by Travis Scott",
+    title: 'New album by Travis Scott',
     description: <>{clockicon} 2 days ago</>,
 
     avatar: <Avatar shape="square">{wifi}</Avatar>,
   },
   {
-    title: "Payment completed",
+    title: 'Payment completed',
     description: <>{clockicon} 2 days ago</>,
     avatar: <Avatar shape="square">{credit}</Avatar>,
   },
@@ -232,15 +232,15 @@ function Header({
   placement: DrawerProps['placement'];
   name: string;
   subName: string;
-  onPress: () => void, // Thay đổi kiểu từ string thành hàm
-  handleSidenavColor: (color: string) => void,
-  handleSidenavType: (type: string) => void,
-  handleFixedNavbar: (fixed: boolean) => void,
+  onPress: () => void; // Thay đổi kiểu từ string thành hàm
+  handleSidenavColor: (color: string) => void;
+  handleSidenavType: (type: string) => void;
+  handleFixedNavbar: (fixed: boolean) => void;
 }) {
   const { Title, Text } = Typography;
 
   const [visible, setVisible] = useState(false);
-  const [sidenavType, setSidenavType] = useState("transparent");
+  const [sidenavType, setSidenavType] = useState('transparent');
 
   useEffect(() => window.scrollTo(0, 0));
 
@@ -253,8 +253,8 @@ function Header({
     },
     {
       title: (
-        <span style={{ textTransform: "capitalize" }}>
-          {name.replace("/", "")}
+        <span style={{ textTransform: 'capitalize' }}>
+          {name.replace('/', '')}
         </span>
       ),
     },
@@ -270,14 +270,13 @@ function Header({
           <div className="ant-page-header-heading">
             <span
               className="ant-page-header-heading-title"
-              style={{ textTransform: "capitalize" }}
+              style={{ textTransform: 'capitalize' }}
             >
-              {subName.replace("/", "")}
+              {subName.replace('/', '')}
             </span>
           </div>
         </Col>
         <Col span={24} md={18} className="header-control">
-
           <Button type="link" onClick={showDrawer}>
             {logsetting}
           </Button>
@@ -296,7 +295,7 @@ function Header({
             placement={placement}
             open={visible}
           >
-            <div style={{ display: "flex", flexDirection: "column" }}>
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
               <div className="header-top">
                 <Title level={4}>
                   Configurator
@@ -309,32 +308,32 @@ function Header({
                 <div className="theme-color mb-2">
                   <ButtonContainer>
                     <Button
-                      style={{ backgroundColor: "#1890ff", color: "#fff" }}
-                      onClick={() => handleSidenavColor("#1890ff")}
+                      style={{ backgroundColor: '#1890ff', color: '#fff' }}
+                      onClick={() => handleSidenavColor('#1890ff')}
                     >
                       1
                     </Button>
                     <Button
-                      style={{ backgroundColor: "#52c41a", color: "#fff" }}
-                      onClick={() => handleSidenavColor("#52c41a")}
+                      style={{ backgroundColor: '#52c41a', color: '#fff' }}
+                      onClick={() => handleSidenavColor('#52c41a')}
                     >
                       1
                     </Button>
                     <Button
-                      style={{ backgroundColor: "#d9363e", color: "#fff" }}
-                      onClick={() => handleSidenavColor("#d9363e")}
+                      style={{ backgroundColor: '#d9363e', color: '#fff' }}
+                      onClick={() => handleSidenavColor('#d9363e')}
                     >
                       1
                     </Button>
                     <Button
-                      style={{ backgroundColor: "#fadb14", color: "#fff" }}
-                      onClick={() => handleSidenavColor("#fadb14")}
+                      style={{ backgroundColor: '#fadb14', color: '#fff' }}
+                      onClick={() => handleSidenavColor('#fadb14')}
                     >
                       1
                     </Button>
                     <Button
-                      style={{ backgroundColor: "#111", color: "#fff" }}
-                      onClick={() => handleSidenavColor("#111")}
+                      style={{ backgroundColor: '#111', color: '#fff' }}
+                      onClick={() => handleSidenavColor('#111')}
                     >
                       1
                     </Button>
@@ -346,68 +345,50 @@ function Header({
                   <Text>Choose between 2 different sidenav types.</Text>
                   <ButtonContainer className="trans">
                     <Button
-                      type={sidenavType === "transparent" ? "primary" : "default"}
+                      type={
+                        sidenavType === 'transparent' ? 'primary' : 'default'
+                      }
                       onClick={() => {
-                        handleSidenavType("transparent");
-                        setSidenavType("transparent");
+                        handleSidenavType('transparent');
+                        setSidenavType('transparent');
                       }}
                     >
                       TRANSPARENT
                     </Button>
                     <Button
-                      type={sidenavType === "white" ? "primary" : "default"}
+                      type={sidenavType === 'white' ? 'primary' : 'default'}
                       onClick={() => {
-                        handleSidenavType("white");
-                        setSidenavType("white");
+                        handleSidenavType('white');
+                        setSidenavType('white');
                       }}
                     >
                       WHITE
                     </Button>
                   </ButtonContainer>
                 </div>
-
-                <div className="fixed-nav mb-2">
+                {/* <div className="fixed-nav mb-2">
                   <Title level={5}>Navbar Fixed</Title>
                   <Switch onChange={(checked) => handleFixedNavbar(checked)} />
-                </div>
-
-                <div className="ant-document">
-                  <ButtonContainer>
-                    <Button type="primary" size="large">
-                      FREE DOWNLOAD
-                    </Button>
-                    <Button size="large">VIEW DOCUMENTATION</Button>
-                  </ButtonContainer>
-                </div>
-
-                <div className="viewstar">
-                  <a href="#pablo">
-                    <StarOutlined /> Star
-                  </a>
-                  <a href="#pablo"> 190</a>
-                </div>
-
-                <div className="ant-thank">
-                  <Title level={5} className="mb-2">
-                    Thank you for sharing!
-                  </Title>
-                  <ButtonContainer className="social">
-                    <Button type="primary" icon={<TwitterOutlined />}>
-                      TWEET
-                    </Button>
-                    <Button type="primary" icon={<FacebookFilled />}>
-                      SHARE
-                    </Button>
-                  </ButtonContainer>
-                </div>
+                </div> */}
               </div>
             </div>
           </Drawer>
-          <Badge size="small" count={6} >
+          <Badge size="small" className="header-notifications" count={3}>
             <Dropdown
-              trigger={["click"]}
+              trigger={['click']}
               dropdownRender={() => (
-                <div className="header-notifications-dropdown" style={{ maxHeight: '300px', overflowY: 'auto', overflowX: 'hidden', padding: '10px', backgroundColor: '#fff', boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)', width: '300px' }}>
+                <div
+                  className="header-notifications-dropdown"
+                  style={{
+                    maxHeight: '300px',
+                    overflowY: 'auto',
+                    overflowX: 'hidden',
+                    padding: '10px',
+                    backgroundColor: '#fff',
+                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
+                    width: '300px',
+                  }}
+                >
                   <List
                     itemLayout="horizontal"
                     dataSource={data}
@@ -433,7 +414,7 @@ function Header({
               </a>
             </Dropdown>
           </Badge>
-          <Link to="/sign-in" className="btn-sign-in">
+          <Link to="/account-admin" className="btn-sign-in">
             {profile}
             <span>Sign in</span>
           </Link>
