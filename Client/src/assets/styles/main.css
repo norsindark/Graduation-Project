@@ -1,4 +1,9 @@
-/* body {
+html,
+body {
+  overflow-x: hidden;
+}
+
+body {
   padding: 0 0 30px 0;
   background-color: #fafafa;
   letter-spacing: -0.3px;
@@ -6,9 +11,13 @@
   font-size: 14px;
   line-height: 1.6;
   font-weight: 400;
-  font-family: open sans, Helvetica, Arial, sans-serif;
+  /* font-family:
+    open sans,
+    Helvetica,
+    Arial,
+    sans-serif; */
   overflow-x: hidden;
-} */
+}
 .ant-layout.ant-layout-has-sider {
   flex-direction: row;
 }
@@ -526,14 +535,14 @@ h4 {
 }
 
 .layout-dashboard .header-control .btn-sign-in {
-  display: flex;
-  align-items: center;
-  justify-content: center;
   height: auto;
   padding: 0 7px;
   margin: 0;
   box-shadow: none;
   color: #8c8c8c;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 .layout-dashboard .header-control .btn-sign-in svg {
   margin-right: 4px;
@@ -2874,6 +2883,13 @@ section.ant-layout.ant-layout-has-sider.layout-dashboard.layout-profile
   left: 30px;
   right: auto;
 }
+.setting-drwer svg {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  width: 25px;
+  height: 25px;
+}
 
 .layout-dashboard-rtl ul.ant-menu.ant-menu-root.ant-menu-inline.ant-menu-light {
   text-align: right;
@@ -3045,8 +3061,4 @@ section.ant-layout.ant-layout-has-sider.layout-dashboard.layout-profile
   svg
   path {
   fill: #8c8c8c;
-}
-
-.fix-pl {
-  padding-left: 0px !important;
 }

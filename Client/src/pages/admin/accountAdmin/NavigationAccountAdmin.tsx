@@ -1,13 +1,13 @@
-import AvatarAccount from './AvatarAccount';
+import AvatarAccount from '../../../components/public/auth/account/AvatarAccount';
 import { useDispatch } from 'react-redux';
-import { doLogoutAction } from '../../../../redux/account/accountSlice';
+import { doLogoutAction } from '../../../redux/account/accountSlice';
 import { useNavigate } from 'react-router-dom';
-import { callLogout } from '../../../../services/clientApi';
+import { callLogout } from '../../../services/clientApi';
 import { notification } from 'antd'; // Import Spin
 import { useState } from 'react';
-import Loading from '../../../Loading/Loading';
+import Loading from '../../../components/Loading/Loading';
 
-const NavigationAccount = () => {
+const NavigationAccountAdmin = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [submit, setSubmit] = useState(false);
@@ -69,71 +69,39 @@ const NavigationAccount = () => {
             <span>
               <i className="fas fa-user"></i>
             </span>{' '}
-            Personal Info
+            Dashboard
           </button>
 
           <button
             className="nav-link"
-            id="v-pills-address-tab"
+            id="v-pills-employee-shift-management-tab"
             data-bs-toggle="pill"
-            data-bs-target="#v-pills-address"
+            data-bs-target="#v-pills-employee-shift-management"
             type="button"
             role="tab"
-            aria-controls="v-pills-address"
+            aria-controls="v-pills-employee-shift-management"
             aria-selected="true"
           >
             <span>
               <i className="fas fa-user"></i>
             </span>{' '}
-            Address
+            Employee Shift Management
           </button>
 
           <button
             className="nav-link"
-            id="v-pills-profile-tab"
+            id="v-pills-timekeeping-tab"
             data-bs-toggle="pill"
-            data-bs-target="#v-pills-profile"
+            data-bs-target="#v-pills-timekeeping"
             type="button"
             role="tab"
-            aria-controls="v-pills-profile"
+            aria-controls="v-pills-timekeeping"
             aria-selected="false"
           >
             <span>
               <i className="fas fa-bags-shopping"></i>
             </span>{' '}
-            Order
-          </button>
-
-          <button
-            className="nav-link"
-            id="v-pills-messages-tab2"
-            data-bs-toggle="pill"
-            data-bs-target="#v-pills-messages2"
-            type="button"
-            role="tab"
-            aria-controls="v-pills-messages2"
-            aria-selected="false"
-          >
-            <span>
-              <i className="far fa-heart"></i>
-            </span>{' '}
-            Wishlist
-          </button>
-
-          <button
-            className="nav-link"
-            id="v-pills-messages-tab"
-            data-bs-toggle="pill"
-            data-bs-target="#v-pills-messages"
-            type="button"
-            role="tab"
-            aria-controls="v-pills-messages"
-            aria-selected="false"
-          >
-            <span>
-              <i className="fas fa-star"></i>
-            </span>{' '}
-            Reviews
+            Timekeeping management
           </button>
 
           <button
@@ -149,7 +117,7 @@ const NavigationAccount = () => {
             <span>
               <i className="fas fa-user-lock"></i>
             </span>{' '}
-            Change Password{' '}
+            Information
           </button>
 
           <button className="nav-link" type="button" onClick={handleLogout}>
@@ -164,4 +132,4 @@ const NavigationAccount = () => {
   );
 };
 
-export default NavigationAccount;
+export default NavigationAccountAdmin;

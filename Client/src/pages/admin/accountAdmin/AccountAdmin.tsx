@@ -1,31 +1,30 @@
 import { Modal } from 'antd';
 import { useLocation, useNavigate } from 'react-router-dom';
-import NavigationAccount from './NavigationAccount';
-import DashboardAccount from './dashboard/DashboardAccount';
-import AddressAccount from './address/AddressAccount';
-import OrderAccount from './OrderAccount';
-import WishListAccount from './WishListAccount';
-import ReviewAccount from './ReviewAccount';
-import ResetPasswordAccount from './changepassword/ResetPasswordAccount';
+import NavigationAccountAdmin from './NavigationAccountAdmin';
+import DashboardAccountAdmin from './Information/DashboardAccountAdmin';
+import EmployeeShiftManagement from './employeeShiftManagement/EmployeeShiftManagement';
+import TimekeepingManagement from './timekeepingmanagement/TimekeepingManagement';
+import InformationAdmin from './Information/InformationAdmin';
+import EmployeeStatistics from './dashboard/EmployeeStatistics';
 
-const Account = () => {
+const AccountAdmin = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const handleCancel = () => {
-    navigate('/');
+    navigate('/dashboard');
   };
 
   return (
     <Modal
-      open={location.pathname === '/account'}
+      open={location.pathname === '/account-admin'}
       onCancel={handleCancel}
       footer={null}
+      styles={{ body: { height: '90vh', overflowY: 'hidden' } }}
       width={1300}
       centered
-      styles={{ body: { height: 'auto', overflowY: 'auto' } }}
       closeIcon={
         <div className="fp__menu_cart_header">
-          <span className="close_cart" onClick={handleCancel}>
+          <span className="close_cart bg-primary" onClick={handleCancel}>
             <i className="fal fa-times"></i>
           </span>
         </div>
@@ -39,7 +38,7 @@ const Account = () => {
                 className="col-xl-3 col-lg-4 wow fadeInUp"
                 data-wow-duration="1s"
               >
-                <NavigationAccount />
+                <NavigationAccountAdmin />
               </div>
               <div
                 className="col-xl-9 col-lg-8 wow fadeInUp"
@@ -47,17 +46,13 @@ const Account = () => {
               >
                 <div className="fp__dashboard_content">
                   <div className="tab-content" id="v-pills-tabContent">
-                    <DashboardAccount />
+                    <EmployeeStatistics />
 
-                    <AddressAccount />
+                    <EmployeeShiftManagement />
 
-                    <OrderAccount />
+                    <TimekeepingManagement />
 
-                    <WishListAccount />
-
-                    <ReviewAccount />
-
-                    <ResetPasswordAccount />
+                    <InformationAdmin />
                   </div>
                 </div>
               </div>
@@ -69,4 +64,4 @@ const Account = () => {
   );
 };
 
-export default Account;
+export default AccountAdmin;
