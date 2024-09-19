@@ -1,27 +1,27 @@
-import React from "react";
-import ReactApexChart from "react-apexcharts";
-import { Row, Col, Typography } from "antd";
-import eChart from "./configs/eChart";
+import React from 'react';
+import ReactApexChart from 'react-apexcharts';
+import { Row, Col, Typography } from 'antd';
+import eChart from './configs/eChart';
 
 const EChart: React.FC = () => {
   const { Title, Paragraph } = Typography;
 
   const items = [
     {
-      Title: "3.6K",
-      user: "Users",
+      Title: '3.6K',
+      user: 'Users',
     },
     {
-      Title: "2m",
-      user: "Clicks",
+      Title: '2m',
+      user: 'Clicks',
     },
     {
-      Title: "$772",
-      user: "Sales",
+      Title: '$772',
+      user: 'Sales',
     },
     {
-      Title: "82",
-      user: "Items",
+      Title: '82',
+      user: 'Items',
     },
   ];
 
@@ -42,8 +42,8 @@ const EChart: React.FC = () => {
           than last week <span className="bnb2">+30%</span>
         </Paragraph>
         <Paragraph className="lastweek">
-          We have created multiple options for you to put together and
-          customize into pixel-perfect pages.
+          We have created multiple options for you to put together and customize
+          into pixel-perfect pages.
         </Paragraph>
         <Row gutter={[16, 16]}>
           {items.map((v, index) => (

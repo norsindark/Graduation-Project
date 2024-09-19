@@ -1,13 +1,10 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: [
-    "./index.html",
-    "./src/**/*.{js,ts,jsx,tsx}",
-  ],
+  content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
     extend: {
       fontFamily: {
-        'sans': ['Barlow', 'sans-serif'],
+        sans: ['Barlow', 'sans-serif'],
       },
       colors: {
         colorPrimary: '#F86F03',
@@ -15,7 +12,7 @@ module.exports = {
       container: {
         screens: {
           sm: '540px',
-          md: '720px', 
+          md: '720px',
           lg: '960px',
           xl: '1140px',
           '2xl': '1320px',
@@ -29,4 +26,4 @@ module.exports = {
     },
   },
   plugins: [],
-}
+};
