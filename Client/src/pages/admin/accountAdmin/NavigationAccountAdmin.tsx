@@ -71,7 +71,6 @@ const NavigationAccountAdmin = () => {
             </span>{' '}
             Dashboard
           </button>
-
           <button
             className="nav-link"
             id="v-pills-employee-shift-management-tab"
@@ -103,7 +102,6 @@ const NavigationAccountAdmin = () => {
             </span>{' '}
             Timekeeping management
           </button>
-
           <button
             className="nav-link"
             id="v-pills-settings-tab"
@@ -119,7 +117,6 @@ const NavigationAccountAdmin = () => {
             </span>{' '}
             Information
           </button>
-
           <button className="nav-link" type="button" onClick={handleLogout}>
             <span>
               <i className="fas fa-sign-out-alt"></i>

@@ -4,6 +4,8 @@ import { NavLink, useLocation } from 'react-router-dom';
 // import logo from "../../../../public/images/logo.png";
 import { BiSolidDashboard } from 'react-icons/bi';
 import { CgMenuLeftAlt } from 'react-icons/cg';
+import { AiOutlineHome } from 'react-icons/ai';
+import { FaWarehouse } from 'react-icons/fa';
 function Sidenav({ color }: { color: string }) {
   const { pathname } = useLocation();
   const page = pathname.replace('/', '');
@@ -16,7 +18,7 @@ function Sidenav({ color }: { color: string }) {
             className="icon"
             style={{ background: page === 'dashboard' ? color : '' }}
           >
-            <BiSolidDashboard />
+            <AiOutlineHome />
           </span>
           <span className="label">Dashboard</span>
         </NavLink>
@@ -45,12 +47,15 @@ function Sidenav({ color }: { color: string }) {
     {
       key: '4',
       label: (
-        <NavLink to="/billing">
+        <NavLink to="/product">
           <span
             className="icon"
-            style={{ background: page === 'billing' ? color : '' }}
-          ></span>
-          <span className="label">Billing</span>
+            style={{ background: page === 'product' ? color : '' }}
+          >
+            {' '}
+            <BiSolidDashboard />
+          </span>
+          <span className="label">Product</span>
         </NavLink>
       ),
     },
@@ -58,12 +63,28 @@ function Sidenav({ color }: { color: string }) {
     {
       key: '5',
       label: (
-        <NavLink to="/profile">
+        <NavLink to="/warehouse">
           <span
             className="icon"
-            style={{ background: page === 'profile' ? color : '' }}
-          ></span>
-          <span className="label">Profile</span>
+            style={{ background: page === 'warehouse' ? color : '' }}
+          >
+            <FaWarehouse />
+          </span>
+          <span className="label">Warehouse</span>
+        </NavLink>
+      ),
+    },
+    {
+      key: '6',
+      label: (
+        <NavLink to="/order">
+          <span
+            className="icon"
+            style={{ background: page === 'order' ? color : '' }}
+          >
+            <FaWarehouse />
+          </span>
+          <span className="label">Order</span>
         </NavLink>
       ),
     },
