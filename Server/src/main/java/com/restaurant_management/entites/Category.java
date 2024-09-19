@@ -1,16 +1,14 @@
 package com.restaurant_management.entites;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.sql.Timestamp;
-import java.text.Normalizer;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Data
@@ -36,22 +34,16 @@ public class Category {
     @Column(name = "status")
     private String status;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_id")
+    private Category parentCategory;
+
+    @OneToMany(mappedBy = "parentCategory", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Category> subCategories = new HashSet<>();
+
     @Column(name = "created_at")
     private Timestamp createdAt;
 
     @Column(name = "updated_at")
     private Timestamp updatedAt;
-
-    public Category(String name, String slug) {
-        this.name = name;
-        this.slug = generateSlug(name);
-    }
-
-    private String generateSlug(String input) {
-        String normalized = Normalizer.normalize(input, Normalizer.Form.NFD);
-        return normalized.replaceAll("\\p{M}", "")
-                .replaceAll("[^\\w\\s-]", "")
-                .replaceAll("\\s+", "-")
-                .toLowerCase();
-    }
 }

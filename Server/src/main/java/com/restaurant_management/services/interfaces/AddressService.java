@@ -18,6 +18,6 @@ public interface AddressService {
 
     AddressResponse getAddress(String addressId) throws DataExitsException;
 
-    PagedModel<EntityModel<AddressByUserIdResponse>> getAllAddressByUserId(String userId, int pageNo, int pageSize, String sortBy)
+    PagedModel<EntityModel<AddressByUserIdResponse>> getAllAddressByUserId(String userId, int pageNo, int pageSize, String sortBy, String sortDir)
             throws DataExitsException;
 }

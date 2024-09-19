@@ -4,14 +4,12 @@ import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import com.restaurant_management.dtos.CategoryDto;
 import com.restaurant_management.entites.Category;
-import com.restaurant_management.entites.User;
 import com.restaurant_management.enums.StatusType;
 import com.restaurant_management.exceptions.DataExitsException;
 import com.restaurant_management.payloads.responses.ApiResponse;
 import com.restaurant_management.payloads.responses.CategoryResponse;
 import com.restaurant_management.repositories.CategoryRepository;
 import com.restaurant_management.services.interfaces.CategoryService;
-import com.restaurant_management.utils.GetUserUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -50,12 +48,11 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public PagedModel<EntityModel<CategoryResponse>> getAllCategories(int pageNo, int pageSize, String sortBy)
+    public PagedModel<EntityModel<CategoryResponse>> getAllCategories(int pageNo, int pageSize, String sortBy, String sortDir)
             throws DataExitsException {
-        Pageable paging = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Order.asc(sortBy)));
+        Pageable paging = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.fromString(sortDir), sortBy));
 
         Page<Category> pagedResult = categoryRepository.findAll(paging);
-
         if (pagedResult.hasContent()) {
             return pagedResourcesAssembler.toModel(pagedResult.map(CategoryResponse::new));
         } else {
@@ -65,19 +62,32 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public ApiResponse addCategory(CategoryDto categoryDto) throws DataExitsException {
-        Optional<Category> category = categoryRepository.findByName(categoryDto.getName());
-        if (category.isPresent()) {
+        Optional<Category> existingCategory = categoryRepository.findByName(categoryDto.getName());
+        if (existingCategory.isPresent()) {
             throw new DataExitsException("Category already exists");
         }
+
         String slug = generateSlug(categoryDto.getName());
+
+        Category parentCategory = null;
+        if (categoryDto.getParentId() != null) {
+            Optional<Category> parentCategoryOpt = categoryRepository.findById(categoryDto.getParentId());
+            if (parentCategoryOpt.isPresent()) {
+                parentCategory = parentCategoryOpt.get();
+            } else {
+                throw new DataExitsException("Parent category not found");
+            }
+        }
 
         Category newCategory = new Category();
         newCategory.setName(categoryDto.getName());
         newCategory.setStatus(StatusType.INACTIVE.toString());
         newCategory.setSlug(slug);
+        newCategory.setParentCategory(parentCategory);
         categoryRepository.save(newCategory);
         return new ApiResponse("Category added successfully", HttpStatus.CREATED);
     }
+
 
     @Override
     public ApiResponse updateCategory(CategoryDto categoryDto) throws DataExitsException {
@@ -85,19 +95,34 @@ public class CategoryServiceImpl implements CategoryService {
         if (category.isEmpty()) {
             throw new DataExitsException("Category not found");
         }
-        Optional<Category> categoryName = categoryRepository.findByName(categoryDto.getName());
-        if (categoryName.isPresent() && !categoryName.get().getId().equals(categoryDto.getId())) {
+
+        Optional<Category> categoryByName = categoryRepository.findByName(categoryDto.getName());
+        if (categoryByName.isPresent() && !categoryByName.get().getId().equals(categoryDto.getId())) {
             throw new DataExitsException(categoryDto.getName() + " already exists");
         }
+
         StatusType status = StatusType.valueOf(categoryDto.getStatus());
 
-        Category _category = category.get();
-        _category.setName(categoryDto.getName());
-        _category.setStatus(status.toString());
-        _category.setSlug(categoryDto.getSlug());
-        categoryRepository.save(_category);
+        Category existingCategory = category.get();
+        existingCategory.setName(categoryDto.getName());
+        existingCategory.setStatus(status.toString());
+        existingCategory.setSlug(categoryDto.getSlug());
+
+        if (categoryDto.getParentId() != null) {
+            Optional<Category> parentCategoryOpt = categoryRepository.findById(categoryDto.getParentId());
+            if (parentCategoryOpt.isPresent()) {
+                existingCategory.setParentCategory(parentCategoryOpt.get());
+            } else {
+                throw new DataExitsException("Parent category not found");
+            }
+        } else {
+            existingCategory.setParentCategory(null);
+        }
+
+        categoryRepository.save(existingCategory);
         return new ApiResponse("Category updated successfully", HttpStatus.OK);
     }
+
 
     @Override
     public ApiResponse updateThumbnail(MultipartFile file, String id) throws DataExitsException, IOException {

@@ -22,4 +22,6 @@ public class CategoryDto {
     private String slug;
 
     private String status;
+
+    private String parentId;
 }
