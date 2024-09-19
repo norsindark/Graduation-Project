@@ -7,58 +7,78 @@ interface CategoryItem {
   key: string;
   name: string;
   description: string;
+  displayOrder: number;
+  isActive: boolean;
   children?: CategoryItem[];
 }
 
 const initialDataSource: CategoryItem[] = [
   {
     key: '1',
-    name: 'Appetizers',
-    description: 'Starters to begin your meal',
+    name: 'Khai vị',
+    description: 'Món ăn khai vị',
+    displayOrder: 1,
+    isActive: true,
     children: [
       {
         key: '1-1',
-        name: 'Salads',
-        description: 'Fresh and healthy salads',
+        name: 'Salad',
+        description: 'Các loại salad tươi ngon',
+        displayOrder: 1,
+        isActive: true,
       },
       {
         key: '1-2',
-        name: 'Soups',
-        description: 'Warm and comforting soups',
+        name: 'Súp',
+        description: 'Các loại súp nóng hổi',
+        displayOrder: 2,
+        isActive: true,
       },
     ],
   },
   {
     key: '2',
-    name: 'Main Course',
-    description: 'Hearty and satisfying main dishes',
+    name: 'Món chính',
+    description: 'Các món ăn chính',
+    displayOrder: 2,
+    isActive: true,
     children: [
       {
         key: '2-1',
-        name: 'Pasta',
-        description: 'Delicious pasta dishes',
+        name: 'Mì Ý',
+        description: 'Các món mì Ý ngon tuyệt',
+        displayOrder: 1,
+        isActive: true,
       },
       {
         key: '2-2',
-        name: 'Steak',
-        description: 'Juicy and tender steaks',
+        name: 'Bò bít tết',
+        description: 'Bò bít tết mềm ngọt',
+        displayOrder: 2,
+        isActive: true,
       },
     ],
   },
   {
     key: '3',
-    name: 'Desserts',
-    description: 'Sweet treats to end your meal',
+    name: 'Tráng miệng',
+    description: 'Món tráng miệng ngọt ngào',
+    displayOrder: 3,
+    isActive: true,
     children: [
       {
         key: '3-1',
-        name: 'Cakes',
-        description: 'Delectable cakes',
+        name: 'Bánh ngọt',
+        description: 'Các loại bánh ngọt hấp dẫn',
+        displayOrder: 1,
+        isActive: true,
       },
       {
         key: '3-2',
-        name: 'Ice Cream',
-        description: 'Creamy and cold ice creams',
+        name: 'Kem',
+        description: 'Kem mát lạnh đa dạng hương vị',
+        displayOrder: 2,
+        isActive: true,
       },
     ],
   },
@@ -105,17 +125,28 @@ const Category: React.FC = () => {
 
   const columns = [
     {
-      title: 'Category Name',
+      title: 'Tên danh mục',
       dataIndex: 'name',
       key: 'name',
     },
     {
-      title: 'Description',
+      title: 'Mô tả',
       dataIndex: 'description',
       key: 'description',
     },
     {
-      title: 'Actions',
+      title: 'Thứ tự hiển thị',
+      dataIndex: 'displayOrder',
+      key: 'displayOrder',
+    },
+    {
+      title: 'Trạng thái',
+      dataIndex: 'isActive',
+      key: 'isActive',
+      render: (isActive: boolean) => (isActive ? 'Đang hiển thị' : 'Ẩn'),
+    },
+    {
+      title: 'Hành động',
       key: 'actions',
       render: (_: any, record: CategoryItem) => {
         if (record.children) {
@@ -128,7 +159,7 @@ const Category: React.FC = () => {
                   block
                   onClick={() => handleEditClick(record)}
                 >
-                  Edit
+                  Sửa
                 </Button>
               </Col>
               <Col xs={24} sm={12} md={12} lg={8} xl={6} xxl={6}>
@@ -139,7 +170,7 @@ const Category: React.FC = () => {
                   block
                   onClick={() => handleDeleteClick(record.key)}
                 >
-                  Delete
+                  Xóa
                 </Button>
               </Col>
             </Row>

@@ -4,10 +4,6 @@ import { Table, Tag, Space } from 'antd';
 
 import Echart from '../../components/admin/chart/EChart';
 import LineChart from '../../components/admin/chart/LineChart';
-import { Calendar, theme } from 'antd';
-import type { CalendarProps } from 'antd';
-import type { Dayjs } from 'dayjs';
-import { stringify } from 'ajv';
 
 function Home() {
   const { Title } = Typography;
@@ -104,33 +100,41 @@ function Home() {
 
   const count = [
     {
-      today: 'Total Sales',
+      today: 'Tổng doanh thu',
       title: '$53,000',
       persent: '+30%',
       icon: dollor,
       bnb: 'bnb2',
     },
     {
-      today: 'Orders',
+      today: 'Đơn hàng',
       title: '+1,200',
       persent: '-20%',
       icon: heart,
       bnb: 'redtext',
     },
     {
-      today: 'Discounted products',
+      today: 'Sản phẩm trong kho',
       title: '13,200',
       persent: '10%',
       icon: cart,
       bnb: 'bnb2',
     },
     {
-      today: 'User',
+      today: 'Khách hàng',
       title: '3,200',
       persent: '+20%',
       icon: profile,
       bnb: 'bnb2',
     },
+  ];
+
+  const bestSellingProducts = [
+    { name: 'Sản phẩm A', sales: 1200 },
+    { name: 'Sản phẩm B', sales: 950 },
+    { name: 'Sản phẩm C', sales: 800 },
+    { name: 'Sản phẩm D', sales: 750 },
+    { name: 'Sản phẩm E', sales: 600 },
   ];
 
   const columns = [
@@ -297,6 +301,44 @@ function Home() {
             </Card>
           </Col>
         </Row>
+
+        <Row gutter={[24, 0]}>
+          <Col xs={24} sm={24} md={12} lg={12} xl={12} className="mb-24">
+            <Card
+              title="Sản phẩm bán chạy"
+              bordered={false}
+              className="criclebox h-full"
+            >
+              <Table
+                dataSource={bestSellingProducts}
+                columns={[
+                  {
+                    title: 'Tên sản phẩm',
+                    dataIndex: 'name',
+                    key: 'name',
+                  },
+                  {
+                    title: 'Số lượng bán',
+                    dataIndex: 'sales',
+                    key: 'sales',
+                    sorter: (a, b) => a.sales - b.sales,
+                  },
+                ]}
+                pagination={false}
+              />
+            </Card>
+          </Col>
+          <Col xs={24} sm={24} md={12} lg={12} xl={12} className="mb-24">
+            <Card
+              title="Thông tin kho hàng"
+              bordered={false}
+              className="criclebox h-full"
+            >
+              {/* Thêm biểu đồ hoặc thông tin về kho hàng ở đây */}
+            </Card>
+          </Col>
+        </Row>
+
         <Row gutter={[24, 0]}>
           <Col xs={24} sm={24} md={24} lg={24} xl={24} className="mb-24">
             <Table
@@ -321,32 +363,3 @@ function Home() {
 }
 
 export default Home;
-
-//<Row gutter={[24, 0]}>
-//<Col xs={24} sm={24} md={24} lg={24} xl={24} className="mb-24">
-//  {/* <Button onClick={() => setCalendarVisible(!calendarVisible)}>
-//    Search by calendar
-//  </Button> */}
-//  {calendarVisible && (
-//    <div style={wrapperStyle}>
-//      <Calendar
-//        fullscreen={false}
-//        onPanelChange={onPanelChange}
-//        onChange={(date) => console.log(date.format('YYYY-MM-DD'))}
-//      />
-//    </div>
-//  )}
-//</Col>
-//</Row>
-
-// const wrapperStyle: React.CSSProperties = {
-//   width: 500,
-//   border: `1px solid ${token.colorBorderSecondary}`,
-//   borderRadius: token.borderRadiusLG,
-// };
-
-// const [calendarVisible, setCalendarVisible] = useState(false);
-// const onPanelChange = (value: Dayjs, mode: CalendarProps<Dayjs>['mode']) => {
-//   console.log(value.format('YYYY-MM-DD'), mode);
-// };
-// const { token } = theme.useToken();
