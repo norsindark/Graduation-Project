@@ -1,14 +1,14 @@
-import { ApexOptions } from "apexcharts";
+import { ApexOptions } from 'apexcharts';
 
 const lineChart = {
   series: [
     {
-      name: "Mobile apps",
+      name: 'Mobile apps',
       data: [350, 40, 300, 220, 500, 250, 400, 230, 500],
       offsetY: 0,
     },
     {
-      name: "Websites",
+      name: 'Websites',
       data: [30, 90, 40, 140, 290, 290, 340, 230, 400],
       offsetY: 0,
     },
@@ -16,9 +16,9 @@ const lineChart = {
 
   options: {
     chart: {
-      width: "100%",
+      width: '100%',
       height: 350,
-      type: "area",
+      type: 'area',
       toolbar: {
         show: false,
       },
@@ -32,15 +32,15 @@ const lineChart = {
       enabled: false,
     },
     stroke: {
-      curve: "smooth",
+      curve: 'smooth',
     },
 
     yaxis: {
       labels: {
         style: {
-          fontSize: "14px",
+          fontSize: '14px',
           fontWeight: 600,
-          colors: ["#8c8c8c"],
+          colors: ['#8c8c8c'],
         },
       },
     },
@@ -48,31 +48,31 @@ const lineChart = {
     xaxis: {
       labels: {
         style: {
-          fontSize: "14px",
+          fontSize: '14px',
           fontWeight: 600,
           colors: [
-            "#8c8c8c",
-            "#8c8c8c",
-            "#8c8c8c",
-            "#8c8c8c",
-            "#8c8c8c",
-            "#8c8c8c",
-            "#8c8c8c",
-            "#8c8c8c",
-            "#8c8c8c",
+            '#8c8c8c',
+            '#8c8c8c',
+            '#8c8c8c',
+            '#8c8c8c',
+            '#8c8c8c',
+            '#8c8c8c',
+            '#8c8c8c',
+            '#8c8c8c',
+            '#8c8c8c',
           ],
         },
       },
       categories: [
-        "Feb",
-        "Mar",
-        "Apr",
-        "May",
-        "Jun",
-        "Jul",
-        "Aug",
-        "Sep",
-        "Oct",
+        'Feb',
+        'Mar',
+        'Apr',
+        'May',
+        'Jun',
+        'Jul',
+        'Aug',
+        'Sep',
+        'Oct',
       ],
     },
 
@@ -83,7 +83,7 @@ const lineChart = {
         },
       },
     },
-  } as ApexOptions
+  } as ApexOptions,
 };
 
 export default lineChart;

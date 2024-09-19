@@ -1,19 +1,19 @@
-import { ApexOptions } from "apexcharts";
+import { ApexOptions } from 'apexcharts';
 
 const eChart = {
   series: [
     {
-      name: "Sales",
+      name: 'Sales',
       data: [450, 200, 100, 220, 500, 100, 400, 230, 500],
-      color: "#fff",
+      color: '#fff',
     },
   ],
 
   options: {
     chart: {
-      type: "bar",
-      width: "100%",
-      height: "auto",
+      type: 'bar',
+      width: '100%',
+      height: 'auto',
       toolbar: {
         show: false,
       },
@@ -21,7 +21,7 @@ const eChart = {
     plotOptions: {
       bar: {
         horizontal: false,
-        columnWidth: "55%",
+        columnWidth: '55%',
         borderRadius: 5,
       },
     },
@@ -31,50 +31,50 @@ const eChart = {
     stroke: {
       show: true,
       width: 1,
-      colors: ["transparent"],
+      colors: ['transparent'],
     },
     grid: {
       show: true,
-      borderColor: "#ccc",
+      borderColor: '#ccc',
       strokeDashArray: 2,
     },
     xaxis: {
       categories: [
-        "Feb",
-        "Mar",
-        "Apr",
-        "May",
-        "Jun",
-        "Jul",
-        "Aug",
-        "Sep",
-        "Oct",
+        'Feb',
+        'Mar',
+        'Apr',
+        'May',
+        'Jun',
+        'Jul',
+        'Aug',
+        'Sep',
+        'Oct',
       ],
       labels: {
         show: true,
-        align: "right",
+        align: 'right',
         minWidth: 0,
         maxWidth: 160,
         style: {
-          colors: Array(9).fill("#fff"),
+          colors: Array(9).fill('#fff'),
         },
       },
     },
     yaxis: {
       labels: {
         show: true,
-        align: "right",
+        align: 'right',
         minWidth: 0,
         maxWidth: 160,
         style: {
-          colors: Array(9).fill("#fff"),
+          colors: Array(9).fill('#fff'),
         },
       },
     },
     tooltip: {
       y: {
         formatter: function (val: number) {
-          return "$ " + val + " thousands";
+          return '$ ' + val + ' thousands';
         },
       },
     },
