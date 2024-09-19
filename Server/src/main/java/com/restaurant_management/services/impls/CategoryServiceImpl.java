@@ -84,6 +84,7 @@ public class CategoryServiceImpl implements CategoryService {
         newCategory.setStatus(StatusType.INACTIVE.toString());
         newCategory.setSlug(slug);
         newCategory.setParentCategory(parentCategory);
+        newCategory.setDescription(categoryDto.getDescription());
         categoryRepository.save(newCategory);
         return new ApiResponse("Category added successfully", HttpStatus.CREATED);
     }
@@ -107,6 +108,7 @@ public class CategoryServiceImpl implements CategoryService {
         existingCategory.setName(categoryDto.getName());
         existingCategory.setStatus(status.toString());
         existingCategory.setSlug(categoryDto.getSlug());
+        existingCategory.setDescription(categoryDto.getDescription());
 
         if (categoryDto.getParentId() != null) {
             Optional<Category> parentCategoryOpt = categoryRepository.findById(categoryDto.getParentId());
