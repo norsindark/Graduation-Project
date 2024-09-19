@@ -34,6 +34,9 @@ public class Category {
     @Column(name = "status")
     private String status;
 
+    @Column(name = "description")
+    private String description;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")
     private Category parentCategory;
