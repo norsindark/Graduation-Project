@@ -12,7 +12,7 @@ import java.io.IOException;
 
 public interface CategoryService {
 
-    PagedModel<EntityModel<CategoryResponse>> getAllCategories(int pageNo, int pageSize, String sortBy)
+    PagedModel<EntityModel<CategoryResponse>> getAllCategories(int pageNo, int pageSize, String sortBy, String sortDir)
             throws DataExitsException;
 
     CategoryResponse getCategoryById(String id) throws DataExitsException;

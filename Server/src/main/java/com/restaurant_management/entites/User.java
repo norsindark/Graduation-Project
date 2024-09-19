@@ -68,6 +68,10 @@ public class User implements UserDetails {
     @JsonManagedReference
     private Set<UserToken> tokens = new HashSet<>();
 
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    private Employee employee;
+
     @Column(name = "created_at")
     @CreationTimestamp
     private Timestamp createdAt;

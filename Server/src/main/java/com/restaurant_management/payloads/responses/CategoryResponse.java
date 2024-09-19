@@ -10,17 +10,19 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class CategoryResponse {
 
-        private String id;
-        private String name;
-        private String thumbnail;
-        private String slug;
-        private String status;
+    private String id;
+    private String name;
+    private String thumbnail;
+    private String slug;
+    private String status;
+    private String parentId;
 
-        public CategoryResponse(Category category) {
-            this.id = category.getId();
-            this.name = category.getName();
-            this.thumbnail = category.getThumbnail();
-            this.slug = category.getSlug();
-            this.status = category.getStatus();
-        }
+    public CategoryResponse(Category category) {
+        this.id = category.getId();
+        this.name = category.getName();
+        this.thumbnail = category.getThumbnail();
+        this.slug = category.getSlug();
+        this.status = category.getStatus();
+        this.parentId = category.getParentCategory() != null ? category.getParentCategory().getId() : null;
+    }
 }

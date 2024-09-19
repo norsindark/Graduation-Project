@@ -19,19 +19,13 @@ public class SwaggerConfig {
                         .version("1.0.0")
                         .description("API documentation for Spring Boot application"))
                 .addSecurityItem(new SecurityRequirement().addList("Bearer Authentication"))
-                .addSecurityItem(new SecurityRequirement().addList("Basic Authentication"))
                 .components(new Components()
                         .addSecuritySchemes("Bearer Authentication",
                                 new SecurityScheme()
                                         .name("Bearer Authentication")
                                         .type(SecurityScheme.Type.HTTP)
                                         .scheme("bearer")
-                                        .bearerFormat("JWT"))
-                        .addSecuritySchemes("Basic Authentication",
-                                new SecurityScheme()
-                                        .name("Basic Authentication")
-                                        .type(SecurityScheme.Type.HTTP)
-                                        .scheme("basic")));
+                                        .bearerFormat("JWT")));
     }
 
 }

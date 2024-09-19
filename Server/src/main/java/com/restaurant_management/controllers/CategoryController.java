@@ -26,10 +26,11 @@ public class CategoryController {
     @GetMapping("/all")
     @PreAuthorize("hasRole('ADMIN') or hasRole('EMPLOYEE')")
     public ResponseEntity<PagedModel<EntityModel<CategoryResponse>>> getAllCategories(
-            @RequestParam int pageNo,
-            @RequestParam int pageSize,
-            @RequestParam String sortBy) throws DataExitsException {
-        return ResponseEntity.ok(categoryService.getAllCategories(pageNo, pageSize, sortBy));
+            @RequestParam(defaultValue = "0") int pageNo,
+            @RequestParam(defaultValue = "10") int pageSize,
+            @RequestParam(defaultValue = "name") String sortBy,
+            @RequestParam(defaultValue = "asc") String sortDir) throws DataExitsException {
+        return ResponseEntity.ok(categoryService.getAllCategories(pageNo, pageSize, sortBy, sortDir));
     }
 
     @GetMapping("/get-by-id/{id}")

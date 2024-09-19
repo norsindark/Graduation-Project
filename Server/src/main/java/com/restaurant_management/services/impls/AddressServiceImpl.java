@@ -102,17 +102,21 @@ public class AddressServiceImpl implements AddressService {
     }
 
     @Override
-    public PagedModel<EntityModel<AddressByUserIdResponse>> getAllAddressByUserId(String userId, int pageNo, int pageSize, String sortBy)
+    public PagedModel<EntityModel<AddressByUserIdResponse>> getAllAddressByUserId(String userId, int pageNo, int pageSize, String sortBy, String sortDir)
             throws DataExitsException {
-        Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Order.asc(sortBy)));
+        Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.fromString(sortDir), sortBy));
 
         Optional<User> user = userRepository.findById(userId);
         if (user.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found with id: " + userId);
         }
 
-        Page<Address> addressPages = addressRepository.findByUserId(userId, pageable);
+        Page<Address> pagedResult = addressRepository.findByUserId(userId, pageable);
 
-        return pagedResourcesAssembler.toModel(addressPages.map(AddressByUserIdResponse::new));
+        if (pagedResult.hasContent()) {
+            return pagedResourcesAssembler.toModel(pagedResult.map(AddressByUserIdResponse::new));
+        } else {
+            throw new DataExitsException("No Category found");
+        }
     }
 }
