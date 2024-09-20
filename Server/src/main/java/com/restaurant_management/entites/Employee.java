@@ -41,13 +41,8 @@ public class Employee {
     @Column(name = "job_title")
     private String jobTitle;
 
-    @ManyToMany
-    @JoinTable(
-            name = "employee_shifts",
-            joinColumns = @JoinColumn(name = "employee_id"),
-            inverseJoinColumns = @JoinColumn(name = "shift_id")
-    )
-    private Set<Shift> shifts = new HashSet<>();
+    @OneToMany(mappedBy = "employee")
+    private Set<EmployeeShift> employeeShifts = new HashSet<>();
 
     @OneToMany(mappedBy = "employee")
     private Set<Attendance> attendances = new HashSet<>();

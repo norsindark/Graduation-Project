@@ -1,6 +1,5 @@
 package com.restaurant_management.entites;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -37,11 +36,10 @@ public class Shift {
     @Column(name = "end_time", nullable = false)
     private LocalTime endTime;
 
-    @ManyToMany(mappedBy = "shifts")
-    private Set<Employee> employees = new HashSet<>();
+    @OneToMany(mappedBy = "shift")
+    private Set<EmployeeShift> employeeShifts = new HashSet<>();
 
     @OneToMany(mappedBy = "shift")
-    @JsonBackReference
     private Set<Attendance> attendances = new HashSet<>();
 
     @Column(name = "created_at")
