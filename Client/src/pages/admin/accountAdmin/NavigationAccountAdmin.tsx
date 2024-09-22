@@ -67,24 +67,40 @@ const NavigationAccountAdmin = () => {
             aria-selected="true"
           >
             <span>
-              <i className="fas fa-user"></i>
+              <i className="fas fa-chart-line"></i>
             </span>{' '}
             Dashboard
           </button>
           <button
             className="nav-link"
-            id="v-pills-employee-shift-management-tab"
+            id="v-pills-employee-management-tab"
             data-bs-toggle="pill"
-            data-bs-target="#v-pills-employee-shift-management"
+            data-bs-target="#v-pills-employee-management"
             type="button"
             role="tab"
-            aria-controls="v-pills-employee-shift-management"
+            aria-controls="v-pills-employee-management"
             aria-selected="true"
           >
             <span>
               <i className="fas fa-user"></i>
             </span>{' '}
-            Employee Shift Management
+            Employee Management
+          </button>
+
+          <button
+            className="nav-link"
+            id="v-pills-shift-management-tab"
+            data-bs-toggle="pill"
+            data-bs-target="#v-pills-shift-management"
+            type="button"
+            role="tab"
+            aria-controls="v-pills-shift-management"
+            aria-selected="true"
+          >
+            <span>
+              <i className="fas fa-calendar-alt"></i>
+            </span>{' '}
+            Shift Management
           </button>
 
           <button

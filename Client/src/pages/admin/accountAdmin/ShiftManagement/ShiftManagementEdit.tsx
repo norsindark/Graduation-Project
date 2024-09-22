@@ -14,7 +14,7 @@ import { RootState } from '../../../../redux/store';
 import { useNavigate } from 'react-router-dom';
 import moment from 'moment';
 
-const EmployeeShiftManagementEdit = ({
+const ShiftManagementEdit = ({
   currentShift,
   onEditSuccess,
   setShowShiftEdit,
@@ -182,4 +182,4 @@ const EmployeeShiftManagementEdit = ({
   );
 };
 
-export default EmployeeShiftManagementEdit;
+export default ShiftManagementEdit;

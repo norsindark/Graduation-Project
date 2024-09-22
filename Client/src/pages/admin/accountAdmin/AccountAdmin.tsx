@@ -1,12 +1,12 @@
 import { Modal } from 'antd';
 import { useLocation, useNavigate } from 'react-router-dom';
 import NavigationAccountAdmin from './NavigationAccountAdmin';
-import DashboardAccountAdmin from './Information/DashboardAccountAdmin';
-import EmployeeShiftManagement from './employeeShiftManagement/EmployeeShiftManagement';
+
+import ShiftManagement from './ShiftManagement/ShiftManagement';
 import TimekeepingManagement from './timekeepingmanagement/TimekeepingManagement';
 import InformationAdmin from './Information/InformationAdmin';
 import EmployeeStatistics from './dashboard/EmployeeStatistics';
-
+import EmployeeManagement from './employeeManagement/EmployeeManagement';
 const AccountAdmin = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -48,7 +48,9 @@ const AccountAdmin = () => {
                   <div className="tab-content" id="v-pills-tabContent">
                     <EmployeeStatistics />
 
-                    <EmployeeShiftManagement />
+                    <EmployeeManagement />
+
+                    <ShiftManagement />
 
                     <TimekeepingManagement />
 

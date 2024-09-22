@@ -38,26 +38,38 @@ const UserEdit: React.FC<UserEditProps> = ({
   }, [currentItem, form]);
 
   const onFinish = async (values: any) => {
+    const { email, role, status, fullName } = values;
     setLoading(true);
     try {
-      await callUpdateUser(
-        values.email,
-        values.role,
-        values.status,
-        values.fullName,
+      const res = await callUpdateUser(
+        email,
+        role,
+        status,
+        fullName,
         currentItem.id
       );
-      notification.success({
-        message: 'Update successful',
-        description: 'User information has been updated.',
-      });
-      onEditSuccess();
-    } catch (error) {
-      console.error('Error updating user:', error);
+      if (res?.status == 200) {
+        notification.success({
+          message: 'Update successful',
+          description: 'User information has been updated.',
+          duration: 5,
+          showProgress: true,
+        });
+        onEditSuccess();
+      } else {
+        notification.error({
+          message: 'Update failed',
+          description: res.data.errors?.error || 'An error occurred!',
+          duration: 5,
+          showProgress: true,
+        });
+      }
+    } catch {
       notification.error({
         message: 'Update failed',
-        description:
-          'An error occurred while updating user information. Please try again.',
+        description: 'An error occurred!',
+        duration: 5,
+        showProgress: true,
       });
     } finally {
       setLoading(false);

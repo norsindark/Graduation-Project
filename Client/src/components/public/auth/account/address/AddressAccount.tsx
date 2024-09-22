@@ -44,6 +44,7 @@ const AddressAccount = () => {
           currentPage - 1,
           pageSize
         );
+        console.log(response);
         if (response.status === 200) {
           const fetchedAddresses =
             response.data._embedded.addressByUserIdResponseList;

@@ -91,3 +91,127 @@
     font-size: 14px; /* Giữ nguyên cỡ chữ cho màn hình nhỏ */
   }
 }
+
+/* ... Các styles hiện có ... */
+
+/* Styles cho Drawer */
+.ant-drawer-content {
+  background-color: #fff8e1; /* Màu kem nhạt, phù hợp với nền chính */
+}
+
+.ant-drawer-header {
+  background-color: #81c784; /* Màu xanh lá cây, giống như tiêu đề bảng */
+  border-bottom: none;
+}
+
+.ant-drawer-title {
+  color: #fff;
+  font-weight: 600;
+  font-size: 18px;
+}
+
+.ant-drawer-close {
+  color: #fff;
+}
+
+/* Styles cho Descriptions trong Drawer */
+.user-detail-descriptions.ant-descriptions {
+  background-color: #fffaf0; /* Màu trắng ngà, như màu sữa */
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.user-detail-descriptions .ant-descriptions-item-label {
+  background-color: #f0f4e8; /* Màu xanh lá nhạt, gợi nhớ đến rau */
+  font-weight: 600;
+  color: #2e7d32; /* Màu xanh lá cây đậm hơn */
+  padding: 12px 16px;
+}
+
+.user-detail-descriptions .ant-descriptions-item-content {
+  background-color: #fff0e0; /* Màu cam nhạt, gợi nhớ đến trái cây */
+  color: #5d4037; /* Màu nâu nhạt, như socola */
+  padding: 12px 16px;
+}
+
+/* Style cho ảnh avatar */
+.user-avatar {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  border: 2px solid #81c784; /* Viền xanh lá cây */
+  object-fit: cover;
+}
+
+/* Style cho địa chỉ */
+.address-item {
+  background-color: #e8f5e9; /* Màu xanh lá cây rất nhạt */
+  padding: 12px;
+  margin-bottom: 8px;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.address-item p {
+  margin: 4px 0;
+}
+
+.address-item strong {
+  color: #2e7d32;
+}
+
+/* Responsive styles */
+@media screen and (max-width: 768px) {
+  .ant-drawer-content-wrapper {
+    width: 100% !important;
+  }
+
+  .user-detail-descriptions .ant-descriptions-item-label,
+  .user-detail-descriptions .ant-descriptions-item-content {
+    padding: 8px;
+  }
+
+  .user-avatar {
+    width: 80px;
+    height: 80px;
+  }
+}
+.fp__checkout_single_address {
+  background-color: #f0f2f5;
+  padding: 16px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  position: relative;
+}
+
+.fp__checkout_single_address .icon {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: bold;
+}
+
+.fp__checkout_single_address ul {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  list-style: none;
+  padding: 0;
+}
+
+.fp__checkout_single_address ul li {
+  display: inline-block;
+  margin-left: 10px;
+}
+
+.dash_edit_btn,
+.dash_del_icon {
+  cursor: pointer;
+}
+
+.dash_edit_btn i {
+  color: #1890ff;
+}
+
+.dash_del_icon i {
+  color: #ff4d4f;
+}

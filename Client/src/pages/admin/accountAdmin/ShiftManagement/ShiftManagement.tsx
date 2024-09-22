@@ -3,8 +3,8 @@ import { FaCalendarAlt } from 'react-icons/fa';
 import { Button, Pagination, notification, Table } from 'antd';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../../redux/store';
-import ShiftNew from './EmployeeShiftManagementNew';
-import ShiftEdit from './EmployeeShiftManagementEdit';
+import ShiftNew from './ShiftManagementNew';
+import ShiftEdit from './ShiftManagementEdit';
 // import {
 //   callBulkShifts,
 //   callDeleteShift,
@@ -20,7 +20,7 @@ interface Shift {
   employees: string[];
 }
 
-const EmployeeShiftManagement = () => {
+const ShiftManagement = () => {
   const [shifts, setShifts] = useState<Shift[]>([]);
   const [total, setTotal] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
@@ -141,9 +141,9 @@ const EmployeeShiftManagement = () => {
   return (
     <div
       className="tab-pane fade"
-      id="v-pills-employee-shift-management"
+      id="v-pills-shift-management"
       role="tabpanel"
-      aria-labelledby="v-pills-employee-shift-management-tab"
+      aria-labelledby="v-pills-shift-management-tab"
     >
       <div className="fp_dashboard_body">
         <h3>
@@ -201,4 +201,4 @@ const EmployeeShiftManagement = () => {
   );
 };
 
-export default EmployeeShiftManagement;
+export default ShiftManagement;

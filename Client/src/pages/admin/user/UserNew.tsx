@@ -15,22 +15,34 @@ const UserNew: React.FC<UserNewProps> = ({ onAddSuccess, setShowUserNew }) => {
   const [loading, setLoading] = useState(false);
 
   const onFinish = async (values: any) => {
+    const { email, password, fullName, role } = values;
     setLoading(true);
     try {
-      const { email, password, fullName, role } = values;
-      await callAddUser(email, password, fullName, role);
-      notification.success({
-        message: 'User added successfully',
-        description: 'The new user has been added to the system.',
-      });
-      form.resetFields();
-      onAddSuccess();
-    } catch (error) {
-      console.error('Error adding user:', error);
+      const res = await callAddUser(email, password, fullName, role);
+      if (res?.status == 200) {
+        notification.success({
+          message: 'User added successfully',
+          description: 'The new user has been added to the system.',
+          duration: 5,
+          showProgress: true,
+        });
+        form.resetFields();
+        onAddSuccess();
+      } else {
+        notification.error({
+          message: 'Error adding user',
+          description: res.data.errors?.error || 'An error occurred!',
+          duration: 5,
+          showProgress: true,
+        });
+      }
+    } catch {
       notification.error({
         message: 'Error adding user',
         description:
           'An error occurred while adding the new user. Please try again.',
+        duration: 5,
+        showProgress: true,
       });
     } finally {
       setLoading(false);

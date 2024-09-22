@@ -14,7 +14,7 @@ import { useSelector } from 'react-redux';
 import { RootState } from '../../../../redux/store';
 import { useNavigate } from 'react-router-dom';
 
-const EmployeeShiftManagementNew = ({
+const ShiftManagementNew = ({
   onAddSuccess,
   setShowShiftNew,
 }: {
@@ -161,4 +161,4 @@ const EmployeeShiftManagementNew = ({
   );
 };
 
-export default EmployeeShiftManagementNew;
+export default ShiftManagementNew;
