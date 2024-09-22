@@ -18,7 +18,7 @@ import Category from '../pages/admin/categoris/Category';
 import AccountAdmin from '../pages/admin/accountAdmin/AccountAdmin';
 import Warehouse from '../pages/admin/warehouse/Warehouse';
 import Product from '../pages/admin/product/Product';
-
+import User from '../pages/admin/user/User';
 import Order from '../pages/admin/order/Order';
 export const router = createBrowserRouter([
   {
@@ -77,6 +77,10 @@ export const router = createBrowserRouter([
         index: true,
         path: 'dashboard',
         element: <Home />,
+      },
+      {
+        path: '/user',
+        element: <User />,
       },
       {
         path: '/category',

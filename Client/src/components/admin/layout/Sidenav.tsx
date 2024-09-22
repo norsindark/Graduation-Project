@@ -6,6 +6,8 @@ import { BiSolidDashboard } from 'react-icons/bi';
 import { CgMenuLeftAlt } from 'react-icons/cg';
 import { AiOutlineHome } from 'react-icons/ai';
 import { FaWarehouse } from 'react-icons/fa';
+import { UsergroupAddOutlined } from '@ant-design/icons';
+
 function Sidenav({ color }: { color: string }) {
   const { pathname } = useLocation();
   const page = pathname.replace('/', '');
@@ -33,6 +35,20 @@ function Sidenav({ color }: { color: string }) {
     {
       key: '3',
       label: (
+        <NavLink to="/user">
+          <span
+            className="icon"
+            style={{ background: page === 'user' ? color : '' }}
+          >
+            <UsergroupAddOutlined />
+          </span>
+          <span className="label">User</span>
+        </NavLink>
+      ),
+    },
+    {
+      key: '4',
+      label: (
         <NavLink to="/category">
           <span
             className="icon"
@@ -45,7 +61,7 @@ function Sidenav({ color }: { color: string }) {
       ),
     },
     {
-      key: '4',
+      key: '5',
       label: (
         <NavLink to="/product">
           <span
@@ -59,9 +75,8 @@ function Sidenav({ color }: { color: string }) {
         </NavLink>
       ),
     },
-
     {
-      key: '5',
+      key: '6',
       label: (
         <NavLink to="/warehouse">
           <span
@@ -75,7 +90,7 @@ function Sidenav({ color }: { color: string }) {
       ),
     },
     {
-      key: '6',
+      key: '7',
       label: (
         <NavLink to="/order">
           <span

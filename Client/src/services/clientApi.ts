@@ -122,6 +122,7 @@ export const callDeleteAddress = (addressId: string) => {
 export const callChangePassword = (
   userId: string,
   oldPassword: string,
+
   newPassword: string
 ) => {
   return axios.put('/api/v1/client/user/change-password', {

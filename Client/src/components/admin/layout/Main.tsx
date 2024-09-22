@@ -6,12 +6,13 @@ import Header from './Header';
 import Footer from './Footer';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../redux/store';
+import './Table.css';
 
 const { Header: AntHeader, Content, Sider } = Layout;
 
 function Main() {
   const [visible, setVisible] = useState(false);
-  const [sidenavColor, setSidenavColor] = useState('#1890ff');
+  const [sidenavColor, setSidenavColor] = useState('#66bb6a');
   const [sidenavType, setSidenavType] = useState('transparent');
   const [fixed, setFixed] = useState(false);
 
