@@ -26,7 +26,12 @@ import {
 import { NavLink, Link } from 'react-router-dom';
 import styled from 'styled-components';
 import avtar from '../../../assets/images/team-2.jpg';
-import { UserOutlined, TeamOutlined, LogoutOutlined } from '@ant-design/icons';
+import {
+  UserOutlined,
+  TeamOutlined,
+  LogoutOutlined,
+  HomeOutlined,
+} from '@ant-design/icons';
 import { Menu } from 'antd';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../redux/store';
@@ -304,6 +309,11 @@ function Header({
   const dispatch = useDispatch();
   const menuItems = [
     {
+      key: '0',
+      icon: <HomeOutlined />,
+      label: <Link to="/">Go To Client</Link>,
+    },
+    {
       key: '1',
       icon: <TeamOutlined />,
       label: <Link to="/account-admin">Manage Employee</Link>,
@@ -506,12 +516,6 @@ function Header({
                 <span>Sign in</span>
               </Link>
             )}
-            <Input
-              style={{ width: '300px' }}
-              className="header-search"
-              placeholder="Type here..."
-              prefix={<SearchOutlined />}
-            />
           </Col>
         </Row>
       </section>
