@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.text.ParseException;
 import java.util.Optional;
 
 @RestController
@@ -44,8 +45,9 @@ public class AdminController {
     public ResponseEntity<PagedModel<EntityModel<GetUserResponse>>>
     getAllUsers(@RequestParam(defaultValue = "0") int pageNo,
                 @RequestParam(defaultValue = "10") int pageSize,
-                @RequestParam(defaultValue = "email") String sortBy) throws DataExitsException {
-        return ResponseEntity.ok(adminService.getAllUsers(pageNo, pageSize, sortBy));
+                @RequestParam(defaultValue = "email") String sortBy,
+                @RequestParam(defaultValue = "asc") String sortDir) throws DataExitsException {
+        return ResponseEntity.ok(adminService.getAllUsers(pageNo, pageSize, sortBy, sortDir));
     }
 
     @PutMapping("/user/update-user")
@@ -58,5 +60,17 @@ public class AdminController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse> deleteUser(@PathVariable String id) throws DataExitsException {
         return ResponseEntity.ok(adminService.deleteUser(id));
+    }
+
+    @GetMapping("/user/search-user")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<PagedModel<EntityModel<GetUserResponse>>>
+    searchUsers(@RequestParam(defaultValue = "role") String type,
+                @RequestParam(defaultValue = "user") String keyword,
+                @RequestParam(defaultValue = "0") int pageNo,
+                @RequestParam(defaultValue = "10") int pageSize,
+                @RequestParam(defaultValue = "email") String sortBy,
+                @RequestParam(defaultValue = "asc") String sortDir) throws DataExitsException, ParseException {
+        return ResponseEntity.ok(adminService.searchUsers(type, keyword, pageNo, pageSize, sortBy, sortDir));
     }
 }
