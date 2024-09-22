@@ -1,6 +1,7 @@
 package com.restaurant_management.entites;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -29,7 +30,7 @@ public class Employee {
 
     @OneToOne
     @JoinColumn(name = "user_id", referencedColumnName = "user_id")
-    @JsonBackReference
+    @JsonIgnore
     private User user;
 
     @Column(name = "employee_name", nullable = false)
@@ -42,9 +43,11 @@ public class Employee {
     private String jobTitle;
 
     @OneToMany(mappedBy = "employee")
+    @JsonIgnore
     private Set<EmployeeShift> employeeShifts = new HashSet<>();
 
     @OneToMany(mappedBy = "employee")
+    @JsonIgnore
     private Set<Attendance> attendances = new HashSet<>();
 
     @Column(name = "created_at")

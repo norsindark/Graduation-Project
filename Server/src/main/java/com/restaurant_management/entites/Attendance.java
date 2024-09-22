@@ -1,5 +1,7 @@
 package com.restaurant_management.entites;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -28,12 +30,12 @@ public class Attendance {
 
     @ManyToOne
     @JoinColumn(name = "employee_id", referencedColumnName = "employee_id")
-    @JsonManagedReference
+    @JsonIgnore
     private Employee employee;
 
     @ManyToOne
     @JoinColumn(name = "shift_id", referencedColumnName = "shift_id")
-    @JsonManagedReference
+    @JsonIgnore
     private Shift shift;
 
     @Column(name = "date", nullable = false)
