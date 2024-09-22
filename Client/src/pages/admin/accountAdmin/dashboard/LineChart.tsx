@@ -2,7 +2,7 @@ import React from 'react';
 import ReactApexChart from 'react-apexcharts';
 import { Typography } from 'antd';
 import { MinusOutlined } from '@ant-design/icons';
-import lineChart from './configs/lineChart';
+import lineChartConfig from '../../../../components/admin/chart/configs/lineChart';
 
 const LineChart: React.FC = () => {
   const { Title, Paragraph } = Typography;
@@ -11,25 +11,25 @@ const LineChart: React.FC = () => {
     <>
       <div className="linechart">
         <div>
-          <Title level={4}>Chart Total Sales</Title>
+          <Title level={4}>Biểu đồ thống kê nhân viên</Title>
           <Paragraph className="lastweek">
-            than last week <span className="bnb2">+30%</span>
+            So với tháng trước <span className="bnb2">+5%</span>
           </Paragraph>
         </div>
         <div className="sales">
           <ul>
-            <li>{<MinusOutlined />} Last week</li>
-            <li>{<MinusOutlined />} New week</li>
+            <li>{<MinusOutlined />} Tuần trước</li>
+            <li>{<MinusOutlined />} Tuần này</li>
           </ul>
         </div>
       </div>
 
       <ReactApexChart
-        className="full-width"
-        options={lineChart.options}
-        series={lineChart.series}
-        type="area"
-        height={350}
+        className="w-full h-[245px] fixErrorChartMinHeight"
+        options={lineChartConfig.options}
+        series={lineChartConfig.series}
+        type="line"
+        height={250}
         width={'100%'}
       />
     </>

@@ -190,7 +190,7 @@ const TimekeepingManagement = () => {
         <Table columns={columns} dataSource={timekeepingRecords} rowKey="id" />
         <Modal
           title={currentRecord ? 'Chỉnh sửa chấm công' : 'Thêm chấm công'}
-          visible={isModalVisible}
+          open={isModalVisible}
           onOk={handleModalOk}
           onCancel={() => {
             setIsModalVisible(false);
