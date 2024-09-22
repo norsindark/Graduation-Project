@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Row, Col, Statistic } from 'antd';
+import { Card, Row, Col, Typography } from 'antd';
+import LineChart from './LineChart';
 import {
   ClockCircleOutlined,
   DollarOutlined,
@@ -8,8 +9,9 @@ import {
   CheckCircleOutlined,
   WarningOutlined,
 } from '@ant-design/icons';
-import { Line } from '@ant-design/charts';
 import CountUp from 'react-countup';
+
+const { Title } = Typography;
 
 interface ChartDataItem {
   date: string;
@@ -26,8 +28,6 @@ const EmployeeStatistics = () => {
     lateArrivals: 0,
   });
 
-  const [chartData, setChartData] = useState<ChartDataItem[]>([]);
-
   useEffect(() => {
     // Trong thực tế, bạn sẽ gọi API để lấy dữ liệu thống kê
     // Ví dụ: fetchStatistics().then(data => setStatistics(data));
@@ -41,33 +41,7 @@ const EmployeeStatistics = () => {
       averageAttendance: 95,
       lateArrivals: 10,
     });
-
-    // Giả lập dữ liệu biểu đồ
-    setChartData([
-      { date: '2023-01', value: 3 },
-      { date: '2023-02', value: 4 },
-      { date: '2023-03', value: 3.5 },
-      { date: '2023-04', value: 5 },
-      { date: '2023-05', value: 4.9 },
-      { date: '2023-06', value: 6 },
-    ]);
   }, []);
-
-  const config = {
-    data: chartData,
-    height: 300,
-    xField: 'date',
-    yField: 'value',
-    point: {
-      size: 5,
-      shape: 'diamond',
-    },
-    label: {
-      style: {
-        fill: '#aaa',
-      },
-    },
-  };
 
   return (
     <div
@@ -77,91 +51,88 @@ const EmployeeStatistics = () => {
       aria-labelledby="v-pills-home-tab"
     >
       <div className="fp__dsahboard_overview">
-        <Row gutter={[16, 16]}>
-          <Col xs={24} sm={12} md={8} lg={8} xl={8}>
-            <Card hoverable>
-              <Statistic
-                title="Tổng số ca làm việc"
-                value={statistics.totalShifts}
-                prefix={<CalendarOutlined style={{ color: '#1890ff' }} />}
-                valueStyle={{ color: '#1890ff' }}
-                formatter={(value) => (
-                  <CountUp end={value as number} separator="," />
-                )}
-              />
-            </Card>
+        <Row
+          className="rowgap-vbox bg-[#faf6f3fa] justify-center"
+          gutter={[8, 8]}
+        >
+          <Col xs={24} sm={12} md={8} lg={6} xl={7}>
+            <div className="bg-white p-4 rounded-lg shadow-md flex items-center justify-between">
+              <div>
+                <div className="text-gray-500">Tổng số ca làm việc</div>
+                <div className="">
+                  <CountUp end={statistics.totalShifts} separator="," />
+                </div>
+                <div className="text-green-500">Month: +30%</div>
+              </div>
+              <CalendarOutlined className="text-blue-500 text-3xl" />
+            </div>
           </Col>
-          <Col xs={24} sm={12} md={8} lg={8} xl={8}>
-            <Card hoverable>
-              <Statistic
-                title="Tổng số nhân viên"
-                value={statistics.totalEmployees}
-                prefix={<UserOutlined style={{ color: '#52c41a' }} />}
-                valueStyle={{ color: '#52c41a' }}
-                formatter={(value) => (
-                  <CountUp end={value as number} separator="," />
-                )}
-              />
-            </Card>
+          <Col xs={24} sm={12} md={8} lg={6} xl={7}>
+            <div className="bg-white p-4 rounded-lg shadow-md flex items-center justify-between">
+              <div>
+                <div className="text-gray-500">Tổng số nhân viên</div>
+                <div className="">
+                  <CountUp end={statistics.totalEmployees} separator="," />
+                </div>
+                <div className="text-red-500">Month: -20%</div>
+              </div>
+              <UserOutlined className="text-blue-500 text-3xl" />
+            </div>
           </Col>
-          <Col xs={24} sm={12} md={8} lg={8} xl={8}>
-            <Card hoverable>
-              <Statistic
-                title="Tổng số giờ làm việc"
-                value={statistics.totalHours}
-                prefix={<ClockCircleOutlined style={{ color: '#faad14' }} />}
-                suffix="giờ"
-                valueStyle={{ color: '#faad14' }}
-                formatter={(value) => (
-                  <CountUp end={value as number} separator="," />
-                )}
-              />
-            </Card>
+          <Col xs={24} sm={12} md={8} lg={6} xl={7}>
+            <div className="bg-white p-4 rounded-lg shadow-md flex items-center justify-between">
+              <div>
+                <div className="text-gray-500">Tổng số giờ làm việc</div>
+                <div className="">
+                  <CountUp end={statistics.totalHours} separator="," /> giờ
+                </div>
+                <div className="text-green-500">Month: +10%</div>
+              </div>
+              <ClockCircleOutlined className="text-blue-500 text-3xl" />
+            </div>
           </Col>
-          <Col xs={24} sm={12} md={8} lg={8} xl={8}>
-            <Card hoverable>
-              <Statistic
-                title="Tổng tiền trả cho nhân viên"
-                value={statistics.totalPayment}
-                prefix={<DollarOutlined style={{ color: '#eb2f96' }} />}
-                suffix="VNĐ"
-                valueStyle={{ color: '#eb2f96' }}
-                formatter={(value) => (
-                  <CountUp end={value as number} separator="," />
-                )}
-              />
-            </Card>
+          <Col xs={24} sm={12} md={8} lg={6} xl={7}>
+            <div className="bg-white p-4 rounded-lg shadow-md flex items-center justify-between">
+              <div>
+                <div className="text-gray-500">Tổng tiền trả cho nhân viên</div>
+                <div className="">
+                  <CountUp end={statistics.totalPayment} separator="," /> VNĐ
+                </div>
+                <div className="text-green-500">Month: +20%</div>
+              </div>
+              <DollarOutlined className="text-blue-500 text-3xl" />
+            </div>
           </Col>
-          <Col xs={24} sm={12} md={8} lg={8} xl={8}>
-            <Card hoverable>
-              <Statistic
-                title="Tỷ lệ chuyên cần trung bình"
-                value={statistics.averageAttendance}
-                prefix={<CheckCircleOutlined style={{ color: '#13c2c2' }} />}
-                suffix="%"
-                valueStyle={{ color: '#13c2c2' }}
-                formatter={(value) => (
-                  <CountUp end={value as number} decimals={2} />
-                )}
-              />
-            </Card>
+          <Col xs={24} sm={12} md={8} lg={6} xl={7}>
+            <div className="bg-white p-4 rounded-lg shadow-md flex items-center justify-between">
+              <div>
+                <div className="text-gray-500">Tỷ lệ chuyên cần trung bình</div>
+                <div className=" ">
+                  <CountUp end={statistics.averageAttendance} decimals={2} />%
+                </div>
+                <div className="text-green-500">Month: +15%</div>
+              </div>
+              <CheckCircleOutlined className="text-blue-500 text-3xl" />
+            </div>
           </Col>
-          <Col xs={24} sm={12} md={8} lg={8} xl={8}>
-            <Card hoverable>
-              <Statistic
-                title="Số lần đi muộn"
-                value={statistics.lateArrivals}
-                prefix={<WarningOutlined style={{ color: '#f5222d' }} />}
-                valueStyle={{ color: '#f5222d' }}
-                formatter={(value) => (
-                  <CountUp end={value as number} separator="," />
-                )}
-              />
-            </Card>
+          <Col xs={24} sm={12} md={8} lg={6} xl={7}>
+            <div className="bg-white p-4 rounded-lg shadow-md flex items-center justify-between">
+              <div>
+                <div className="text-gray-500">Số lần đi muộn</div>
+                <div className="">
+                  <CountUp end={statistics.lateArrivals} separator="," />
+                </div>
+                <div className="text-red-500">Month: -5%</div>
+              </div>
+              <WarningOutlined className="text-blue-500 text-3xl" />
+            </div>
           </Col>
-          <Col span={24}>
-            <Card title="Biểu đồ hiệu suất làm việc" hoverable>
-              <Line {...config} />
+        </Row>
+
+        <Row gutter={[24, 0]} className="w-full m-auto pt-2 ">
+          <Col xs={24} sm={24} md={24} lg={24} xl={24} className="">
+            <Card bordered={false} className="criclebox">
+              <LineChart />
             </Card>
           </Col>
         </Row>

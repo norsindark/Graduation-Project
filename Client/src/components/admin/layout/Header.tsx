@@ -261,170 +261,176 @@ function Header({
   ];
   return (
     <>
-      <div className="setting-drwer" onClick={showDrawer}>
-        {setting}
-      </div>
-      <Row gutter={[24, 0]}>
-        <Col span={24} md={6}>
-          <Breadcrumb items={breadcrumbItems} />
-          <div className="ant-page-header-heading">
-            <span
-              className="ant-page-header-heading-title"
-              style={{ textTransform: 'capitalize' }}
+      <section
+        className="fp__banner h-[11vh] pt-[15px]"
+        style={{ backgroundImage: 'url(images/counter_bg.jpg)' }}
+      >
+        <div className="setting-drwer" onClick={showDrawer}>
+          {setting}
+        </div>
+        <Row gutter={[24, 0]}>
+          <Col span={24} md={6}>
+            <Breadcrumb items={breadcrumbItems} />
+            <div className="ant-page-header-heading">
+              <span
+                className="ant-page-header-heading-title"
+                style={{ textTransform: 'capitalize' }}
+              >
+                {subName.replace('/', '')}
+              </span>
+            </div>
+          </Col>
+          <Col span={24} md={18} className="header-control">
+            <Button type="link" onClick={showDrawer}>
+              {logsetting}
+            </Button>
+            <Button
+              type="link"
+              className="sidebar-toggler"
+              onClick={() => onPress()}
             >
-              {subName.replace('/', '')}
-            </span>
-          </div>
-        </Col>
-        <Col span={24} md={18} className="header-control">
-          <Button type="link" onClick={showDrawer}>
-            {logsetting}
-          </Button>
-          <Button
-            type="link"
-            className="sidebar-toggler"
-            onClick={() => onPress()}
-          >
-            {toggler}
-          </Button>
-          <Drawer
-            className="settings-drawer"
-            mask={true}
-            width={360}
-            onClose={hideDrawer}
-            placement={placement}
-            open={visible}
-          >
-            <div style={{ display: 'flex', flexDirection: 'column' }}>
-              <div className="header-top">
-                <Title level={4}>
-                  Configurator
-                  <Text className="subtitle">See our dashboard options.</Text>
-                </Title>
-              </div>
-
-              <div className="sidebar-color">
-                <Title level={5}>Sidebar Color</Title>
-                <div className="theme-color mb-2">
-                  <ButtonContainer>
-                    <Button
-                      style={{ backgroundColor: '#1890ff', color: '#fff' }}
-                      onClick={() => handleSidenavColor('#1890ff')}
-                    >
-                      1
-                    </Button>
-                    <Button
-                      style={{ backgroundColor: '#52c41a', color: '#fff' }}
-                      onClick={() => handleSidenavColor('#52c41a')}
-                    >
-                      1
-                    </Button>
-                    <Button
-                      style={{ backgroundColor: '#d9363e', color: '#fff' }}
-                      onClick={() => handleSidenavColor('#d9363e')}
-                    >
-                      1
-                    </Button>
-                    <Button
-                      style={{ backgroundColor: '#fadb14', color: '#fff' }}
-                      onClick={() => handleSidenavColor('#fadb14')}
-                    >
-                      1
-                    </Button>
-                    <Button
-                      style={{ backgroundColor: '#111', color: '#fff' }}
-                      onClick={() => handleSidenavColor('#111')}
-                    >
-                      1
-                    </Button>
-                  </ButtonContainer>
+              {toggler}
+            </Button>
+            <Drawer
+              className="settings-drawer"
+              mask={true}
+              width={360}
+              onClose={hideDrawer}
+              placement={placement}
+              open={visible}
+            >
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                <div className="header-top">
+                  <Title level={4}>
+                    Configurator
+                    <Text className="subtitle">See our dashboard options.</Text>
+                  </Title>
                 </div>
 
-                <div className="sidebarnav-color mb-2">
-                  <Title level={5}>Sidenav Type</Title>
-                  <Text>Choose between 2 different sidenav types.</Text>
-                  <ButtonContainer className="trans">
-                    <Button
-                      type={
-                        sidenavType === 'transparent' ? 'primary' : 'default'
-                      }
-                      onClick={() => {
-                        handleSidenavType('transparent');
-                        setSidenavType('transparent');
-                      }}
-                    >
-                      TRANSPARENT
-                    </Button>
-                    <Button
-                      type={sidenavType === 'white' ? 'primary' : 'default'}
-                      onClick={() => {
-                        handleSidenavType('white');
-                        setSidenavType('white');
-                      }}
-                    >
-                      WHITE
-                    </Button>
-                  </ButtonContainer>
-                </div>
-                {/* <div className="fixed-nav mb-2">
+                <div className="sidebar-color">
+                  <Title level={5}>Sidebar Color</Title>
+                  <div className="theme-color mb-2">
+                    <ButtonContainer>
+                      <Button
+                        style={{ backgroundColor: '#1890ff', color: '#fff' }}
+                        onClick={() => handleSidenavColor('#1890ff')}
+                      >
+                        1
+                      </Button>
+                      <Button
+                        style={{ backgroundColor: '#52c41a', color: '#fff' }}
+                        onClick={() => handleSidenavColor('#52c41a')}
+                      >
+                        1
+                      </Button>
+                      <Button
+                        style={{ backgroundColor: '#d9363e', color: '#fff' }}
+                        onClick={() => handleSidenavColor('#d9363e')}
+                      >
+                        1
+                      </Button>
+                      <Button
+                        style={{ backgroundColor: '#fadb14', color: '#fff' }}
+                        onClick={() => handleSidenavColor('#fadb14')}
+                      >
+                        1
+                      </Button>
+                      <Button
+                        style={{ backgroundColor: '#111', color: '#fff' }}
+                        onClick={() => handleSidenavColor('#111')}
+                      >
+                        1
+                      </Button>
+                    </ButtonContainer>
+                  </div>
+
+                  <div className="sidebarnav-color mb-2">
+                    <Title level={5}>Sidenav Type</Title>
+                    <Text>Choose between 2 different sidenav types.</Text>
+                    <ButtonContainer className="trans">
+                      <Button
+                        type={
+                          sidenavType === 'transparent' ? 'primary' : 'default'
+                        }
+                        onClick={() => {
+                          handleSidenavType('transparent');
+                          setSidenavType('transparent');
+                        }}
+                      >
+                        TRANSPARENT
+                      </Button>
+                      <Button
+                        type={sidenavType === 'white' ? 'primary' : 'default'}
+                        onClick={() => {
+                          handleSidenavType('white');
+                          setSidenavType('white');
+                        }}
+                      >
+                        WHITE
+                      </Button>
+                    </ButtonContainer>
+                  </div>
+                  {/* <div className="fixed-nav mb-2">
                   <Title level={5}>Navbar Fixed</Title>
                   <Switch onChange={(checked) => handleFixedNavbar(checked)} />
                 </div> */}
-              </div>
-            </div>
-          </Drawer>
-          <Badge size="small" className="header-notifications" count={3}>
-            <Dropdown
-              trigger={['click']}
-              dropdownRender={() => (
-                <div
-                  className="header-notifications-dropdown"
-                  style={{
-                    maxHeight: '300px',
-                    overflowY: 'auto',
-                    overflowX: 'hidden',
-                    padding: '10px',
-                    backgroundColor: '#fff',
-                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
-                    width: '300px',
-                  }}
-                >
-                  <List
-                    itemLayout="horizontal"
-                    dataSource={data}
-                    renderItem={(item) => (
-                      <List.Item>
-                        <List.Item.Meta
-                          avatar={<Avatar shape="square" src={item.avatar} />}
-                          title={item.title}
-                          description={item.description}
-                        />
-                      </List.Item>
-                    )}
-                  />
                 </div>
-              )}
-            >
-              <a
-                href="#pablo"
-                className="ant-dropdown-link"
-                onClick={(e) => e.preventDefault()}
+              </div>
+            </Drawer>
+            <Badge size="small" className="header-notifications" count={3}>
+              <Dropdown
+                trigger={['click']}
+                dropdownRender={() => (
+                  <div
+                    className="header-notifications-dropdown"
+                    style={{
+                      maxHeight: '300px',
+                      overflowY: 'auto',
+                      overflowX: 'hidden',
+                      padding: '10px',
+                      backgroundColor: '#fff',
+                      boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
+                      width: '300px',
+                    }}
+                  >
+                    <List
+                      itemLayout="horizontal"
+                      dataSource={data}
+                      renderItem={(item) => (
+                        <List.Item>
+                          <List.Item.Meta
+                            avatar={<Avatar shape="square" src={item.avatar} />}
+                            title={item.title}
+                            description={item.description}
+                          />
+                        </List.Item>
+                      )}
+                    />
+                  </div>
+                )}
               >
-                {bell}
-              </a>
-            </Dropdown>
-          </Badge>
-          <Link to="/account-admin" className="btn-sign-in">
-            {profile}
-            <span>Sign in</span>
-          </Link>
-          <Input
-            className="header-search"
-            placeholder="Type here..."
-            prefix={<SearchOutlined />}
-          />
-        </Col>
-      </Row>
+                <a
+                  href="#pablo"
+                  className="ant-dropdown-link"
+                  onClick={(e) => e.preventDefault()}
+                >
+                  {bell}
+                </a>
+              </Dropdown>
+            </Badge>
+            <Link to="/account-admin" className="btn-sign-in">
+              {profile}
+              <span>Sign in</span>
+            </Link>
+            <Input
+              style={{ width: '300px' }}
+              className="header-search"
+              placeholder="Type here..."
+              prefix={<SearchOutlined />}
+            />
+          </Col>
+        </Row>
+      </section>
     </>
   );
 }

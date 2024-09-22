@@ -17,7 +17,7 @@ const lineChart = {
   options: {
     chart: {
       width: '100%',
-      height: 350,
+      height: 270,
       type: 'area',
       toolbar: {
         show: false,
