@@ -32,7 +32,7 @@ public class UserController {
     private final UserRepository userRepository;
 
     @GetMapping("/profile")
-    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN') or hasRole('EMPLOYEE')")
     public ResponseEntity<Optional<UserResponse>> getUserByAccessToken() throws DataExitsException {
         return ResponseEntity.ok(this.userService.getUserByAccessToken());
     }

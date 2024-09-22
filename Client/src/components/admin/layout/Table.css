@@ -1,0 +1,93 @@
+.layout-content {
+  padding: 24px;
+  background-color: #fff8e1; /* Màu kem nhạt, gợi nhớ đến bánh ngọt */
+}
+
+.ant-card {
+  background-color: #fffaf0; /* Màu trắng ngà, như màu sữa */
+}
+
+.table-row-light {
+  background-color: #f0f4e8; /* Màu xanh lá nhạt, gợi nhớ đến rau */
+}
+
+.table-row-dark {
+  background-color: #fff0e0; /* Màu cam nhạt, gợi nhớ đến trái cây */
+}
+
+.ant-table-thead > tr > th {
+  background-color: #81c784 !important;
+  color: #fff !important;
+  font-weight: 600;
+  font-size: 14px !important; /* Đảm bảo cỡ chữ đồng nhất */
+  text-transform: none; /* Bỏ chữ in hoa */
+  letter-spacing: normal; /* Bỏ khoảng cách giữa các chữ cái */
+}
+
+.ant-table-thead > tr > th > div > span {
+  background-color: #81c784 !important;
+  color: #fff !important;
+  font-weight: 600;
+  font-size: 14px !important; /* Đảm bảo cỡ chữ đồng nhất */
+  text-transform: none; /* Bỏ chữ in hoa */
+  letter-spacing: normal; /* Bỏ khoảng cách giữa các chữ cái */ /* Đảm bảo padding đồng nhất */
+}
+
+.ant-table-tbody > tr:hover > td {
+  background-color: #ffe0b2 !important; /* Màu cam nhạt hơn, như quả đào */
+}
+
+.ant-btn-primary {
+  background-color: #66bb6a !important; /* Màu xanh lá cây nhạt, như rau diếp */
+  border-color: #66bb6a !important;
+}
+
+.ant-btn-primary:hover,
+.ant-btn-primary:focus {
+  background-color: #4caf50 !important; /* Màu xanh lá cây đậm hơn khi hover */
+  border-color: #4caf50 !important;
+}
+
+.ant-btn-primary[disabled],
+.ant-btn-primary[disabled]:hover {
+  background-color: #c8e6c9 !important; /* Màu xanh lá cây rất nhạt khi button bị vô hiệu hóa */
+  border-color: #c8e6c9 !important;
+}
+
+.ant-btn-dangerous {
+  background-color: #ef5350 !important; /* Màu đỏ nhạt cho nút xóa */
+  border-color: #ef5350 !important;
+  color: #fff !important;
+}
+
+.ant-btn-dangerous:hover,
+.ant-btn-dangerous:focus {
+  background-color: #e53935 !important; /* Màu đỏ đậm hơn khi hover */
+  border-color: #e53935 !important;
+}
+
+.ant-btn-round {
+  border-radius: 24px !important;
+}
+
+.ant-pagination-item-active {
+  border-color: #66bb6a !important; /* Màu xanh lá cho phân trang active */
+}
+
+.ant-pagination-item-active a {
+  color: #66bb6a !important;
+}
+
+@media screen and (max-width: 576px) {
+  .ant-table-content {
+    overflow-x: auto;
+  }
+
+  .ant-card-head-title {
+    font-size: 20px;
+  }
+
+  .ant-table {
+    font-size: 14px; /* Giữ nguyên cỡ chữ cho màn hình nhỏ */
+  }
+}

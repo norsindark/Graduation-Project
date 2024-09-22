@@ -26,6 +26,15 @@ import {
 import { NavLink, Link } from 'react-router-dom';
 import styled from 'styled-components';
 import avtar from '../../../assets/images/team-2.jpg';
+import { UserOutlined, TeamOutlined, LogoutOutlined } from '@ant-design/icons';
+import { Menu } from 'antd';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../../redux/store';
+import { useDispatch } from 'react-redux';
+import { doLogoutAction } from '../../../redux/account/accountSlice';
+import { callLogout } from '../../../services/clientApi';
+import { useNavigate } from 'react-router-dom';
+import { notification } from 'antd';
 
 const ButtonContainer = styled.div`
   .ant-btn-primary {
@@ -232,16 +241,16 @@ function Header({
   placement: DrawerProps['placement'];
   name: string;
   subName: string;
-  onPress: () => void; // Thay đổi kiểu từ string thành hàm
+  onPress: () => void;
   handleSidenavColor: (color: string) => void;
   handleSidenavType: (type: string) => void;
   handleFixedNavbar: (fixed: boolean) => void;
 }) {
   const { Title, Text } = Typography;
-
+  const navigate = useNavigate();
   const [visible, setVisible] = useState(false);
   const [sidenavType, setSidenavType] = useState('transparent');
-
+  const [submit, setSubmit] = useState(false);
   useEffect(() => window.scrollTo(0, 0));
 
   const showDrawer = () => setVisible(true);
@@ -256,6 +265,60 @@ function Header({
         <span style={{ textTransform: 'capitalize' }}>
           {name.replace('/', '')}
         </span>
+      ),
+    },
+  ];
+  const handleLogout = async () => {
+    try {
+      setSubmit(true);
+      const res = await callLogout();
+      if (res?.status == 200) {
+        dispatch(doLogoutAction());
+        navigate('/');
+        notification.success({
+          message: 'Logout success!',
+          duration: 5,
+          showProgress: true,
+        });
+      } else {
+        notification.error({
+          message: 'Logout failed!',
+          description: res?.data?.errors?.error || 'Something went wrong!',
+          duration: 5,
+          showProgress: true,
+        });
+      }
+    } catch {
+      notification.error({
+        message: 'Logout failed!',
+        description: 'Something went wrong!',
+        duration: 5,
+        showProgress: true,
+      });
+    } finally {
+      setSubmit(false);
+    }
+  };
+
+  const user = useSelector((state: RootState) => state.account.user);
+  const dispatch = useDispatch();
+  const menuItems = [
+    {
+      key: '1',
+      icon: <TeamOutlined />,
+      label: <Link to="/account-admin">Manage Employee</Link>,
+    },
+    {
+      key: '2',
+      icon: <LogoutOutlined />,
+      label: (
+        <a
+          onClick={() => {
+            handleLogout();
+          }}
+        >
+          Logout
+        </a>
       ),
     },
   ];
@@ -418,10 +481,31 @@ function Header({
                 </a>
               </Dropdown>
             </Badge>
-            <Link to="/account-admin" className="btn-sign-in">
-              {profile}
-              <span>Sign in</span>
-            </Link>
+            {user ? (
+              <Dropdown menu={{ items: menuItems }} trigger={['click']}>
+                <a
+                  className="ant-dropdown-link"
+                  onClick={(e) => e.preventDefault()}
+                >
+                  <Avatar icon={<UserOutlined />} src={user.avatar} />
+                  <span
+                    style={{
+                      marginLeft: '8px',
+                      fontWeight: '600',
+                      marginRight: '10px',
+                      fontSize: '16px',
+                    }}
+                  >
+                    Welcome, {user.fullName}
+                  </span>
+                </a>
+              </Dropdown>
+            ) : (
+              <Link to="/login" className="btn-sign-in">
+                {profile}
+                <span>Sign in</span>
+              </Link>
+            )}
             <Input
               style={{ width: '300px' }}
               className="header-search"
