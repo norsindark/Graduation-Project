@@ -42,10 +42,9 @@ export const callGetUserById = async (id: string) => {
   return axios.get(`/api/v1/dashboard/user/get-user/${id}`);
 };
 
-export const callAddNewEmployee = async (employeeName: string, email: string, salary: string, jobTitle: string) => {
+export const callAddNewEmployee = async ( emails: string, salary: string, jobTitle: string) => {
   return axios.post(`/api/v1/dashboard/employee/add-new-employee`, {
-    employeeName,
-    email,
+    emails,
     salary,
     jobTitle,
   });
@@ -59,16 +58,15 @@ export const callDeleteEmployee = async (employeeId: string) => {
   return axios.delete(`/api/v1/dashboard/employee/delete-employee/${employeeId}`);
 };
 
-export const callUpdateEmployee = async (employeeId: string, employeeName: string, email: string, salary: string, jobTitle: string) => {
+export const callUpdateEmployee = async (employeeId: string, employeeName: string, salary: string, jobTitle: string) => {
   return axios.put(`/api/v1/dashboard/employee/update-employee`, {
     employeeId,
     employeeName,
-    email,
     salary,
     jobTitle,
   });
-};
+};``
 
 export const callGetAllEmployers = async () => {
-  return axios.get(`/api/v1/dashboard/employee/get-emails`);
+  return axios.get(`/api/v1/dashboard/employee/get-emails-user`);
 };

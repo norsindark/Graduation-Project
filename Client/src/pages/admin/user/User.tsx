@@ -81,7 +81,7 @@ const User: React.FC = () => {
       // }
 
       const response = await callAllGetUsers(query);
-      console.log(response);
+      console.log('response', response);
       if (response?.status == 200) {
         if (
           response &&
