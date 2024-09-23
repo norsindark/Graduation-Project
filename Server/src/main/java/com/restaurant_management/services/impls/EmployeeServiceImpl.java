@@ -75,34 +75,47 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Override
     @Transactional
     public ApiResponse addEmployee(EmployeeDto employeeDto) throws DataExitsException {
-        Optional<User> userOptional = userRepository.findByEmail(employeeDto.getEmail());
-        if (userOptional.isPresent()) {
-            String userRole = userOptional.get().getRole().getName();
-            if (userRole.equals(RoleName.EMPLOYEE.toString())) {
-                throw new DataExitsException("Employee already exists");
+        List<String> emailList = employeeDto.getEmails();
+        List<String> existingEmails = new ArrayList<>();
+
+        for (String email : emailList) {
+            Optional<User> userOptional = userRepository.findByEmail(email);
+            if (userOptional.isPresent()) {
+                String userRole = userOptional.get().getRole().getName();
+                if (userRole.equals(RoleName.EMPLOYEE.toString())) {
+                    existingEmails.add(email);
+                    continue;
+                }
+                if (userRole.equals(RoleName.ADMIN.toString())) {
+                    throw new DataExitsException("User " + email + " is an admin");
+                }
+
+                Employee _employee = Employee.builder()
+                        .employeeName(userOptional.get().getFullName())
+                        .salary(employeeDto.getSalary())
+                        .jobTitle(employeeDto.getJobTitle())
+                        .user(userOptional.get())
+                        .build();
+
+                this.employeeRepository.save(_employee);
+
+                Role role = roleRepository.findByName(RoleName.EMPLOYEE.toString());
+                User user = userOptional.get();
+                user.setRole(role);
+                userRepository.save(user);
+            } else {
+                throw new DataExitsException("User with email: " + email + " not found");
             }
-            if (userRole.equals(RoleName.ADMIN.toString())) {
-                throw new DataExitsException("User is an admin");
-            }
-
-            Employee _employee = Employee.builder()
-                    .employeeName(employeeDto.getEmployeeName())
-                    .salary(employeeDto.getSalary())
-                    .jobTitle(employeeDto.getJobTitle())
-                    .user(userOptional.get())
-                    .build();
-
-            this.employeeRepository.save(_employee);
-
-            Role role = roleRepository.findByName(RoleName.EMPLOYEE.toString());
-            User user = userOptional.get();
-            user.setRole(role);
-            userRepository.save(user);
-
-            return new ApiResponse("Employee added successfully", HttpStatus.CREATED);
         }
-        return new ApiResponse("User not found", HttpStatus.NOT_FOUND);
+
+        if (!existingEmails.isEmpty()) {
+            throw new DataExitsException("Employee with email: " + existingEmails + " already exists");
+        }
+
+        return new ApiResponse("Employees added successfully", HttpStatus.CREATED);
     }
+
+
 
     @Override
     public EmployeeResponse getEmployeeById(String employeeId) throws DataExitsException {
@@ -149,8 +162,14 @@ public class EmployeeServiceImpl implements EmployeeService {
         if (employeeOptional.isEmpty()) {
             throw new DataExitsException("Employee not found");
         }
+        Optional<User> userOptional = userRepository.findById(employeeOptional.get().getUser().getId());
+        if (userOptional.isEmpty()) {
+            throw new DataExitsException("User not found");
+        }
+        Role role = roleRepository.findByName(RoleName.USER.toString());
+        userOptional.get().setRole(role);
+        userRepository.save(userOptional.get());
         employeeRepository.deleteById(employeeId);
         return new ApiResponse("Employee deleted successfully", HttpStatus.OK);
     }
-
 }
