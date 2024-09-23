@@ -4,6 +4,7 @@ import com.restaurant_management.dtos.EmployeeDto;
 import com.restaurant_management.exceptions.DataExitsException;
 import com.restaurant_management.payloads.responses.ApiResponse;
 import com.restaurant_management.payloads.responses.EmployeeResponse;
+import com.restaurant_management.payloads.responses.GetEmailEmployeeResponse;
 import com.restaurant_management.services.interfaces.EmployeeService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +14,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @Tag(name = "Employee")
@@ -20,6 +23,12 @@ import org.springframework.web.bind.annotation.*;
 public class EmployeeController {
 
     private final EmployeeService employeeService;
+
+    @GetMapping("/get-emails")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<GetEmailEmployeeResponse>> getEmails() throws DataExitsException {
+        return ResponseEntity.ok(employeeService.getEmails());
+    }
 
     @GetMapping("/get-all-employees")
     @PreAuthorize("hasRole('ADMIN')")

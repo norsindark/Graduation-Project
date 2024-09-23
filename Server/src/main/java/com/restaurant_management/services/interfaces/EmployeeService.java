@@ -4,13 +4,17 @@ import com.restaurant_management.dtos.EmployeeDto;
 import com.restaurant_management.exceptions.DataExitsException;
 import com.restaurant_management.payloads.responses.ApiResponse;
 import com.restaurant_management.payloads.responses.EmployeeResponse;
+import com.restaurant_management.payloads.responses.GetEmailEmployeeResponse;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
+
+import java.util.List;
 
 public interface EmployeeService {
 
     ApiResponse addEmployee(EmployeeDto employeeDto) throws DataExitsException;
 
+    List<GetEmailEmployeeResponse> getEmails() throws DataExitsException;
 
     EmployeeResponse getEmployeeById(String employeeId) throws DataExitsException;
 

@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.sql.Timestamp;
+import java.util.List;
 import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, String> {
@@ -15,6 +16,9 @@ public interface UserRepository extends JpaRepository<User, String> {
     Optional<User> findByEmail(String email);
 
     boolean existsByEmail(String email);
+
+    @Query("SELECT u FROM User u WHERE LOWER(u.role.name) = LOWER(:EMPLOYEE)")
+    List<User> findByRoleName(@Param("EMPLOYEE") String EMPLOYEE);
 
     @Query("SELECT u FROM User u")
     Page<User> findAllUser(Pageable pageable);
