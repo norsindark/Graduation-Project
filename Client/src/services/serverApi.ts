@@ -68,3 +68,7 @@ export const callUpdateEmployee = async (employeeId: string, employeeName: strin
     jobTitle,
   });
 };
+
+export const callGetAllEmployers = async () => {
+  return axios.get(`/api/v1/dashboard/employee/get-emails`);
+};
