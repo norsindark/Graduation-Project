@@ -584,7 +584,7 @@ button {
   height: 30px;
   line-height: 30px;
   text-align: center;
-  background: var(--colorPrimary);
+  background: #66bb6a !important;
   color: var(--colorWhite);
   top: -4px;
   right: 0;
@@ -599,7 +599,7 @@ button {
 }
 
 .fp__menu_cart_header .close_cart:hover {
-  background: var(--colorBlack);
+  background: #4caf50 !important;
   color: var(--colorWhite);
 }
 
@@ -5077,11 +5077,15 @@ CHECKOUT PAGE START
   -o-transition: all 0.3s linear 0s;
   width: 50px;
   height: 50px;
-  background: var(--colorPrimary);
+  background: #66bb6a;
   color: var(--colorWhite) !important;
   text-align: center;
   line-height: 50px;
   margin-right: 10px;
+}
+
+.fp__dashboard_menu button span:hover {
+  background: #4caf50;
 }
 
 .nav-pills .nav-link.active,

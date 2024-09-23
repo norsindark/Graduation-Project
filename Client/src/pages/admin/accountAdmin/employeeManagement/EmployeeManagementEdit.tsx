@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Form, Input, Button, notification } from 'antd';
 import { callUpdateEmployee } from '../../../../services/serverApi';
-
+import { SaveOutlined, CloseOutlined } from '@ant-design/icons';
 interface EmployeeEditProps {
   currentEmployee: {
     employeeId: string;
@@ -23,34 +23,36 @@ const EmployeeManagementEdit: React.FC<EmployeeEditProps> = ({
   const [loading, setLoading] = useState(false);
 
   const onFinish = async (values: any) => {
+    const { employeeName, salary, jobTitle } = values;
+    console.log(values, 'values');
+
     setLoading(true);
     try {
       const response = await callUpdateEmployee(
         currentEmployee.employeeId,
-        values.employeeName,
-        values.email,
-        values.salary,
-        values.jobTitle
+        employeeName,
+        salary,
+        jobTitle
       );
       if (response?.status === 200) {
         notification.success({
-          message: 'Cập nhật nhân viên thành công!',
+          message: 'Employee updated successfully!',
           duration: 5,
           showProgress: true,
         });
         onEditSuccess();
       } else {
         notification.error({
-          message: 'Cập nhật nhân viên thất bại',
-          description: response.data.errors?.error || 'Đã xảy ra lỗi!',
+          message: 'Failed to update employee',
+          description: response.data.errors?.error || 'An error occurred!',
           duration: 5,
           showProgress: true,
         });
       }
     } catch (error) {
       notification.error({
-        message: 'Lỗi khi cập nhật nhân viên',
-        description: 'Đã xảy ra lỗi trong quá trình cập nhật!',
+        message: 'Error updating employee',
+        description: 'An error occurred during the update process!',
         duration: 5,
         showProgress: true,
       });
@@ -62,7 +64,7 @@ const EmployeeManagementEdit: React.FC<EmployeeEditProps> = ({
   return (
     <div className="container">
       <h4 className="text-center p-3 font-[500] text-[18px]">
-        Chỉnh sửa thông tin nhân viên
+        Edit Employee Information
       </h4>
       <Form
         form={form}
@@ -72,44 +74,66 @@ const EmployeeManagementEdit: React.FC<EmployeeEditProps> = ({
       >
         <Form.Item
           name="employeeName"
-          label="Tên nhân viên"
-          rules={[{ required: true, message: 'Vui lòng nhập tên nhân viên!' }]}
+          label="Employee Name"
+          className="font-medium"
+          rules={[{ required: true, message: 'Please enter employee name!' }]}
         >
-          <Input placeholder="Nhập tên nhân viên" />
+          <Input placeholder="Enter employee name" />
         </Form.Item>
-        <Form.Item
-          name="email"
-          label="Email"
-          rules={[
-            { required: true, message: 'Vui lòng nhập email!' },
-            { type: 'email', message: 'Email không hợp lệ!' },
-          ]}
-        >
-          <Input placeholder="Nhập email" />
+        <Form.Item label="Email" className="font-medium">
+          <Input placeholder="Enter email" disabled={true} />
         </Form.Item>
         <Form.Item
           name="salary"
-          label="Lương"
-          rules={[{ required: true, message: 'Vui lòng nhập lương!' }]}
+          label="Salary"
+          className="font-medium"
+          rules={[
+            { required: true, message: 'Please enter salary!' },
+            {
+              validator: (_, value) => {
+                if (value === undefined || value === null || value === '') {
+                  return Promise.reject('Salary is required!');
+                }
+                if (isNaN(value)) {
+                  return Promise.reject('Salary must be a number!');
+                }
+                if (value < 0) {
+                  return Promise.reject('Salary cannot be negative!');
+                }
+                return Promise.resolve();
+              },
+            },
+          ]}
         >
-          <Input placeholder="Nhập lương" />
+          <Input placeholder="Enter salary" />
         </Form.Item>
         <Form.Item
           name="jobTitle"
-          label="Chức vụ"
-          rules={[{ required: true, message: 'Vui lòng nhập chức vụ!' }]}
+          label="Job Title"
+          className="font-medium"
+          rules={[{ required: true, message: 'Please enter job title!' }]}
         >
-          <Input placeholder="Nhập chức vụ" />
+          <Input placeholder="Enter job title" />
         </Form.Item>
         <Form.Item>
-          <Button type="primary" htmlType="submit" loading={loading}>
-            Cập nhật
+          <Button
+            type="primary"
+            shape="round"
+            htmlType="submit"
+            loading={loading}
+            icon={<SaveOutlined />}
+          >
+            Update
           </Button>
           <Button
+            type="primary"
+            danger
+            shape="round"
+            icon={<CloseOutlined />}
             onClick={() => setShowEmployeeEdit(false)}
             style={{ marginLeft: 10 }}
           >
-            Hủy
+            Cancel
           </Button>
         </Form.Item>
       </Form>

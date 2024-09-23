@@ -25,6 +25,7 @@ const EmployeeManagementNew: React.FC<EmployeeNewProps> = ({
     const fetchEmployers = async () => {
       try {
         const responseAllEmployers = await callGetAllEmployers();
+
         if (responseAllEmployers?.status === 200) {
           setEmployers(responseAllEmployers.data);
         }
@@ -37,15 +38,11 @@ const EmployeeManagementNew: React.FC<EmployeeNewProps> = ({
   }, []);
 
   const onFinish = async (values: any) => {
-    const { employeeName, email, salary, jobTitle } = values;
+    const { emails, salary, jobTitle } = values;
+    console.log('values', values);
     setIsSubmitting(true);
     try {
-      const response = await callAddNewEmployee(
-        employeeName,
-        email,
-        salary,
-        jobTitle
-      );
+      const response = await callAddNewEmployee(emails, salary, jobTitle);
       if (response?.status === 200) {
         notification.success({
           message: 'Employee added successfully!',
@@ -80,20 +77,14 @@ const EmployeeManagementNew: React.FC<EmployeeNewProps> = ({
       </h4>
       <Form layout="vertical" onFinish={onFinish}>
         <Form.Item
-          name="employeeName"
-          label="Employee Name"
-          rules={[{ required: true, message: 'Please enter employee name!' }]}
-        >
-          <Input placeholder="Enter employee name" />
-        </Form.Item>
-        <Form.Item
-          label="Employee"
-          name="employees"
+          label="Select Emails"
+          className="font-medium"
+          name="emails"
           rules={[
             { required: true, message: 'Please select at least one employee!' },
           ]}
         >
-          <Select mode="multiple" placeholder="Select employee">
+          <Select mode="multiple" placeholder="Select emails">
             {employers.map((employer) => (
               <Select.Option key={employer.email} value={employer.email}>
                 {employer.fullName} ({employer.email})
@@ -104,13 +95,31 @@ const EmployeeManagementNew: React.FC<EmployeeNewProps> = ({
         <Form.Item
           name="salary"
           label="Salary"
-          rules={[{ required: true, message: 'Please enter salary!' }]}
+          className="font-medium"
+          rules={[
+            { required: true, message: 'Please enter salary!' },
+            {
+              validator: (_, value) => {
+                if (value === undefined || value === null || value === '') {
+                  return Promise.reject('Salary is required!');
+                }
+                if (isNaN(value)) {
+                  return Promise.reject('Salary must be a number!');
+                }
+                if (value < 0) {
+                  return Promise.reject('Salary cannot be negative!');
+                }
+                return Promise.resolve();
+              },
+            },
+          ]}
         >
           <Input placeholder="Enter salary" />
         </Form.Item>
         <Form.Item
           name="jobTitle"
           label="Job Title"
+          className="font-medium"
           rules={[{ required: true, message: 'Please enter job title!' }]}
         >
           <Input placeholder="Enter job title" />
@@ -123,7 +132,7 @@ const EmployeeManagementNew: React.FC<EmployeeNewProps> = ({
             loading={isSubmitting}
             icon={<UserAddOutlined />}
           >
-            Add Employee
+            Save
           </Button>
           <Button
             type="primary"
