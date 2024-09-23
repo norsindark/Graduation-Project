@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Form, Input, Button, notification } from 'antd';
 import { callAddNewEmployee } from '../../../../services/serverApi';
-
+import { UserAddOutlined, CloseOutlined } from '@ant-design/icons';
+import { Select } from 'antd';
 interface EmployeeNewProps {
   onAddSuccess: () => void;
   setShowEmployeeNew: (show: boolean) => void;
@@ -14,33 +15,34 @@ const EmployeeManagementNew: React.FC<EmployeeNewProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const onFinish = async (values: any) => {
+    const { employeeName, email, salary, jobTitle } = values;
     setIsSubmitting(true);
     try {
       const response = await callAddNewEmployee(
-        values.employeeName,
-        values.email,
-        values.salary,
-        values.jobTitle
+        employeeName,
+        email,
+        salary,
+        jobTitle
       );
       if (response?.status === 200) {
         notification.success({
-          message: 'Thêm nhân viên thành công!',
+          message: 'Employee added successfully!',
           duration: 5,
           showProgress: true,
         });
         onAddSuccess();
       } else {
         notification.error({
-          message: 'Thêm nhân viên thất bại',
-          description: response.data.errors?.error || 'Đã xảy ra lỗi!',
+          message: 'Failed to add employee',
+          description: response.data.errors?.error || 'An error occurred!',
           duration: 5,
           showProgress: true,
         });
       }
     } catch (error) {
       notification.error({
-        message: 'Lỗi khi thêm nhân viên',
-        description: 'Đã xảy ra lỗi trong quá trình thêm nhân viên!',
+        message: 'Error adding employee',
+        description: 'An error occurred while adding the employee!',
         duration: 5,
         showProgress: true,
       });
@@ -52,49 +54,62 @@ const EmployeeManagementNew: React.FC<EmployeeNewProps> = ({
   return (
     <div className="container">
       <h4 className="text-center p-3 font-[500] text-[18px]">
-        Thêm nhân viên mới
+        Add New Employee
       </h4>
       <Form layout="vertical" onFinish={onFinish}>
         <Form.Item
           name="employeeName"
-          label="Tên nhân viên"
-          rules={[{ required: true, message: 'Vui lòng nhập tên nhân viên!' }]}
+          label="Employee Name"
+          rules={[{ required: true, message: 'Please enter employee name!' }]}
         >
-          <Input placeholder="Nhập tên nhân viên" />
+          <Input placeholder="Enter employee name" />
         </Form.Item>
         <Form.Item
-          name="email"
-          label="Email"
+          label="Employee"
+          name="employees"
           rules={[
-            { required: true, message: 'Vui lòng nhập email!' },
-            { type: 'email', message: 'Email không hợp lệ!' },
+            { required: true, message: 'Please select at least one employee!' },
           ]}
         >
-          <Input placeholder="Nhập email" />
+          <Select mode="multiple" placeholder="Select employee">
+            <Select.Option value="employee1">Employee 1</Select.Option>
+            <Select.Option value="employee2">Employee 2</Select.Option>
+            <Select.Option value="employee3">Employee 3</Select.Option>
+          </Select>
         </Form.Item>
         <Form.Item
           name="salary"
-          label="Lương"
-          rules={[{ required: true, message: 'Vui lòng nhập lương!' }]}
+          label="Salary"
+          rules={[{ required: true, message: 'Please enter salary!' }]}
         >
-          <Input placeholder="Nhập lương" />
+          <Input placeholder="Enter salary" />
         </Form.Item>
         <Form.Item
           name="jobTitle"
-          label="Chức vụ"
-          rules={[{ required: true, message: 'Vui lòng nhập chức vụ!' }]}
+          label="Job Title"
+          rules={[{ required: true, message: 'Please enter job title!' }]}
         >
-          <Input placeholder="Nhập chức vụ" />
+          <Input placeholder="Enter job title" />
         </Form.Item>
         <Form.Item>
-          <Button type="primary" htmlType="submit" loading={isSubmitting}>
-            Thêm nhân viên
+          <Button
+            type="primary"
+            shape="round"
+            htmlType="submit"
+            loading={isSubmitting}
+            icon={<UserAddOutlined />}
+          >
+            Add Employee
           </Button>
           <Button
+            type="primary"
+            shape="round"
+            danger
             onClick={() => setShowEmployeeNew(false)}
             style={{ marginLeft: 10 }}
+            icon={<CloseOutlined />}
           >
-            Hủy
+            Cancel
           </Button>
         </Form.Item>
       </Form>

@@ -1,6 +1,6 @@
 import axios from '../utils/axios-customize';
 
-export const callGetUsers = async (query: string) => {
+export const callAllGetUsers = async (query: string) => {
   return await axios.get(`/api/v1/dashboard/user/get-all-users?${query}`);
 };
 
@@ -43,7 +43,7 @@ export const callGetUserById = async (id: string) => {
 };
 
 export const callAddNewEmployee = async (employeeName: string, email: string, salary: string, jobTitle: string) => {
-  return axios.post(`/api/v1/dashboard/user/add-new-employee`, {
+  return axios.post(`/api/v1/dashboard/employee/add-new-employee`, {
     employeeName,
     email,
     salary,

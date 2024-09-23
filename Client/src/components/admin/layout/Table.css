@@ -163,7 +163,7 @@
 /* Responsive styles */
 @media screen and (max-width: 768px) {
   .ant-drawer-content-wrapper {
-    width: 100% !important;
+    /* width: 70% !important; */
   }
 
   .user-detail-descriptions .ant-descriptions-item-label,
