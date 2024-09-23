@@ -5,6 +5,7 @@ import com.restaurant_management.exceptions.DataExitsException;
 import com.restaurant_management.payloads.responses.ApiResponse;
 import com.restaurant_management.payloads.responses.EmployeeResponse;
 import com.restaurant_management.payloads.responses.GetEmailEmployeeResponse;
+import com.restaurant_management.payloads.responses.GetEmailUserResponse;
 import com.restaurant_management.services.interfaces.EmployeeService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -26,13 +27,13 @@ public class EmployeeController {
 
     @GetMapping("/get-emails-employee")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<GetEmailEmployeeResponse>> getEmails() throws DataExitsException {
+    public ResponseEntity<List<GetEmailEmployeeResponse>> getEmailsEmployee() throws DataExitsException {
         return ResponseEntity.ok(employeeService.getEmailsEmployee());
     }
 
     @GetMapping("/get-emails-user")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<GetEmailEmployeeResponse>> getEmailsUser() throws DataExitsException {
+    public ResponseEntity<List<GetEmailUserResponse>> getEmailsUser() throws DataExitsException {
         return ResponseEntity.ok(employeeService.getEmailsUser());
     }
 

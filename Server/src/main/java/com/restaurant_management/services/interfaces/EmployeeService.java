@@ -5,6 +5,7 @@ import com.restaurant_management.exceptions.DataExitsException;
 import com.restaurant_management.payloads.responses.ApiResponse;
 import com.restaurant_management.payloads.responses.EmployeeResponse;
 import com.restaurant_management.payloads.responses.GetEmailEmployeeResponse;
+import com.restaurant_management.payloads.responses.GetEmailUserResponse;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
 
@@ -16,7 +17,7 @@ public interface EmployeeService {
 
     List<GetEmailEmployeeResponse> getEmailsEmployee() throws DataExitsException;
 
-    List<GetEmailEmployeeResponse> getEmailsUser() throws DataExitsException;
+    List<GetEmailUserResponse> getEmailsUser() throws DataExitsException;
 
     EmployeeResponse getEmployeeById(String employeeId) throws DataExitsException;
 

@@ -9,7 +9,9 @@ import com.restaurant_management.exceptions.DataExitsException;
 import com.restaurant_management.payloads.responses.ApiResponse;
 import com.restaurant_management.payloads.responses.EmployeeResponse;
 import com.restaurant_management.payloads.responses.GetEmailEmployeeResponse;
+import com.restaurant_management.payloads.responses.GetEmailUserResponse;
 import com.restaurant_management.repositories.EmployeeRepository;
+import com.restaurant_management.repositories.EmployeeShiftRepository;
 import com.restaurant_management.repositories.RoleRepository;
 import com.restaurant_management.repositories.UserRepository;
 import com.restaurant_management.services.interfaces.EmployeeService;
@@ -35,6 +37,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class EmployeeServiceImpl implements EmployeeService {
     private final EmployeeRepository employeeRepository;
+    private final EmployeeShiftRepository employeeShiftRepository;
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final PagedResourcesAssembler<EmployeeResponse> pagedResourcesAssembler;
@@ -50,7 +53,10 @@ public class EmployeeServiceImpl implements EmployeeService {
         for (User user : users) {
             for (Employee employee : employees) {
                 if (user.getId().equals(employee.getUser().getId())) {
-                    getEmailEmployeeResponses.add(new GetEmailEmployeeResponse(user.getEmail(), employee.getEmployeeName()));
+                    getEmailEmployeeResponses.add(new GetEmailEmployeeResponse(
+                            user.getEmail(),
+                            employee.getEmployeeName(),
+                            employee.getId()));
                 }
             }
         }
@@ -58,15 +64,15 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
-    public List<GetEmailEmployeeResponse> getEmailsUser() throws DataExitsException {
+    public List<GetEmailUserResponse> getEmailsUser() throws DataExitsException {
         List<User> users = userRepository.findByRoleName(RoleName.USER.toString());
         if (users.isEmpty()) {
             throw new DataExitsException("No user found");
         }
-        List<GetEmailEmployeeResponse> getEmailEmployeeResponses = new ArrayList<>();
+        List<GetEmailUserResponse> getEmailEmployeeResponses = new ArrayList<>();
         for (User user : users) {
             if (user.getRole().getName().equals(RoleName.USER.toString())) {
-                getEmailEmployeeResponses.add(new GetEmailEmployeeResponse(user.getEmail(), user.getFullName()));
+                getEmailEmployeeResponses.add(new GetEmailUserResponse(user.getEmail(), user.getFullName()));
             }
         }
         return getEmailEmployeeResponses;
@@ -136,7 +142,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         if (pagedResult.hasContent()) {
             return pagedResourcesAssembler.toModel(pagedResult.map(EmployeeResponse::new));
         } else {
-            throw new DataExitsException("No Category found");
+            throw new DataExitsException("No Employee found");
         }
     }
 
@@ -158,18 +164,19 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Override
     @Transactional
     public ApiResponse deleteEmployee(String employeeId) throws DataExitsException {
-        Optional<Employee> employeeOptional = employeeRepository.findById(employeeId);
-        if (employeeOptional.isEmpty()) {
-            throw new DataExitsException("Employee not found");
-        }
-        Optional<User> userOptional = userRepository.findById(employeeOptional.get().getUser().getId());
-        if (userOptional.isEmpty()) {
+        Employee employee = employeeRepository.findById(employeeId)
+                .orElseThrow(() -> new DataExitsException("Employee not found"));
+
+        User user = employee.getUser();
+        if (user == null) {
             throw new DataExitsException("User not found");
         }
+
         Role role = roleRepository.findByName(RoleName.USER.toString());
-        userOptional.get().setRole(role);
-        userRepository.save(userOptional.get());
-        employeeRepository.deleteById(employeeId);
+        user.setRole(role);
+        userRepository.save(user);
+        employeeShiftRepository.deleteByEmployeeId(employeeId);
+        employeeRepository.delete(employee);
         return new ApiResponse("Employee deleted successfully", HttpStatus.OK);
     }
 }

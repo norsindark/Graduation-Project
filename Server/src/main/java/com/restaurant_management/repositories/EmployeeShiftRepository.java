@@ -8,5 +8,7 @@ import java.util.List;
 
 public interface EmployeeShiftRepository extends JpaRepository<EmployeeShift, String> {
 
+    void deleteByEmployeeId(String employeeId);
+
     List<EmployeeShift> findAllByShift(Shift shift);
 }
