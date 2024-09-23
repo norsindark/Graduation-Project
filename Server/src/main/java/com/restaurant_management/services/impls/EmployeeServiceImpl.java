@@ -8,6 +8,7 @@ import com.restaurant_management.enums.RoleName;
 import com.restaurant_management.exceptions.DataExitsException;
 import com.restaurant_management.payloads.responses.ApiResponse;
 import com.restaurant_management.payloads.responses.EmployeeResponse;
+import com.restaurant_management.payloads.responses.GetEmailEmployeeResponse;
 import com.restaurant_management.repositories.EmployeeRepository;
 import com.restaurant_management.repositories.RoleRepository;
 import com.restaurant_management.repositories.UserRepository;
@@ -25,6 +26,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -35,6 +38,24 @@ public class EmployeeServiceImpl implements EmployeeService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final PagedResourcesAssembler<EmployeeResponse> pagedResourcesAssembler;
+
+    @Override
+    public List<GetEmailEmployeeResponse> getEmails() throws DataExitsException {
+        List<User> users = userRepository.findByRoleName(RoleName.EMPLOYEE.toString());
+        List<Employee> employees = employeeRepository.findAll();
+        if (users.isEmpty()) {
+            throw new DataExitsException("No user found");
+        }
+        List<GetEmailEmployeeResponse> getEmailEmployeeResponses = new ArrayList<>();
+        for (User user : users) {
+            for (Employee employee : employees) {
+                if (user.getId().equals(employee.getUser().getId())) {
+                    getEmailEmployeeResponses.add(new GetEmailEmployeeResponse(user.getEmail(), employee.getEmployeeName()));
+                }
+            }
+        }
+        return getEmailEmployeeResponses;
+    }
 
     @Override
     @Transactional
