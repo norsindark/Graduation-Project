@@ -172,11 +172,12 @@ public class EmployeeServiceImpl implements EmployeeService {
             throw new DataExitsException("User not found");
         }
 
+        employeeShiftRepository.deleteByEmployeeId(employeeId);
+        employeeRepository.deleteByEmployeeId(employeeId);
+
         Role role = roleRepository.findByName(RoleName.USER.toString());
         user.setRole(role);
         userRepository.save(user);
-        employeeShiftRepository.deleteByEmployeeId(employeeId);
-        employeeRepository.delete(employee);
         return new ApiResponse("Employee deleted successfully", HttpStatus.OK);
     }
 }
