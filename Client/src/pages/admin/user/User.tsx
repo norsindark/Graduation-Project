@@ -23,7 +23,7 @@ import {
 import UserNew from './UserNew';
 import UserEdit from './UserEdit';
 import {
-  callGetUsers,
+  callAllGetUsers,
   callDeleteUser,
   callGetUserById,
 } from '../../../services/serverApi';
@@ -62,7 +62,6 @@ const User: React.FC = () => {
 
   const [showUserDetail, setShowUserDetail] = useState<boolean>(false);
   const [userDetail, setUserDetail] = useState<UserDetail | null>(null);
-  console.log(userDetail);
 
   useEffect(() => {
     fetchItems();
@@ -72,14 +71,17 @@ const User: React.FC = () => {
     setLoading(true);
     try {
       let query = `pageNo=${current - 1}&pageSize=${pageSize}`;
-      if (filter) {
-        query += `&filter=${filter}`;
-      }
       if (sortQuery) {
-        query += `&sort=${sortQuery}`;
+        query += `&sortBy=${sortQuery}`;
+      } else {
+        query += `&sortBy=createdAt&sortDir=desc`;
       }
+      // if (filter) {
+      //   query += `&filter=${filter}`;
+      // }
 
-      const response = await callGetUsers(query);
+      const response = await callAllGetUsers(query);
+      console.log(response);
       if (response?.status == 200) {
         if (
           response &&
@@ -157,12 +159,12 @@ const User: React.FC = () => {
     }
   };
 
-  const onChange = (pagination: any, filters: any, sorter: any) => {
+  const onChange = (pagination: any, sortDir: any) => {
     setCurrent(pagination.current);
     setPageSize(pagination.pageSize);
-    if (sorter && sorter.field) {
-      const order = sorter.order === 'ascend' ? 'asc' : 'desc';
-      setSortQuery(`${sorter.field},${order}`);
+    if (sortDir && sortDir.field) {
+      const order = sortDir.order === 'ascend' ? 'asc' : 'desc';
+      setSortQuery(`${sortDir.field},${order}`);
     } else {
       setSortQuery('');
     }

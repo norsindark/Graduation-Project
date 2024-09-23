@@ -516,6 +516,11 @@ function Header({
                 <span>Sign in</span>
               </Link>
             )}
+            {/* <Input
+              className="header-search w-[300px]"
+              placeholder="Type here..."
+              prefix={<SearchOutlined />}
+            /> */}
           </Col>
         </Row>
       </section>

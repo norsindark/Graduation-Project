@@ -303,43 +303,6 @@ function Home() {
         </Row>
 
         <Row gutter={[24, 0]}>
-          <Col xs={24} sm={24} md={12} lg={12} xl={12} className="mb-24">
-            <Card
-              title="Sản phẩm bán chạy"
-              bordered={false}
-              className="criclebox h-full"
-            >
-              <Table
-                dataSource={bestSellingProducts}
-                columns={[
-                  {
-                    title: 'Tên sản phẩm',
-                    dataIndex: 'name',
-                    key: 'name',
-                  },
-                  {
-                    title: 'Số lượng bán',
-                    dataIndex: 'sales',
-                    key: 'sales',
-                    sorter: (a, b) => a.sales - b.sales,
-                  },
-                ]}
-                pagination={false}
-              />
-            </Card>
-          </Col>
-          <Col xs={24} sm={24} md={12} lg={12} xl={12} className="mb-24">
-            <Card
-              title="Thông tin kho hàng"
-              bordered={false}
-              className="criclebox h-full"
-            >
-              {/* Thêm biểu đồ hoặc thông tin về kho hàng ở đây */}
-            </Card>
-          </Col>
-        </Row>
-
-        <Row gutter={[24, 0]}>
           <Col xs={24} sm={24} md={24} lg={24} xl={24} className="mb-24">
             <Table
               className="def"
@@ -363,3 +326,40 @@ function Home() {
 }
 
 export default Home;
+
+// <Row gutter={[24, 0]}>
+// <Col xs={24} sm={24} md={12} lg={12} xl={12} className="mb-24">
+//   <Card
+//     title="Sản phẩm bán chạy"
+//     bordered={false}
+//     className="criclebox h-full"
+//   >
+//     <Table
+//       dataSource={bestSellingProducts}
+//       columns={[
+//         {
+//           title: 'Tên sản phẩm',
+//           dataIndex: 'name',
+//           key: 'name',
+//         },
+//         {
+//           title: 'Số lượng bán',
+//           dataIndex: 'sales',
+//           key: 'sales',
+//           sorter: (a, b) => a.sales - b.sales,
+//         },
+//       ]}
+//       pagination={false}
+//     />
+//   </Card>
+// </Col>
+// <Col xs={24} sm={24} md={12} lg={12} xl={12} className="mb-24">
+//   <Card
+//     title="Thông tin kho hàng"
+//     bordered={false}
+//     className="criclebox h-full"
+//   >
+//     {/* Thêm biểu đồ hoặc thông tin về kho hàng ở đây */}
+//   </Card>
+// </Col>
+// </Row>

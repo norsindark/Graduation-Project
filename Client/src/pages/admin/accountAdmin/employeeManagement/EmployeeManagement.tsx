@@ -19,6 +19,7 @@ import EmployeeManagementNew from './EmployeeManagementNew';
 import EmployeeManagementEdit from './EmployeeManagementEdit';
 import { callDeleteEmployee } from '../../../../services/serverApi';
 import { FaUser } from 'react-icons/fa';
+
 interface EmployeeItem {
   employeeId: string;
   employeeName: string;
@@ -27,12 +28,10 @@ interface EmployeeItem {
   salary: string;
 }
 
-const { Title } = Typography;
-
 const EmployeeManagement: React.FC = () => {
   const [listEmployee, setListEmployee] = useState<EmployeeItem[]>([]);
   const [current, setCurrent] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(2);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
 
@@ -45,6 +44,54 @@ const EmployeeManagement: React.FC = () => {
     null
   );
 
+  useEffect(() => {
+    fetchItems();
+  }, [current, pageSize, filter, sortQuery]);
+
+  const fetchItems = async () => {
+    setLoading(true);
+    try {
+      let query = `pageNo=${current - 1}&pageSize=${pageSize}`;
+      if (sortQuery) {
+        query += `&sortBy=${sortQuery}`;
+      } else {
+        query += `&sortBy=createdAt&sortDir=desc`;
+      }
+      const response = await callGetAllEmployee(query);
+      if (response?.status === 200) {
+        if (
+          response.data._embedded &&
+          Array.isArray(response.data._embedded.employeeResponseList)
+        ) {
+          setListEmployee(response.data._embedded.employeeResponseList);
+          setTotal(response.data.page.totalElements);
+        } else {
+          setListEmployee([]);
+          setTotal(0);
+        }
+      }
+    } catch {
+      notification.error({
+        message: 'Unable to load employee list',
+        description: 'An error occurred while fetching data!',
+        duration: 5,
+        showProgress: true,
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const onChange = (pagination: any, sortDir: any) => {
+    setCurrent(pagination.current);
+    setPageSize(pagination.pageSize);
+    if (sortDir && sortDir.field) {
+      const order = sortDir.order === 'ascend' ? 'asc' : 'desc';
+      setSortQuery(`${sortDir.field},${order}`);
+    } else {
+      setSortQuery('');
+    }
+  };
   const handleAddSuccess = () => {
     setShowEmployeeNew(false);
     fetchItems();
@@ -66,84 +113,26 @@ const EmployeeManagement: React.FC = () => {
       const response = await callDeleteEmployee(id);
       if (response?.status === 200) {
         notification.success({
-          message: 'Xóa nhân viên thành công!',
+          message: 'Employee deleted successfully!',
           duration: 5,
           showProgress: true,
         });
         fetchItems();
       } else {
         notification.error({
-          message: 'Xóa nhân viên thất bại',
-          description: response.data.errors?.error || 'Đã xảy ra lỗi!',
+          message: 'Failed to delete employee',
+          description: response.data.errors?.error || 'An error occurred!',
           duration: 5,
           showProgress: true,
         });
       }
     } catch (error) {
       notification.error({
-        message: 'Lỗi khi xóa nhân viên',
-        description: 'Đã xảy ra lỗi trong quá trình xóa!',
+        message: 'Error deleting employee',
+        description: 'An error occurred during deletion!',
         duration: 5,
         showProgress: true,
       });
-    }
-  };
-
-  useEffect(() => {
-    fetchItems();
-  }, [current, pageSize, filter, sortQuery]);
-
-  const fetchItems = async () => {
-    setLoading(true);
-    try {
-      let query = `pageNo=${current - 1}&pageSize=${pageSize}`;
-      if (filter) {
-        query += `&filter=${filter}`;
-      }
-      if (sortQuery) {
-        query += `&sort=${sortQuery}`;
-      }
-
-      const response = await callGetAllEmployee(query);
-      if (response?.status === 200) {
-        if (
-          response.data._embedded &&
-          Array.isArray(response.data._embedded.employeeResponseList)
-        ) {
-          setListEmployee(response.data._embedded.employeeResponseList);
-          setTotal(response.data.page.totalElements);
-        } else {
-          setListEmployee([]);
-          setTotal(0);
-        }
-      } else {
-        notification.error({
-          message: 'Không thể tải danh sách nhân viên',
-          description: 'Đã xảy ra lỗi trong quá trình lấy dữ liệu!',
-          duration: 5,
-          showProgress: true,
-        });
-      }
-    } catch (error) {
-      notification.error({
-        message: 'Không thể tải danh sách nhân viên',
-        description: 'Đã xảy ra lỗi trong quá trình lấy dữ liệu!',
-        duration: 5,
-        showProgress: true,
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const onChange = (pagination: any, filters: any, sorter: any) => {
-    setCurrent(pagination.current);
-    setPageSize(pagination.pageSize);
-    if (sorter && sorter.field) {
-      const order = sorter.order === 'ascend' ? 'asc' : 'desc';
-      setSortQuery(`${sorter.field},${order}`);
-    } else {
-      setSortQuery('');
     }
   };
 
@@ -155,47 +144,50 @@ const EmployeeManagement: React.FC = () => {
       render: (text: string) => text.slice(0, 7),
     },
     {
-      title: 'Tên nhân viên',
+      title: 'Employee Name',
       dataIndex: 'employeeName',
       key: 'employeeName',
-      sorter: true,
+      sorter: (a: any, b: any) => a.employeeName.localeCompare(b.employeeName),
     },
     {
       title: 'Email',
       dataIndex: 'email',
       key: 'email',
-      sorter: true,
+      sorter: (a: any, b: any) => a.email.localeCompare(b.email),
     },
     {
-      title: 'Chức vụ',
+      title: 'Job Title',
       dataIndex: 'jobTitle',
       key: 'jobTitle',
-      sorter: true,
+      sorter: (a: any, b: any) => a.jobTitle.localeCompare(b.jobTitle),
     },
     {
-      title: 'Lương',
+      title: 'Salary',
       dataIndex: 'salary',
       key: 'salary',
-      sorter: true,
+      sorter: (a: any, b: any) => a.salary.localeCompare(b.salary),
     },
     {
-      title: 'Hành động',
+      title: 'Actions',
       key: 'actions',
       render: (_: any, record: EmployeeItem) => (
-        <Space size="small">
+        <Space
+          size="small"
+          className="flex justify-center items-center flex-col"
+        >
           <Button
             type="primary"
             shape="round"
             icon={<EditOutlined />}
             onClick={() => handleEditClick(record)}
           >
-            Sửa
+            Edit
           </Button>
           <Popconfirm
-            title="Bạn có chắc chắn muốn xóa nhân viên này?"
+            title="Are you sure you want to delete this employee?"
             onConfirm={() => handleDeleteClick(record.employeeId)}
-            okText="Có"
-            cancelText="Không"
+            okText="Yes"
+            cancelText="No"
           >
             <Button
               type="primary"
@@ -203,7 +195,7 @@ const EmployeeManagement: React.FC = () => {
               shape="round"
               icon={<DeleteOutlined />}
             >
-              Xóa
+              Delete
             </Button>
           </Popconfirm>
         </Space>
@@ -221,10 +213,10 @@ const EmployeeManagement: React.FC = () => {
       <div className="fp_dashboard_body">
         <h3>
           <FaUser style={{ fontSize: '22px', marginRight: '5px' }} />
-          Quản lý nhân viên
+          Employee Management
         </h3>
         <Card
-          title="Quản lý nhân viên"
+          title="Employee Management"
           extra={
             !showEmployeeNew &&
             !showEmployeeEdit && (
@@ -234,7 +226,7 @@ const EmployeeManagement: React.FC = () => {
                 icon={<UserAddOutlined />}
                 onClick={() => setShowEmployeeNew(true)}
               >
-                Thêm nhân viên mới
+                Add New Employee
               </Button>
             )
           }
@@ -263,7 +255,7 @@ const EmployeeManagement: React.FC = () => {
                 total: total,
                 showSizeChanger: true,
                 showQuickJumper: true,
-                pageSizeOptions: ['5', '10', '20', '50'],
+                pageSizeOptions: ['1', '2'],
                 onShowSizeChange: (current, size) => {
                   setCurrent(1);
                   setPageSize(size);
@@ -271,6 +263,9 @@ const EmployeeManagement: React.FC = () => {
               }}
               scroll={{ x: 'max-content' }}
               bordered
+              rowClassName={(record, index) =>
+                index % 2 === 0 ? 'table-row-light' : 'table-row-dark'
+              }
             />
           )}
         </Card>
