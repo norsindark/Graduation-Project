@@ -24,10 +24,16 @@ public class EmployeeController {
 
     private final EmployeeService employeeService;
 
-    @GetMapping("/get-emails")
+    @GetMapping("/get-emails-employee")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<GetEmailEmployeeResponse>> getEmails() throws DataExitsException {
-        return ResponseEntity.ok(employeeService.getEmails());
+        return ResponseEntity.ok(employeeService.getEmailsEmployee());
+    }
+
+    @GetMapping("/get-emails-user")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<GetEmailEmployeeResponse>> getEmailsUser() throws DataExitsException {
+        return ResponseEntity.ok(employeeService.getEmailsUser());
     }
 
     @GetMapping("/get-all-employees")

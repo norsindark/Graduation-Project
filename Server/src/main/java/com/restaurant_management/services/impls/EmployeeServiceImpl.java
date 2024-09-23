@@ -40,7 +40,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     private final PagedResourcesAssembler<EmployeeResponse> pagedResourcesAssembler;
 
     @Override
-    public List<GetEmailEmployeeResponse> getEmails() throws DataExitsException {
+    public List<GetEmailEmployeeResponse> getEmailsEmployee() throws DataExitsException {
         List<User> users = userRepository.findByRoleName(RoleName.EMPLOYEE.toString());
         List<Employee> employees = employeeRepository.findAll();
         if (users.isEmpty()) {
@@ -52,6 +52,21 @@ public class EmployeeServiceImpl implements EmployeeService {
                 if (user.getId().equals(employee.getUser().getId())) {
                     getEmailEmployeeResponses.add(new GetEmailEmployeeResponse(user.getEmail(), employee.getEmployeeName()));
                 }
+            }
+        }
+        return getEmailEmployeeResponses;
+    }
+
+    @Override
+    public List<GetEmailEmployeeResponse> getEmailsUser() throws DataExitsException {
+        List<User> users = userRepository.findByRoleName(RoleName.USER.toString());
+        if (users.isEmpty()) {
+            throw new DataExitsException("No user found");
+        }
+        List<GetEmailEmployeeResponse> getEmailEmployeeResponses = new ArrayList<>();
+        for (User user : users) {
+            if (user.getRole().getName().equals(RoleName.USER.toString())) {
+                getEmailEmployeeResponses.add(new GetEmailEmployeeResponse(user.getEmail(), user.getFullName()));
             }
         }
         return getEmailEmployeeResponses;
