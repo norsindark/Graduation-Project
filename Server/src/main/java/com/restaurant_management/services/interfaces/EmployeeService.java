@@ -14,7 +14,9 @@ public interface EmployeeService {
 
     ApiResponse addEmployee(EmployeeDto employeeDto) throws DataExitsException;
 
-    List<GetEmailEmployeeResponse> getEmails() throws DataExitsException;
+    List<GetEmailEmployeeResponse> getEmailsEmployee() throws DataExitsException;
+
+    List<GetEmailEmployeeResponse> getEmailsUser() throws DataExitsException;
 
     EmployeeResponse getEmployeeById(String employeeId) throws DataExitsException;
 

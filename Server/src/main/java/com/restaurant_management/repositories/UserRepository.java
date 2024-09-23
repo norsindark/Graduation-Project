@@ -17,8 +17,8 @@ public interface UserRepository extends JpaRepository<User, String> {
 
     boolean existsByEmail(String email);
 
-    @Query("SELECT u FROM User u WHERE LOWER(u.role.name) = LOWER(:EMPLOYEE)")
-    List<User> findByRoleName(@Param("EMPLOYEE") String EMPLOYEE);
+    @Query("SELECT u FROM User u WHERE LOWER(u.role.name) = LOWER(:roleName)")
+    List<User> findByRoleName(@Param("roleName") String roleName);
 
     @Query("SELECT u FROM User u")
     Page<User> findAllUser(Pageable pageable);
