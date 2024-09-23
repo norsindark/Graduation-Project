@@ -16,7 +16,10 @@ import com.restaurant_management.repositories.UserTokenRepository;
 import com.restaurant_management.services.interfaces.AdminService;
 import com.restaurant_management.utils.TimestampConverter;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
@@ -28,7 +31,10 @@ import org.springframework.stereotype.Service;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Locale;
+import java.util.Optional;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -136,25 +142,27 @@ public class AdminServiceImpl implements AdminService {
     public PagedModel<EntityModel<GetUserResponse>> searchUsers(String type, String keyword, int pageNo, int pageSize, String sort, String sortDir)
             throws DataExitsException, ParseException {
         Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.fromString(sortDir), sort));
-        List<User> users = switch (type.toLowerCase(Locale.ROOT)) {
-            case "email" -> userRepository.findsByEmail(keyword);
-            case "fullname" -> userRepository.findByFullName(keyword);
-            case "role" -> userRepository.findByRoleId(keyword);
-            case "status" -> userRepository.findByStatus(keyword);
-            case "enabled" -> userRepository.findByEnabled(Boolean.parseBoolean(keyword));
-            case "emailverifiedat" -> userRepository.findByEmailVerifiedAt(TimestampConverter.convertStringToTimestamp(keyword));
-            case "createdat" -> userRepository.findByCreatedAt(TimestampConverter.convertStringToTimestamp(keyword));
-            case "updatedat" -> userRepository.findByUpdatedAt(TimestampConverter.convertStringToTimestamp(keyword));
+        Page<User> userPage = switch (type.toLowerCase(Locale.ROOT)) {
+            case "email" -> userRepository.findsByEmail(keyword, pageable);
+            case "fullname" -> userRepository.findByFullName(keyword, pageable);
+            case "role" -> userRepository.findByRoleId(keyword, pageable);
+            case "status" -> userRepository.findByStatus(keyword, pageable);
+            case "enabled" -> userRepository.findByEnabled(Boolean.parseBoolean(keyword), pageable);
+            case "emailverifiedat" -> userRepository.findByEmailVerifiedAt(TimestampConverter.convertStringToTimestamp(keyword), pageable);
+            case "createdat" -> userRepository.findByCreatedAt(TimestampConverter.convertStringToTimestamp(keyword), pageable);
+            case "updatedat" -> userRepository.findByUpdatedAt(TimestampConverter.convertStringToTimestamp(keyword), pageable);
             default -> throw new DataExitsException("Invalid search type");
         };
 
-        if (users.isEmpty()) {
+        if (userPage.isEmpty()) {
             throw new DataExitsException("No user found!");
         }
 
-        Page<User> userPage = new PageImpl<>(users, pageable, users.size());
-        Page<GetUserResponse> userResponses = userPage.map(GetUserResponse::new);
-        return pagedResourcesAssembler.toModel(userResponses);
+        if (userPage.hasContent()) {
+            return pagedResourcesAssembler.toModel(userPage.map(GetUserResponse::new));
+        } else {
+            throw new DataExitsException("No Category found");
+        }
     }
 
 }

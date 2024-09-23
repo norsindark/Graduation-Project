@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.sql.Timestamp;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -15,6 +17,8 @@ public class GetUserResponse {
     private String fullName;
     private Role role;
     private String status;
+    private Timestamp createdAt;
+    private Timestamp updatedAt;
 
     public GetUserResponse(User user) {
         this.id = user.getId();
@@ -22,6 +26,8 @@ public class GetUserResponse {
         this.email = user.getEmail();
         this.role = user.getRole();
         this.status = user.getStatus();
+        this.createdAt = user.getCreatedAt();
+        this.updatedAt = user.getUpdatedAt();
     }
 
 }
