@@ -1,8 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Form, Input, Button, notification } from 'antd';
-import { callAddNewEmployee } from '../../../../services/serverApi';
+import {
+  callAddNewEmployee,
+  callGetAllEmployers,
+} from '../../../../services/serverApi';
 import { UserAddOutlined, CloseOutlined } from '@ant-design/icons';
 import { Select } from 'antd';
+
 interface EmployeeNewProps {
   onAddSuccess: () => void;
   setShowEmployeeNew: (show: boolean) => void;
@@ -13,6 +17,24 @@ const EmployeeManagementNew: React.FC<EmployeeNewProps> = ({
   setShowEmployeeNew,
 }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [employers, setEmployers] = useState<
+    { email: string; fullName: string }[]
+  >([]);
+
+  useEffect(() => {
+    const fetchEmployers = async () => {
+      try {
+        const responseAllEmployers = await callGetAllEmployers();
+        if (responseAllEmployers?.status === 200) {
+          setEmployers(responseAllEmployers.data);
+        }
+      } catch (error) {
+        console.error('Error fetching employers:', error);
+      }
+    };
+
+    fetchEmployers();
+  }, []);
 
   const onFinish = async (values: any) => {
     const { employeeName, email, salary, jobTitle } = values;
@@ -72,9 +94,11 @@ const EmployeeManagementNew: React.FC<EmployeeNewProps> = ({
           ]}
         >
           <Select mode="multiple" placeholder="Select employee">
-            <Select.Option value="employee1">Employee 1</Select.Option>
-            <Select.Option value="employee2">Employee 2</Select.Option>
-            <Select.Option value="employee3">Employee 3</Select.Option>
+            {employers.map((employer) => (
+              <Select.Option key={employer.email} value={employer.email}>
+                {employer.fullName} ({employer.email})
+              </Select.Option>
+            ))}
           </Select>
         </Form.Item>
         <Form.Item
