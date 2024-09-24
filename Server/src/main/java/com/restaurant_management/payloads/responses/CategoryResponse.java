@@ -15,7 +15,7 @@ public class CategoryResponse {
     private String thumbnail;
     private String slug;
     private String status;
-    private String parentId;
+    private String parentName;
 
     public CategoryResponse(Category category) {
         this.id = category.getId();
@@ -23,6 +23,6 @@ public class CategoryResponse {
         this.thumbnail = category.getThumbnail();
         this.slug = category.getSlug();
         this.status = category.getStatus();
-        this.parentId = category.getParentCategory() != null ? category.getParentCategory().getId() : null;
+        this.parentName = category.getParentCategory() != null ? category.getParentCategory().getName() : null;
     }
 }
