@@ -81,7 +81,11 @@ const EmployeeManagementEdit: React.FC<EmployeeEditProps> = ({
           <Input placeholder="Enter employee name" />
         </Form.Item>
         <Form.Item label="Email" className="font-medium">
-          <Input placeholder="Enter email" disabled={true} />
+          <Input
+            placeholder="Enter email"
+            value={currentEmployee.email}
+            disabled={true}
+          />
         </Form.Item>
         <Form.Item
           name="salary"

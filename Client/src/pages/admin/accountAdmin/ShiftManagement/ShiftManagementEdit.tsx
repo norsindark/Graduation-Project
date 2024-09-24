@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Button,
   Form,
@@ -8,174 +8,179 @@ import {
   DatePicker,
   TimePicker,
 } from 'antd';
-import { useSelector } from 'react-redux';
-import { RootState } from '../../../../redux/store';
-// import { callUpdateShift } from '../../../../services/clientApi';
-import { useNavigate } from 'react-router-dom';
+import { CloseOutlined, SaveOutlined } from '@ant-design/icons';
+import {
+  callUpdateShift,
+  callGetAllEmployees,
+} from '../../../../services/serverApi';
 import moment from 'moment';
 
-const ShiftManagementEdit = ({
-  currentShift,
-  onEditSuccess,
-  setShowShiftEdit,
-}: {
+interface Employee {
+  employeeId: string;
+  employeeName: string;
+  email: string;
+  jobTitle: string;
+  salary: string;
+}
+
+interface ShiftEditProps {
   currentShift: {
-    id: string;
-    name: string;
-    date: string;
+    shiftId: string; // Thay đổi từ 'id' sang 'shiftId'
+    shiftName: string;
     startTime: string;
     endTime: string;
-    employees: string[];
+    employees: Employee[]; // Thay đổi từ 'employeeIds' sang 'employees'
   };
   onEditSuccess: () => void;
   setShowShiftEdit: (show: boolean) => void;
+}
+
+const ShiftManagementEdit: React.FC<ShiftEditProps> = ({
+  currentShift,
+  onEditSuccess,
+  setShowShiftEdit,
 }) => {
   const [form] = Form.useForm();
-  const [loading, setLoading] = useState(false);
-  const userId = useSelector((state: RootState) => state.account.user?.id);
-  const navigate = useNavigate();
-  const { Option } = Select;
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const [employees, setEmployees] = useState<
+    { id: string; employeeName: string; email: string }[]
+  >([]);
+
+  useEffect(() => {
+    const fetchEmployees = async () => {
+      try {
+        const responseAllEmployees = await callGetAllEmployees();
+        if (responseAllEmployees?.status === 200) {
+          setEmployees(responseAllEmployees.data);
+        }
+      } catch (error) {
+        console.error('Error fetching employee list:', error);
+        notification.error({
+          message: 'Error',
+          description: 'Unable to fetch employee list. Please try again later.',
+        });
+      }
+    };
+
+    fetchEmployees();
+  }, []);
+
+  useEffect(() => {
+    form.setFieldsValue({
+      shiftName: currentShift.shiftName,
+      startTime: moment(currentShift.startTime, 'HH:mm'),
+      endTime: moment(currentShift.endTime, 'HH:mm'),
+      employeeIds: currentShift.employees.map((emp) => emp.employeeId),
+    });
+  }, [currentShift, form]);
 
   const onFinish = async (values: {
-    name: string;
-    date: moment.Moment;
+    shiftName: string;
     startTime: moment.Moment;
     endTime: moment.Moment;
-    employees: string[];
+    employeeIds: string[];
   }) => {
-    const { name, date, startTime, endTime, employees } = values;
-    if (!userId) {
-      notification.error({
-        message: 'Không tìm thấy người dùng',
-        description: 'Vui lòng đăng nhập để chỉnh sửa ca làm việc',
-        duration: 5,
-        showProgress: true,
-      });
-      setLoading(false);
-      navigate('/login');
-      return;
-    }
-    setLoading(true);
+    const { shiftName, startTime, endTime, employeeIds } = values;
+    setIsSubmitting(true);
     try {
-      // const response = await callUpdateShift(
-      //   currentShift.id,
-      //   name,
-      //   date.format('YYYY-MM-DD'),
-      //   startTime.format('HH:mm'),
-      //   endTime.format('HH:mm'),
-      //   employees,
-      //   userId
-      // );
-      // if (response?.status === 200) {
-      //   notification.success({
-      //     message: 'Cập nhật ca làm việc thành công!',
-      //     duration: 5,
-      //     showProgress: true,
-      //   });
-      //   onEditSuccess();
-      // } else {
-      //   notification.error({
-      //     message: 'Cập nhật ca làm việc thất bại',
-      //     description: response.data.errors?.error || 'Đã xảy ra lỗi!',
-      //     duration: 5,
-      //     showProgress: true,
-      //   });
-      // }
+      const response = await callUpdateShift(
+        currentShift.shiftId,
+        shiftName,
+        startTime.format('HH:mm'),
+        endTime.format('HH:mm'),
+        employeeIds
+      );
+      if (response?.status === 200) {
+        notification.success({
+          message: 'Update shift successfully!',
+          duration: 5,
+          showProgress: true,
+        });
+        onEditSuccess();
+      } else {
+        notification.error({
+          message: 'Update shift failed!',
+          description: response.data.errors?.error || 'An error occurred!',
+          duration: 5,
+          showProgress: true,
+        });
+      }
     } catch (error) {
       notification.error({
-        message: 'Lỗi khi cập nhật ca làm việc',
-        description:
-          error instanceof Error
-            ? error.message
-            : 'Đã xảy ra lỗi trong quá trình cập nhật!',
+        message: 'Error updating shift',
+        description: 'An error occurred during the update process!',
         duration: 5,
         showProgress: true,
       });
     } finally {
-      setLoading(false);
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="container text-medium">
-      <h4 className="fp__dsahboard_overview_item text-center flex justify-center items-center p-3 font-[500] text-[18px]">
-        Chỉnh sửa ca làm việc
-      </h4>
-      <Form
-        form={form}
-        layout="vertical"
-        initialValues={{
-          ...currentShift,
-          date: moment(currentShift.date),
-          startTime: moment(currentShift.startTime, 'HH:mm'),
-          endTime: moment(currentShift.endTime, 'HH:mm'),
-        }}
-        onFinish={onFinish}
-      >
+    <div className="container">
+      <h4 className="text-center p-3 font-[500] text-[18px]">Edit Shift</h4>
+      <Form form={form} layout="vertical" onFinish={onFinish}>
         <Form.Item
-          label="Tên ca"
-          name="name"
-          rules={[
-            { required: true, message: 'Vui lòng nhập tên ca làm việc!' },
-          ]}
+          label="Shift name"
+          name="shiftName"
+          className="font-medium"
+          rules={[{ required: true, message: 'Please enter shift name!' }]}
         >
-          <Input placeholder="Tên ca làm việc" />
+          <Input placeholder="Shift name" />
         </Form.Item>
         <Form.Item
-          label="Ngày"
-          name="date"
-          rules={[{ required: true, message: 'Vui lòng chọn ngày!' }]}
-        >
-          <DatePicker style={{ width: '100%' }} />
-        </Form.Item>
-        <Form.Item
-          label="Giờ bắt đầu"
+          label="Start time"
           name="startTime"
-          rules={[{ required: true, message: 'Vui lòng chọn giờ bắt đầu!' }]}
+          rules={[{ required: true, message: 'Please select start time!' }]}
+          className="font-medium"
         >
           <TimePicker style={{ width: '100%' }} format="HH:mm" />
         </Form.Item>
         <Form.Item
-          label="Giờ kết thúc"
+          label="End time"
           name="endTime"
-          rules={[{ required: true, message: 'Vui lòng chọn giờ kết thúc!' }]}
+          className="font-medium"
+          rules={[{ required: true, message: 'Please select end time!' }]}
         >
           <TimePicker style={{ width: '100%' }} format="HH:mm" />
         </Form.Item>
         <Form.Item
-          label="Nhân viên"
-          name="employees"
+          label="Employee"
+          name="employeeIds"
           rules={[
-            { required: true, message: 'Vui lòng chọn ít nhất một nhân viên!' },
+            { required: true, message: 'Please select at least one employee!' },
           ]}
+          className="font-medium"
         >
-          <Select mode="multiple" placeholder="Chọn nhân viên">
-            <Option value="employee1">Nhân viên 1</Option>
-            <Option value="employee2">Nhân viên 2</Option>
-            <Option value="employee3">Nhân viên 3</Option>
+          <Select mode="multiple" placeholder="Select employee">
+            {employees.map((employee) => (
+              <Select.Option key={employee.id} value={employee.id}>
+                {employee.employeeName} ({employee.email})
+              </Select.Option>
+            ))}
           </Select>
         </Form.Item>
         <Button
           type="primary"
           shape="round"
           htmlType="submit"
-          size="large"
-          loading={loading}
+          loading={isSubmitting}
+          icon={<SaveOutlined />}
         >
-          <div className="text-[16px] font-medium text-center">
-            Lưu thay đổi
-          </div>
+          Save changes
         </Button>
         <Button
+          icon={<CloseOutlined />}
           danger
           size="large"
           style={{ fontWeight: 'medium', margin: '0 10px' }}
           shape="round"
           type="primary"
-          className="cancel_edit_shift"
           onClick={() => setShowShiftEdit(false)}
         >
-          <div className="text-[16px] font-medium text-center">Hủy</div>
+          Cancel
         </Button>
       </Form>
     </div>

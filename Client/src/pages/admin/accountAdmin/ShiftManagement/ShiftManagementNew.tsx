@@ -1,161 +1,156 @@
+import React, { useState, useEffect } from 'react';
 import moment from 'moment';
-import { useState } from 'react';
+import { Form, Input, Button, notification, Select, TimePicker } from 'antd';
 import {
-  Form,
-  Input,
-  Button,
-  notification,
-  Select,
-  DatePicker,
-  TimePicker,
-} from 'antd';
-// import { callAddShift } from '../../../../services/clientApi';
-import { useSelector } from 'react-redux';
-import { RootState } from '../../../../redux/store';
-import { useNavigate } from 'react-router-dom';
+  callAddNewShift,
+  callGetAllEmployees,
+} from '../../../../services/serverApi';
+import { CalendarOutlined, CloseOutlined } from '@ant-design/icons';
 
-const ShiftManagementNew = ({
-  onAddSuccess,
-  setShowShiftNew,
-}: {
+interface ShiftManagementNewProps {
   onAddSuccess: () => void;
   setShowShiftNew: (show: boolean) => void;
+}
+
+const ShiftManagementNew: React.FC<ShiftManagementNewProps> = ({
+  onAddSuccess,
+  setShowShiftNew,
 }) => {
-  const userId = useSelector((state: RootState) => state.account.user?.id);
-  const navigate = useNavigate();
-  const [isSubmit, setIsSubmit] = useState(false);
-  const { Option } = Select;
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [employees, setEmployees] = useState<
+    { email: string; employeeName: string; id: string }[]
+  >([]);
+
+  useEffect(() => {
+    const fetchEmployees = async () => {
+      try {
+        const responseAllEmployees = await callGetAllEmployees();
+        console.log('responseAllEmployees', responseAllEmployees);
+
+        if (responseAllEmployees?.status === 200) {
+          setEmployees(responseAllEmployees.data);
+        }
+      } catch (error) {
+        console.error('Error fetching employee list:', error);
+        notification.error({
+          message: 'Error',
+          description: 'Unable to fetch employee list. Please try again later.',
+        });
+      }
+    };
+
+    fetchEmployees();
+  }, []);
 
   const onFinish = async (values: {
-    name: string;
-    date: moment.Moment;
+    shiftName: string;
     startTime: moment.Moment;
     endTime: moment.Moment;
-    employees: string[];
+    employeeIds: string[];
   }) => {
-    const { name, date, startTime, endTime, employees } = values;
-    if (!userId) {
-      notification.error({
-        message: 'Không tìm thấy người dùng',
-        description: 'Vui lòng đăng nhập để tạo ca làm việc mới',
-        duration: 5,
-        showProgress: true,
-      });
-      setIsSubmit(false);
-      navigate('/login');
-      return;
-    }
-    setIsSubmit(true);
+    const { shiftName, startTime, endTime, employeeIds } = values;
+    setIsSubmitting(true);
     try {
-      // const response = await callAddShift(
-      //   name,
-      //   date.format('YYYY-MM-DD'),
-      //   startTime.format('HH:mm'),
-      //   endTime.format('HH:mm'),
-      //   employees,
-      //   userId
-      // );
-      // if (response?.status === 200) {
-      //   notification.success({
-      //     message: 'Tạo ca làm việc thành công!',
-      //     duration: 5,
-      //     showProgress: true,
-      //   });
-      //   onAddSuccess();
-      // } else {
-      //   notification.error({
-      //     message: 'Tạo ca làm việc thất bại',
-      //     description: response.data.errors?.error || 'Đã xảy ra lỗi!',
-      //     duration: 5,
-      //     showProgress: true,
-      //   });
-      // }
-    } catch (shiftError) {
+      const response = await callAddNewShift(
+        shiftName,
+        startTime.format('HH:mm'),
+        endTime.format('HH:mm'),
+        employeeIds
+      );
+      if (response?.status === 200) {
+        notification.success({
+          message: 'Shift created successfully!',
+          duration: 5,
+          showProgress: true,
+        });
+        onAddSuccess();
+      } else {
+        notification.error({
+          message: 'Failed to add employee',
+          description: response.data.errors?.error || 'An error occurred!',
+          duration: 5,
+          showProgress: true,
+        });
+      }
+    } catch (error) {
       notification.error({
-        message: 'Lỗi khi tạo ca làm việc',
-        description:
-          shiftError instanceof Error
-            ? shiftError.message
-            : 'Đã xảy ra lỗi trong quá trình tạo ca làm việc!',
+        message: 'Error adding employee',
+        description: 'An error occurred while adding the employee!',
         duration: 5,
         showProgress: true,
       });
     } finally {
-      setIsSubmit(false);
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="container text-medium">
-      <h4 className="fp__dsahboard_overview_item text-center flex justify-center items-center p-3 font-[500] text-[18px]">
-        Tạo ca làm việc mới
+    <div className="container">
+      <h4 className="text-center p-3 font-[500] text-[18px]">
+        Create New Shift
       </h4>
       <Form layout="vertical" onFinish={onFinish}>
         <Form.Item
-          label="Tên ca"
-          name="name"
-          rules={[
-            { required: true, message: 'Vui lòng nhập tên ca làm việc!' },
-          ]}
+          label="Shift Name"
+          className="font-medium"
+          name="shiftName"
+          rules={[{ required: true, message: 'Please enter the shift name!' }]}
         >
-          <Input placeholder="Tên ca làm việc" />
+          <Input placeholder="Shift name" />
         </Form.Item>
         <Form.Item
-          label="Ngày"
-          name="date"
-          rules={[{ required: true, message: 'Vui lòng chọn ngày!' }]}
-        >
-          <DatePicker style={{ width: '100%' }} />
-        </Form.Item>
-        <Form.Item
-          label="Giờ bắt đầu"
+          label="Start Time"
+          className="font-medium"
           name="startTime"
-          rules={[{ required: true, message: 'Vui lòng chọn giờ bắt đầu!' }]}
+          rules={[{ required: true, message: 'Please select the start time!' }]}
         >
           <TimePicker style={{ width: '100%' }} format="HH:mm" />
         </Form.Item>
         <Form.Item
-          label="Giờ kết thúc"
+          label="End Time"
+          className="font-medium"
           name="endTime"
-          rules={[{ required: true, message: 'Vui lòng chọn giờ kết thúc!' }]}
+          rules={[{ required: true, message: 'Please select the end time!' }]}
         >
           <TimePicker style={{ width: '100%' }} format="HH:mm" />
         </Form.Item>
         <Form.Item
-          label="Nhân viên"
-          name="employees"
+          label="Employees"
+          name="employeeIds"
+          className="font-medium"
           rules={[
-            { required: true, message: 'Vui lòng chọn ít nhất một nhân viên!' },
+            { required: true, message: 'Please select at least one employee!' },
           ]}
         >
-          <Select mode="multiple" placeholder="Chọn nhân viên">
-            <Option value="employee1">Nhân viên 1</Option>
-            <Option value="employee2">Nhân viên 2</Option>
-            <Option value="employee3">Nhân viên 3</Option>
+          <Select mode="multiple" placeholder="Select employees">
+            {employees.map((employee) => (
+              <Select.Option key={employee.id} value={employee.id}>
+                {employee.employeeName} ({employee.email})
+              </Select.Option>
+            ))}
           </Select>
         </Form.Item>
-        <Button
-          type="primary"
-          shape="round"
-          htmlType="submit"
-          size="large"
-          loading={isSubmit}
-        >
-          <div className="text-[16px] font-medium text-center">
-            Lưu ca làm việc
-          </div>
-        </Button>
-        <Button
-          danger
-          size="large"
-          style={{ fontWeight: 'medium', margin: '0 10px' }}
-          shape="round"
-          type="primary"
-          className="cancel_new_shift"
-          onClick={() => setShowShiftNew(false)}
-        >
-          <div className="text-[16px] font-medium text-center">Hủy</div>
-        </Button>
+        <Form.Item>
+          <Button
+            type="primary"
+            shape="round"
+            htmlType="submit"
+            loading={isSubmitting}
+            icon={<CalendarOutlined />}
+          >
+            Save Shift
+          </Button>
+          <Button
+            type="primary"
+            shape="round"
+            danger
+            onClick={() => setShowShiftNew(false)}
+            style={{ marginLeft: 10 }}
+            icon={<CloseOutlined />}
+          >
+            Cancel
+          </Button>
+        </Form.Item>
       </Form>
     </div>
   );
