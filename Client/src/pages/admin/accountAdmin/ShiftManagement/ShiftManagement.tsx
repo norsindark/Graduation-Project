@@ -1,68 +1,120 @@
 import { useState, useEffect } from 'react';
 import { FaCalendarAlt } from 'react-icons/fa';
 import { Button, Pagination, notification, Table } from 'antd';
-import { useSelector } from 'react-redux';
-import { RootState } from '../../../../redux/store';
-import ShiftNew from './ShiftManagementNew';
-import ShiftEdit from './ShiftManagementEdit';
-// import {
-//   callBulkShifts,
-//   callDeleteShift,
-// } from '../../../../services/clientApi';
-import Loading from '../../../../components/Loading/Loading';
 
-interface Shift {
-  id: string;
-  name: string;
-  date: string;
-  startTime: string;
-  endTime: string;
-  employees: string[];
+import ShiftManagementNew from './ShiftManagementNew';
+import ShiftManagementEdit from './ShiftManagementEdit';
+
+import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import { Space } from 'antd';
+import { Popconfirm, Card } from 'antd';
+import { PlusOutlined } from '@ant-design/icons';
+
+interface Employee {
+  employeeId: string;
+  employeeName: string;
+  email: string;
+  jobTitle: string;
+  salary: string;
 }
 
-const ShiftManagement = () => {
-  const [shifts, setShifts] = useState<Shift[]>([]);
-  const [total, setTotal] = useState(0);
+interface Shift {
+  shiftId: string;
+  shiftName: string;
+  startTime: string;
+  endTime: string;
+  employees: Employee[];
+}
+
+import {
+  callGetAllShift,
+  callDeleteShift,
+} from '../../../../services/serverApi';
+
+const ShiftManagement: React.FC = () => {
+  const [listShift, setListShift] = useState<Shift[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 10;
+  const [pageSize, setPageSize] = useState(2);
+  const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
+
+  const [filter, setFilter] = useState('');
+  const [sortQuery, setSortQuery] = useState('');
+
   const [showShiftNew, setShowShiftNew] = useState(false);
   const [showShiftEdit, setShowShiftEdit] = useState(false);
   const [currentShift, setCurrentShift] = useState<Shift | null>(null);
-  const userId = useSelector((state: RootState) => state.account.user?.id);
-
-  const fetchShifts = async () => {
-    if (userId) {
-      try {
-        // setLoading(true);
-        // const response = await callBulkShifts(
-        //   userId,
-        //   currentPage - 1,
-        //   pageSize
-        // );
-        // if (response.status === 200) {
-        //   setShifts(response.data.shifts);
-        //   setTotal(response.data.total);
-        // }
-      } catch (error) {
-        console.error('Error fetching shifts:', error);
-      } finally {
-        setLoading(false);
-      }
-    }
-  };
 
   useEffect(() => {
     fetchShifts();
-  }, [userId, currentPage]);
+  }, [currentPage, pageSize, filter, sortQuery]);
 
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
+  const fetchShifts = async () => {
+    setLoading(true);
+    try {
+      let query = `pageNo=${currentPage - 1}&pageSize=${pageSize}`;
+      if (sortQuery) {
+        query += `&sortBy=${sortQuery}`;
+      } else {
+        query += `&sortBy=createdAt&sortDir=desc`;
+      }
+      const response = await callGetAllShift(query);
+
+      if (response?.status === 200) {
+        if (
+          response.data._embedded &&
+          Array.isArray(response.data._embedded.employeeShiftResponseList)
+        ) {
+          setListShift(response.data._embedded.employeeShiftResponseList);
+          setTotal(response.data.page.totalElements);
+        } else {
+          setListShift([]);
+          setTotal(0);
+        }
+      } else if (
+        response?.status === 400 &&
+        response.data.errors?.error === 'No Shift found'
+      ) {
+        setListShift([]);
+        setTotal(0);
+        if (
+          currentPage > 1 &&
+          response.data.page.totalElements <= (currentPage - 1) * pageSize
+        ) {
+          setCurrentPage(currentPage - 1);
+        }
+      }
+    } catch {
+      notification.error({
+        message: 'Unable to load shift list',
+        description: 'An error occurred while loading data!',
+        duration: 5,
+        showProgress: true,
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const onChange = (pagination: any, sortDir: any) => {
+    setCurrentPage(pagination.current);
+    setPageSize(pagination.pageSize);
+    if (sortDir && sortDir.field) {
+      const order = sortDir.order === 'ascend' ? 'asc' : 'desc';
+      setSortQuery(`${sortDir.field},${order}`);
+    } else {
+      setSortQuery('');
+    }
   };
 
   const handleAddSuccess = () => {
     setShowShiftNew(false);
     fetchShifts();
+  };
+
+  const handleEditClick = (item: Shift) => {
+    setCurrentShift(item);
+    setShowShiftEdit(true);
   };
 
   const handleEditSuccess = () => {
@@ -71,69 +123,93 @@ const ShiftManagement = () => {
     fetchShifts();
   };
 
-  const handleEditClick = (shift: Shift) => {
-    setCurrentShift(shift);
-    setShowShiftEdit(true);
-  };
-
-  const handleDeleteClick = (id: string) => {
-    // callDeleteShift(id)
-    //   .then(() => {
-    //     notification.success({
-    //   message: 'Ca làm việc đã được xóa thành công!',
-    //   duration: 5,
-    //   showProgress: true,
-    // });
-    // fetchShifts();
-    // })
-    // .catch((error: any) => {
-    //   notification.error({
-    //     message: 'Lỗi khi xóa ca làm việc',
-    //     description:
-    //       error instanceof Error
-    //         ? error.message
-    //         : 'Đã xảy ra lỗi trong quá trình xóa!',
-    //     duration: 5,
-    //     showProgress: true,
-    //   });
-    // });
+  const handleDeleteClick = async (id: string) => {
+    try {
+      const response = await callDeleteShift(id);
+      if (response?.status == 200) {
+        notification.success({
+          message: 'Shift has been successfully deleted!',
+          duration: 5,
+          showProgress: true,
+        });
+        fetchShifts();
+      } else {
+        notification.error({
+          message: 'Unable to delete shift',
+          description: response.data.errors?.error || 'An error occurred!',
+          duration: 5,
+          showProgress: true,
+        });
+      }
+    } catch (error) {
+      notification.error({
+        message: 'Error deleting shift',
+        description: 'An error occurred during the deletion process!',
+        duration: 5,
+        showProgress: true,
+      });
+    }
   };
 
   const columns = [
     {
-      title: 'Tên ca',
-      dataIndex: 'name',
-      key: 'name',
+      title: 'Shift Name',
+      dataIndex: 'shiftName',
+      key: 'shiftName',
+      sorter: (a: any, b: any) => a.shiftName.localeCompare(b.shiftName),
     },
     {
-      title: 'Ngày',
-      dataIndex: 'date',
-      key: 'date',
-    },
-    {
-      title: 'Giờ bắt đầu',
+      title: 'Start Time',
       dataIndex: 'startTime',
       key: 'startTime',
+      sorter: (a: any, b: any) => a.startTime.localeCompare(b.startTime),
     },
     {
-      title: 'Giờ kết thúc',
+      title: 'End Time',
       dataIndex: 'endTime',
       key: 'endTime',
+      sorter: (a: any, b: any) => a.endTime.localeCompare(b.endTime),
     },
     {
-      title: 'Nhân viên',
+      title: 'Employees',
       dataIndex: 'employees',
       key: 'employees',
-      render: (employees: string[]) => employees.join(', '),
+      render: (employees: Employee[]) =>
+        employees.map((e) => e.employeeName).join(', '),
+      sorter: (a: any, b: any) => a.employees.length - b.employees.length,
     },
     {
-      title: 'Hành động',
+      title: 'Actions',
       key: 'action',
       render: (_: any, record: Shift) => (
-        <>
-          <Button onClick={() => handleEditClick(record)}>Sửa</Button>
-          <Button onClick={() => handleDeleteClick(record.id)}>Xóa</Button>
-        </>
+        <Space
+          size="small"
+          className="flex justify-center items-center flex-col"
+        >
+          <Button
+            type="primary"
+            shape="round"
+            icon={<EditOutlined />}
+            onClick={() => handleEditClick(record)}
+          >
+            Edit
+          </Button>
+          <Popconfirm
+            title="Are you sure you want to delete this shift?"
+            onConfirm={() => handleDeleteClick(record.shiftId)}
+            okText="Yes"
+            cancelText="No"
+          >
+            <Button
+              type="primary"
+              danger
+              shape="round"
+              icon={<DeleteOutlined />}
+            >
+              Delete
+            </Button>
+          </Popconfirm>
+        </Space>
       ),
     },
   ];
@@ -148,54 +224,62 @@ const ShiftManagement = () => {
       <div className="fp_dashboard_body">
         <h3>
           <FaCalendarAlt style={{ fontSize: '22px', marginRight: '5px' }} />
-          Quản lý ca làm việc
+          Shift Management
         </h3>
-        {!showShiftNew && !showShiftEdit && (
-          <Button
-            type="primary"
-            className="mb-3"
-            onClick={() => setShowShiftNew(true)}
-            size="large"
-          >
-            Tạo ca làm việc mới
-          </Button>
-        )}
-        {loading ? (
-          <Loading />
-        ) : (
-          <div>
-            {showShiftNew ? (
-              <ShiftNew
-                onAddSuccess={handleAddSuccess}
-                setShowShiftNew={setShowShiftNew}
-              />
-            ) : showShiftEdit && currentShift ? (
-              <ShiftEdit
-                currentShift={currentShift as any} // Tạm thời ép kiểu
-                onEditSuccess={handleEditSuccess}
-                setShowShiftEdit={setShowShiftEdit}
-              />
-            ) : (
-              <>
-                <Table
-                  columns={columns}
-                  dataSource={shifts}
-                  pagination={false}
-                  rowKey="id"
-                />
-                {shifts.length > 0 && (
-                  <Pagination
-                    current={currentPage}
-                    total={total}
-                    pageSize={pageSize}
-                    onChange={handlePageChange}
-                    className="mt-4"
-                  />
-                )}
-              </>
-            )}
-          </div>
-        )}
+        <Card
+          title="Shift Management"
+          extra={
+            !showShiftNew &&
+            !showShiftEdit && (
+              <Button
+                type="primary"
+                shape="round"
+                icon={<PlusOutlined />}
+                onClick={() => setShowShiftNew(true)}
+              >
+                Create New Shift
+              </Button>
+            )
+          }
+        >
+          {showShiftNew ? (
+            <ShiftManagementNew
+              onAddSuccess={handleAddSuccess}
+              setShowShiftNew={setShowShiftNew}
+            />
+          ) : showShiftEdit && currentShift ? (
+            <ShiftManagementEdit
+              currentShift={currentShift}
+              onEditSuccess={handleEditSuccess}
+              setShowShiftEdit={setShowShiftEdit}
+            />
+          ) : (
+            <Table
+              dataSource={listShift}
+              columns={columns}
+              rowKey="shiftId"
+              loading={loading}
+              onChange={onChange}
+              pagination={{
+                current: currentPage,
+                pageSize: pageSize,
+                total: total,
+                showSizeChanger: true,
+                showQuickJumper: true,
+                pageSizeOptions: ['1', '2'],
+                onShowSizeChange: (current, size) => {
+                  setCurrentPage(1);
+                  setPageSize(size);
+                },
+              }}
+              scroll={{ x: 'max-content' }}
+              bordered
+              rowClassName={(record, index) =>
+                index % 2 === 0 ? 'table-row-light' : 'table-row-dark'
+              }
+            />
+          )}
+        </Card>
       </div>
     </div>
   );

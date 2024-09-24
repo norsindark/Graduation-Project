@@ -9,6 +9,7 @@ import Reservation from '../../reservation/Reservation';
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [isFixed, setIsFixed] = useState(false);
 
   useEffect(() => {
     const handleResize = () => {
@@ -24,12 +25,27 @@ const Header = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 50) {
+        setIsFixed(true);
+      } else {
+        setIsFixed(false);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
 
   return (
-    <nav className="navbar navbar-expand-lg main_menu">
+    <nav
+      className={`navbar navbar-expand-lg main_menu ${isFixed ? 'menu_fix' : ''}`}
+    >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
         <LogoHeader />
         <button

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Form, Input, Button, notification } from 'antd';
 import {
   callAddNewEmployee,
-  callGetAllEmployers,
+  callGetAllUser,
 } from '../../../../services/serverApi';
 import { UserAddOutlined, CloseOutlined } from '@ant-design/icons';
 import { Select } from 'antd';
@@ -17,17 +17,15 @@ const EmployeeManagementNew: React.FC<EmployeeNewProps> = ({
   setShowEmployeeNew,
 }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [employers, setEmployers] = useState<
-    { email: string; fullName: string }[]
-  >([]);
+  const [users, setUsers] = useState<{ email: string; fullName: string }[]>([]);
 
   useEffect(() => {
     const fetchEmployers = async () => {
       try {
-        const responseAllEmployers = await callGetAllEmployers();
-
-        if (responseAllEmployers?.status === 200) {
-          setEmployers(responseAllEmployers.data);
+        const responseAllUser = await callGetAllUser();
+        console.log('responseAllEmployers', responseAllUser);
+        if (responseAllUser?.status === 200) {
+          setUsers(responseAllUser.data);
         }
       } catch (error) {
         console.error('Error fetching employers:', error);
@@ -85,9 +83,9 @@ const EmployeeManagementNew: React.FC<EmployeeNewProps> = ({
           ]}
         >
           <Select mode="multiple" placeholder="Select emails">
-            {employers.map((employer) => (
-              <Select.Option key={employer.email} value={employer.email}>
-                {employer.fullName} ({employer.email})
+            {users.map((user) => (
+              <Select.Option key={user.email} value={user.email}>
+                {user.fullName} ({user.email})
               </Select.Option>
             ))}
           </Select>

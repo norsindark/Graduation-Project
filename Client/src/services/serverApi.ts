@@ -67,6 +67,38 @@ export const callUpdateEmployee = async (employeeId: string, employeeName: strin
   });
 };``
 
-export const callGetAllEmployers = async () => {
+export const callGetAllUser = async () => {
   return axios.get(`/api/v1/dashboard/employee/get-emails-user`);
 };
+
+export const callGetAllEmployees = async () => {
+  return axios.get(`/api/v1/dashboard/employee/get-emails-employee`);
+};
+
+export const callGetAllShift = async (query: string) => {
+  return axios.get(`/api/v1/dashboard/shift/get-all-shifts?${query}`);
+};
+
+export const callAddNewShift = async (shiftName: string, startTime: string, endTime: string, employeeIds: string[]) => {
+  return axios.post(`/api/v1/dashboard/shift/add-new-shift`, {
+    shiftName,
+    startTime,
+    endTime,
+    employeeIds,
+  });
+};
+
+export const callUpdateShift = async (shiftId: string, shiftName: string, startTime: string, endTime: string, employeeIds: string[]) => {
+  return axios.put(`/api/v1/dashboard/shift/update-shift`, {
+    shiftId,
+    shiftName,
+    startTime,
+    endTime,
+    employeeIds,
+  });
+};
+
+export const callDeleteShift = async (id : string) => {
+  return axios.delete(`/api/v1/dashboard/shift/delete-shift/${id}`);
+};
+

@@ -30,7 +30,7 @@ interface EmployeeItem {
 
 const EmployeeManagement: React.FC = () => {
   const [listEmployee, setListEmployee] = useState<EmployeeItem[]>([]);
-  const [current, setCurrent] = useState(1);
+  const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(2);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -46,12 +46,12 @@ const EmployeeManagement: React.FC = () => {
 
   useEffect(() => {
     fetchItems();
-  }, [current, pageSize, filter, sortQuery]);
+  }, [currentPage, pageSize, filter, sortQuery]);
 
   const fetchItems = async () => {
     setLoading(true);
     try {
-      let query = `pageNo=${current - 1}&pageSize=${pageSize}`;
+      let query = `pageNo=${currentPage - 1}&pageSize=${pageSize}`;
       if (sortQuery) {
         query += `&sortBy=${sortQuery}`;
       } else {
@@ -69,6 +69,18 @@ const EmployeeManagement: React.FC = () => {
           setListEmployee([]);
           setTotal(0);
         }
+      } else if (
+        response?.status === 400 &&
+        response.data.errors?.error === 'No Employee found'
+      ) {
+        setListEmployee([]);
+        setTotal(0);
+        if (
+          currentPage > 1 &&
+          response.data.page.totalElements <= (currentPage - 1) * pageSize
+        ) {
+          setCurrentPage(currentPage - 1);
+        }
       }
     } catch {
       notification.error({
@@ -83,7 +95,7 @@ const EmployeeManagement: React.FC = () => {
   };
 
   const onChange = (pagination: any, sortDir: any) => {
-    setCurrent(pagination.current);
+    setCurrentPage(pagination.current);
     setPageSize(pagination.pageSize);
     if (sortDir && sortDir.field) {
       const order = sortDir.order === 'ascend' ? 'asc' : 'desc';
@@ -108,15 +120,16 @@ const EmployeeManagement: React.FC = () => {
     fetchItems();
   };
 
-  const handleDeleteClick = async (id: string) => {
+  const handleDeleteClick = async (employeeId: string) => {
     try {
-      const response = await callDeleteEmployee(id);
-      if (response?.status === 200) {
+      const response = await callDeleteEmployee(employeeId);
+      if (response?.status == 200) {
         notification.success({
           message: 'Employee deleted successfully!',
           duration: 5,
           showProgress: true,
         });
+        // Gọi fetchItems thay vì đặt lại current
         fetchItems();
       } else {
         notification.error({
@@ -226,7 +239,7 @@ const EmployeeManagement: React.FC = () => {
                 icon={<UserAddOutlined />}
                 onClick={() => setShowEmployeeNew(true)}
               >
-                Add New Employee
+                Create New Employee
               </Button>
             )
           }
@@ -250,14 +263,14 @@ const EmployeeManagement: React.FC = () => {
               loading={loading}
               onChange={onChange}
               pagination={{
-                current: current,
+                current: currentPage,
                 pageSize: pageSize,
                 total: total,
                 showSizeChanger: true,
                 showQuickJumper: true,
                 pageSizeOptions: ['1', '2'],
                 onShowSizeChange: (current, size) => {
-                  setCurrent(1);
+                  setCurrentPage(1);
                   setPageSize(size);
                 },
               }}

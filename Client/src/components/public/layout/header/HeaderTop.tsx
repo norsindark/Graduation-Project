@@ -22,22 +22,22 @@ const HeaderTop = () => {
               <li>
                 <a href="#">
                   <i className="fab fa-facebook-f"></i>
-                </a>
+                </a>{' '}
               </li>
               <li>
                 <a href="#">
                   <i className="fab fa-twitter"></i>
-                </a>
+                </a>{' '}
               </li>
               <li>
                 <a href="#">
                   <i className="fab fa-linkedin-in"></i>
-                </a>
+                </a>{' '}
               </li>
               <li>
                 <a href="#">
                   <i className="fab fa-behance"></i>
-                </a>
+                </a>{' '}
               </li>
             </ul>
           </div>
