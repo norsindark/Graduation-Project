@@ -16,6 +16,9 @@ public class CategoryResponse {
     private String slug;
     private String status;
     private String parentName;
+    private String description;
+    private String createdAt;
+    private String updatedAt;
 
     public CategoryResponse(Category category) {
         this.id = category.getId();
@@ -23,6 +26,9 @@ public class CategoryResponse {
         this.thumbnail = category.getThumbnail();
         this.slug = category.getSlug();
         this.status = category.getStatus();
+        this.description = category.getDescription();
         this.parentName = category.getParentCategory() != null ? category.getParentCategory().getName() : null;
+        this.createdAt = category.getCreatedAt().toString();
+        this.updatedAt = category.getUpdatedAt().toString();
     }
 }
