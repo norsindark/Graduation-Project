@@ -84,7 +84,7 @@ public class ShiftServiceImpl implements ShiftService {
         List<Employee> employees = employeeRepository.findAllById(ids);
 
         if (employees.size() != shiftDto.getEmployeeIds().size()) {
-            return new ApiResponse("One or more employee IDs are invalid", HttpStatus.NOT_FOUND);
+            throw new DataExitsException("One or more employee IDs are invalid");
         }
 
         Shift newShift = Shift.builder()
@@ -110,7 +110,7 @@ public class ShiftServiceImpl implements ShiftService {
         Optional<Shift> shift = shiftRepository.findById(shiftRequest.getShiftId());
 
         if (shift.isEmpty()) {
-            return new ApiResponse("Shift not found", HttpStatus.NOT_FOUND);
+            throw new DataExitsException("Shift not found");
         }
 
         LocalTime startTime = LocalTime.parse(shiftRequest.getStartTime());
@@ -120,7 +120,7 @@ public class ShiftServiceImpl implements ShiftService {
         List<Employee> employees = employeeRepository.findAllById(ids);
 
         if (employees.size() != shiftRequest.getEmployeeIds().size()) {
-            return new ApiResponse("One or more employee IDs are invalid", HttpStatus.NOT_FOUND);
+            throw new DataExitsException("One or more employee IDs are invalid");
         }
 
         Shift updatedShift = shift.get();
@@ -147,7 +147,7 @@ public class ShiftServiceImpl implements ShiftService {
     public ApiResponse deleteShift(String id) throws DataExitsException {
         Optional<Shift> shift = shiftRepository.findById(id);
         if (shift.isEmpty()) {
-            return new ApiResponse("Shift not found", HttpStatus.NOT_FOUND);
+            throw new DataExitsException("Shift not found");
         }
 
         List<EmployeeShift> employeeShifts = employeeShiftRepository.findAllByShift(shift.get());
