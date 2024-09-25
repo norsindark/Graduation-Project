@@ -92,7 +92,10 @@ public class ShiftServiceImpl implements ShiftService {
             throw new DataExitsException("Shift not found");
         }
 
-        if (shiftRepository.existsByShiftName(shiftRequest.getShiftName())) {
+        Shift currentShift = shift.get();
+
+        if (!currentShift.getShiftName().equals(shiftRequest.getShiftName()) &&
+                shiftRepository.existsByShiftName(shiftRequest.getShiftName())) {
             throw new DataExitsException("Shift already exists");
         }
 
@@ -103,12 +106,11 @@ public class ShiftServiceImpl implements ShiftService {
             throw new IllegalArgumentException("Start time cannot be after end time");
         }
 
-        Shift updatedShift = shift.get();
-        updatedShift.setShiftName(shiftRequest.getShiftName());
-        updatedShift.setStartTime(startTime);
-        updatedShift.setEndTime(endTime);
+        currentShift.setShiftName(shiftRequest.getShiftName());
+        currentShift.setStartTime(startTime);
+        currentShift.setEndTime(endTime);
 
-        shiftRepository.save(updatedShift);
+        shiftRepository.save(currentShift);
 
         return new ApiResponse("Shift updated successfully", HttpStatus.OK);
     }

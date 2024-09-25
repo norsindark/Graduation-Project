@@ -38,8 +38,7 @@ public class EmployeeShift {
     @Column(name = "status", length = 20)
     private String status;
 
-    @Column(name = "notes")
-    @Lob
+    @Column(name = "notes", length = 2000)
     private String notes;
 
     @Column(name = "created_at")

@@ -6,4 +6,7 @@ public enum StatusType {
     DELETED,
     PENDING,
     BANNED,
+    ABSENT,
+    PRESENT,
+    LATE,
 }

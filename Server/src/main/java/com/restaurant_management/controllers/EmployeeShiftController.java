@@ -40,10 +40,11 @@ public class EmployeeShiftController {
 
 //    @DeleteMapping("/remove-employee-from-shift/{employeeId}/{shiftId}")
 //    @PreAuthorize("hasRole('ADMIN')")
-//    public ResponseEntity<ApiResponse> removeEmployeeFromShift(@PathVariable String employeeId, @PathVariable String shiftId) throws DataExitsException {
+//    public ResponseEntity<ApiResponse> removeEmployeeFromShift(@PathVariable String employeeId, @PathVariable String shiftId)
+//            throws DataExitsException {
 //        return ResponseEntity.ok(employeeShiftService.removeEmployeeFromShift(employeeId, shiftId));
 //    }
-//
+
 //    @PutMapping("/update-employee-shift")
 //    @PreAuthorize("hasRole('ADMIN')")
 //    public ResponseEntity<ApiResponse> updateEmployeeShift(@RequestBody AddEmployeeToShiftRequest request) throws DataExitsException {
