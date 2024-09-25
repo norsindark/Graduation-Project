@@ -1,10 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import moment from 'moment';
 import { Form, Input, Button, notification, Select, TimePicker } from 'antd';
-import {
-  callAddNewShift,
-  callGetAllEmployees,
-} from '../../../../services/serverApi';
+import { callAddNewShift } from '../../../../services/serverApi';
 import { CalendarOutlined, CloseOutlined } from '@ant-design/icons';
 
 interface ShiftManagementNewProps {
@@ -17,45 +14,19 @@ const ShiftManagementNew: React.FC<ShiftManagementNewProps> = ({
   setShowShiftNew,
 }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [employees, setEmployees] = useState<
-    { email: string; employeeName: string; id: string }[]
-  >([]);
-
-  useEffect(() => {
-    const fetchEmployees = async () => {
-      try {
-        const responseAllEmployees = await callGetAllEmployees();
-        console.log('responseAllEmployees', responseAllEmployees);
-
-        if (responseAllEmployees?.status === 200) {
-          setEmployees(responseAllEmployees.data);
-        }
-      } catch (error) {
-        console.error('Error fetching employee list:', error);
-        notification.error({
-          message: 'Error',
-          description: 'Unable to fetch employee list. Please try again later.',
-        });
-      }
-    };
-
-    fetchEmployees();
-  }, []);
 
   const onFinish = async (values: {
     shiftName: string;
     startTime: moment.Moment;
     endTime: moment.Moment;
-    employeeIds: string[];
   }) => {
-    const { shiftName, startTime, endTime, employeeIds } = values;
+    const { shiftName, startTime, endTime } = values;
     setIsSubmitting(true);
     try {
       const response = await callAddNewShift(
         shiftName,
         startTime.format('HH:mm'),
-        endTime.format('HH:mm'),
-        employeeIds
+        endTime.format('HH:mm')
       );
       if (response?.status === 200) {
         notification.success({
@@ -113,22 +84,6 @@ const ShiftManagementNew: React.FC<ShiftManagementNewProps> = ({
           rules={[{ required: true, message: 'Please select the end time!' }]}
         >
           <TimePicker style={{ width: '100%' }} format="HH:mm" />
-        </Form.Item>
-        <Form.Item
-          label="Employees"
-          name="employeeIds"
-          className="font-medium"
-          rules={[
-            { required: true, message: 'Please select at least one employee!' },
-          ]}
-        >
-          <Select mode="multiple" placeholder="Select employees">
-            {employees.map((employee) => (
-              <Select.Option key={employee.id} value={employee.id}>
-                {employee.employeeName} ({employee.email})
-              </Select.Option>
-            ))}
-          </Select>
         </Form.Item>
         <Form.Item>
           <Button

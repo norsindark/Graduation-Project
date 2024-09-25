@@ -10,20 +10,11 @@ import { Space } from 'antd';
 import { Popconfirm, Card } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 
-interface Employee {
-  employeeId: string;
-  employeeName: string;
-  email: string;
-  jobTitle: string;
-  salary: string;
-}
-
 interface Shift {
   shiftId: string;
   shiftName: string;
   startTime: string;
   endTime: string;
-  employees: Employee[];
 }
 
 import {
@@ -59,13 +50,14 @@ const ShiftManagement: React.FC = () => {
         query += `&sortBy=createdAt&sortDir=desc`;
       }
       const response = await callGetAllShift(query);
+      console.log('responseGetAllShift', response.data);
 
       if (response?.status === 200) {
         if (
           response.data._embedded &&
-          Array.isArray(response.data._embedded.employeeShiftResponseList)
+          Array.isArray(response.data._embedded.shiftResponseList)
         ) {
-          setListShift(response.data._embedded.employeeShiftResponseList);
+          setListShift(response.data._embedded.shiftResponseList);
           setTotal(response.data.page.totalElements);
         } else {
           setListShift([]);
@@ -169,14 +161,6 @@ const ShiftManagement: React.FC = () => {
       dataIndex: 'endTime',
       key: 'endTime',
       sorter: (a: any, b: any) => a.endTime.localeCompare(b.endTime),
-    },
-    {
-      title: 'Employees',
-      dataIndex: 'employees',
-      key: 'employees',
-      render: (employees: Employee[]) =>
-        employees.map((e) => e.employeeName).join(', '),
-      sorter: (a: any, b: any) => a.employees.length - b.employees.length,
     },
     {
       title: 'Actions',
