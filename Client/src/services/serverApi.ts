@@ -79,22 +79,20 @@ export const callGetAllShift = async (query: string) => {
   return axios.get(`/api/v1/dashboard/shift/get-all-shifts?${query}`);
 };
 
-export const callAddNewShift = async (shiftName: string, startTime: string, endTime: string, employeeIds: string[]) => {
+export const callAddNewShift = async (shiftName: string, startTime: string, endTime: string) => {
   return axios.post(`/api/v1/dashboard/shift/add-new-shift`, {
     shiftName,
     startTime,
     endTime,
-    employeeIds,
   });
 };
 
-export const callUpdateShift = async (shiftId: string, shiftName: string, startTime: string, endTime: string, employeeIds: string[]) => {
+export const callUpdateShift = async (shiftId: string, shiftName: string, startTime: string, endTime: string) => {
   return axios.put(`/api/v1/dashboard/shift/update-shift`, {
     shiftId,
     shiftName,
     startTime,
     endTime,
-    employeeIds,
   });
 };
 
