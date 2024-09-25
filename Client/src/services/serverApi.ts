@@ -102,3 +102,16 @@ export const callDeleteShift = async (id : string) => {
   return axios.delete(`/api/v1/dashboard/shift/delete-shift/${id}`);
 };
 
+
+
+/// category
+
+export const callGetAllCategory = async (query: string) => {
+  return axios.get(`/api/v1/dashboard/category/all?${query}`);
+};
+
+// export const callAddNewCategory = async (categoryName: string) => {
+//   return axios.post(`/api/v1/dashboard/category/add-new-category`, {
+//     categoryName,
+//   });
+// };
