@@ -1,8 +1,6 @@
 package com.restaurant_management.entites;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,7 +11,6 @@ import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.sql.Timestamp;
-import java.time.LocalDateTime;
 
 @Entity
 @Data
@@ -39,12 +36,13 @@ public class Attendance {
     private Shift shift;
 
     @Column(name = "date", nullable = false)
-    private LocalDateTime date;
+    private Timestamp attendance_date;
 
-    @Column(name = "status", nullable = false)
+    @Column(name = "status", nullable = false, length = 20)
     private String status;
 
     @Column(name = "note")
+    @Lob
     private String note;
 
     @Column(name = "created_at")
