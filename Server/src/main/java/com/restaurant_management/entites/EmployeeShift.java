@@ -32,6 +32,16 @@ public class EmployeeShift {
     @JoinColumn(name = "shift_id", nullable = false)
     private Shift shift;
 
+    @Column(name = "work_date", nullable = false)
+    private Timestamp workDate;
+
+    @Column(name = "status", length = 20)
+    private String status;
+
+    @Column(name = "notes")
+    @Lob
+    private String notes;
+
     @Column(name = "created_at")
     @CreationTimestamp
     private Timestamp createdAt;

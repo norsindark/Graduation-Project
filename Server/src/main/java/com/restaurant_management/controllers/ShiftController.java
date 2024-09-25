@@ -4,7 +4,7 @@ import com.restaurant_management.dtos.ShiftDto;
 import com.restaurant_management.exceptions.DataExitsException;
 import com.restaurant_management.payloads.requests.ShiftRequest;
 import com.restaurant_management.payloads.responses.ApiResponse;
-import com.restaurant_management.payloads.responses.EmployeeShiftResponse;
+import com.restaurant_management.payloads.responses.ShiftResponse;
 import com.restaurant_management.services.interfaces.ShiftService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -24,13 +24,13 @@ public class ShiftController {
 
     @GetMapping("/get-shifts/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<EmployeeShiftResponse> getShiftsById(@PathVariable String id) throws DataExitsException {
+    public ResponseEntity<ShiftResponse> getShiftsById(@PathVariable String id) throws DataExitsException {
         return ResponseEntity.ok(shiftService.getShiftsById(id));
     }
 
     @GetMapping("/get-all-shifts")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<PagedModel<EntityModel<EmployeeShiftResponse>>> getAllShifts(
+    public ResponseEntity<PagedModel<EntityModel<ShiftResponse>>> getAllShifts(
             @RequestParam(defaultValue = "0") int pageNo,
             @RequestParam(defaultValue = "10") int pageSize,
             @RequestParam(defaultValue = "createdAt") String sortBy,
@@ -56,4 +56,6 @@ public class ShiftController {
     public ResponseEntity<ApiResponse> deleteShift(@PathVariable String id) throws DataExitsException {
         return ResponseEntity.ok(shiftService.deleteShift(id));
     }
+
+
 }

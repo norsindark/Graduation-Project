@@ -1,21 +1,21 @@
 package com.restaurant_management.services.impls;
 
 import com.restaurant_management.dtos.ShiftDto;
-import com.restaurant_management.entites.Employee;
 import com.restaurant_management.entites.EmployeeShift;
 import com.restaurant_management.entites.Shift;
 import com.restaurant_management.exceptions.DataExitsException;
 import com.restaurant_management.payloads.requests.ShiftRequest;
 import com.restaurant_management.payloads.responses.ApiResponse;
-import com.restaurant_management.payloads.responses.EmployeeResponse;
-import com.restaurant_management.payloads.responses.EmployeeShiftResponse;
-import com.restaurant_management.repositories.EmployeeRepository;
+import com.restaurant_management.payloads.responses.ShiftResponse;
 import com.restaurant_management.repositories.EmployeeShiftRepository;
 import com.restaurant_management.repositories.ShiftRepository;
 import com.restaurant_management.services.interfaces.ShiftService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
@@ -24,10 +24,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @Component
@@ -35,40 +33,27 @@ import java.util.stream.Collectors;
 public class ShiftServiceImpl implements ShiftService {
 
     private final ShiftRepository shiftRepository;
-    private final EmployeeRepository employeeRepository;
     private final EmployeeShiftRepository employeeShiftRepository;
-    private final PagedResourcesAssembler<EmployeeShiftResponse> pagedResourcesAssembler;
+    private final PagedResourcesAssembler<ShiftResponse> pagedResourcesAssembler;
 
     @Override
-    public EmployeeShiftResponse getShiftsById(String id) throws DataExitsException {
+    public ShiftResponse getShiftsById(String id) throws DataExitsException {
         Optional<Shift> shiftOptional = shiftRepository.findById(id);
         if (shiftOptional.isEmpty()) {
             throw new DataExitsException("Shift not found");
         }
         Shift shift = shiftOptional.get();
-        List<EmployeeShift> employeeShifts = employeeShiftRepository.findAllByShift(shift);
-        List<EmployeeResponse> employeeResponses = employeeShifts.stream().map(EmployeeResponse::new).collect(Collectors.toList());
-        return new EmployeeShiftResponse(shift, employeeResponses);
+         return new ShiftResponse(shift);
     }
 
     @Override
-    public PagedModel<EntityModel<EmployeeShiftResponse>> getAllShifts(int pageNo, int pageSize, String sortBy, String sortDir)
+    public PagedModel<EntityModel<ShiftResponse>> getAllShifts(int pageNo, int pageSize, String sortBy, String sortDir)
             throws DataExitsException {
         Pageable paging = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.fromString(sortDir), sortBy));
         Page<Shift> pagedResult = shiftRepository.findAll(paging);
 
         if (pagedResult.hasContent()) {
-            List<EmployeeShiftResponse> shiftResponses = new ArrayList<>();
-
-            for (Shift shift : pagedResult) {
-                List<EmployeeShift> employeeShifts = employeeShiftRepository.findAllByShift(shift);
-                List<EmployeeResponse> employeeResponses = employeeShifts.stream()
-                        .map(EmployeeResponse::new)
-                        .collect(Collectors.toList());
-                shiftResponses.add(new EmployeeShiftResponse(shift, employeeResponses));
-            }
-
-            return pagedResourcesAssembler.toModel(new PageImpl<>(shiftResponses, paging, pagedResult.getTotalElements()));
+            return pagedResourcesAssembler.toModel(pagedResult.map(ShiftResponse::new));
         } else {
             throw new DataExitsException("No Shift found");
         }
@@ -80,11 +65,12 @@ public class ShiftServiceImpl implements ShiftService {
         LocalTime startTime = LocalTime.parse(shiftDto.getStartTime());
         LocalTime endTime = LocalTime.parse(shiftDto.getEndTime());
 
-        List<String> ids = new ArrayList<>(shiftDto.getEmployeeIds());
-        List<Employee> employees = employeeRepository.findAllById(ids);
+        if (startTime.isAfter(endTime)) {
+            throw new IllegalArgumentException("Start time cannot be after end time");
+        }
 
-        if (employees.size() != shiftDto.getEmployeeIds().size()) {
-            throw new DataExitsException("One or more employee IDs are invalid");
+        if (shiftRepository.existsByShiftName(shiftDto.getShiftName())) {
+            throw new DataExitsException("Shift already exists");
         }
 
         Shift newShift = Shift.builder()
@@ -94,13 +80,6 @@ public class ShiftServiceImpl implements ShiftService {
                 .build();
 
         shiftRepository.save(newShift);
-
-        for (Employee employee : employees) {
-            EmployeeShift employeeShift = new EmployeeShift();
-            employeeShift.setEmployee(employee);
-            employeeShift.setShift(newShift);
-            employeeShiftRepository.save(employeeShift);
-        }
 
         return new ApiResponse("Shift added successfully", HttpStatus.CREATED);
     }
@@ -113,14 +92,15 @@ public class ShiftServiceImpl implements ShiftService {
             throw new DataExitsException("Shift not found");
         }
 
+        if (shiftRepository.existsByShiftName(shiftRequest.getShiftName())) {
+            throw new DataExitsException("Shift already exists");
+        }
+
         LocalTime startTime = LocalTime.parse(shiftRequest.getStartTime());
         LocalTime endTime = LocalTime.parse(shiftRequest.getEndTime());
 
-        List<String> ids = new ArrayList<>(shiftRequest.getEmployeeIds());
-        List<Employee> employees = employeeRepository.findAllById(ids);
-
-        if (employees.size() != shiftRequest.getEmployeeIds().size()) {
-            throw new DataExitsException("One or more employee IDs are invalid");
+        if (startTime.isAfter(endTime)) {
+            throw new IllegalArgumentException("Start time cannot be after end time");
         }
 
         Shift updatedShift = shift.get();
@@ -129,16 +109,6 @@ public class ShiftServiceImpl implements ShiftService {
         updatedShift.setEndTime(endTime);
 
         shiftRepository.save(updatedShift);
-
-        List<EmployeeShift> employeeShifts = employeeShiftRepository.findAllByShift(updatedShift);
-        employeeShiftRepository.deleteAll(employeeShifts);
-
-        for (Employee employee : employees) {
-            EmployeeShift employeeShift = new EmployeeShift();
-            employeeShift.setEmployee(employee);
-            employeeShift.setShift(updatedShift);
-            employeeShiftRepository.save(employeeShift);
-        }
 
         return new ApiResponse("Shift updated successfully", HttpStatus.OK);
     }

@@ -1,18 +1,18 @@
 package com.restaurant_management.payloads.requests;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.time.LocalDate;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
-public class ShiftRequest {
+public class AddEmployeeToShiftRequest {
+    private List<String> employeeIds;
     private String shiftId;
-    private String shiftName;
-    private String startTime;
-    private String endTime;
-//    private List<String> employeeIds;
+    private LocalDate startDate;
+    private LocalDate endDate;
 }
