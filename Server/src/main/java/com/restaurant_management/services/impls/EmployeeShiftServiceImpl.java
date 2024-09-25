@@ -1,20 +1,25 @@
 package com.restaurant_management.services.impls;
 
+import com.restaurant_management.entites.Attendance;
 import com.restaurant_management.entites.Employee;
 import com.restaurant_management.entites.EmployeeShift;
 import com.restaurant_management.entites.Shift;
+import com.restaurant_management.enums.StatusType;
 import com.restaurant_management.exceptions.DataExitsException;
 import com.restaurant_management.payloads.requests.AddEmployeeToShiftRequest;
 import com.restaurant_management.payloads.responses.ApiResponse;
+import com.restaurant_management.repositories.AttendanceRepository;
 import com.restaurant_management.repositories.EmployeeRepository;
 import com.restaurant_management.repositories.EmployeeShiftRepository;
 import com.restaurant_management.repositories.ShiftRepository;
 import com.restaurant_management.services.interfaces.EmployeeShiftService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
@@ -36,6 +41,7 @@ public class EmployeeShiftServiceImpl implements EmployeeShiftService {
     private final EmployeeRepository employeeRepository;
     private final ShiftRepository shiftRepository;
     private final EmployeeShiftRepository employeeShiftRepository;
+    private final AttendanceRepository attendanceRepository;
     private final PagedResourcesAssembler<EmployeeShift> pagedResourcesAssembler;
 
 
@@ -64,7 +70,7 @@ public class EmployeeShiftServiceImpl implements EmployeeShiftService {
 //    }
 
     @Override
-    public PagedModel<EntityModel<EmployeeShift>> getAllEmployeeShifts( int pageNo, int pageSize, String sortBy, String sortDir) throws DataExitsException {
+    public PagedModel<EntityModel<EmployeeShift>> getAllEmployeeShifts(int pageNo, int pageSize, String sortBy, String sortDir) throws DataExitsException {
         Pageable paging = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.fromString(sortDir), sortBy));
         Page<EmployeeShift> pagedResult = employeeShiftRepository.findAll(paging);
         if (pagedResult.hasContent()) {
@@ -76,15 +82,19 @@ public class EmployeeShiftServiceImpl implements EmployeeShiftService {
 
 
     @Override
+    @Transactional
     public ApiResponse addEmployeeToShift(AddEmployeeToShiftRequest request) throws DataExitsException {
         if (request.getStartDate().isAfter(request.getEndDate())) {
             throw new DataExitsException("Start date cannot be after end date");
         }
+
         Optional<Shift> shiftOpt = shiftRepository.findById(request.getShiftId());
         if (shiftOpt.isEmpty()) {
             throw new DataExitsException("Shift not found");
         }
+
         List<EmployeeShift> employeeShifts = new ArrayList<>();
+        List<Attendance> attendances = new ArrayList<>();
 
         for (String employeeId : request.getEmployeeIds()) {
             Optional<Employee> employeeOpt = employeeRepository.findById(employeeId);
@@ -96,22 +106,46 @@ public class EmployeeShiftServiceImpl implements EmployeeShiftService {
             LocalDate endDate = request.getEndDate();
 
             while (!startDate.isAfter(endDate)) {
+                Timestamp workDate = Timestamp.valueOf(startDate.atStartOfDay());
+
+                if (employeeShiftRepository.existsByEmployeeAndShiftAndWorkDate(
+                        employeeOpt.get(), shiftOpt.get(), workDate)) {
+                    throw new DataExitsException("Employee shift already exists for employee ID: " + employeeId +
+                            " on date: " + startDate);
+                }
+
+                if (attendanceRepository.existsByEmployeeAndShiftAndAttendanceDate(
+                        employeeOpt.get(), shiftOpt.get(), workDate)) {
+                    throw new DataExitsException("Attendance already exists for employee ID: " + employeeId +
+                            " on date: " + startDate);
+                }
+
                 EmployeeShift employeeShift = new EmployeeShift();
                 employeeShift.setEmployee(employeeOpt.get());
                 employeeShift.setShift(shiftOpt.get());
-                employeeShift.setWorkDate(Timestamp.valueOf(startDate.atStartOfDay()));
-
+                employeeShift.setWorkDate(workDate);
                 employeeShifts.add(employeeShift);
+
+                Attendance attendance = new Attendance();
+                attendance.setEmployee(employeeOpt.get());
+                attendance.setShift(shiftOpt.get());
+                attendance.setAttendanceDate(workDate);
+                attendance.setStatus(StatusType.PENDING.toString());
+                attendance.setNote(null);
+                attendances.add(attendance);
+
                 startDate = startDate.plusDays(1);
             }
         }
-        employeeShiftRepository.saveAll(employeeShifts);
 
-        return new ApiResponse("Employees added to shift successfully", HttpStatus.CREATED);
+        employeeShiftRepository.saveAll(employeeShifts);
+        attendanceRepository.saveAll(attendances);
+
+        return new ApiResponse("Employees and attendances added successfully", HttpStatus.CREATED);
     }
 
-
     @Override
+    @Modifying
     public ApiResponse removeEmployeeFromShift(String employeeId, String shiftId) throws DataExitsException {
         Optional<EmployeeShift> employeeShiftOpt = employeeShiftRepository.findByEmployeeIdAndShiftId(employeeId, shiftId);
 
@@ -119,10 +153,23 @@ public class EmployeeShiftServiceImpl implements EmployeeShiftService {
             throw new DataExitsException("Employee shift does not exist");
         }
 
+        LocalDate workDate = employeeShiftOpt.get().getWorkDate().toLocalDateTime().toLocalDate();
+        List<Attendance> attendances = attendanceRepository.findByEmployeeIdAndShiftIdAndAttendanceDate(employeeId, shiftId, Timestamp.valueOf(workDate.atStartOfDay()));
+
+        System.out.println("Here");
+
+        if (!attendances.isEmpty()) {
+            attendanceRepository.deleteAll(attendances);
+        }
+
+        System.out.println("Here 2");
+
         employeeShiftRepository.delete(employeeShiftOpt.get());
 
-        return new ApiResponse("Employee removed from shift successfully", HttpStatus.OK);
+        System.out.println("Here 3");
+        return new ApiResponse("Employee removed from shift and corresponding attendance deleted successfully", HttpStatus.OK);
     }
+
 
     @Override
     public ApiResponse updateEmployeeShift(AddEmployeeToShiftRequest request) throws DataExitsException {

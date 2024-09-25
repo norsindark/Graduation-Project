@@ -35,14 +35,13 @@ public class Attendance {
     @JsonIgnore
     private Shift shift;
 
-    @Column(name = "date", nullable = false)
-    private Timestamp attendance_date;
+    @Column(name = "attendance_date", nullable = false)
+    private Timestamp attendanceDate;
 
     @Column(name = "status", nullable = false, length = 20)
     private String status;
 
-    @Column(name = "note")
-    @Lob
+    @Column(name = "note", length = 2000)
     private String note;
 
     @Column(name = "created_at")
