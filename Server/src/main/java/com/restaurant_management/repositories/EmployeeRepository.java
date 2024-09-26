@@ -15,4 +15,10 @@ public interface EmployeeRepository extends JpaRepository<Employee, String> {
     @Modifying
     @Query("DELETE FROM Employee e WHERE e.id = :employeeId")
     void deleteByEmployeeId(@Param("employeeId") String employeeId);
+
+    @Query("SELECT COUNT(e) FROM Employee e WHERE EXTRACT(MONTH FROM e.createdAt) = :month AND EXTRACT(YEAR FROM e.createdAt) = :year")
+    Long countEmployeesByMonthAndYear(Integer month, Integer year);
+
+
+
 }

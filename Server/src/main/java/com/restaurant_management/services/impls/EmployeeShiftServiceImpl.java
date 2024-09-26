@@ -29,7 +29,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
+import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -81,6 +83,69 @@ public class EmployeeShiftServiceImpl implements EmployeeShiftService {
         }
     }
 
+//    @Override
+//    @Transactional
+//    public ApiResponse addEmployeeToShift(AddEmployeeToShiftRequest request) throws DataExitsException {
+//        if (request.getStartDate().isAfter(request.getEndDate())) {
+//            throw new DataExitsException("Start date cannot be after end date");
+//        }
+//
+//        Optional<Shift> shiftOpt = shiftRepository.findById(request.getShiftId());
+//        if (shiftOpt.isEmpty()) {
+//            throw new DataExitsException("Shift not found");
+//        }
+//
+//        List<EmployeeShift> employeeShifts = new ArrayList<>();
+//        List<Attendance> attendances = new ArrayList<>();
+//
+//        for (String employeeId : request.getEmployeeIds()) {
+//            Optional<Employee> employeeOpt = employeeRepository.findById(employeeId);
+//            if (employeeOpt.isEmpty()) {
+//                throw new DataExitsException("Employee not found for ID: " + employeeId);
+//            }
+//
+//            LocalDate startDate = request.getStartDate();
+//            LocalDate endDate = request.getEndDate();
+//
+//            while (!startDate.isAfter(endDate)) {
+//                Timestamp workDate = Timestamp.valueOf(startDate.atStartOfDay());
+//
+//                if (employeeShiftRepository.existsByEmployeeAndShiftAndWorkDate(
+//                        employeeOpt.get(), shiftOpt.get(), workDate)) {
+//                    throw new DataExitsException("Employee shift already exists for employee ID: " + employeeId +
+//                            " on date: " + startDate);
+//                }
+//
+//                if (attendanceRepository.existsByEmployeeAndShiftAndAttendanceDate(
+//                        employeeOpt.get(), shiftOpt.get(), workDate)) {
+//                    throw new DataExitsException("Attendance already exists for employee ID: " + employeeId +
+//                            " on date: " + startDate);
+//                }
+//
+//                EmployeeShift employeeShift = new EmployeeShift();
+//                employeeShift.setEmployee(employeeOpt.get());
+//                employeeShift.setShift(shiftOpt.get());
+//                employeeShift.setWorkDate(workDate);
+//                employeeShifts.add(employeeShift);
+//
+//                Attendance attendance = new Attendance();
+//                attendance.setEmployee(employeeOpt.get());
+//                attendance.setShift(shiftOpt.get());
+//                attendance.setAttendanceDate(workDate);
+//                attendance.setStatus(StatusType.PENDING.toString());
+//                attendance.setNote(null);
+//                attendances.add(attendance);
+//
+//                startDate = startDate.plusDays(1);
+//            }
+//        }
+//
+//        employeeShiftRepository.saveAll(employeeShifts);
+//        attendanceRepository.saveAll(attendances);
+//
+//        return new ApiResponse("Employees and attendances added successfully", HttpStatus.CREATED);
+//    }
+
     @Override
     @Transactional
     public ApiResponse addEmployeeToShift(AddEmployeeToShiftRequest request) throws DataExitsException {
@@ -95,11 +160,13 @@ public class EmployeeShiftServiceImpl implements EmployeeShiftService {
 
         List<EmployeeShift> employeeShifts = new ArrayList<>();
         List<Attendance> attendances = new ArrayList<>();
+        List<String> messages = new ArrayList<>();
 
         for (String employeeId : request.getEmployeeIds()) {
             Optional<Employee> employeeOpt = employeeRepository.findById(employeeId);
             if (employeeOpt.isEmpty()) {
-                throw new DataExitsException("Employee not found for ID: " + employeeId);
+                messages.add("Employee not found for ID: " + employeeId);
+                continue;
             }
 
             LocalDate startDate = request.getStartDate();
@@ -110,38 +177,48 @@ public class EmployeeShiftServiceImpl implements EmployeeShiftService {
 
                 if (employeeShiftRepository.existsByEmployeeAndShiftAndWorkDate(
                         employeeOpt.get(), shiftOpt.get(), workDate)) {
-                    throw new DataExitsException("Employee shift already exists for employee ID: " + employeeId +
-                            " on date: " + startDate);
+                    messages.add("Employee shift already exists for " + employeeOpt.get().getEmployeeName() +
+                            " on date: " + startDate + " for shift: " + shiftOpt.get().getShiftName());
+                } else {
+                    EmployeeShift employeeShift = new EmployeeShift();
+                    employeeShift.setEmployee(employeeOpt.get());
+                    employeeShift.setShift(shiftOpt.get());
+                    employeeShift.setWorkDate(workDate);
+                    employeeShifts.add(employeeShift);
                 }
 
                 if (attendanceRepository.existsByEmployeeAndShiftAndAttendanceDate(
                         employeeOpt.get(), shiftOpt.get(), workDate)) {
-                    throw new DataExitsException("Attendance already exists for employee ID: " + employeeId +
-                            " on date: " + startDate);
+                    messages.add("Attendance already exists for " + employeeOpt.get().getEmployeeName() +
+                            " on date: " + startDate + " for shift ID: " + shiftOpt.get().getShiftName());
+                } else {
+                    Attendance attendance = new Attendance();
+                    attendance.setEmployee(employeeOpt.get());
+                    attendance.setShift(shiftOpt.get());
+                    attendance.setAttendanceDate(workDate);
+                    attendance.setStatus(StatusType.PENDING.toString());
+                    attendance.setNote(null);
+                    attendances.add(attendance);
                 }
-
-                EmployeeShift employeeShift = new EmployeeShift();
-                employeeShift.setEmployee(employeeOpt.get());
-                employeeShift.setShift(shiftOpt.get());
-                employeeShift.setWorkDate(workDate);
-                employeeShifts.add(employeeShift);
-
-                Attendance attendance = new Attendance();
-                attendance.setEmployee(employeeOpt.get());
-                attendance.setShift(shiftOpt.get());
-                attendance.setAttendanceDate(workDate);
-                attendance.setStatus(StatusType.PENDING.toString());
-                attendance.setNote(null);
-                attendances.add(attendance);
 
                 startDate = startDate.plusDays(1);
             }
         }
 
-        employeeShiftRepository.saveAll(employeeShifts);
-        attendanceRepository.saveAll(attendances);
+        if (!employeeShifts.isEmpty()) {
+            employeeShiftRepository.saveAll(employeeShifts);
+        }
 
-        return new ApiResponse("Employees and attendances added successfully", HttpStatus.CREATED);
+        if (!attendances.isEmpty()) {
+            attendanceRepository.saveAll(attendances);
+        }
+
+        String resultMessage = "Employees and attendances added successfully";
+        if (!messages.isEmpty()) {
+            resultMessage += ". However, there were some issues:" + "\n" + String.join("\n", messages);
+        }
+
+        return new ApiResponse(resultMessage, HttpStatus.CREATED);
     }
 
     @Override
@@ -195,8 +272,17 @@ public class EmployeeShiftServiceImpl implements EmployeeShiftService {
                         request.getEmployeeIds(), request.getShiftId(), workDateTimestamp)
                 .orElseThrow(() -> new DataExitsException("Employee shift does not exist"));
 
-        if (employeeShift.getWorkDate().before(Timestamp.valueOf(LocalDate.now().atStartOfDay()))) {
-            throw new DataExitsException("Cannot update past shifts");
+        List<Attendance> attendances = attendanceRepository.findByEmployeeIdAndShiftIdAndAttendanceDate(
+                request.getEmployeeIds(), request.getShiftId(), workDateTimestamp);
+
+        boolean hasAttendanceStatus = attendances.stream().anyMatch(attendance ->
+                attendance.getStatus().equals(StatusType.ABSENT.toString()) ||
+                        attendance.getStatus().equals(StatusType.LATE.toString()) ||
+                        attendance.getStatus().equals(StatusType.PRESENT.toString())
+        );
+
+        if (hasAttendanceStatus) {
+            throw new DataExitsException("Cannot update shift after attendance has been recorded.");
         }
 
         if (employeeShiftRepository.existsByEmployeeAndShiftAndWorkDate(
@@ -204,14 +290,6 @@ public class EmployeeShiftServiceImpl implements EmployeeShiftService {
             throw new DataExitsException("Employee shift already exists for employee ID: " + request.getEmployeeIds() +
                     " on date: " + request.getNewWorkDate());
         }
-
-        if (attendanceRepository.existsByEmployeeAndShiftAndAttendanceDate(
-                employeeShift.getEmployee(), employeeShift.getShift(), workDateTimestamp)) {
-            throw new DataExitsException("Cannot update shift after attendance has been recorded");
-        }
-
-        List<Attendance> attendances = attendanceRepository.findByEmployeeIdAndShiftIdAndAttendanceDate(
-                request.getEmployeeIds(), request.getShiftId(), workDateTimestamp);
 
         attendances.forEach(attendance -> {
             attendance.setAttendanceDate(newWorkDateTimestamp);
@@ -222,6 +300,36 @@ public class EmployeeShiftServiceImpl implements EmployeeShiftService {
         employeeShiftRepository.save(employeeShift);
 
         return new ApiResponse("Employee shift updated successfully", HttpStatus.OK);
+    }
+
+    @Override
+    public Long countEmployeeShifts(Integer month, Integer year) throws DataExitsException {
+        try {
+            return employeeShiftRepository.countEmployeeShiftsByMonthAndYear(month, year);
+        } catch (Exception e) {
+            throw new DataExitsException("Error counting employee shifts for month: " + month + " and year: " + year);
+        }
+    }
+
+    @Override
+    public Long sumHoursWorked(Integer month, Integer year) throws DataExitsException {
+        try {
+            List<Object[]> totalShiftInMonth = employeeShiftRepository.findShiftsByMonthAndYear(month, year);
+            long totalHours = 0;
+
+            for (Object[] shift : totalShiftInMonth) {
+
+                LocalTime startTime = (LocalTime) shift[0];
+                LocalTime endTime = (LocalTime) shift[1];
+
+                long hoursWorked = Duration.between(startTime, endTime).toHours();
+
+                totalHours += hoursWorked;
+            }
+            return totalHours;
+        } catch (Exception e) {
+            throw new DataExitsException("Error counting hours worked for month: " + month + " and year: " + year);
+        }
     }
 
 }
