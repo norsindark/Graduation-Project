@@ -17,7 +17,7 @@ public interface EmployeeShiftRepository extends JpaRepository<EmployeeShift, St
 
     List<EmployeeShift> findAllByShift(Shift shift);
 
-    Optional<EmployeeShift> findByEmployeeIdAndShiftId(String employeeId, String shiftId);
+    Optional<EmployeeShift> findByEmployeeIdAndShiftIdAndWorkDate(String employeeId, String shiftId, Timestamp workDate);
 
     Page<EmployeeShift> findByEmployeeId(String employeeId, Pageable pageable);
 
