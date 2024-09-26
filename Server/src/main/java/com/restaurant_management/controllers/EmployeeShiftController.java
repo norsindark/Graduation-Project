@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@Tag(name = "Work Schedule", description = "Work Schedule API")
+@Tag(name = "Employee Shift(Work Schedule)", description = "Employee Shift API")
 @RequestMapping("/api/v1/dashboard/work-schedule")
 public class EmployeeShiftController {
 
