@@ -12,4 +12,10 @@ public interface AttendanceService {
             , int pageSize, String sortBy, String sortDir) throws DataExitsException;
 
     ApiResponse updateStatusOfAttendance(StatusAttendanceRequest request) throws DataExitsException;
+
+    Long sumStatusPerMonth(Integer month, Integer year, String status) throws DataExitsException;
+
+    double sumSalaryOfEmployeePerMonth(Integer month, Integer year, String employeeId) throws DataExitsException;
+
+    double sumSalaryPerMonth(Integer month, Integer year) throws DataExitsException;
 }

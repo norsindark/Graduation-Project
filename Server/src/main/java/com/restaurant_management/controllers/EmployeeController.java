@@ -72,4 +72,12 @@ public class EmployeeController {
     public ResponseEntity<ApiResponse> deleteEmployee(@PathVariable String employeeId) throws DataExitsException {
         return ResponseEntity.ok(employeeService.deleteEmployee(employeeId));
     }
+
+    @GetMapping("/count-employees")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Long> countEmployee(
+            @RequestParam Integer month,
+            @RequestParam Integer year) throws DataExitsException {
+        return ResponseEntity.ok(employeeService.countEmployee(month, year));
+    }
 }

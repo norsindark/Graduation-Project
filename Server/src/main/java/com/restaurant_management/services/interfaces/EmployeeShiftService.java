@@ -19,4 +19,8 @@ public interface EmployeeShiftService {
     ApiResponse removeEmployeeFromShift(String employeeId, String shiftId, String workDate) throws DataExitsException;
 
     ApiResponse updateEmployeeShift(UpdateEmployeeShiftRequest request) throws DataExitsException;
+
+    Long countEmployeeShifts(Integer month, Integer year) throws DataExitsException;
+
+    Long sumHoursWorked(Integer month, Integer year) throws DataExitsException;
 }

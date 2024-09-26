@@ -27,4 +27,6 @@ public interface EmployeeService {
     ApiResponse updateEmployee(EmployeeDto employeeDto) throws DataExitsException;
 
     ApiResponse deleteEmployee(String employeeId) throws DataExitsException;
+
+    Long countEmployee(Integer month, Integer year) throws DataExitsException;
 }
