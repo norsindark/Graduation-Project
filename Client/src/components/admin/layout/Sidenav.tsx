@@ -49,11 +49,11 @@ function Sidenav({ color }: { color: string }) {
     {
       key: '4',
       label: (
-        <NavLink to="/attendance-management">
+        <NavLink to="/attendance">
           <span
             className="icon"
             style={{
-              background: page === 'attendance-management' ? color : '',
+              background: page === 'attendance' ? color : '',
             }}
           >
             <FaCalendarCheck />
@@ -92,7 +92,7 @@ function Sidenav({ color }: { color: string }) {
       ),
     },
     {
-      key: '6',
+      key: '7',
       label: (
         <NavLink to="/warehouse">
           <span

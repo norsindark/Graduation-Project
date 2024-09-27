@@ -3,24 +3,28 @@ import { ApexOptions } from 'apexcharts';
 const lineChartConFig = {
   series: [
     {
-      name: 'Tuần trước',
-      data: [100, 200, 300, 400, 500, 600, 700],
+      name: 'Có mặt',
+      data: [0, 0, 0, 0, 0, 0, 0],
     },
     {
-      name: 'Tuần này',
-      data: [150, 250, 350, 450, 550, 650, 750],
+      name: 'Vắng mặt',
+      data: [0, 0, 0, 0, 0, 0, 0],
+    },
+    {
+      name: 'Đi muộn',
+      data: [0, 0, 0, 0, 0, 0, 0],
     },
   ],
 
   options: {
     chart: {
-      height: 180,
+      height: 350,
       type: 'line',
       toolbar: {
         show: false,
       },
     },
-    colors: ['#8884d8', '#82ca9d'],
+    colors: ['#82ca9d', '#ff6b6b', '#feca57'],
     dataLabels: {
       enabled: false,
     },
@@ -33,18 +37,15 @@ const lineChartConFig = {
       labels: {
         style: {
           colors: '#8c8c8c',
-          fontSize: '10px',
+          fontSize: '12px',
         },
       },
     },
     yaxis: {
-      min: 0,
-      max: 800,
-      tickAmount: 5,
       labels: {
         style: {
           colors: '#8c8c8c',
-          fontSize: '10px',
+          fontSize: '12px',
         },
         formatter: (value) => value.toFixed(0),
       },
@@ -57,7 +58,7 @@ const lineChartConFig = {
       offsetX: -5,
     },
     grid: {
-      show: false,
+      show: true,
       borderColor: '#f0f0f0',
       strokeDashArray: 4,
     },

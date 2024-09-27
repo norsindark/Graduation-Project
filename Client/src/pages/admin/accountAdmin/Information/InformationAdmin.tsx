@@ -83,10 +83,11 @@ const InformationAdmin = () => {
       <div className="fp_dashboard_body fp__change_password">
         <div className="fp__review_input">
           <DashboardAccountAdmin />
+          <h4 className="text-center text-xl font-">Change Password</h4>
           <div className="comment_input pt-[20px]">
             <Form onFinish={onFinish} layout="vertical">
               <div className="row">
-                <div className="col-xl-7">
+                <div className="col-xl-6">
                   <Form.Item
                     label="Old Password"
                     name="oldPassword"
@@ -103,7 +104,7 @@ const InformationAdmin = () => {
                     />
                   </Form.Item>
                 </div>
-                <div className="col-xl-7">
+                <div className="col-xl-6">
                   <Form.Item
                     label="New Password"
                     name="newPassword"
@@ -124,8 +125,6 @@ const InformationAdmin = () => {
                       autoComplete="new-password"
                     />
                   </Form.Item>
-                </div>
-                <div className="col-xl-7">
                   <Form.Item
                     label="Confirm Password"
                     name="confirmPassword"
