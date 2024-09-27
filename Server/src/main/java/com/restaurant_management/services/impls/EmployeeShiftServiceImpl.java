@@ -204,12 +204,7 @@ public class EmployeeShiftServiceImpl implements EmployeeShiftService {
             throw new DataExitsException("Employee shift already exists for employee ID: " + request.getEmployeeIds() +
                     " on date: " + request.getNewWorkDate());
         }
-
-        if (attendanceRepository.existsByEmployeeAndShiftAndAttendanceDate(
-                employeeShift.getEmployee(), employeeShift.getShift(), workDateTimestamp)) {
-            throw new DataExitsException("Cannot update shift after attendance has been recorded");
-        }
-
+   
         List<Attendance> attendances = attendanceRepository.findByEmployeeIdAndShiftIdAndAttendanceDate(
                 request.getEmployeeIds(), request.getShiftId(), workDateTimestamp);
 
