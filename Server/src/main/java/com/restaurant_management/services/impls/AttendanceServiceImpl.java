@@ -63,7 +63,7 @@ public class AttendanceServiceImpl implements AttendanceService {
         if (pagedResult.hasContent()) {
             return pagedResourcesAssembler.toModel(pagedResult.map(AttendanceByDateResponse::new));
         } else {
-            throw new DataExitsException("No attendance found");
+            throw new DataExitsException("No attendance found for this date: " + date);
         }
     }
 
