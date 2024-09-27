@@ -102,15 +102,12 @@ export const callDeleteShift = async (id : string) => {
 
 
 export const callGetAllEmployeeShift = async (query: string) => {
-  return axios.get(`/api/v1/dashboard/work-schedule/get-all-employee-shifts?${query}`);
+  return axios.get(`/api/v1/dashboard/employee-shift/get-all-employee-shifts?${query}`);
 };
 
-// export const callDeleteEmployeeShift = async (id: string) => {
-//   return axios.delete(`/api/v1/dashboard/work-schedule/delete-employee-shift/${id}`);
-// };
 
 export const callAddNewEmployeeShift = async (employeeIds: [], shiftId: string, startDate: string, endDate: string) => {
-  return axios.post(`/api/v1/dashboard/work-schedule/add-employee-to-shift`, {
+  return axios.post(`/api/v1/dashboard/employee-shift/add-employee-to-shift`, {
     employeeIds,
     shiftId,
     startDate,
@@ -119,7 +116,7 @@ export const callAddNewEmployeeShift = async (employeeIds: [], shiftId: string, 
 };
 
 export const callUpdateEmployeeShift = async (employeeIds: string, shiftId: string, workDate: string, newWorkDate: string) => {
-  return axios.put(`/api/v1/dashboard/work-schedule/update-employee-shift`, {
+  return axios.put(`/api/v1/dashboard/employee-shift/update-employee-shift`, {
     employeeIds,
     shiftId,
     workDate,
@@ -128,8 +125,22 @@ export const callUpdateEmployeeShift = async (employeeIds: string, shiftId: stri
 };
 
 export const callDeleteEmployeeShift = async (employeeId: string, shiftId: string, workDate: string) => {
-  return axios.delete(`/api/v1/dashboard/work-schedule/remove-employee-from-shift?employeeId=${employeeId}&shiftId=${shiftId}&workDate=${workDate}`);
+  return axios.delete(`/api/v1/dashboard/employee-shift/remove-employee-from-shift?employeeId=${employeeId}&shiftId=${shiftId}&workDate=${workDate}`);
 };
+
+export const callGetAllAttendanceManagement = async (query: string) => {
+  return axios.get(`/api/v1/dashboard/attendance/get-attendance-by-date?${query}`);
+};
+
+export const callUpdateAttendanceManagement = async (id: string, status: string, note: string) => {
+  return axios.put(`/api/v1/dashboard/attendance/update-status`, {
+    id,
+    status,
+    note,
+  });
+};
+
+
 
 /// category
 

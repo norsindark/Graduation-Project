@@ -121,21 +121,6 @@ const NavigationAccountAdmin = () => {
 
           <button
             className="nav-link"
-            id="v-pills-attendance-management-tab"
-            data-bs-toggle="pill"
-            data-bs-target="#v-pills-attendance-management"
-            type="button"
-            role="tab"
-            aria-controls="v-pills-attendance-management"
-            aria-selected="false"
-          >
-            <span>
-              <i className="fas fa-bags-shopping"></i>
-            </span>{' '}
-            Attendance Management
-          </button>
-          <button
-            className="nav-link"
             id="v-pills-settings-tab"
             data-bs-toggle="pill"
             data-bs-target="#v-pills-settings"

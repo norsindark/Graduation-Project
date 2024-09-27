@@ -7,7 +7,7 @@ import { CgMenuLeftAlt } from 'react-icons/cg';
 import { AiOutlineHome } from 'react-icons/ai';
 import { FaWarehouse } from 'react-icons/fa';
 import { UsergroupAddOutlined } from '@ant-design/icons';
-
+import { FaCalendarCheck } from 'react-icons/fa';
 function Sidenav({ color }: { color: string }) {
   const { pathname } = useLocation();
   const page = pathname.replace('/', '');
@@ -49,6 +49,22 @@ function Sidenav({ color }: { color: string }) {
     {
       key: '4',
       label: (
+        <NavLink to="/attendance-management">
+          <span
+            className="icon"
+            style={{
+              background: page === 'attendance-management' ? color : '',
+            }}
+          >
+            <FaCalendarCheck />
+          </span>
+          <span className="label">Attendance</span>
+        </NavLink>
+      ),
+    },
+    {
+      key: '5',
+      label: (
         <NavLink to="/category">
           <span
             className="icon"
@@ -61,7 +77,7 @@ function Sidenav({ color }: { color: string }) {
       ),
     },
     {
-      key: '5',
+      key: '6',
       label: (
         <NavLink to="/product">
           <span
@@ -90,7 +106,7 @@ function Sidenav({ color }: { color: string }) {
       ),
     },
     {
-      key: '7',
+      key: '8',
       label: (
         <NavLink to="/order">
           <span
