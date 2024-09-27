@@ -20,6 +20,7 @@ import Warehouse from '../pages/admin/warehouse/Warehouse';
 import Product from '../pages/admin/product/Product';
 import User from '../pages/admin/user/User';
 import Order from '../pages/admin/order/Order';
+import AttendanceManagement from '../pages/admin/attendanceManagement/AttendanceManagement';
 export const router = createBrowserRouter([
   {
     path: '/',
@@ -81,6 +82,10 @@ export const router = createBrowserRouter([
       {
         path: '/user',
         element: <User />,
+      },
+      {
+        path: '/attendance-management',
+        element: <AttendanceManagement />,
       },
       {
         path: '/category',

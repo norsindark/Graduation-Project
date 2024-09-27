@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import NavigationAccountAdmin from './NavigationAccountAdmin';
 
 import ShiftManagement from './ShiftManagement/ShiftManagement';
-import AttendanceManagement from './attendanceManagement/AttendanceManagement';
+import AttendanceManagement from '../attendanceManagement/AttendanceManagement';
 import InformationAdmin from './Information/InformationAdmin';
 import EmployeeStatistics from './dashboard/EmployeeStatistics';
 import EmployeeManagement from './employeeManagement/EmployeeManagement';
@@ -54,8 +54,6 @@ const AccountAdmin = () => {
                     <ShiftManagement />
 
                     <EmployeeShift />
-
-                    <AttendanceManagement />
 
                     <InformationAdmin />
                   </div>
