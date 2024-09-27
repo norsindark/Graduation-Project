@@ -8,7 +8,7 @@ interface Employee {
   name: string;
 }
 
-interface TimekeepingRecord {
+interface AttendanceManagement {
   id: string;
   employeeId: string;
   employeeName: string;
@@ -16,17 +16,16 @@ interface TimekeepingRecord {
   status: 'present' | 'absent' | 'late';
 }
 
-const TimekeepingManagement = () => {
+const AttendanceManagement = () => {
   const [selectedDate, setSelectedDate] = useState<moment.Moment | null>(
     moment()
   );
-  const [timekeepingRecords, setTimekeepingRecords] = useState<
-    TimekeepingRecord[]
+  const [AttendanceManagement, setAttendanceManagement] = useState<
+    AttendanceManagement[]
   >([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [currentRecord, setCurrentRecord] = useState<TimekeepingRecord | null>(
-    null
-  );
+  const [currentRecord, setCurrentRecord] =
+    useState<AttendanceManagement | null>(null);
   const [form] = Form.useForm();
 
   // Giả lập danh sách nhân viên, trong thực tế bạn sẽ lấy từ API
@@ -39,14 +38,14 @@ const TimekeepingManagement = () => {
   const fetchTimekeepingRecords = (date: moment.Moment) => {
     // Trong thực tế, bạn sẽ gọi API để lấy dữ liệu chấm công
     // Ở đây chúng ta sẽ tạo dữ liệu mẫu
-    const records: TimekeepingRecord[] = employees.map((employee) => ({
+    const records: AttendanceManagement[] = employees.map((employee) => ({
       id: `${employee.id}-${date.format('YYYY-MM-DD')}`,
       employeeId: employee.id,
       employeeName: employee.name,
       date: date.format('YYYY-MM-DD'),
       status: Math.random() > 0.5 ? 'present' : 'absent',
     }));
-    setTimekeepingRecords(records);
+    setAttendanceManagement(records);
   };
 
   const handleDateChange = (date: moment.Moment | null) => {
@@ -64,7 +63,7 @@ const TimekeepingManagement = () => {
     }
   };
 
-  const handleEditClick = (record: TimekeepingRecord) => {
+  const handleEditClick = (record: AttendanceManagement) => {
     form.setFieldsValue({
       employeeId: record.employeeId,
       status: record.status,
@@ -75,8 +74,8 @@ const TimekeepingManagement = () => {
 
   const handleDeleteClick = (id: string) => {
     // Trong thực tế, bạn sẽ gọi API để xóa dữ liệu
-    setTimekeepingRecords(
-      timekeepingRecords.filter((record) => record.id !== id)
+    setAttendanceManagement(
+      AttendanceManagement.filter((record) => record.id !== id)
     );
     message.success('Đã xóa dữ liệu chấm công');
   };
@@ -86,7 +85,7 @@ const TimekeepingManagement = () => {
       form.validateFields().then((values) => {
         if (currentRecord) {
           // Chỉnh sửa bản ghi hiện có
-          const updatedRecords = timekeepingRecords.map((record) =>
+          const updatedRecords = AttendanceManagement.map((record) =>
             record.id === currentRecord.id
               ? {
                   ...record,
@@ -98,11 +97,11 @@ const TimekeepingManagement = () => {
                 }
               : record
           );
-          setTimekeepingRecords(updatedRecords);
+          setAttendanceManagement(updatedRecords);
           message.success('Đã cập nhật dữ liệu chấm công');
         } else {
           // Thêm bản ghi mới
-          const newRecord: TimekeepingRecord = {
+          const newRecord: AttendanceManagement = {
             id: Date.now().toString(),
             employeeId: values.employeeId,
             employeeName:
@@ -110,7 +109,7 @@ const TimekeepingManagement = () => {
             date: selectedDate.format('YYYY-MM-DD'),
             status: values.status,
           };
-          setTimekeepingRecords([...timekeepingRecords, newRecord]);
+          setAttendanceManagement([...AttendanceManagement, newRecord]);
           message.success('Đã thêm dữ liệu chấm công');
         }
         setIsModalVisible(false);
@@ -151,7 +150,7 @@ const TimekeepingManagement = () => {
     {
       title: 'Hành động',
       key: 'action',
-      render: (_: any, record: TimekeepingRecord) => (
+      render: (_: any, record: AttendanceManagement) => (
         <>
           <Button onClick={() => handleEditClick(record)}>Sửa</Button>
           <Button
@@ -168,9 +167,9 @@ const TimekeepingManagement = () => {
   return (
     <div
       className="tab-pane fade"
-      id="v-pills-timekeeping"
+      id="v-pills-attendance-management"
       role="tabpanel"
-      aria-labelledby="v-pills-timekeeping-tab"
+      aria-labelledby="v-pills-attendance-management-tab"
     >
       <div className="fp_dashboard_body address_body">
         <h3>
@@ -187,7 +186,11 @@ const TimekeepingManagement = () => {
             Thêm chấm công
           </Button>
         </div>
-        <Table columns={columns} dataSource={timekeepingRecords} rowKey="id" />
+        <Table
+          columns={columns}
+          dataSource={AttendanceManagement}
+          rowKey="id"
+        />
         <Modal
           title={currentRecord ? 'Chỉnh sửa chấm công' : 'Thêm chấm công'}
           open={isModalVisible}
@@ -230,4 +233,4 @@ const TimekeepingManagement = () => {
   );
 };
 
-export default TimekeepingManagement;
+export default AttendanceManagement;
