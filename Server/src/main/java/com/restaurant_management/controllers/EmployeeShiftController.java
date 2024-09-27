@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @Tag(name = "Employee Shift(Work Schedule)", description = "Employee Shift API")
-@RequestMapping("/api/v1/dashboard/work-schedule")
+@RequestMapping("/api/v1/dashboard/employee-shift")
 public class EmployeeShiftController {
 
     private final EmployeeShiftService employeeShiftService;
@@ -54,5 +54,21 @@ public class EmployeeShiftController {
     public ResponseEntity<ApiResponse> updateEmployeeShift(
             @RequestBody UpdateEmployeeShiftRequest request) throws DataExitsException {
         return ResponseEntity.ok(employeeShiftService.updateEmployeeShift(request));
+    }
+
+    @GetMapping("/count-employee-shifts")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Long> countEmployeeShifts(
+            @RequestParam Integer month,
+            @RequestParam Integer year) throws DataExitsException {
+        return ResponseEntity.ok(employeeShiftService.countEmployeeShifts(month, year));
+    }
+
+    @GetMapping("/count-hours-worked")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Long> countHoursWorked(
+            @RequestParam Integer month,
+            @RequestParam Integer year) throws DataExitsException {
+        return ResponseEntity.ok(employeeShiftService.sumHoursWorked(month, year));
     }
 }

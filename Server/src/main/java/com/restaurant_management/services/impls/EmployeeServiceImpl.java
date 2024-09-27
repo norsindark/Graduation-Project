@@ -122,7 +122,6 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
 
-
     @Override
     public EmployeeResponse getEmployeeById(String employeeId) throws DataExitsException {
         Optional<Employee> employeeOptional = employeeRepository.findById(employeeId);
@@ -179,5 +178,14 @@ public class EmployeeServiceImpl implements EmployeeService {
         user.setRole(role);
         userRepository.save(user);
         return new ApiResponse("Employee deleted successfully", HttpStatus.OK);
+    }
+
+    @Override
+    public Long countEmployee(Integer month, Integer year) throws DataExitsException {
+        try {
+            return employeeRepository.countEmployeesByMonthAndYear(month, year);
+        } catch (Exception e) {
+            throw new DataExitsException("Error counting employees for month: " + month + " and year: " + year);
+        }
     }
 }

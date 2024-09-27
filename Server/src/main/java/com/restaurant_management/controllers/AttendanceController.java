@@ -22,12 +22,12 @@ public class AttendanceController {
     private final AttendanceService attendanceService;
 
     @GetMapping("/get-attendance-by-date")
-    public ResponseEntity<PagedModel<EntityModel<AttendanceByDateResponse>>>
-    getAttendanceByDate(@RequestParam(required = false) String date,
-                        @RequestParam(defaultValue = "0") int pageNo,
-                        @RequestParam(defaultValue = "10") int pageSize,
-                        @RequestParam(defaultValue = "shiftName") String sortBy,
-                        @RequestParam(defaultValue = "asc") String sortDir) throws DataExitsException {
+    public ResponseEntity<PagedModel<EntityModel<AttendanceByDateResponse>>> getAttendanceByDate(
+            @RequestParam(required = false) String date,
+            @RequestParam(defaultValue = "0") int pageNo,
+            @RequestParam(defaultValue = "10") int pageSize,
+            @RequestParam(defaultValue = "shiftName") String sortBy,
+            @RequestParam(defaultValue = "asc") String sortDir) throws DataExitsException {
         if (date == null || date.isEmpty()) {
             date = LocalDate.now().toString();
         }
@@ -36,8 +36,32 @@ public class AttendanceController {
 
 
     @PutMapping("/update-status")
-    public ResponseEntity<ApiResponse> updateStatusOfAttendance(@RequestBody StatusAttendanceRequest request)
+    public ResponseEntity<ApiResponse> updateStatusOfAttendance(
+            @RequestBody StatusAttendanceRequest request)
             throws DataExitsException {
         return ResponseEntity.ok(attendanceService.updateStatusOfAttendance(request));
+    }
+
+    @GetMapping("/sum-status-per-month")
+    public ResponseEntity<Long> sumStatusPerMonth(
+            @RequestParam Integer month,
+            @RequestParam Integer year,
+            @RequestParam String status) throws DataExitsException {
+        return ResponseEntity.ok(attendanceService.sumStatusPerMonth(month, year, status));
+    }
+
+    @GetMapping("/sum-salary-per-month")
+    public ResponseEntity<Double> sumSalaryPerMonth(
+            @RequestParam Integer month,
+            @RequestParam Integer year) throws DataExitsException {
+        return ResponseEntity.ok(attendanceService.sumSalaryPerMonth(month, year));
+    }
+
+    @GetMapping("/sum-salary-of-employee-per-month")
+    public ResponseEntity<Double> sumSalaryOfEmployeePerMonth(
+            @RequestParam Integer month,
+            @RequestParam Integer year,
+            @RequestParam String employeeId) throws DataExitsException {
+        return ResponseEntity.ok(attendanceService.sumSalaryOfEmployeePerMonth(month, year, employeeId));
     }
 }
