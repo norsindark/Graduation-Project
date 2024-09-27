@@ -1,129 +1,171 @@
-import React, { useState } from 'react';
-import { Table, Button, notification, Row, Col } from 'antd';
+import React, { useState, useEffect } from 'react';
+import { Table, Button, notification, Card, Space, Popconfirm } from 'antd';
 import CategoryNew from './CategoryNew';
 import CategoryEdit from './CategoryEdit';
+import { callGetAllCategory } from '../../../services/serverApi';
+import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
 
 interface CategoryItem {
-  key: string;
+  id: string;
   name: string;
   description: string;
-  displayOrder: number;
-  isActive: boolean;
+  status: string;
+  parentName: string | null;
+  createdAt: string;
+  updatedAt: string;
   children?: CategoryItem[];
+  displayOrder?: string;
 }
 
-const initialDataSource: CategoryItem[] = [
-  {
-    key: '1',
-    name: 'Khai vị',
-    description: 'Món ăn khai vị',
-    displayOrder: 1,
-    isActive: true,
-    children: [
-      {
-        key: '1-1',
-        name: 'Salad',
-        description: 'Các loại salad tươi ngon',
-        displayOrder: 1,
-        isActive: true,
-      },
-      {
-        key: '1-2',
-        name: 'Súp',
-        description: 'Các loại súp nóng hổi',
-        displayOrder: 2,
-        isActive: true,
-      },
-    ],
-  },
-  {
-    key: '2',
-    name: 'Món chính',
-    description: 'Các món ăn chính',
-    displayOrder: 2,
-    isActive: true,
-    children: [
-      {
-        key: '2-1',
-        name: 'Mì Ý',
-        description: 'Các món mì Ý ngon tuyệt',
-        displayOrder: 1,
-        isActive: true,
-      },
-      {
-        key: '2-2',
-        name: 'Bò bít tết',
-        description: 'Bò bít tết mềm ngọt',
-        displayOrder: 2,
-        isActive: true,
-      },
-    ],
-  },
-  {
-    key: '3',
-    name: 'Tráng miệng',
-    description: 'Món tráng miệng ngọt ngào',
-    displayOrder: 3,
-    isActive: true,
-    children: [
-      {
-        key: '3-1',
-        name: 'Bánh ngọt',
-        description: 'Các loại bánh ngọt hấp dẫn',
-        displayOrder: 1,
-        isActive: true,
-      },
-      {
-        key: '3-2',
-        name: 'Kem',
-        description: 'Kem mát lạnh đa dạng hương vị',
-        displayOrder: 2,
-        isActive: true,
-      },
-    ],
-  },
-];
-
 const Category: React.FC = () => {
-  const [dataSource, setDataSource] =
-    useState<CategoryItem[]>(initialDataSource);
+  const [dataSource, setDataSource] = useState<CategoryItem[]>([]);
   const [showCategoryNew, setShowCategoryNew] = useState<boolean>(false);
   const [showCategoryEdit, setShowCategoryEdit] = useState<boolean>(false);
   const [currentCategory, setCurrentCategory] = useState<CategoryItem | null>(
     null
   );
 
-  const handleAddSuccess = () => {
-    setShowCategoryNew(false);
-    notification.success({
-      message: 'Category added successfully!',
-      duration: 5,
+  const [filter, setFilter] = useState('');
+  const [sortQuery, setSortQuery] = useState('');
+
+  const [current, setCurrent] = useState<number>(1);
+  const [pageSize, setPageSize] = useState<number>(10);
+  const [total, setTotal] = useState<number>(0);
+  const [loading, setLoading] = useState<boolean>(false);
+
+  useEffect(() => {
+    fetchCategories();
+  }, [current, pageSize, sortQuery]);
+
+  const fetchCategories = async () => {
+    setLoading(true);
+    try {
+      let query = `pageNo=${current - 1}&pageSize=${pageSize}`;
+      if (sortQuery) {
+        query += `&sortBy=${sortQuery}`;
+      } else {
+        query += `&sortBy=name&sortDir=asc`;
+      }
+      const response = await callGetAllCategory(query);
+      if (response?.status == 200) {
+        if (
+          response &&
+          response.data._embedded &&
+          Array.isArray(response.data._embedded.categoryResponseList)
+        ) {
+          const categories = response.data._embedded.categoryResponseList;
+          const treeData = buildCategoryTree(categories);
+          setDataSource(treeData);
+          setTotal(response.data.page.totalElements);
+        } else {
+          setDataSource([]);
+          setTotal(0);
+        }
+      } else {
+        notification.error({
+          message: 'Lỗi khi tải danh sách danh mục',
+          description:
+            response.data.errors?.error || 'Lỗi khi tải danh sách danh mục!',
+          duration: 5,
+          showProgress: true,
+        });
+      }
+    } catch (error) {
+      notification.error({
+        message: 'Lỗi khi tải danh sách danh mục',
+        description: 'Vui lòng thử lại sau',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const buildCategoryTree = (categories: CategoryItem[]): CategoryItem[] => {
+    const categoryMap = new Map<string, CategoryItem>();
+    const rootCategories: CategoryItem[] = [];
+
+    categories.forEach((category) => {
+      categoryMap.set(category.id, { ...category, children: [] });
     });
+
+    let rootIndex = 1;
+    categories.forEach((category) => {
+      if (category.parentName) {
+        const parentCategory = Array.from(categoryMap.values()).find(
+          (c) => c.name === category.parentName
+        );
+        if (parentCategory) {
+          if (!parentCategory.displayOrder) {
+            parentCategory.displayOrder = `${rootIndex}`;
+            rootIndex++;
+          }
+          const childIndex = (parentCategory.children?.length || 0) + 1;
+          const displayOrder = `${parentCategory.displayOrder}-${childIndex}`;
+          categoryMap.get(category.id)!.displayOrder = displayOrder;
+          parentCategory.children?.push(categoryMap.get(category.id)!);
+        } else {
+          categoryMap.get(category.id)!.displayOrder = `${rootIndex}`;
+          rootCategories.push(categoryMap.get(category.id)!);
+          rootIndex++;
+        }
+      } else {
+        categoryMap.get(category.id)!.displayOrder = `${rootIndex}`;
+        rootCategories.push(categoryMap.get(category.id)!);
+        rootIndex++;
+      }
+    });
+
+    return rootCategories;
+  };
+
+  const handleAddSuccess = () => {
+    fetchCategories();
   };
 
   const handleEditSuccess = () => {
-    setShowCategoryEdit(false);
-    setCurrentCategory(null);
-    notification.success({
-      message: 'Category updated successfully!',
-      duration: 5,
-    });
+    fetchCategories();
   };
 
-  const handleEditClick = (category: CategoryItem) => {
-    setCurrentCategory(category);
+  const handleEditClick = (record: CategoryItem) => {
+    setCurrentCategory(record);
     setShowCategoryEdit(true);
   };
 
-  const handleDeleteClick = (key: string) => {
-    notification.success({
-      message: 'Category deleted successfully!',
-      duration: 5,
-    });
-    setDataSource(dataSource.filter((item) => item.key !== key));
+  const handleDeleteClick = async (id: string) => {
+    // try {
+    //   const res = await callDeleteCategory(id);
+    //   if (res?.status == 200) {
+    //     notification.success({
+    //       message: 'Danh mục đã được xóa thành công!',
+    //       duration: 5,
+    //       showProgress: true,
+    //     });
+    //     fetchCategories();
+    //   } else {
+    //     notification.error({
+    //       message: 'Lỗi khi xóa danh mục',
+    //       description: res.data.errors?.error || 'Lỗi khi xóa danh mục!',
+    //       duration: 5,
+    //       showProgress: true,
+    //     });
+    //   }
+    // } catch {
+    //   notification.error({
+    //     message: 'Lỗi khi xóa danh mục',
+    //     description: 'Lỗi khi xóa danh mục!',
+    //     duration: 5,
+    //     showProgress: true,
+    //   });
+    // }
   };
 
   const columns = [
+    {
+      title: 'Thứ tự hiển thị',
+      dataIndex: 'displayOrder',
+      key: 'displayOrder',
+      render: (displayOrder: string) => displayOrder,
+    },
     {
       title: 'Tên danh mục',
       dataIndex: 'name',
@@ -135,58 +177,55 @@ const Category: React.FC = () => {
       key: 'description',
     },
     {
-      title: 'Thứ tự hiển thị',
-      dataIndex: 'displayOrder',
-      key: 'displayOrder',
-    },
-    {
       title: 'Trạng thái',
-      dataIndex: 'isActive',
-      key: 'isActive',
-      render: (isActive: boolean) => (isActive ? 'Đang hiển thị' : 'Ẩn'),
+      dataIndex: 'status',
+      key: 'status',
+      render: (status: string) =>
+        status === 'ACTIVE' ? 'Đang hiển thị' : 'Ẩn',
     },
     {
       title: 'Hành động',
       key: 'actions',
-      render: (_: any, record: CategoryItem) => {
-        if (record.children) {
-          return (
-            <Row gutter={[8, 8]}>
-              <Col xs={24} sm={12} md={12} lg={8} xl={6} xxl={6}>
-                <Button
-                  type="primary"
-                  shape="round"
-                  block
-                  onClick={() => handleEditClick(record)}
-                >
-                  Sửa
-                </Button>
-              </Col>
-              <Col xs={24} sm={12} md={12} lg={8} xl={6} xxl={6}>
-                <Button
-                  type="primary"
-                  shape="round"
-                  danger
-                  block
-                  onClick={() => handleDeleteClick(record.key)}
-                >
-                  Xóa
-                </Button>
-              </Col>
-            </Row>
-          );
-        }
-        return null;
-      },
+      render: (_: any, record: CategoryItem) => (
+        <Space>
+          <Button
+            type="primary"
+            shape="round"
+            icon={<EditOutlined />}
+            onClick={() => handleEditClick(record)}
+          >
+            Sửa
+          </Button>
+
+          <Popconfirm
+            title="Bạn có chắc chắn muốn xóa danh mục này?"
+            onConfirm={() => handleDeleteClick(record.id)}
+            okText="Có"
+            cancelText="Không"
+          >
+            <Button
+              type="primary"
+              danger
+              shape="round"
+              icon={<DeleteOutlined />}
+            >
+              Xóa
+            </Button>
+          </Popconfirm>
+        </Space>
+      ),
     },
   ];
 
   return (
     <div className="layout-content">
-      <Row>
-        <Col xs={24} sm={12} md={12} lg={8} xl={4} xxl={4}>
-          {!showCategoryNew && !showCategoryEdit && (
+      <Card
+        title="Quản lý danh mục"
+        extra={
+          !showCategoryNew &&
+          !showCategoryEdit && (
             <Button
+              title="Thêm danh mục mới"
               type="primary"
               className="mb-3"
               onClick={() => setShowCategoryNew(true)}
@@ -194,39 +233,52 @@ const Category: React.FC = () => {
               shape="round"
               block
             >
-              Create New Category
+              Tạo danh mục mới
             </Button>
-          )}
-        </Col>
-      </Row>
-
-      <Row>
-        <Col xs={24} sm={24} md={24} lg={24} xl={24} xxl={24}>
-          {showCategoryNew ? (
-            <CategoryNew
-              onAddSuccess={handleAddSuccess}
-              setShowCategoryNew={setShowCategoryNew}
-            />
-          ) : showCategoryEdit && currentCategory ? (
-            <CategoryEdit
-              currentCategory={currentCategory}
-              onEditSuccess={handleEditSuccess}
-              setShowCategoryEdit={setShowCategoryEdit}
-            />
-          ) : (
-            <Table
-              dataSource={dataSource}
-              columns={columns}
-              rowKey="key"
-              pagination={{
-                pageSize: 5,
-                showSizeChanger: true,
-                total: dataSource.length,
-              }}
-            />
-          )}
-        </Col>
-      </Row>
+          )
+        }
+      >
+        {showCategoryNew ? (
+          <CategoryNew
+            onAddSuccess={handleAddSuccess}
+            setShowCategoryNew={setShowCategoryNew}
+          />
+        ) : showCategoryEdit && currentCategory ? (
+          <CategoryEdit
+            currentCategory={currentCategory}
+            onEditSuccess={handleEditSuccess}
+            setShowCategoryEdit={setShowCategoryEdit}
+          />
+        ) : (
+          <Table
+            dataSource={dataSource}
+            columns={columns}
+            rowKey="id"
+            loading={loading}
+            pagination={{
+              current: current,
+              pageSize: pageSize,
+              total: total,
+              showSizeChanger: true,
+              showQuickJumper: true,
+              pageSizeOptions: ['5', '10', '20', '50'],
+              onShowSizeChange: (current, size) => {
+                setCurrent(1);
+                setPageSize(size);
+              },
+              onChange: (page, pageSize) => {
+                setCurrent(page);
+                setPageSize(pageSize);
+              },
+            }}
+            scroll={{ x: 'max-content' }}
+            bordered
+            rowClassName={(record, index) =>
+              index % 2 === 0 ? 'table-row-light' : 'table-row-dark'
+            }
+          />
+        )}
+      </Card>
     </div>
   );
 };
