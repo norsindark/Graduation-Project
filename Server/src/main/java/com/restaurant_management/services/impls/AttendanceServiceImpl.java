@@ -35,12 +35,30 @@ public class AttendanceServiceImpl implements AttendanceService {
     private final EmployeeRepository employeeRepository;
 
     @Override
-    public PagedModel<EntityModel<AttendanceByDateResponse>> getAttendanceByDate(String date, int pageNo
-            , int pageSize, String sortBy, String sortDir) throws DataExitsException {
+    public PagedModel<EntityModel<AttendanceByDateResponse>> getAttendanceByDate(
+            String date, int pageNo, int pageSize, String sortBy, String sortDir)
+            throws DataExitsException {
 
         Timestamp attendanceDate = Timestamp.valueOf(LocalDate.parse(date).atStartOfDay());
 
-        Pageable paging = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.fromString(sortDir), sortBy));
+        Pageable paging = switch (sortBy) {
+            case "shiftName" ->
+                    PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.fromString(sortDir), "s.shiftName"));
+            case "shiftStartTime" ->
+                    PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.fromString(sortDir), "s.startTime"));
+            case "shiftEndTime" ->
+                    PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.fromString(sortDir), "s.endTime"));
+            case "attendanceId" ->
+                    PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.fromString(sortDir), "a.id"));
+            case "employeeName" ->
+                    PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.fromString(sortDir), "e.employeeName"));
+            case "attendanceDate" ->
+                    PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.fromString(sortDir), "a.attendanceDate"));
+            case "status" ->
+                    PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.fromString(sortDir), "a.status"));
+            default -> throw new DataExitsException("Invalid sort field: " + sortBy);
+        };
+
         Page<Attendance> pagedResult = attendanceRepository.findByAttendanceDate(attendanceDate, paging);
         if (pagedResult.hasContent()) {
             return pagedResourcesAssembler.toModel(pagedResult.map(AttendanceByDateResponse::new));

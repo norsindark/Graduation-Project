@@ -15,7 +15,8 @@ import java.util.List;
 public interface AttendanceRepository extends JpaRepository<Attendance, String> {
     boolean existsByEmployeeAndShiftAndAttendanceDate(Employee employee, Shift shift, Timestamp attendanceDate);
 
-    Page<Attendance> findByAttendanceDate(Timestamp date, Pageable pageable);
+    @Query("SELECT a FROM Attendance a JOIN a.shift s JOIN a.employee e WHERE a.attendanceDate = :attendanceDate")
+    Page<Attendance> findByAttendanceDate(@Param("attendanceDate") Timestamp attendanceDate, Pageable pageable);
 
     List<Attendance> findByEmployeeIdAndShiftIdAndAttendanceDate(String employeeId, String shiftId, Timestamp attendanceDate);
 
