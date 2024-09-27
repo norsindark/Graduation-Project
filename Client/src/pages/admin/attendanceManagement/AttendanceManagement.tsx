@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { DatePicker, Table, Button, message, Card, notification } from 'antd';
 
-import moment from 'moment';
+import dayjs from 'dayjs';
 import { Row, Col } from 'antd';
 import { Input, Select } from 'antd';
 
@@ -35,9 +35,7 @@ const AttendanceManagement = () => {
   const [sortQuery, setSortQuery] = useState('');
 
   const [loading, setLoading] = useState(false);
-  const [selectedDate, setSelectedDate] = useState<moment.Moment | null>(
-    moment()
-  );
+  const [selectedDate, setSelectedDate] = useState<dayjs.Dayjs | null>(dayjs());
 
   const [editingKey, setEditingKey] = useState('');
 
@@ -82,7 +80,7 @@ const AttendanceManagement = () => {
     }
   };
 
-  const handleDateChange = (date: moment.Moment | null) => {
+  const handleDateChange = (date: dayjs.Dayjs | null) => {
     setSelectedDate(date);
     setCurrent(1);
     setPageSize(5);
@@ -285,6 +283,7 @@ const AttendanceManagement = () => {
             value={selectedDate}
             onChange={handleDateChange}
             style={{ width: '100%' }}
+            format="DD/MM/YYYY"
           />
         }
       >
@@ -293,7 +292,7 @@ const AttendanceManagement = () => {
             <Table
               dataSource={listAttendanceManagement}
               columns={columns}
-              rowKey="attendanceId"
+              rowKey={(record) => record.attendanceId}
               loading={loading}
               onChange={onChange}
               pagination={{

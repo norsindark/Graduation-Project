@@ -140,7 +140,27 @@ export const callUpdateAttendanceManagement = async (id: string, status: string,
   });
 };
 
+/// statistical Management
 
+export const callGetCountHoursWork = async (month: string, year: string) => {
+  return axios.get(`/api/v1/dashboard/employee-shift/count-hours-worked?month=${month}&year=${year}`);
+};
+
+export const callGetCountEmployeeShift = async (month: string, year: string) => {
+  return axios.get(`/api/v1/dashboard/employee-shift/count-employee-shifts?month=${month}&year=${year}`);
+};
+
+export const callGetSumStatusPerMonth = async (month: string, year: string, status: string) => {
+  return axios.get(`/api/v1/dashboard/attendance/sum-status-per-month?month=${month}&year=${year}&status=${status}`);
+};
+
+export const callGetSumSalaryPerMonth = async (month: string, year: string) => {
+  return axios.get(`/api/v1/dashboard/attendance/sum-salary-per-month?month=${month}&year=${year}`);
+};
+
+export const callGetSumSalaryOfEmployeePerMonth = async (employeeId: string, month: string, year: string) => {
+  return axios.get(`/api/v1/dashboard/attendance/sum-salary-of-employee-per-month?employeeId=${employeeId}&month=${month}&year=${year}`);
+};
 
 /// category
 

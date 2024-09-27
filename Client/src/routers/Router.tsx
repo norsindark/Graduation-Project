@@ -84,7 +84,7 @@ export const router = createBrowserRouter([
         element: <User />,
       },
       {
-        path: '/attendance-management',
+        path: '/attendance',
         element: <AttendanceManagement />,
       },
       {
