@@ -81,7 +81,7 @@ const LineChart: React.FC = () => {
           options={chartData.options}
           series={chartData.series}
           type="line"
-          height={250}
+          height={230}
         />
       )}
     </Spin>

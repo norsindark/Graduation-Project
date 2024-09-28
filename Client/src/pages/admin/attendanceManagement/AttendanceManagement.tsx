@@ -67,6 +67,7 @@ const AttendanceManagement = () => {
           description:
             response.data.errors?.error || 'Error while fetching data!',
           duration: 5,
+          showProgress: true,
         });
       }
     } catch (error) {
@@ -74,6 +75,7 @@ const AttendanceManagement = () => {
         message: 'Unable to load attendance list',
         description: 'Connection or system error!',
         duration: 5,
+        showProgress: true,
       });
     } finally {
       setLoading(false);

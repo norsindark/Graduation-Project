@@ -69,6 +69,7 @@ const OrderEdit: React.FC<OrderEditProps> = ({
       notification.error({
         message: 'Không thể tải danh sách sản phẩm',
         duration: 5,
+        showProgress: true,
       });
     }
   };
@@ -102,6 +103,7 @@ const OrderEdit: React.FC<OrderEditProps> = ({
       notification.success({
         message: 'Đơn hàng đã được cập nhật thành công!',
         duration: 5,
+        showProgress: true,
       });
       onEditSuccess();
     } catch (error: any) {
@@ -109,6 +111,7 @@ const OrderEdit: React.FC<OrderEditProps> = ({
         message: 'Lỗi khi cập nhật đơn hàng',
         description: error.message,
         duration: 5,
+        showProgress: true,
       });
     } finally {
       setIsSubmit(false);

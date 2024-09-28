@@ -170,8 +170,28 @@ export const callGetAllCategory = async (query: string) => {
 
 
 
-// export const callAddNewCategory = async (categoryName: string) => {
-//   return axios.post(`/api/v1/dashboard/category/add-new-category`, {
-//     categoryName,
-//   });
-// };
+export const callAddNewCategory = async (name: string, slug: string, status: string, parentId: string | null, description: string) => {
+  return axios.post(`/api/v1/dashboard/category/add-category`, {
+    name,
+    slug,
+    status,
+    parentId,
+    description,
+  });
+};
+
+export const callUpdateCategory = async (id: string, name: string, slug: string, status: string, parentId: string | null, description: string) => {
+  return axios.put(`/api/v1/dashboard/category/update-category`, {
+    id,
+    name,
+    slug,
+    status,
+    parentId,
+    description,
+  });
+};
+
+export const callDeleteCategory = async (id: string) => {
+  return axios.delete(`/api/v1/dashboard/category/delete-category/${id}`);
+};
+

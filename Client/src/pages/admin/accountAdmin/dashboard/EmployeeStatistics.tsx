@@ -8,6 +8,8 @@ import {
   CalendarOutlined,
   CheckCircleOutlined,
   WarningOutlined,
+  ArrowUpOutlined,
+  ArrowDownOutlined,
 } from '@ant-design/icons';
 import CountUp from 'react-countup';
 import LineChart from './LineChart';
@@ -41,6 +43,16 @@ const EmployeeStatistics: React.FC = () => {
     lateArrivals: 0,
   });
 
+  const [previousMonthStatistics, setPreviousMonthStatistics] =
+    useState<StatisticsData>({
+      totalShifts: 0,
+      totalEmployees: 0,
+      totalHours: 0,
+      totalPayment: 0,
+      averageAttendance: 0,
+      lateArrivals: 0,
+    });
+
   const [dateRange, setDateRange] = useState<[Dayjs, Dayjs]>([
     dayjs().startOf('month'),
     dayjs().endOf('month'),
@@ -55,36 +67,56 @@ const EmployeeStatistics: React.FC = () => {
   const fetchStatistics = async () => {
     setLoading(true);
     const [startDate] = dateRange;
-    const month = startDate.format('MM');
-    const year = startDate.format('YYYY');
+    const currentMonth = startDate.format('MM');
+    const currentYear = startDate.format('YYYY');
+    const previousMonth = startDate.subtract(1, 'month');
+    const previousMonthStr = previousMonth.format('MM');
+    const previousYearStr = previousMonth.format('YYYY');
 
     try {
-      const [hoursWorked, employeeShifts, attendance, salary, lateArrivals] =
-        await Promise.all([
-          callGetCountHoursWork(month, year),
-          callGetCountEmployeeShift(month, year),
-          callGetSumStatusPerMonth(month, year, 'present'),
-          callGetSumSalaryPerMonth(month, year),
-          callGetSumStatusPerMonth(month, year, 'late'),
-        ]);
+      const [currentMonthData, previousMonthData] = await Promise.all([
+        fetchMonthData(currentMonth, currentYear),
+        fetchMonthData(previousMonthStr, previousYearStr),
+      ]);
 
-      setStatistics({
-        totalShifts: employeeShifts.data.totalShifts || 0,
-        totalEmployees: employeeShifts.data.totalEmployees || 0,
-        totalHours: hoursWorked.data.totalHours || 0,
-        totalPayment: salary.data.totalSalary || 0,
-        averageAttendance:
-          (attendance.data.totalPresent /
-            (employeeShifts.data.totalShifts || 1)) *
-          100,
-        lateArrivals: lateArrivals.data.totalLate || 0,
-      });
+      setStatistics(currentMonthData);
+      setPreviousMonthStatistics(previousMonthData);
     } catch (error) {
       console.error('Error fetching statistics:', error);
-      message.error('Có lỗi xảy ra khi lấy dữ liệu thống kê');
+      message.error('Error fetching statistics');
     } finally {
       setLoading(false);
     }
+  };
+
+  const fetchMonthData = async (
+    month: string,
+    year: string
+  ): Promise<StatisticsData> => {
+    const [hoursWorked, employeeShifts, attendance, salary, lateArrivals] =
+      await Promise.all([
+        callGetCountHoursWork(month, year),
+        callGetCountEmployeeShift(month, year),
+        callGetSumStatusPerMonth(month, year, 'present'),
+        callGetSumSalaryPerMonth(month, year),
+        callGetSumStatusPerMonth(month, year, 'late'),
+      ]);
+
+    return {
+      totalShifts: employeeShifts.data || 0,
+      totalEmployees: employeeShifts.data || 0,
+      totalHours: hoursWorked.data || 0,
+      totalPayment: salary.data || 0,
+      averageAttendance: (attendance.data / (employeeShifts.data || 1)) * 100,
+      lateArrivals: lateArrivals.data || 0,
+    };
+  };
+  const calculatePercentageChange = (
+    current: number,
+    previous: number
+  ): number => {
+    if (previous === 0) return 100;
+    return ((current - previous) / previous) * 100;
   };
 
   const handleDateRangeChange = (
@@ -93,6 +125,17 @@ const EmployeeStatistics: React.FC = () => {
     if (dates) {
       setDateRange(dates as [Dayjs, Dayjs]);
     }
+  };
+
+  const renderPercentageChange = (current: number, previous: number) => {
+    const percentageChange = calculatePercentageChange(current, previous);
+    const isPositive = percentageChange >= 0;
+    return (
+      <div className={isPositive ? 'text-green-500' : 'text-red-500'}>
+        {isPositive ? <ArrowUpOutlined /> : <ArrowDownOutlined />}
+        Month: {Math.abs(percentageChange).toFixed(2)}%
+      </div>
+    );
   };
 
   return (
@@ -106,7 +149,8 @@ const EmployeeStatistics: React.FC = () => {
         <RangePicker
           value={dateRange}
           onChange={handleDateRangeChange}
-          format="DD/MM/YYYY"
+          format="MM/YYYY"
+          picker="month"
           className="mb-4"
         />
         <Row
@@ -116,8 +160,14 @@ const EmployeeStatistics: React.FC = () => {
           <Col xs={24} sm={12} md={8} lg={6} xl={7}>
             <div className="bg-white p-4 rounded-lg shadow-md flex items-center justify-between">
               <div>
-                <div className="text-gray-500">Total shifts</div>
-                <CountUp end={statistics.totalShifts} separator="," />
+                <div>
+                  <div className="text-gray-500">Total Shifts</div>
+                  <CountUp end={statistics.totalShifts} separator="," />
+                </div>
+                {renderPercentageChange(
+                  statistics.totalShifts,
+                  previousMonthStatistics.totalShifts
+                )}
               </div>
               <CalendarOutlined className="text-blue-500 text-3xl" />
             </div>
@@ -125,8 +175,14 @@ const EmployeeStatistics: React.FC = () => {
           <Col xs={24} sm={12} md={8} lg={6} xl={7}>
             <div className="bg-white p-4 rounded-lg shadow-md flex items-center justify-between">
               <div>
-                <div className="text-gray-500">Total employees</div>
-                <CountUp end={statistics.totalEmployees} separator="," />
+                <div>
+                  <div className="text-gray-500">Total Employees</div>
+                  <CountUp end={statistics.totalEmployees} separator="," />
+                </div>
+                {renderPercentageChange(
+                  statistics.totalEmployees,
+                  previousMonthStatistics.totalEmployees
+                )}
               </div>
               <UserOutlined className="text-blue-500 text-3xl" />
             </div>
@@ -134,8 +190,14 @@ const EmployeeStatistics: React.FC = () => {
           <Col xs={24} sm={12} md={8} lg={6} xl={7}>
             <div className="bg-white p-4 rounded-lg shadow-md flex items-center justify-between">
               <div>
-                <div className="text-gray-500">Total working hours</div>
-                <CountUp end={statistics.totalHours} separator="," /> giờ
+                <div>
+                  <div className="text-gray-500">Total Hours Worked</div>
+                  <CountUp end={statistics.totalHours} separator="," /> hours
+                </div>
+                {renderPercentageChange(
+                  statistics.totalHours,
+                  previousMonthStatistics.totalHours
+                )}
               </div>
               <ClockCircleOutlined className="text-blue-500 text-3xl" />
             </div>
@@ -143,8 +205,14 @@ const EmployeeStatistics: React.FC = () => {
           <Col xs={24} sm={12} md={8} lg={6} xl={7}>
             <div className="bg-white p-4 rounded-lg shadow-md flex items-center justify-between">
               <div>
-                <div className="text-gray-500">Total payment</div>
-                <CountUp end={statistics.totalPayment} separator="," /> VNĐ
+                <div>
+                  <div className="text-gray-500">Total Payment</div>
+                  <CountUp end={statistics.totalPayment} separator="," /> VNĐ
+                </div>
+                {renderPercentageChange(
+                  statistics.totalPayment,
+                  previousMonthStatistics.totalPayment
+                )}
               </div>
               <DollarOutlined className="text-blue-500 text-3xl" />
             </div>
@@ -152,8 +220,14 @@ const EmployeeStatistics: React.FC = () => {
           <Col xs={24} sm={12} md={8} lg={6} xl={7}>
             <div className="bg-white p-4 rounded-lg shadow-md flex items-center justify-between">
               <div>
-                <div className="text-gray-500">Average attendance rate</div>
-                <CountUp end={statistics.averageAttendance} decimals={2} />%
+                <div>
+                  <div className="text-gray-500">Average Attendance Rate</div>
+                  <CountUp end={statistics.averageAttendance} decimals={2} />%
+                </div>
+                {renderPercentageChange(
+                  statistics.averageAttendance,
+                  previousMonthStatistics.averageAttendance
+                )}
               </div>
               <CheckCircleOutlined className="text-blue-500 text-3xl" />
             </div>
@@ -161,8 +235,14 @@ const EmployeeStatistics: React.FC = () => {
           <Col xs={24} sm={12} md={8} lg={6} xl={7}>
             <div className="bg-white p-4 rounded-lg shadow-md flex items-center justify-between">
               <div>
-                <div className="text-gray-500">Late arrivals</div>
-                <CountUp end={statistics.lateArrivals} separator="," />
+                <div>
+                  <div className="text-gray-500">Late Arrivals</div>
+                  <CountUp end={statistics.lateArrivals} separator="," />
+                </div>
+                {renderPercentageChange(
+                  statistics.lateArrivals,
+                  previousMonthStatistics.lateArrivals
+                )}
               </div>
               <WarningOutlined className="text-blue-500 text-3xl" />
             </div>
