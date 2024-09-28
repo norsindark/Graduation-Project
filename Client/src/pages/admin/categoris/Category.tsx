@@ -2,7 +2,10 @@ import React, { useState, useEffect, Children } from 'react';
 import { Table, Button, notification, Card, Space, Popconfirm } from 'antd';
 import CategoryNew from './CategoryNew';
 import CategoryEdit from './CategoryEdit';
-import { callGetAllCategory, callDeleteCategory } from '../../../services/serverApi';
+import {
+  callGetAllCategory,
+  callDeleteCategory,
+} from '../../../services/serverApi';
 import { EditOutlined, DeleteOutlined, PlusOutlined } from '@ant-design/icons';
 
 interface CategoryItem {
@@ -15,13 +18,17 @@ interface CategoryItem {
   updatedAt: string;
   children?: CategoryItem[];
   subCategories?: CategoryItem[];
+  displayOrder: string;
 }
 
 const Category: React.FC = () => {
   const [dataSource, setDataSource] = useState<CategoryItem[]>([]);
   const [showCategoryNew, setShowCategoryNew] = useState<boolean>(false);
   const [showCategoryEdit, setShowCategoryEdit] = useState<boolean>(false);
-  const [currentCategory, setCurrentCategory] = useState<CategoryItem | null>(null);
+  const [currentCategory, setCurrentCategory] = useState<CategoryItem | null>(
+    null
+  );
+  const [sortQuery, setSortQuery] = useState<string>('');
   const [current, setCurrent] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(10);
   const [total, setTotal] = useState<number>(0);
@@ -34,9 +41,17 @@ const Category: React.FC = () => {
   const fetchCategories = async () => {
     setLoading(true);
     try {
-      const query = `pageNo=${current - 1}&pageSize=${pageSize}&sortBy=name&sortDir=asc`;
+      let query = `pageNo=${current - 1}&pageSize`;
+      if (sortQuery) {
+        query += `&sortBy=${sortQuery}`;
+      } else {
+        query += `&sortBy=name&sortDir=desc`;
+      }
       const response = await callGetAllCategory(query);
-      if (response?.status === 200 && response.data._embedded?.categoryResponseList) {
+      if (
+        response?.status === 200 &&
+        response.data._embedded?.categoryResponseList
+      ) {
         const categories = response.data._embedded.categoryResponseList;
         setDataSource(buildCategoryTree(categories));
         setTotal(response.data.page.totalElements);
@@ -55,22 +70,46 @@ const Category: React.FC = () => {
     }
   };
 
-
   const buildCategoryTree = (categories: CategoryItem[]): CategoryItem[] => {
-    const categoryMap = new Map<string, CategoryItem>();
-    categories.forEach((category) => {
-      categoryMap.set(category.id, { ...category, children: [] });
+    let rootOrder = 1;
+
+    const assignDisplayOrder = (
+      category: CategoryItem,
+      parentOrder: string = ''
+    ) => {
+      if (!category.displayOrder) {
+        category.displayOrder = parentOrder ? parentOrder : `${rootOrder++}`;
+      }
+
+      if (category.subCategories && category.subCategories.length > 0) {
+        category.subCategories.forEach((subCategory, index) => {
+          subCategory.displayOrder = `${category.displayOrder}-${index + 1}`;
+          assignDisplayOrder(subCategory, subCategory.displayOrder);
+        });
+      }
+    };
+
+    const processCategory = (category: CategoryItem) => {
+      if (category.subCategories && category.subCategories.length > 0) {
+        category.children = category.subCategories.map((subCategory) => ({
+          ...subCategory,
+          children: [],
+        }));
+        category.subCategories.forEach(processCategory);
+      }
+    };
+
+    // Xử lý các danh mục gốc trước
+    const rootCategories = categories.filter(
+      (category) => !category.parentName
+    );
+    rootCategories.forEach((category, index) => {
+      category.displayOrder = `${index + 1}`;
+      processCategory(category);
+      assignDisplayOrder(category);
     });
-    categories.forEach((category) => {
-      category.subCategories?.forEach((subCategory) => {
-        const childCategory = categoryMap.get(subCategory.id);
-        const parentCategory = categoryMap.get(category.id);
-        if (parentCategory && childCategory) {
-          parentCategory.children?.push(childCategory);
-        }
-      });
-    });
-    return Array.from(categoryMap.values()).filter((category) => !category.parentName);
+
+    return rootCategories;
   };
 
   const handleAddSuccess = () => {
@@ -87,46 +126,107 @@ const Category: React.FC = () => {
     try {
       const res = await callDeleteCategory(id);
       if (res?.status === 200) {
-        notification.success({ message: 'Category deleted successfully!' });
+        notification.success({
+          message: 'Category deleted successfully!',
+          duration: 5,
+          showProgress: true,
+        });
         fetchCategories();
       } else if (res?.status === 401) {
-        notification.error({ message: 'Error deleting category: This category has subcategories.' });
+        notification.error({
+          message: 'Error deleting category: This category has subcategories.',
+          duration: 5,
+          showProgress: true,
+        });
       } else {
-        notification.error({ message: 'Error deleting category.' });
+        notification.error({
+          message: 'Error deleting category.',
+          description: res.data.errors?.error || 'Error during delete process!',
+          duration: 5,
+          showProgress: true,
+        });
       }
     } catch (error) {
-      notification.error({ message: 'Error deleting category.' });
+      notification.error({
+        message: 'Error deleting category.',
+        duration: 5,
+        showProgress: true,
+      });
     }
   };
 
+  const onChange = (pagination: any, sortDir: any) => {
+    setCurrent(pagination.current);
+    setPageSize(pagination.pageSize);
+    if (sortDir && sortDir.field) {
+      const order = sortDir.order === 'ascend' ? 'asc' : 'desc';
+      setSortQuery(`${sortDir.field},${order}`);
+    } else {
+      setSortQuery('');
+    }
+  };
 
   const columns = [
+    {
+      title: 'Display Order',
+      dataIndex: 'displayOrder',
+      key: 'displayOrder',
+      render: (displayOrder: string) => displayOrder,
+      sorter: (a: CategoryItem, b: CategoryItem) =>
+        a.displayOrder.localeCompare(b.displayOrder),
+    },
     {
       title: 'Category Name',
       dataIndex: 'name',
       key: 'name',
-      sorter: (a: CategoryItem, b: CategoryItem) => a.name.localeCompare(b.name),
+      sorter: (a: CategoryItem, b: CategoryItem) =>
+        a.name.localeCompare(b.name),
     },
     {
       title: 'Description',
       dataIndex: 'description',
       key: 'description',
-      render: (description: string) => (description ? description : 'No Description'),
+      render: (description: string) =>
+        description ? description : 'No Description',
+      sorter: (a: CategoryItem, b: CategoryItem) =>
+        a.description.localeCompare(b.description),
     },
     {
       title: 'Status',
       dataIndex: 'status',
       key: 'status',
-      render: (status: string) => (status === 'INACTIVE' ? 'Hidden' : 'Displayed'),
+      render: (status: string) =>
+        status === 'INACTIVE' ? 'Hidden' : 'Displayed',
+      sorter: (a: CategoryItem, b: CategoryItem) =>
+        a.status.localeCompare(b.status),
     },
     {
       title: 'Action',
       key: 'actions',
       render: (_: any, record: CategoryItem) => (
         <Space>
-          <Button type="primary" shape="round" icon={<EditOutlined />} onClick={() => handleEditClick(record)}>Edit</Button>
-          <Popconfirm title="Delete this category?" onConfirm={() => handleDeleteClick(record.id)}>
-            <Button type="primary" danger shape="round" icon={<DeleteOutlined />}>Delete</Button>
+          {record.parentName ? null : (
+            <Button
+              type="primary"
+              shape="round"
+              icon={<EditOutlined />}
+              onClick={() => handleEditClick(record)}
+            >
+              Edit
+            </Button>
+          )}
+          <Popconfirm
+            title="Delete this category?"
+            onConfirm={() => handleDeleteClick(record.id)}
+          >
+            <Button
+              type="primary"
+              danger
+              shape="round"
+              icon={<DeleteOutlined />}
+            >
+              {record.parentName ? 'Delete Sub Category' : 'Delete'}
+            </Button>
           </Popconfirm>
         </Space>
       ),
@@ -138,15 +238,24 @@ const Category: React.FC = () => {
       <Card
         title="Manage Category"
         extra={
-          !showCategoryNew && !showCategoryEdit && (
-            <Button type="primary" onClick={() => setShowCategoryNew(true)} shape="round" icon={<PlusOutlined />}>
+          !showCategoryNew &&
+          !showCategoryEdit && (
+            <Button
+              type="primary"
+              onClick={() => setShowCategoryNew(true)}
+              shape="round"
+              icon={<PlusOutlined />}
+            >
               Create Category
             </Button>
           )
         }
       >
         {showCategoryNew ? (
-          <CategoryNew onAddSuccess={handleAddSuccess} setShowCategoryNew={setShowCategoryNew} />
+          <CategoryNew
+            onAddSuccess={handleAddSuccess}
+            setShowCategoryNew={setShowCategoryNew}
+          />
         ) : showCategoryEdit && currentCategory ? (
           <CategoryEdit
             currentCategory={currentCategory}
@@ -159,6 +268,7 @@ const Category: React.FC = () => {
             columns={columns}
             rowKey="id"
             loading={loading}
+            onChange={onChange}
             pagination={{
               current,
               pageSize,
@@ -173,9 +283,12 @@ const Category: React.FC = () => {
                 setCurrent(page);
               },
             }}
-            expandable={{ childrenColumnName: 'subCategories' }}
             scroll={{ x: 'max-content' }}
             bordered
+            expandable={{ childrenColumnName: 'subCategories' }}
+            rowClassName={(record, index) =>
+              index % 2 === 0 ? 'table-row-light' : 'table-row-dark'
+            }
           />
         )}
       </Card>
