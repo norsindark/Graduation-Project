@@ -19,6 +19,7 @@ import {
   callGetCountEmployeeShift,
   callGetSumStatusPerMonth,
   callGetSumSalaryPerMonth,
+  callGetCountEmployeePerMonth
 } from '../../../../services/serverApi';
 
 const { Title } = Typography;
@@ -93,18 +94,19 @@ const EmployeeStatistics: React.FC = () => {
     month: string,
     year: string
   ): Promise<StatisticsData> => {
-    const [hoursWorked, employeeShifts, attendance, salary, lateArrivals] =
+    const [hoursWorked, employeeShifts, attendance, salary, lateArrivals, Employees] =
       await Promise.all([
         callGetCountHoursWork(month, year),
         callGetCountEmployeeShift(month, year),
         callGetSumStatusPerMonth(month, year, 'present'),
         callGetSumSalaryPerMonth(month, year),
         callGetSumStatusPerMonth(month, year, 'late'),
+        callGetCountEmployeePerMonth(month, year)
       ]);
 
     return {
       totalShifts: employeeShifts.data || 0,
-      totalEmployees: employeeShifts.data || 0,
+      totalEmployees: Employees.data || 0,
       totalHours: hoursWorked.data || 0,
       totalPayment: salary.data || 0,
       averageAttendance: (attendance.data / (employeeShifts.data || 1)) * 100,
