@@ -71,8 +71,10 @@ const EmployeeShiftEdit: React.FC<EmployeeShiftEditProps> = ({
       }
     } catch (error) {
       notification.error({
-        message: 'Lỗi khi tải danh sách nhân viên',
-        description: 'Đã xảy ra lỗi khi tải dữ liệu nhân viên!',
+        message: 'Error loading employee list',
+        description: 'An error occurred while loading employee data!',
+        duration: 5,
+        showProgress: true,
       });
     }
   };
@@ -85,8 +87,10 @@ const EmployeeShiftEdit: React.FC<EmployeeShiftEditProps> = ({
       }
     } catch (error) {
       notification.error({
-        message: 'Lỗi khi tải danh sách ca làm việc',
-        description: 'Đã xảy ra lỗi khi tải dữ liệu ca làm việc!',
+        message: 'Error loading shift list',
+        description: 'An error occurred while loading shift data!',
+        duration: 5,
+        showProgress: true,
       });
     }
   };

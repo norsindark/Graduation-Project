@@ -39,6 +39,8 @@ const EmployeeShiftNew: React.FC<EmployeeShiftNewProps> = ({
       notification.error({
         message: 'Error loading employee list',
         description: 'An error occurred while loading employee data!',
+        duration: 5,
+        showProgress: true,
       });
     }
   };
@@ -53,6 +55,8 @@ const EmployeeShiftNew: React.FC<EmployeeShiftNewProps> = ({
       notification.error({
         message: 'Error loading shift list',
         description: 'An error occurred while loading shift data!',
+        duration: 5,
+        showProgress: true,
       });
     }
   };

@@ -1,6 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { Form, Input, Button, notification, Space } from 'antd';
-import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
+import { Form, Input, Button, notification, Space, Switch } from 'antd';
+import {
+  MinusCircleOutlined,
+  PlusOutlined,
+  SaveOutlined,
+  CloseOutlined,
+} from '@ant-design/icons';
+import {
+  callUpdateCategory,
+  callAddNewCategory,
+} from '../../../services/serverApi';
 
 interface CategoryEditProps {
   currentCategory: any;
@@ -21,6 +30,7 @@ const CategoryEdit: React.FC<CategoryEditProps> = ({
       form.setFieldsValue({
         name: currentCategory.name,
         description: currentCategory.description,
+        status: currentCategory.status === 'ACTIVE',
         children: currentCategory.children || [],
       });
     }
@@ -29,21 +39,56 @@ const CategoryEdit: React.FC<CategoryEditProps> = ({
   const onFinish = async (values: any) => {
     setIsSubmit(true);
     try {
-      // Call API to update category
-      // const response = await callEditCategory(currentCategory.key, values);
-      // Mock response
-      const response = { status: 200 };
-      if (response.status === 200) {
+      const { name, description, status, children } = values;
+      const slug = name
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/\s+/g, '-');
+
+      const response = await callUpdateCategory(
+        currentCategory.id,
+        name,
+        slug,
+        status ? 'ACTIVE' : 'INACTIVE',
+        currentCategory.parentId,
+        description
+      );
+
+      if (response?.status === 200) {
         notification.success({
-          message: 'Category updated successfully!',
+          message: 'Update category successfully!',
           duration: 5,
+          showProgress: true,
         });
+
+        if (children && children.length > 0) {
+          for (const child of children) {
+            if (!child.id) {
+              const childSlug = child.name
+                .toLowerCase()
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .replace(/\s+/g, '-');
+
+              await callAddNewCategory(
+                child.name,
+                childSlug,
+                status ? 'ACTIVE' : 'INACTIVE',
+                currentCategory.id,
+                child.description
+              );
+            }
+          }
+        }
         onEditSuccess();
+        setShowCategoryEdit(false);
       } else {
         notification.error({
-          message: 'Category update failed',
-          description: 'Something went wrong!',
+          message: 'Update category failed',
+          description: 'An error occurred while updating the category!',
           duration: 5,
+          showProgress: true,
         });
       }
     } catch (error: any) {
@@ -51,6 +96,7 @@ const CategoryEdit: React.FC<CategoryEditProps> = ({
         message: 'Error updating category',
         description: error.message,
         duration: 5,
+        showProgress: true,
       });
     } finally {
       setIsSubmit(false);
@@ -58,26 +104,42 @@ const CategoryEdit: React.FC<CategoryEditProps> = ({
   };
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 bg-white shadow rounded-md">
+    <>
       <h4 className="text-center text-xl font-semibold mb-4">Edit Category</h4>
       <Form layout="vertical" onFinish={onFinish} form={form}>
         <Form.Item
-          label="Category Name"
+          className="font-medium"
+          label="Tên danh mục"
           name="name"
           rules={[
-            { required: true, message: 'Please input the category name!' },
+            { required: true, message: 'Please enter the category name!' },
           ]}
         >
           <Input placeholder="Category Name" />
         </Form.Item>
         <Form.Item
-          label="Description"
+          className="font-medium"
+          label="Mô tả"
           name="description"
-          rules={[{ required: true, message: 'Please input the description!' }]}
+          // rules={[{ required: true, message: 'Please enter the description!' }]}
         >
-          <Input.TextArea rows={2} placeholder="Description" />
+          <Input.TextArea rows={2} placeholder="Mô tả" />
         </Form.Item>
-
+        <Form.Item
+          className="font-medium"
+          label="Status"
+          name="status"
+          valuePropName="checked"
+        >
+          <Switch
+            loading={isSubmit}
+            checkedChildren="Active"
+            unCheckedChildren="Inactive"
+          />
+        </Form.Item>
+        <h4 className="text-center text-xl font-semibold mb-2">
+          Create new subcategories
+        </h4>
         <Form.List name="children">
           {(fields, { add, remove }) => (
             <>
@@ -96,7 +158,7 @@ const CategoryEdit: React.FC<CategoryEditProps> = ({
                     rules={[
                       {
                         required: true,
-                        message: 'Please input the subcategory name!',
+                        message: 'Please enter the subcategory name!',
                       },
                     ]}
                     className="flex-1"
@@ -106,12 +168,12 @@ const CategoryEdit: React.FC<CategoryEditProps> = ({
                   <Form.Item
                     {...restField}
                     name={[name, 'description']}
-                    rules={[
-                      {
-                        required: true,
-                        message: 'Please input the subcategory description!',
-                      },
-                    ]}
+                    // rules={[
+                    //   {
+                    //     required: true,
+                    //     message: 'Please enter the subcategory description!',
+                    //   },
+                    // ]}
                     className="flex-1"
                   >
                     <Input placeholder="Subcategory Description" />
@@ -129,7 +191,7 @@ const CategoryEdit: React.FC<CategoryEditProps> = ({
                   icon={<PlusOutlined />}
                   className="w-full"
                 >
-                  Add Subcategory
+                  Create Subcategory
                 </Button>
               </Form.Item>
             </>
@@ -144,8 +206,9 @@ const CategoryEdit: React.FC<CategoryEditProps> = ({
             size="large"
             loading={isSubmit}
             className="w-full sm:w-auto"
+            icon={<SaveOutlined />}
           >
-            Save Changes
+            Save changes
           </Button>
           <Button
             danger
@@ -153,12 +216,13 @@ const CategoryEdit: React.FC<CategoryEditProps> = ({
             shape="round"
             onClick={() => setShowCategoryEdit(false)}
             className="w-full sm:w-auto"
+            icon={<CloseOutlined />}
           >
             Cancel
           </Button>
         </div>
       </Form>
-    </div>
+    </>
   );
 };
 

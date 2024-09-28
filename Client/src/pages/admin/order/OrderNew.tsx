@@ -44,6 +44,7 @@ const OrderNew: React.FC<OrderNewProps> = ({
       notification.error({
         message: 'Không thể tải danh sách sản phẩm',
         duration: 5,
+        showProgress: true,
       });
     }
   };
@@ -77,6 +78,7 @@ const OrderNew: React.FC<OrderNewProps> = ({
       notification.success({
         message: 'Đơn hàng đã được thêm thành công!',
         duration: 5,
+        showProgress: true,
       });
       onAddSuccess();
     } catch (error: any) {
@@ -84,6 +86,7 @@ const OrderNew: React.FC<OrderNewProps> = ({
         message: 'Lỗi khi thêm đơn hàng mới',
         description: error.message,
         duration: 5,
+        showProgress: true,
       });
     } finally {
       setIsSubmit(false);

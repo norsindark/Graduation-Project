@@ -23,6 +23,7 @@ const InformationAdmin = () => {
         message: 'User not found',
         description: 'Please login to change your password',
         duration: 5,
+        showProgress: true,
       });
       navigate('/login');
       return;

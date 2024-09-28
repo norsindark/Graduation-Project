@@ -48,6 +48,7 @@ const Order: React.FC = () => {
       notification.error({
         message: 'Không thể tải danh sách đơn hàng',
         duration: 5,
+        showProgress: true,
       });
       setDataSource([]);
     }
@@ -59,6 +60,7 @@ const Order: React.FC = () => {
     notification.success({
       message: 'Đơn hàng đã được thêm thành công!',
       duration: 5,
+      showProgress: true,
     });
     fetchOrders();
   };
@@ -69,6 +71,7 @@ const Order: React.FC = () => {
     notification.success({
       message: 'Đơn hàng đã được cập nhật thành công!',
       duration: 5,
+      showProgress: true,
     });
     fetchOrders();
   };
@@ -84,12 +87,14 @@ const Order: React.FC = () => {
       notification.success({
         message: 'Đơn hàng đã được xóa thành công!',
         duration: 5,
+        showProgress: true,
       });
       fetchOrders();
     } catch (error) {
       notification.error({
         message: 'Không thể xóa đơn hàng',
         duration: 5,
+        showProgress: true,
       });
     }
   };
@@ -100,12 +105,14 @@ const Order: React.FC = () => {
       notification.success({
         message: 'Đơn hàng đã được chuyển sang trạng thái giao hàng!',
         duration: 5,
+        showProgress: true,
       });
       fetchOrders();
     } catch (error) {
       notification.error({
         message: 'Không thể cập nhật trạng thái giao hàng',
         duration: 5,
+        showProgress: true,
       });
     }
   };
@@ -116,12 +123,14 @@ const Order: React.FC = () => {
       notification.success({
         message: 'Đơn hàng đã được hoàn thành!',
         duration: 5,
+        showProgress: true,
       });
       fetchOrders();
     } catch (error) {
       notification.error({
         message: 'Không thể hoàn thành đơn hàng',
         duration: 5,
+        showProgress: true,
       });
     }
   };

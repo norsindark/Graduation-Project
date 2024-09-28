@@ -3,8 +3,8 @@ import { Table, Button, notification, Card, Space, Popconfirm } from 'antd';
 import CategoryNew from './CategoryNew';
 import CategoryEdit from './CategoryEdit';
 import { callGetAllCategory } from '../../../services/serverApi';
-import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
-
+import { EditOutlined, DeleteOutlined, PlusOutlined } from '@ant-design/icons';
+import { callDeleteCategory } from '../../../services/serverApi';
 interface CategoryItem {
   id: string;
   name: string;
@@ -55,6 +55,7 @@ const Category: React.FC = () => {
         ) {
           const categories = response.data._embedded.categoryResponseList;
           const treeData = buildCategoryTree(categories);
+          console.log(treeData);
           setDataSource(treeData);
           setTotal(response.data.page.totalElements);
         } else {
@@ -63,17 +64,19 @@ const Category: React.FC = () => {
         }
       } else {
         notification.error({
-          message: 'Lỗi khi tải danh sách danh mục',
+          message: 'Error when loading category list',
           description:
-            response.data.errors?.error || 'Lỗi khi tải danh sách danh mục!',
+            response.data.errors?.error || 'Error when loading category list!',
           duration: 5,
           showProgress: true,
         });
       }
     } catch (error) {
       notification.error({
-        message: 'Lỗi khi tải danh sách danh mục',
-        description: 'Vui lòng thử lại sau',
+        message: 'Error when loading category list',
+        description: 'Please try again later',
+        duration: 5,
+        showProgress: true,
       });
     } finally {
       setLoading(false);
@@ -84,33 +87,39 @@ const Category: React.FC = () => {
     const categoryMap = new Map<string, CategoryItem>();
     const rootCategories: CategoryItem[] = [];
 
+    // Đầu tiên, tạo map của tất cả các danh mục
     categories.forEach((category) => {
       categoryMap.set(category.id, { ...category, children: [] });
     });
 
     let rootIndex = 1;
     categories.forEach((category) => {
+      const currentCategory = categoryMap.get(category.id)!;
+
       if (category.parentName) {
+        // Tìm danh mục cha dựa trên parentName
         const parentCategory = Array.from(categoryMap.values()).find(
           (c) => c.name === category.parentName
         );
+
         if (parentCategory) {
           if (!parentCategory.displayOrder) {
             parentCategory.displayOrder = `${rootIndex}`;
             rootIndex++;
           }
           const childIndex = (parentCategory.children?.length || 0) + 1;
-          const displayOrder = `${parentCategory.displayOrder}-${childIndex}`;
-          categoryMap.get(category.id)!.displayOrder = displayOrder;
-          parentCategory.children?.push(categoryMap.get(category.id)!);
+          currentCategory.displayOrder = `${parentCategory.displayOrder}-${childIndex}`;
+          parentCategory.children?.push(currentCategory);
         } else {
-          categoryMap.get(category.id)!.displayOrder = `${rootIndex}`;
-          rootCategories.push(categoryMap.get(category.id)!);
+          // Nếu không tìm thấy danh mục cha, xử lý như danh mục gốc
+          currentCategory.displayOrder = `${rootIndex}`;
+          rootCategories.push(currentCategory);
           rootIndex++;
         }
       } else {
-        categoryMap.get(category.id)!.displayOrder = `${rootIndex}`;
-        rootCategories.push(categoryMap.get(category.id)!);
+        // Danh mục gốc
+        currentCategory.displayOrder = `${rootIndex}`;
+        rootCategories.push(currentCategory);
         rootIndex++;
       }
     });
@@ -120,6 +129,7 @@ const Category: React.FC = () => {
 
   const handleAddSuccess = () => {
     fetchCategories();
+    setShowCategoryNew(false);
   };
 
   const handleEditSuccess = () => {
@@ -131,109 +141,137 @@ const Category: React.FC = () => {
     setShowCategoryEdit(true);
   };
 
+  const onChange = (pagination: any, sortDir: any) => {
+    setCurrent(pagination.current);
+    setPageSize(pagination.pageSize);
+    if (sortDir && sortDir.field) {
+      const order = sortDir.order === 'ascend' ? 'asc' : 'desc';
+      setSortQuery(`${sortDir.field},${order}`);
+    } else {
+      setSortQuery('');
+    }
+  };
+
   const handleDeleteClick = async (id: string) => {
-    // try {
-    //   const res = await callDeleteCategory(id);
-    //   if (res?.status == 200) {
-    //     notification.success({
-    //       message: 'Danh mục đã được xóa thành công!',
-    //       duration: 5,
-    //       showProgress: true,
-    //     });
-    //     fetchCategories();
-    //   } else {
-    //     notification.error({
-    //       message: 'Lỗi khi xóa danh mục',
-    //       description: res.data.errors?.error || 'Lỗi khi xóa danh mục!',
-    //       duration: 5,
-    //       showProgress: true,
-    //     });
-    //   }
-    // } catch {
-    //   notification.error({
-    //     message: 'Lỗi khi xóa danh mục',
-    //     description: 'Lỗi khi xóa danh mục!',
-    //     duration: 5,
-    //     showProgress: true,
-    //   });
-    // }
+    try {
+      const res = await callDeleteCategory(id);
+      if (res?.status == 200) {
+        notification.success({
+          message: 'Category deleted successfully!',
+          duration: 5,
+          showProgress: true,
+        });
+        fetchCategories();
+      } else {
+        notification.error({
+          message: 'Error deleting category',
+          description: res.data.errors?.error || 'Error deleting category!',
+          duration: 5,
+          showProgress: true,
+        });
+      }
+    } catch {
+      notification.error({
+        message: 'Error deleting category',
+        description: 'Error deleting category!',
+        duration: 5,
+        showProgress: true,
+      });
+    }
   };
 
   const columns = [
     {
-      title: 'Thứ tự hiển thị',
+      title: 'Display Order',
       dataIndex: 'displayOrder',
       key: 'displayOrder',
       render: (displayOrder: string) => displayOrder,
+      sorter: (a: CategoryItem, b: CategoryItem) =>
+        parseInt(a.displayOrder || '0') - parseInt(b.displayOrder || '0'),
     },
     {
-      title: 'Tên danh mục',
+      title: 'Category Name',
       dataIndex: 'name',
       key: 'name',
+      sorter: (a: CategoryItem, b: CategoryItem) =>
+        a.name.localeCompare(b.name),
     },
     {
-      title: 'Mô tả',
+      title: 'Description',
       dataIndex: 'description',
       key: 'description',
+      render: (description: string) =>
+        description === '' ? 'No Description' : description,
+      sorter: (a: CategoryItem, b: CategoryItem) =>
+        a.description.localeCompare(b.description),
     },
     {
-      title: 'Trạng thái',
+      title: 'Status',
       dataIndex: 'status',
       key: 'status',
-      render: (status: string) =>
-        status === 'ACTIVE' ? 'Đang hiển thị' : 'Ẩn',
+      render: (status: string, record: CategoryItem) => {
+        if (!record.parentName) {
+          return status === 'INACTIVE' ? 'Hidden' : 'Display';
+        }
+        return null;
+      },
+      sorter: (a: CategoryItem, b: CategoryItem) =>
+        a.status.localeCompare(b.status),
     },
     {
-      title: 'Hành động',
+      title: 'Action',
       key: 'actions',
-      render: (_: any, record: CategoryItem) => (
-        <Space>
-          <Button
-            type="primary"
-            shape="round"
-            icon={<EditOutlined />}
-            onClick={() => handleEditClick(record)}
-          >
-            Sửa
-          </Button>
+      render: (_: any, record: CategoryItem) => {
+        if (!record.parentName) {
+          return (
+            <Space>
+              <Button
+                type="primary"
+                shape="round"
+                icon={<EditOutlined />}
+                onClick={() => handleEditClick(record)}
+              >
+                Edit
+              </Button>
 
-          <Popconfirm
-            title="Bạn có chắc chắn muốn xóa danh mục này?"
-            onConfirm={() => handleDeleteClick(record.id)}
-            okText="Có"
-            cancelText="Không"
-          >
-            <Button
-              type="primary"
-              danger
-              shape="round"
-              icon={<DeleteOutlined />}
-            >
-              Xóa
-            </Button>
-          </Popconfirm>
-        </Space>
-      ),
+              <Popconfirm
+                title="Are you sure you want to delete this category?"
+                onConfirm={() => handleDeleteClick(record.id)}
+                okText="Yes"
+                cancelText="No"
+              >
+                <Button
+                  type="primary"
+                  danger
+                  shape="round"
+                  icon={<DeleteOutlined />}
+                >
+                  Delete
+                </Button>
+              </Popconfirm>
+            </Space>
+          );
+        }
+        return null;
+      },
     },
   ];
 
   return (
     <div className="layout-content">
       <Card
-        title="Quản lý danh mục"
+        title="Manage Category"
         extra={
           !showCategoryNew &&
           !showCategoryEdit && (
             <Button
-              title="Thêm danh mục mới"
               type="primary"
               className="mb-3"
               onClick={() => setShowCategoryNew(true)}
-              size="large"
               shape="round"
-              block
+              icon={<PlusOutlined />}
             >
-              Tạo danh mục mới
+              Create Category New
             </Button>
           )
         }
@@ -255,6 +293,7 @@ const Category: React.FC = () => {
             columns={columns}
             rowKey="id"
             loading={loading}
+            onChange={onChange}
             pagination={{
               current: current,
               pageSize: pageSize,
@@ -265,10 +304,6 @@ const Category: React.FC = () => {
               onShowSizeChange: (current, size) => {
                 setCurrent(1);
                 setPageSize(size);
-              },
-              onChange: (page, pageSize) => {
-                setCurrent(page);
-                setPageSize(pageSize);
               },
             }}
             scroll={{ x: 'max-content' }}
