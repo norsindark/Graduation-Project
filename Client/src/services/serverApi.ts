@@ -168,13 +168,13 @@ export const callGetCountEmployeePerMonth = async (month: string, year: string) 
 /// category
 
 export const callGetAllCategory = async (query: string) => {
-  return axios.get(`/api/v1/dashboard/category/all?${query}`);
+  return axios.get(`/api/v1/dashboard/category/get-all-categories?${query}`);
 };
 
 
 
 export const callAddNewCategory = async (name: string, slug: string, status: string, parentId: string | null, description: string) => {
-  return axios.post(`/api/v1/dashboard/category/add-category`, {
+  return axios.post(`/api/v1/dashboard/category/add-new-category`, {
     name,
     slug,
     status,
