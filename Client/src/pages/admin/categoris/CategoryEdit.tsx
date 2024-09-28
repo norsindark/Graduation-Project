@@ -6,10 +6,7 @@ import {
   SaveOutlined,
   CloseOutlined,
 } from '@ant-design/icons';
-import {
-  callUpdateCategory,
-  callAddNewCategory,
-} from '../../../services/serverApi';
+import { callUpdateCategory } from '../../../services/serverApi';
 
 interface CategoryEditProps {
   currentCategory: any;
@@ -31,7 +28,7 @@ const CategoryEdit: React.FC<CategoryEditProps> = ({
         name: currentCategory.name,
         description: currentCategory.description,
         status: currentCategory.status === 'ACTIVE',
-        children: currentCategory.children || [],
+        subCategories: currentCategory.subCategories || [],
       });
     }
   }, [currentCategory, form]);
@@ -39,21 +36,28 @@ const CategoryEdit: React.FC<CategoryEditProps> = ({
   const onFinish = async (values: any) => {
     setIsSubmit(true);
     try {
-      const { name, description, status, children } = values;
+      const { name, description, status, subCategories } = values;
       const slug = name
         .toLowerCase()
         .normalize('NFD')
         .replace(/[\u0300-\u036f]/g, '')
         .replace(/\s+/g, '-');
-
-      const response = await callUpdateCategory(
-        currentCategory.id,
+      const payload = {
+        id: currentCategory.id,
         name,
         slug,
-        status ? 'ACTIVE' : 'INACTIVE',
-        currentCategory.parentId,
-        description
-      );
+        status: status ? 'ACTIVE' : 'INACTIVE',
+        description,
+        subCategories: subCategories.map((child: any) => ({
+          id: child.id || undefined,
+          name: child.name,
+          slug: child.slug,
+          status: child.status ? 'ACTIVE' : 'INACTIVE',
+          description: child.description,
+        })),
+      };
+
+      const response = await callUpdateCategory(payload);
 
       if (response?.status === 200) {
         notification.success({
@@ -61,26 +65,6 @@ const CategoryEdit: React.FC<CategoryEditProps> = ({
           duration: 5,
           showProgress: true,
         });
-
-        if (children && children.length > 0) {
-          for (const child of children) {
-            if (!child.id) {
-              const childSlug = child.name
-                .toLowerCase()
-                .normalize('NFD')
-                .replace(/[\u0300-\u036f]/g, '')
-                .replace(/\s+/g, '-');
-
-              await callAddNewCategory(
-                child.name,
-                childSlug,
-                status ? 'ACTIVE' : 'INACTIVE',
-                currentCategory.id,
-                child.description
-              );
-            }
-          }
-        }
         onEditSuccess();
         setShowCategoryEdit(false);
       } else {
@@ -103,27 +87,25 @@ const CategoryEdit: React.FC<CategoryEditProps> = ({
     }
   };
 
+
   return (
     <>
       <h4 className="text-center text-xl font-semibold mb-4">Edit Category</h4>
       <Form layout="vertical" onFinish={onFinish} form={form}>
         <Form.Item
           className="font-medium"
-          label="Tên danh mục"
+          label="Category Name"
           name="name"
-          rules={[
-            { required: true, message: 'Please enter the category name!' },
-          ]}
+          rules={[{ required: true, message: 'Please enter the category name!' }]}
         >
           <Input placeholder="Category Name" />
         </Form.Item>
         <Form.Item
           className="font-medium"
-          label="Mô tả"
+          label="Description"
           name="description"
-          // rules={[{ required: true, message: 'Please enter the description!' }]}
         >
-          <Input.TextArea rows={2} placeholder="Mô tả" />
+          <Input.TextArea rows={2} placeholder="Description" />
         </Form.Item>
         <Form.Item
           className="font-medium"
@@ -137,30 +119,17 @@ const CategoryEdit: React.FC<CategoryEditProps> = ({
             unCheckedChildren="Inactive"
           />
         </Form.Item>
-        <h4 className="text-center text-xl font-semibold mb-2">
-          Create new subcategories
-        </h4>
-        <Form.List name="children">
+        <h4 className="text-center text-xl font-semibold mb-2">Create new subcategories</h4>
+        <Form.List name="subCategories">
           {(fields, { add, remove }) => (
             <>
-              <label className="block text-lg font-medium mb-2">
-                Subcategories
-              </label>
+              <label className="block text-lg font-medium mb-2">Subcategories</label>
               {fields.map(({ key, name, ...restField }) => (
-                <Space
-                  key={key}
-                  align="baseline"
-                  className="mb-4 flex flex-wrap gap-4"
-                >
+                <Space key={key} align="baseline" className="mb-4 flex flex-wrap gap-4">
                   <Form.Item
                     {...restField}
                     name={[name, 'name']}
-                    rules={[
-                      {
-                        required: true,
-                        message: 'Please enter the subcategory name!',
-                      },
-                    ]}
+                    rules={[{ required: true, message: 'Please enter the subcategory name!' }]}
                     className="flex-1"
                   >
                     <Input placeholder="Subcategory Name" />
@@ -168,20 +137,14 @@ const CategoryEdit: React.FC<CategoryEditProps> = ({
                   <Form.Item
                     {...restField}
                     name={[name, 'description']}
-                    // rules={[
-                    //   {
-                    //     required: true,
-                    //     message: 'Please enter the subcategory description!',
-                    //   },
-                    // ]}
                     className="flex-1"
                   >
                     <Input placeholder="Subcategory Description" />
                   </Form.Item>
-                  <MinusCircleOutlined
-                    onClick={() => remove(name)}
-                    className="text-red-500"
-                  />
+                  <Form.Item {...restField} name={[name, 'status']} valuePropName="checked" className="flex-1">
+                    <Switch checkedChildren="Active" unCheckedChildren="Inactive" defaultChecked />
+                  </Form.Item>
+                  <MinusCircleOutlined onClick={() => remove(name)} className="text-red-500" />
                 </Space>
               ))}
               <Form.Item>

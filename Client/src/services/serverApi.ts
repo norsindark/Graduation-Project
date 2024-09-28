@@ -173,26 +173,34 @@ export const callGetAllCategory = async (query: string) => {
 
 
 
-export const callAddNewCategory = async (name: string, slug: string, status: string, parentId: string | null, description: string) => {
+export const callAddNewCategory = async (name: string, slug: string, status: string, parentId: string | null, description: string, subCategories: Array<{ name: string; description: string; status: string }>) => {
   return axios.post(`/api/v1/dashboard/category/add-new-category`, {
+    id: '',
     name,
     slug,
     status,
-    parentId,
     description,
+    subCategories, 
   });
 };
 
-export const callUpdateCategory = async (id: string, name: string, slug: string, status: string, parentId: string | null, description: string) => {
-  return axios.put(`/api/v1/dashboard/category/update-category`, {
-    id,
-    name,
-    slug,
-    status,
-    parentId,
-    description,
-  });
+export const callUpdateCategory = async (payload: {
+  id: string;
+  name: string;
+  slug: string;
+  status: string;
+  description: string;
+  subCategories: {
+    id?: string;
+    name: string;
+    slug: string;
+    status: string;
+    description: string;
+  }[];
+}) => {
+  return axios.put(`/api/v1/dashboard/category/update-category`, payload);
 };
+
 
 export const callDeleteCategory = async (id: string) => {
   return axios.delete(`/api/v1/dashboard/category/delete-category/${id}`);
