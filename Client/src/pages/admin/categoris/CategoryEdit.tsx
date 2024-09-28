@@ -70,7 +70,9 @@ const CategoryEdit: React.FC<CategoryEditProps> = ({
       } else {
         notification.error({
           message: 'Update category failed',
-          description: 'An error occurred while updating the category!',
+          description:
+            response.data.errors?.error ||
+            'An error occurred while updating the category!',
           duration: 5,
           showProgress: true,
         });
@@ -87,7 +89,6 @@ const CategoryEdit: React.FC<CategoryEditProps> = ({
     }
   };
 
-
   return (
     <>
       <h4 className="text-center text-xl font-semibold mb-4">Edit Category</h4>
@@ -96,7 +97,9 @@ const CategoryEdit: React.FC<CategoryEditProps> = ({
           className="font-medium"
           label="Category Name"
           name="name"
-          rules={[{ required: true, message: 'Please enter the category name!' }]}
+          rules={[
+            { required: true, message: 'Please enter the category name!' },
+          ]}
         >
           <Input placeholder="Category Name" />
         </Form.Item>
@@ -119,17 +122,30 @@ const CategoryEdit: React.FC<CategoryEditProps> = ({
             unCheckedChildren="Inactive"
           />
         </Form.Item>
-        <h4 className="text-center text-xl font-semibold mb-2">Create new subcategories</h4>
+        <h4 className="text-center text-xl font-semibold mb-2">
+          Create new subcategories
+        </h4>
         <Form.List name="subCategories">
           {(fields, { add, remove }) => (
             <>
-              <label className="block text-lg font-medium mb-2">Subcategories</label>
+              <label className="block text-lg font-medium mb-2">
+                Subcategories
+              </label>
               {fields.map(({ key, name, ...restField }) => (
-                <Space key={key} align="baseline" className="mb-4 flex flex-wrap gap-4">
+                <Space
+                  key={key}
+                  align="baseline"
+                  className="mb-4 flex flex-wrap gap-4"
+                >
                   <Form.Item
                     {...restField}
                     name={[name, 'name']}
-                    rules={[{ required: true, message: 'Please enter the subcategory name!' }]}
+                    rules={[
+                      {
+                        required: true,
+                        message: 'Please enter the subcategory name!',
+                      },
+                    ]}
                     className="flex-1"
                   >
                     <Input placeholder="Subcategory Name" />
@@ -141,10 +157,22 @@ const CategoryEdit: React.FC<CategoryEditProps> = ({
                   >
                     <Input placeholder="Subcategory Description" />
                   </Form.Item>
-                  <Form.Item {...restField} name={[name, 'status']} valuePropName="checked" className="flex-1">
-                    <Switch checkedChildren="Active" unCheckedChildren="Inactive" defaultChecked />
+                  <Form.Item
+                    {...restField}
+                    name={[name, 'status']}
+                    valuePropName="checked"
+                    className="flex-1"
+                  >
+                    <Switch
+                      checkedChildren="Active"
+                      unCheckedChildren="Inactive"
+                      defaultChecked
+                    />
                   </Form.Item>
-                  <MinusCircleOutlined onClick={() => remove(name)} className="text-red-500" />
+                  {/* <MinusCircleOutlined
+                    onClick={() => remove(name)}
+                    className="text-red-500"
+                  /> */}
                 </Space>
               ))}
               <Form.Item>
@@ -152,7 +180,7 @@ const CategoryEdit: React.FC<CategoryEditProps> = ({
                   type="dashed"
                   onClick={() => add()}
                   icon={<PlusOutlined />}
-                  className="w-full"
+                  className="w-full font-medium"
                 >
                   Create Subcategory
                 </Button>
