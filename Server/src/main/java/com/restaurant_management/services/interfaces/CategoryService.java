@@ -2,6 +2,7 @@ package com.restaurant_management.services.interfaces;
 
 import com.restaurant_management.dtos.CategoryDto;
 import com.restaurant_management.exceptions.DataExitsException;
+import com.restaurant_management.payloads.requests.CategoryRequest;
 import com.restaurant_management.payloads.responses.ApiResponse;
 import com.restaurant_management.payloads.responses.CategoryResponse;
 import org.springframework.hateoas.EntityModel;
@@ -21,7 +22,7 @@ public interface CategoryService {
 
     ApiResponse updateThumbnail(MultipartFile file, String id) throws DataExitsException, IOException;
 
-    ApiResponse updateCategory(CategoryDto categoryDto) throws DataExitsException;
+    ApiResponse updateCategory(CategoryRequest request) throws DataExitsException;
 
     ApiResponse deleteCategory(String id) throws DataExitsException;
 }
