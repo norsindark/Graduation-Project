@@ -14,6 +14,8 @@ public interface CategoryRepository extends JpaRepository<Category, String> {
 
     Optional<Category> findByName(String name);
 
+    List<Category> findByParentCategory(Category category);
+
     @Query("SELECT c FROM Category c")
     Page<Category> findAllCategories(Pageable pageable);
 
