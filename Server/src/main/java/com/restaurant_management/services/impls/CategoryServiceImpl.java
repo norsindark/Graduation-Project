@@ -45,12 +45,23 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public CategoryResponse getCategoryById(String id) throws DataExitsException {
-        Optional<Category> category = categoryRepository.findById(id);
-        if (category.isEmpty()) {
+        Optional<Category> categoryOptional = categoryRepository.findById(id);
+        if (categoryOptional.isEmpty()) {
             throw new DataExitsException("Category not found");
         }
-        return new CategoryResponse(category.get());
+
+        Category category = categoryOptional.get();
+
+        List<Category> subCategories = categoryRepository.findByParentCategory(category);
+
+        CategoryResponse categoryResponse = new CategoryResponse(category);
+        categoryResponse.setSubCategories(subCategories.stream()
+                .map(CategoryResponse::new)
+                .collect(Collectors.toList()));
+
+        return categoryResponse;
     }
+
 
     @Override
     public PagedModel<EntityModel<CategoryResponse>> getAllCategories(int pageNo, int pageSize, String sortBy, String sortDir)
