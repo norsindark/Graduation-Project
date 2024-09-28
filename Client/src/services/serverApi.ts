@@ -162,6 +162,9 @@ export const callGetSumSalaryOfEmployeePerMonth = async (employeeId: string, mon
   return axios.get(`/api/v1/dashboard/attendance/sum-salary-of-employee-per-month?employeeId=${employeeId}&month=${month}&year=${year}`);
 };
 
+export const callGetCountEmployeePerMonth = async (month: string, year: string) => {
+  return axios.get(`/api/v1/dashboard/employee/count-employees?month=${month}&year=${year}`);
+}
 /// category
 
 export const callGetAllCategory = async (query: string) => {
