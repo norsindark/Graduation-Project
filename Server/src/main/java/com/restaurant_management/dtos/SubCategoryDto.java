@@ -7,26 +7,16 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class CategoryDto {
-
-    private String id;
-
-    @NotBlank(message = "Category name is required")
-    @Pattern(regexp = "^[a-zA-Z ]+$", message = "Category name must be alphanumeric")
+public class SubCategoryDto {
+    @NotBlank(message = "Subcategory name is required")
+    @Pattern(regexp = "^[a-zA-Z ]+$", message = "Subcategory name must be alphanumeric")
     private String name;
-
-    private String slug;
-
-    private String status;
 
     private String description;
 
-    private List<SubCategoryDto> subCategories;
+    private String status;
 }
-

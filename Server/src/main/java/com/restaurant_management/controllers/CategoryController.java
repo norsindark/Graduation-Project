@@ -2,6 +2,7 @@ package com.restaurant_management.controllers;
 
 import com.restaurant_management.dtos.CategoryDto;
 import com.restaurant_management.exceptions.DataExitsException;
+import com.restaurant_management.payloads.requests.CategoryRequest;
 import com.restaurant_management.payloads.responses.CategoryResponse;
 import com.restaurant_management.services.interfaces.CategoryService;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -23,7 +24,7 @@ public class CategoryController {
 
     private final CategoryService categoryService;
 
-    @GetMapping("/all")
+    @GetMapping("/get-all-categories")
     @PreAuthorize("hasRole('ADMIN') or hasRole('EMPLOYEE')")
     public ResponseEntity<PagedModel<EntityModel<CategoryResponse>>> getAllCategories(
             @RequestParam(defaultValue = "0") int pageNo,
@@ -39,7 +40,7 @@ public class CategoryController {
         return ResponseEntity.ok(categoryService.getCategoryById(id));
     }
 
-    @PostMapping("/add-category")
+    @PostMapping("/add-new-category")
     @PreAuthorize("hasRole('ADMIN') or hasRole('EMPLOYEE')")
     public ResponseEntity<?> addCategory(@RequestBody CategoryDto categoryDto) throws DataExitsException {
         return ResponseEntity.ok(categoryService.addCategory(categoryDto));
@@ -47,8 +48,8 @@ public class CategoryController {
 
     @PutMapping("/update-category")
     @PreAuthorize("hasRole('ADMIN') or hasRole('EMPLOYEE')")
-    public ResponseEntity<?> updateCategory(@RequestBody CategoryDto categoryDto) throws DataExitsException {
-        return ResponseEntity.ok(categoryService.updateCategory(categoryDto));
+    public ResponseEntity<?> updateCategory(@RequestBody CategoryRequest request) throws DataExitsException {
+        return ResponseEntity.ok(categoryService.updateCategory(request));
     }
 
     @PutMapping("/update-category-thumbnail/{id}")
