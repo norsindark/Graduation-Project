@@ -49,6 +49,10 @@ public class Category {
     @JsonIgnore
     private Set<Category> subCategories = new HashSet<>();
 
+    @OneToMany(mappedBy = "category", orphanRemoval = false, fetch = FetchType.LAZY)
+    @JsonIgnore
+    private Set<Warehouse> warehouses = new HashSet<>();
+
     @Column(name = "created_at")
     @CreationTimestamp
     private Timestamp createdAt;
@@ -67,5 +71,4 @@ public class Category {
                 ", description='" + description + '\'' +
                 '}';
     }
-
 }
