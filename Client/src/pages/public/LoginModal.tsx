@@ -64,7 +64,7 @@ const LoginModal = () => {
       centered
       closeIcon={
         <div className="fp__menu_cart_header">
-          <span className="close_cart" onClick={handleCancel}>
+          <span className="close_cart-login" onClick={handleCancel}>
             <i className="fal fa-times"></i>
           </span>
         </div>
@@ -132,10 +132,14 @@ const LoginModal = () => {
                         shape="round"
                         htmlType="submit"
                         block
+                        style={{
+                          color: 'white',
+                          backgroundColor: '#f02e2e !important',
+                        }}
                         size="large"
                         loading={isSubmit}
                       >
-                        <div className="w-full max-w-16 font-medium text-center">
+                        <div className="w-full max-w-16 font-medium text-center text-lg">
                           Login
                         </div>
                       </Button>

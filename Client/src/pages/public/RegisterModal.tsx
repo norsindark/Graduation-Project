@@ -179,7 +179,7 @@ const RegisterModal = () => {
                         size="large"
                         loading={isSubmit}
                       >
-                        <div className="w-full max-w-16 font-medium text-center">
+                        <div className="w-full max-w-16 font-medium text-center text-lg">
                           Register
                         </div>
                       </Button>

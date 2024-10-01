@@ -3,7 +3,7 @@ const HeaderTop = () => {
     <section className="fp__topbar">
       <div className="container">
         <div className="row">
-          <div className="col-xl-6 col-md-8">
+          <div className="col-xl-4 col-md-8">
             <ul className="fp__topbar_info d-flex flex-wrap">
               <li>
                 <a href="mailto:example@gmail.com">
@@ -17,7 +17,7 @@ const HeaderTop = () => {
               </li>
             </ul>
           </div>
-          <div className="col-xl-6 col-md-4 d-none d-md-block">
+          <div className="col-xl-8 col-md-4 d-none d-md-block">
             <ul className="topbar_icon d-flex flex-wrap">
               <li>
                 <a href="#">

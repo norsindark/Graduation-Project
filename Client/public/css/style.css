@@ -578,6 +578,26 @@ button {
   font-weight: 600;
 }
 
+.fp__menu_cart_header .close_cart-login {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  line-height: 30px;
+  text-align: center;
+  background: var(--colorPrimary);
+  color: var(--colorWhite);
+  top: -4px;
+  right: 0;
+  border-radius: 50%;
+  font-size: 16px;
+  transition: all linear 0.3s;
+  cursor: pointer;
+  -webkit-transition: all linear 0.3s;
+  -moz-transition: all linear 0.3s;
+  -ms-transition: all linear 0.3s;
+  -o-transition: all linear 0.3s;
+}
+
 .fp__menu_cart_header .close_cart {
   position: absolute;
   width: 30px;
@@ -1074,6 +1094,10 @@ button {
 
 .fp__banner .slick-dots {
   bottom: 50px;
+}
+
+.slick-dots li button:before {
+  content: none !important;
 }
 
 /*============================

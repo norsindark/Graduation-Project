@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import Slider from '../../components/public/slider/Slider';
+import BannerSlider from '../../components/public/slider/BannerSlider';
 import WhyChoose from '../../components/public/whychoose/WhyChoose';
 const HomePage = () => {
   const navigate = useNavigate();
@@ -17,7 +17,7 @@ const HomePage = () => {
   }, [location, navigate]);
   return (
     <>
-      <Slider />
+      <BannerSlider />
       <WhyChoose />
     </>
   );
