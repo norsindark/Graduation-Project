@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class WarehouseDto {
-    private String rawProductName;
+    private String ingredient;
 
     private double importedQuantity;
 

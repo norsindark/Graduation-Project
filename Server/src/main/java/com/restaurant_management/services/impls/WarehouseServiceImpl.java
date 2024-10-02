@@ -41,9 +41,9 @@ public class WarehouseServiceImpl implements WarehouseService {
 
     @Override
     public ApiResponse addNewWarehouse(WarehouseDto request) throws DataExitsException {
-        Optional<Warehouse> warehouse = warehouseRepository.findByRawProductName(request.getRawProductName());
+        Optional<Warehouse> warehouse = warehouseRepository.findByRawProductName(request.getIngredient());
         if (warehouse.isPresent()) {
-            throw new DataExitsException(request.getRawProductName() + " already exists!");
+            throw new DataExitsException(request.getIngredient() + " already exists!");
         }
 
         Optional<Category> categoryOpl = categoryRepository.findById(request.getCategoryId());
@@ -55,7 +55,7 @@ public class WarehouseServiceImpl implements WarehouseService {
         Timestamp importedDate = Timestamp.valueOf(LocalDateTime.parse(request.getImportedDate()));
 
         Warehouse _warehouse = Warehouse.builder()
-                .rawProductName(request.getRawProductName())
+                .ingredient(request.getIngredient())
                 .category(categoryOpl.get())
                 .importedQuantity(request.getImportedQuantity())
                 .availableQuantity(request.getImportedQuantity())
@@ -97,9 +97,9 @@ public class WarehouseServiceImpl implements WarehouseService {
         }
         Warehouse warehouse = warehouseOpt.get();
 
-        Optional<Warehouse> warehouseWithName = warehouseRepository.findByRawProductName(request.getRawProductName());
+        Optional<Warehouse> warehouseWithName = warehouseRepository.findByRawProductName(request.getIngredient());
         if (warehouseWithName.isPresent() && !warehouseWithName.get().getId().equals(request.getWarehouseId())) {
-            throw new DataExitsException("Product name " + request.getRawProductName() + " already exists in another warehouse!");
+            throw new DataExitsException("Product name " + request.getIngredient() + " already exists in another warehouse!");
         }
 
         Optional<Category> categoryOpt = categoryRepository.findById(request.getCategoryId());
@@ -110,7 +110,7 @@ public class WarehouseServiceImpl implements WarehouseService {
         Timestamp importedDate = Timestamp.valueOf(LocalDateTime.parse(request.getImportedDate()));
         Timestamp expiredDate = Timestamp.valueOf(LocalDateTime.parse(request.getExpiredDate()));
 
-        warehouse.setRawProductName(request.getRawProductName());
+        warehouse.setIngredient(request.getIngredient());
         warehouse.setImportedQuantity(request.getImportedQuantity());
         warehouse.setUnit(request.getUnit());
         warehouse.setImportedDate(importedDate);

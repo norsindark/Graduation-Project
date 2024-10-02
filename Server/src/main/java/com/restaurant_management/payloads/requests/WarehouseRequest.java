@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class WarehouseRequest {
     private String warehouseId;
-    private String rawProductName;
+    private String ingredient;
     private double importedQuantity;
     private String unit;
     private String importedDate;
