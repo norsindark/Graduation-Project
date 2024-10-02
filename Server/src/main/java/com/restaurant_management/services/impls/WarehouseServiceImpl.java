@@ -41,7 +41,7 @@ public class WarehouseServiceImpl implements WarehouseService {
 
     @Override
     public ApiResponse addNewWarehouse(WarehouseDto request) throws DataExitsException {
-        Optional<Warehouse> warehouse = warehouseRepository.findByRawProductName(request.getIngredientName());
+        Optional<Warehouse> warehouse = warehouseRepository.findByIngredientName(request.getIngredientName());
         if (warehouse.isPresent()) {
             throw new DataExitsException(request.getIngredientName() + " already exists!");
         }
@@ -97,7 +97,7 @@ public class WarehouseServiceImpl implements WarehouseService {
         }
         Warehouse warehouse = warehouseOpt.get();
 
-        Optional<Warehouse> warehouseWithName = warehouseRepository.findByRawProductName(request.getIngredientName());
+        Optional<Warehouse> warehouseWithName = warehouseRepository.findByIngredientName(request.getIngredientName());
         if (warehouseWithName.isPresent() && !warehouseWithName.get().getId().equals(request.getWarehouseId())) {
             throw new DataExitsException("Product name " + request.getIngredientName() + " already exists in another warehouse!");
         }
