@@ -23,8 +23,8 @@ public class Warehouse {
     @Column(name = "warehouse_id", length = 36, nullable = false)
     private String id;
 
-    @Column(name = "raw_product_name", nullable = false)
-    private String rawProductName;
+    @Column(name = "ingredient", nullable = false)
+    private String ingredient;
 
     @Column(name = "imported_quantity", nullable = false)
     private double importedQuantity;

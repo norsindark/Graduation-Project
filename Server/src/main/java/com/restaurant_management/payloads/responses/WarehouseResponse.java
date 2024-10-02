@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class WarehouseResponse {
     private String warehouseId;
-    private String rawProductName;
+    private String ingredient;
     private double importedQuantity;
     private double availableQuantity;
     private double quantityUsed;
@@ -25,7 +25,7 @@ public class WarehouseResponse {
 
     public WarehouseResponse(Warehouse warehouse) {
         this.warehouseId = warehouse.getId();
-        this.rawProductName = warehouse.getRawProductName();
+        this.ingredient = warehouse.getIngredient();
         this.importedQuantity = warehouse.getImportedQuantity();
         this.availableQuantity = warehouse.getAvailableQuantity();
         this.quantityUsed = warehouse.getQuantityUsed();
