@@ -3,6 +3,7 @@ package com.restaurant_management.services.impls;
 import com.restaurant_management.dtos.WarehouseDto;
 import com.restaurant_management.entites.Category;
 import com.restaurant_management.entites.Warehouse;
+import com.restaurant_management.enums.UnitType;
 import com.restaurant_management.exceptions.DataExitsException;
 import com.restaurant_management.payloads.requests.WarehouseRequest;
 import com.restaurant_management.payloads.responses.ApiResponse;
@@ -29,6 +30,7 @@ import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 @Service
@@ -38,6 +40,7 @@ public class WarehouseServiceImpl implements WarehouseService {
     private final WarehouseRepository warehouseRepository;
     private final CategoryRepository categoryRepository;
     private final PagedResourcesAssembler<WarehouseResponse> pagedResourcesAssembler;
+
 
     @Override
     public ApiResponse addNewWarehouse(WarehouseDto request) throws DataExitsException {
@@ -51,6 +54,8 @@ public class WarehouseServiceImpl implements WarehouseService {
             throw new DataExitsException("Category not found!");
         }
 
+        UnitType unitType = UnitType.valueOf(request.getUnit().toUpperCase(Locale.ROOT));
+
         Timestamp expiredDate = Timestamp.valueOf(LocalDateTime.parse(request.getExpiredDate()));
         Timestamp importedDate = Timestamp.valueOf(LocalDateTime.parse(request.getImportedDate()));
 
@@ -59,7 +64,7 @@ public class WarehouseServiceImpl implements WarehouseService {
                 .category(categoryOpl.get())
                 .importedQuantity(request.getImportedQuantity())
                 .availableQuantity(request.getImportedQuantity())
-                .unit(request.getUnit())
+                .unit(unitType.getUnit())
                 .expiredDate(expiredDate)
                 .importedDate(importedDate)
                 .importedPrice(request.getImportedPrice())
@@ -67,7 +72,7 @@ public class WarehouseServiceImpl implements WarehouseService {
                 .description(request.getDescription())
                 .build();
         warehouseRepository.save(_warehouse);
-        return new ApiResponse("raw product added successfully", HttpStatus.CREATED);
+        return new ApiResponse("ingredient added successfully", HttpStatus.CREATED);
     }
 
     @Override
@@ -96,7 +101,6 @@ public class WarehouseServiceImpl implements WarehouseService {
             throw new DataExitsException("Warehouse not found!");
         }
         Warehouse warehouse = warehouseOpt.get();
-
         Optional<Warehouse> warehouseWithName = warehouseRepository.findByIngredientName(request.getIngredientName());
         if (warehouseWithName.isPresent() && !warehouseWithName.get().getId().equals(request.getWarehouseId())) {
             throw new DataExitsException("Product name " + request.getIngredientName() + " already exists in another warehouse!");
@@ -107,12 +111,14 @@ public class WarehouseServiceImpl implements WarehouseService {
             throw new DataExitsException("Category not found!");
         }
 
+        UnitType unitType = UnitType.valueOf(request.getUnit().toUpperCase(Locale.ROOT));
+
         Timestamp importedDate = Timestamp.valueOf(LocalDateTime.parse(request.getImportedDate()));
         Timestamp expiredDate = Timestamp.valueOf(LocalDateTime.parse(request.getExpiredDate()));
 
         warehouse.setIngredientName(request.getIngredientName());
         warehouse.setImportedQuantity(request.getImportedQuantity());
-        warehouse.setUnit(request.getUnit());
+        warehouse.setUnit(unitType.getUnit());
         warehouse.setImportedDate(importedDate);
         warehouse.setExpiredDate(expiredDate);
         warehouse.setImportedPrice(request.getImportedPrice());
@@ -122,7 +128,7 @@ public class WarehouseServiceImpl implements WarehouseService {
 
         warehouseRepository.save(warehouse);
 
-        return new ApiResponse("raw product updated successfully", HttpStatus.OK);
+        return new ApiResponse("ingredient updated successfully", HttpStatus.OK);
     }
 
     @Override
@@ -132,7 +138,7 @@ public class WarehouseServiceImpl implements WarehouseService {
         if(pageResult.hasContent()){
             return pagedResourcesAssembler.toModel(pageResult.map(WarehouseResponse::new));
         } else {
-            throw new DataExitsException("No raw product found!");
+            throw new DataExitsException("No ingredient found!");
         }
     }
 
@@ -140,9 +146,9 @@ public class WarehouseServiceImpl implements WarehouseService {
     public ApiResponse deleteWarehouse(String id) throws DataExitsException {
         Optional<Warehouse> warehouseOpt = warehouseRepository.findById(id);
         if (warehouseOpt.isEmpty()) {
-            throw new DataExitsException("raw product not found!");
+            throw new DataExitsException("ingredient not found!");
         }
         warehouseRepository.deleteById(id);
-        return new ApiResponse("raw product deleted successfully", HttpStatus.OK);
+        return new ApiResponse("ingredient deleted successfully", HttpStatus.OK);
     }
 }
