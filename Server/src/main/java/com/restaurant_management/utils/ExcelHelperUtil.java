@@ -47,7 +47,7 @@ public class ExcelHelperUtil {
 
                     switch (cellIdx) {
                         case 0:
-                            warehouseDto.setIngredient(currentCell.getStringCellValue());
+                            warehouseDto.setIngredientName(currentCell.getStringCellValue());
                             break;
                         case 1:
                             warehouseDto.setImportedQuantity(currentCell.getNumericCellValue());

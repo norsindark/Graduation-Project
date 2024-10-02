@@ -7,5 +7,5 @@ import java.util.Optional;
 
 public interface WarehouseRepository extends JpaRepository<Warehouse, String> {
 
-    Optional<Warehouse> findByRawProductName(String rawProductName);
+    Optional<Warehouse> findByIngredientName(String ingredientName);
 }
