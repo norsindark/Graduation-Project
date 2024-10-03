@@ -57,7 +57,7 @@ const ForgotPassword = () => {
       centered
       closeIcon={
         <div className="fp__menu_cart_header">
-          <span className="close_cart" onClick={handleCancel}>
+          <span className="close_cart-client" onClick={handleCancel}>
             <i className="fal fa-times"></i>
           </span>
         </div>
@@ -89,7 +89,7 @@ const ForgotPassword = () => {
                       />
                     </Form.Item>
                     <Form.Item>
-                      <Button
+                      {/* <Button
                         type="primary"
                         shape="round"
                         htmlType="submit"
@@ -100,7 +100,27 @@ const ForgotPassword = () => {
                         <div className="w-full font-medium text-center max-w-20">
                           Verify Mail
                         </div>
-                      </Button>
+                      </Button> */}
+                      <div className="fp__login_imput">
+                        <button
+                          type="submit"
+                          className="common_btn"
+                          disabled={isSubmit}
+                        >
+                          {isSubmit ? (
+                            <>
+                              <i className="fas fa-spinner fa-spin pr-2"></i>
+                              <span className="text-white font-medium">
+                                Forgot Password
+                              </span>
+                            </>
+                          ) : (
+                            <span className="text-white font-medium">
+                              Forgot Password
+                            </span>
+                          )}
+                        </button>
+                      </div>
                     </Form.Item>
                   </Form>
                   <p className="create_account d-flex justify-content-between">

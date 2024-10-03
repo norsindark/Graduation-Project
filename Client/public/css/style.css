@@ -116,7 +116,7 @@ button {
 }
 
 .common_btn:hover {
-  /* background: var(--colorBlack); */
+  background: var(--colorBlack);
 }
 
 .fp__section_heading h4 {
@@ -578,7 +578,7 @@ button {
   font-weight: 600;
 }
 
-.fp__menu_cart_header .close_cart-login {
+.fp__menu_cart_header .close_cart-client {
   position: absolute;
   width: 30px;
   height: 30px;
@@ -6690,3 +6690,7 @@ CHECKOUT PAGE START
 /*============================
     SIGN IN END
 ============================*/
+
+.color-bg-client {
+  background-color: var(--colorPrimary) !important;
+}
