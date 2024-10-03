@@ -72,7 +72,7 @@ const ResetPassword = () => {
       centered
       closeIcon={
         <div className="fp__menu_cart_header">
-          <span className="close_cart" onClick={handleCancel}>
+          <span className="close_cart-client" onClick={handleCancel}>
             <i className="fal fa-times"></i>
           </span>
         </div>
@@ -88,10 +88,11 @@ const ResetPassword = () => {
               <div className="col-xxl-12 col-xl-12 col-md-12 col-lg-12 m-auto">
                 <div className="fp__login_area">
                   <h2>Welcome back!</h2>
-                  <p>Reset password</p>
+                  <p className="text-lg">Reset password</p>
                   <Form layout="vertical" onFinish={onFinish}>
                     <Form.Item
                       label="New Password"
+                      className="text-base"
                       name="password"
                       rules={[
                         {
@@ -121,7 +122,7 @@ const ResetPassword = () => {
                       />
                     </Form.Item>
                     <Form.Item>
-                      <Button
+                      {/* <Button
                         type="primary"
                         shape="round"
                         htmlType="submit"
@@ -132,7 +133,27 @@ const ResetPassword = () => {
                         <div className="font-medium text-center w-full max-w-26">
                           Change Password
                         </div>
-                      </Button>
+                      </Button> */}
+                      <div className="fp__login_imput">
+                        <button
+                          type="submit"
+                          className="common_btn"
+                          disabled={isSubmit}
+                        >
+                          {isSubmit ? (
+                            <>
+                              <i className="fas fa-spinner fa-spin pr-2"></i>
+                              <span className="text-white font-medium">
+                                Change Password
+                              </span>
+                            </>
+                          ) : (
+                            <span className="text-white font-medium">
+                              Change Password
+                            </span>
+                          )}
+                        </button>
+                      </div>
                     </Form.Item>
                   </Form>
                   <p className="create_account d-flex justify-content-between">

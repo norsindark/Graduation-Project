@@ -64,7 +64,7 @@ const LoginModal = () => {
       centered
       closeIcon={
         <div className="fp__menu_cart_header">
-          <span className="close_cart-login" onClick={handleCancel}>
+          <span className="close_cart-client" onClick={handleCancel}>
             <i className="fal fa-times"></i>
           </span>
         </div>
@@ -80,10 +80,11 @@ const LoginModal = () => {
               <div className="col-xxl-12 col-xl-12 col-md-12 col-lg-12 m-auto">
                 <div className="fp__login_area">
                   <h2>Welcome back!</h2>
-                  <p>Sign In to continue</p>
+                  <p className="text-lg">Sign In to continue</p>
                   <Form
                     layout="vertical"
                     onFinish={onFinish}
+                    className="text-base"
                     initialValues={{ remember: false }}
                   >
                     <Form.Item
@@ -127,22 +128,38 @@ const LoginModal = () => {
                       </div>
                     </Form.Item>
                     <Form.Item>
-                      <Button
+                      {/* <Button
                         type="primary"
                         shape="round"
                         htmlType="submit"
                         block
-                        style={{
-                          color: 'white',
-                          backgroundColor: '#f02e2e !important',
-                        }}
                         size="large"
                         loading={isSubmit}
                       >
-                        <div className="w-full max-w-16 font-medium text-center text-lg">
+                        <div className="w-full max-w-16 font-medium text-center text-lg ">
                           Login
                         </div>
-                      </Button>
+                      </Button> */}
+                      <div className="fp__login_imput">
+                        <button
+                          type="submit"
+                          className="common_btn"
+                          disabled={isSubmit}
+                        >
+                          {isSubmit ? (
+                            <>
+                              <i className="fas fa-spinner fa-spin pr-2"></i>
+                              <span className="text-white font-medium">
+                                Login
+                              </span>
+                            </>
+                          ) : (
+                            <span className="text-white font-medium">
+                              Login
+                            </span>
+                          )}
+                        </button>
+                      </div>
                     </Form.Item>
                   </Form>
                   <p className="or">
