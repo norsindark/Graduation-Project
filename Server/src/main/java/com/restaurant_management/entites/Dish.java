@@ -1,10 +1,7 @@
 package com.restaurant_management.entites;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,6 +11,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.sql.Timestamp;
+import java.util.List;
 
 @Entity
 @Data
@@ -40,8 +38,8 @@ public class Dish {
     @Column(name = "thumb_image")
     private String thumbImage;
 
-    @Column(name = "images")
-    private String images;
+    @OneToMany(mappedBy = "dish", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<DishImage> images;
 
     @Column(name = "offer_price")
     private Double offerPrice;
@@ -49,9 +47,10 @@ public class Dish {
     @Column(name = "price", nullable = false)
     private Double price;
 
-    @Column(name = "category_id")
+    @ManyToOne
+    @JoinColumn(name = "category_id", nullable = false)
     @JsonIgnore
-    private Category categoryId;
+    private Category category;
 
     @Column(name = "created_at")
     @CreationTimestamp

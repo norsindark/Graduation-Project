@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -12,15 +13,14 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class DishDto {
-
     private String dishName;
     private String description;
     private String status;
-    private String thumbImage;
-    private String images;
+    private MultipartFile thumbImage;
+    private List<ImageDto> images;
     private Double offerPrice;
     private Double price;
     private String categoryId;
-
     private List<RecipeDto> recipes;
+
 }
