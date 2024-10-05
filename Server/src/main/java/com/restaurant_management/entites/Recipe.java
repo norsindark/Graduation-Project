@@ -1,9 +1,6 @@
 package com.restaurant_management.entites;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -27,10 +24,12 @@ public class Recipe {
     @Column(name = "recipe_id", length = 36, nullable = false)
     private String id;
 
-    @Column(name = "dish_id", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "dish_id", nullable = false)
     private Dish dish;
 
-    @Column(name = "warehouse_id", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "warehouse_id", nullable = false)
     private Warehouse warehouse;
 
     @Column(name = "quantity_used", nullable = false)
@@ -46,5 +45,4 @@ public class Recipe {
     @Column(name = "updated_at")
     @UpdateTimestamp
     private Timestamp updatedAt;
-
 }
