@@ -11,6 +11,7 @@ import com.restaurant_management.payloads.requests.CategoryRequest;
 import com.restaurant_management.payloads.requests.SubCategoryRequest;
 import com.restaurant_management.payloads.responses.ApiResponse;
 import com.restaurant_management.payloads.responses.CategoryResponse;
+import com.restaurant_management.payloads.responses.GetCategoriesNameResponse;
 import com.restaurant_management.repositories.CategoryRepository;
 import com.restaurant_management.services.interfaces.CategoryService;
 import lombok.RequiredArgsConstructor;
@@ -42,6 +43,17 @@ public class CategoryServiceImpl implements CategoryService {
     private final PagedResourcesAssembler<CategoryResponse> pagedResourcesAssembler;
 
     private final Cloudinary cloudinary;
+
+    @Override
+    public List<GetCategoriesNameResponse> getAllCategoriesName() throws DataExitsException {
+        List<Category> categories = categoryRepository.findAll();
+        if (categories.isEmpty()) {
+            throw new DataExitsException("No Category found");
+        }
+        return categories.stream()
+                .map(category -> new GetCategoriesNameResponse(category.getId(), category.getName()))
+                .collect(Collectors.toList());
+    }
 
     @Override
     public CategoryResponse getCategoryById(String id) throws DataExitsException {
