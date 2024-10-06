@@ -15,7 +15,7 @@ function WhyChoose() {
                     className="img-fluid w-100"
                   />
                 </span>
-                <p>
+                <p className="text-base">
                   Objectively pontificate quality models before intuitive
                   information. Dramatically recaptiualize multifunctional
                   materials.
@@ -30,8 +30,8 @@ function WhyChoose() {
                   <i className="fas fa-percent"></i>
                 </div>
                 <div className="text">
-                  <h3>discount voucher</h3>
-                  <p>
+                  <h3 className="text-xl font-medium">discount voucher</h3>
+                  <p className="text-base">
                     Lorem ipsum dolor sit amet consectetur adipisicing elit.
                     Est, debitis expedita .
                   </p>
@@ -44,8 +44,8 @@ function WhyChoose() {
                   <i className="fas fa-burger-soda"></i>
                 </div>
                 <div className="text">
-                  <h3>fresh healthy foods</h3>
-                  <p>
+                  <h3 className="text-xl font-medium">fresh healthy foods</h3>
+                  <p className="text-base">
                     Lorem ipsum dolor sit amet consectetur adipisicing elit.
                     Est, debitis expedita .
                   </p>
@@ -58,8 +58,8 @@ function WhyChoose() {
                   <i className="far fa-hat-chef"></i>
                 </div>
                 <div className="text">
-                  <h3>fast serve on table</h3>
-                  <p>
+                  <h3 className="text-xl font-medium">fast serve on table</h3>
+                  <p className="text-base">
                     Lorem ipsum dolor sit amet consectetur adipisicing elit.
                     Est, debitis expedita .
                   </p>

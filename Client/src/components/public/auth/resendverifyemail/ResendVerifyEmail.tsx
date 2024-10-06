@@ -73,8 +73,12 @@ const ResendVerifyEmail = () => {
               <div className="col-xxl-12 col-xl-12 col-md-12 col-lg-12 m-auto">
                 <div className="fp__login_area">
                   <h2>Welcome back!</h2>
-                  <p>Resend Verification Email</p>
-                  <Form layout="vertical" onFinish={onFinish}>
+                  <p className="text-lg">Resend Verification Email</p>
+                  <Form
+                    layout="vertical"
+                    onFinish={onFinish}
+                    className="text-base"
+                  >
                     <Form.Item
                       label="Email"
                       name="email"
@@ -89,7 +93,7 @@ const ResendVerifyEmail = () => {
                       />
                     </Form.Item>
                     <Form.Item>
-                      {/* <Button
+                      <Button
                         type="primary"
                         shape="round"
                         htmlType="submit"
@@ -97,30 +101,10 @@ const ResendVerifyEmail = () => {
                         size="large"
                         loading={isSubmit}
                       >
-                        <div className="w-full font-medium text-center max-w-20">
+                        <div className="w-full font-medium text-center max-w-20 text-lg">
                           Verify Mail
                         </div>
-                      </Button> */}
-                      <div className="fp__login_imput">
-                        <button
-                          type="submit"
-                          className="common_btn"
-                          disabled={isSubmit}
-                        >
-                          {isSubmit ? (
-                            <>
-                              <i className="fas fa-spinner fa-spin pr-2"></i>
-                              <span className="text-white font-medium">
-                                Verify Mail
-                              </span>
-                            </>
-                          ) : (
-                            <span className="text-white font-medium">
-                              Verify Mail
-                            </span>
-                          )}
-                        </button>
-                      </div>
+                      </Button>
                     </Form.Item>
                   </Form>
                   <p className="create_account d-flex justify-content-between">

@@ -64,6 +64,7 @@ const AddressNew = ({
         phoneNumber,
         userId
       );
+      console.log('response', response);
       if (response?.status === 200) {
         notification.success({
           message: 'Address created successfully!',
@@ -216,28 +217,36 @@ const AddressNew = ({
             </Form.Item>
           </div>
         </div>
-        <Button
-          type="primary"
-          shape="round"
-          htmlType="submit"
-          size="large"
-          loading={isSubmit}
-        >
-          <div className=" text-[16px] font-medium text-center">
-            Save Address
+        <div className="row">
+          <div className="col-md-3">
+            <Button
+              type="primary"
+              shape="round"
+              htmlType="submit"
+              block
+              size="large"
+              loading={isSubmit}
+            >
+              <div className=" text-[16px] font-medium text-center">
+                <i className="fas fa-save mr-2"></i> Save Address
+              </div>
+            </Button>
           </div>
-        </Button>
-        <Button
-          danger
-          size="large"
-          style={{ fontWeight: 'medium', margin: '0 10px' }}
-          shape="round"
-          type="primary"
-          className=" cancel_new_address"
-          onClick={() => setShowAddressNew(false)}
-        >
-          <div className=" text-[16px] font-medium text-center">Cancel</div>
-        </Button>
+          <div className="col-md-3">
+            <Button
+              danger
+              size="large"
+              shape="round"
+              type="primary"
+              loading={isSubmit}
+              onClick={() => setShowAddressNew(false)}
+            >
+              <div className=" text-[16px] font-medium text-center">
+                <i className="fas fa-times mr-2"></i> Cancel
+              </div>
+            </Button>
+          </div>
+        </div>
       </Form>
     </div>
   );

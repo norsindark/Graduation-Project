@@ -133,14 +133,16 @@ const AddressAccount = () => {
         {!showAddressNew && !showAddressEdit && (
           <Button
             type="primary"
-            className="mb-3 flex align-center justify-center"
-            onClick={() => setShowAddressNew(true)}
-            size="large"
             shape="round"
+            htmlType="submit"
+            block
+            size="large"
+            disabled={loading}
+            loading={loading}
+            onClick={() => setShowAddressNew(true)}
           >
-            <i className="far fa-plus"></i>
             <span className="text-white align-center leading-4 text-center font-medium">
-              Create New Address
+              <i className="far fa-plus mr-2"></i> Create New Address
             </span>
           </Button>
         )}
@@ -160,7 +162,7 @@ const AddressAccount = () => {
                 setShowAddressEdit={setShowAddressEdit}
               />
             ) : (
-              <div className="fp_dashboard_existing_address">
+              <div className="fp_dashboard_existing_address mt-8">
                 <div className="row">
                   {addresses?.map((address: Address, index: number) => (
                     <div key={index} className="col-md-6">

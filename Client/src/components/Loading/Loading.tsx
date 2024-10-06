@@ -10,7 +10,7 @@ const Loading = () => {
 
   return (
     <div style={style}>
-      <HashLoader color="#F86F03" />
+      <HashLoader color="#4caf50" />
     </div>
   );
 };

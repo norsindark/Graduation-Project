@@ -1,10 +1,12 @@
+import { NavLink } from 'react-router-dom';
+
 const Navigation = () => {
   return (
     <>
       <li className="nav-item">
-        <a className="nav-link active" aria-current="page" href="/">
+        <NavLink className="nav-link " aria-current="page" to="/">
           Home
-        </a>
+        </NavLink>
       </li>
       <li className="nav-item">
         <a className="nav-link" href="/">
@@ -12,9 +14,9 @@ const Navigation = () => {
         </a>
       </li>
       <li className="nav-item">
-        <a className="nav-link" href="/">
+        <NavLink className="nav-link" to="/about">
           About
-        </a>
+        </NavLink>
       </li>
       <li className="nav-item">
         <a className="nav-link" href="/">

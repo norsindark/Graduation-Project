@@ -25,7 +25,7 @@ const Account = () => {
       styles={{ body: { height: 'auto', overflowY: 'auto' } }}
       closeIcon={
         <div className="fp__menu_cart_header">
-          <span className="close_cart" onClick={handleCancel}>
+          <span className="close_cart-client" onClick={handleCancel}>
             <i className="fal fa-times"></i>
           </span>
         </div>
