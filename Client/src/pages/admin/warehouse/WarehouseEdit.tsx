@@ -20,14 +20,18 @@ interface WarehouseEditProps {
 }
 
 interface WarehouseItem {
-  id: number;
-  name: string;
-  quantity: number;
+  warehouseId: string;
+  ingredientName: string;
+  importedQuantity: number;
+  availableQuantity: number;
+  quantityUsed: number;
   unit: string;
-  category: string;
-  minThreshold: number;
-  expirationDate: string;
-  supplier: string;
+  expiredDate: string;
+  importedDate: string;
+  importedPrice: number;
+  supplierName: string;
+  description: string;
+  categoryName: string;
 }
 
 const WarehouseEdit: React.FC<WarehouseEditProps> = ({
@@ -41,7 +45,7 @@ const WarehouseEdit: React.FC<WarehouseEditProps> = ({
   useEffect(() => {
     form.setFieldsValue({
       ...currentItem,
-      expirationDate: moment(currentItem.expirationDate),
+      expiredDate: moment(currentItem.expiredDate),
     });
   }, [currentItem, form]);
 
@@ -50,7 +54,7 @@ const WarehouseEdit: React.FC<WarehouseEditProps> = ({
     try {
       const updatedValues = {
         ...values,
-        expirationDate: moment(values.expirationDate).format('YYYY-MM-DD'),
+        expiredDate: moment(values.expiredDate).format('YYYY-MM-DD'),
       };
       // Giả lập API call
       console.log('Cập nhật mặt hàng:', updatedValues);
@@ -82,7 +86,7 @@ const WarehouseEdit: React.FC<WarehouseEditProps> = ({
         layout="vertical"
         initialValues={{
           ...currentItem,
-          expirationDate: moment(currentItem.expirationDate),
+          expiredDate: moment(currentItem.expiredDate),
         }}
       >
         <Form.Item

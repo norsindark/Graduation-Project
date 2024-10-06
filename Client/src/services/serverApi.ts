@@ -171,7 +171,9 @@ export const callGetAllCategory = async (query: string) => {
   return axios.get(`/api/v1/dashboard/category/get-all-categories?${query}`);
 };
 
-
+export const callGetAllCategoriesName = async () => {
+  return axios.get(`/api/v1/dashboard/category/get-all-categories-name`);
+}
 
 export const callAddNewCategory = async (name: string, slug: string, status: string, parentId: string | null, description: string, subCategories: Array<{ name: string; description: string; status: string }>) => {
   return axios.post(`/api/v1/dashboard/category/add-new-category`, {
@@ -206,3 +208,32 @@ export const callDeleteCategory = async (id: string) => {
   return axios.delete(`/api/v1/dashboard/category/delete-category/${id}`);
 };
 
+// warehouse 
+
+export const callGetAllWarehouse = async (query: string) => {
+  return axios.get(`/api/v1/dashboard/warehouses/get-all-ingredients?${query}`);
+};
+
+export const callAddNewWarehouse = async (
+  ingredientName: string,
+  importedQuantity: number,
+  unit: string,
+  importedDate: string,
+  expiredDate: string,
+  importedPrice: number,
+  description: string,
+  supplierName: string,
+  categoryId: string
+) => {
+  return axios.post(`/api/v1/dashboard/warehouses/add-new-ingredient`, {
+    ingredientName,
+    importedQuantity,
+    unit,
+    importedDate,
+    expiredDate,
+    importedPrice,
+    description,
+    supplierName,
+    categoryId
+  });
+};
