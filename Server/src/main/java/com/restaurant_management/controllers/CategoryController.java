@@ -4,6 +4,7 @@ import com.restaurant_management.dtos.CategoryDto;
 import com.restaurant_management.exceptions.DataExitsException;
 import com.restaurant_management.payloads.requests.CategoryRequest;
 import com.restaurant_management.payloads.responses.CategoryResponse;
+import com.restaurant_management.payloads.responses.GetCategoriesNameResponse;
 import com.restaurant_management.services.interfaces.CategoryService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -23,6 +25,12 @@ import java.io.IOException;
 public class CategoryController {
 
     private final CategoryService categoryService;
+
+    @GetMapping("/get-all-categories-name")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('EMPLOYEE')")
+    public ResponseEntity<List<GetCategoriesNameResponse>> getAllCategoriesName() throws DataExitsException {
+        return ResponseEntity.ok(categoryService.getAllCategoriesName());
+    }
 
     @GetMapping("/get-all-categories")
     @PreAuthorize("hasRole('ADMIN') or hasRole('EMPLOYEE')")
