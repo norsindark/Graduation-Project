@@ -23,7 +23,7 @@ public class WarehouseController {
 
     private final WarehouseService warehouseService;
 
-    @GetMapping("/get-all-raw-products")
+    @GetMapping("/get-all-ingredients")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<PagedModel<EntityModel<WarehouseResponse>>> getAllWarehouses(
             @RequestParam(defaultValue = "0") int pageNo,
@@ -34,25 +34,25 @@ public class WarehouseController {
         return ResponseEntity.ok(warehouseService.getAllWarehouses(pageNo, pageSize, sortBy, sortDir));
     }
 
-    @PostMapping("/add-new-raw-product")
+    @PostMapping("/add-new-ingredient")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse> addNewWarehouse(@RequestBody WarehouseDto request) throws DataExitsException {
         return ResponseEntity.ok(warehouseService.addNewWarehouse(request));
     }
 
-    @PostMapping("/import-raw-products")
+    @PostMapping("/import-ingredients-from-excel")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse> importWarehousesFromExcel(@RequestParam("file") MultipartFile file) throws DataExitsException {
         return ResponseEntity.ok(warehouseService.importWarehousesFromExcel(file));
     }
 
-    @PutMapping("/update-raw-product")
+    @PutMapping("/update-ingredient")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse> updateWarehouse(@RequestBody WarehouseRequest request) throws DataExitsException {
         return ResponseEntity.ok(warehouseService.updateWarehouse(request));
     }
 
-    @DeleteMapping("/delete-raw-product/{id}")
+    @DeleteMapping("/delete-ingredient/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse> deleteWarehouse(@PathVariable String id) throws DataExitsException {
         return ResponseEntity.ok(warehouseService.deleteWarehouse(id));
