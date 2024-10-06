@@ -128,7 +128,7 @@ const LoginModal = () => {
                       </div>
                     </Form.Item>
                     <Form.Item>
-                      {/* <Button
+                      <Button
                         type="primary"
                         shape="round"
                         htmlType="submit"
@@ -139,27 +139,7 @@ const LoginModal = () => {
                         <div className="w-full max-w-16 font-medium text-center text-lg ">
                           Login
                         </div>
-                      </Button> */}
-                      <div className="fp__login_imput">
-                        <button
-                          type="submit"
-                          className="common_btn"
-                          disabled={isSubmit}
-                        >
-                          {isSubmit ? (
-                            <>
-                              <i className="fas fa-spinner fa-spin pr-2"></i>
-                              <span className="text-white font-medium">
-                                Login
-                              </span>
-                            </>
-                          ) : (
-                            <span className="text-white font-medium">
-                              Login
-                            </span>
-                          )}
-                        </button>
-                      </div>
+                      </Button>
                     </Form.Item>
                   </Form>
                   <p className="or">

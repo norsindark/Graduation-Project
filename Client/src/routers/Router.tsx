@@ -21,6 +21,7 @@ import Product from '../pages/admin/product/Product';
 import User from '../pages/admin/user/User';
 import Order from '../pages/admin/order/Order';
 import AttendanceManagement from '../pages/admin/attendanceManagement/AttendanceManagement';
+import AboutPage from '../pages/public/AboutPage';
 export const router = createBrowserRouter([
   {
     path: '/',
@@ -62,6 +63,10 @@ export const router = createBrowserRouter([
       {
         path: '/account',
         element: <Account />,
+      },
+      {
+        path: '/about',
+        element: <AboutPage />,
       },
     ],
   },

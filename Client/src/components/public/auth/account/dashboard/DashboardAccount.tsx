@@ -69,18 +69,36 @@ const DashboardAccount = () => {
             Personal Information
             <div className="row">
               <div className="col-md-12">
-                <Button
+                {/* <button
                   onClick={() => setIsEditing(!isEditing)}
-                  type="primary"
-                  shape="round"
-                  size="large"
-                  loading={isLoading}
-                  style={{ fontWeight: 'medium', color: 'white !important' }}
+                  type="button"
+                  className="bg-colorPrimary text-white rounded-full size-8 font-medium h-10 text-3xl text-white"
                 >
                   <div className="text-[16px] font-medium text-center w-12">
                     {isEditing ? 'Cancel' : 'Edit'}
                   </div>
-                </Button>
+                </button> */}
+                <div className="fp__login_imput">
+                  <Button
+                    type="primary"
+                    shape="round"
+                    htmlType="submit"
+                    block
+                    size="large"
+                    disabled={isLoading}
+                    onClick={() => setIsEditing(!isEditing)}
+                  >
+                    {isEditing ? (
+                      <span className="text-white font-medium text-center text-base">
+                        <i className="fas fa-times mr-2"></i> Cancel
+                      </span>
+                    ) : (
+                      <span className="text-white font-medium text-center text-base">
+                        <i className="fas fa-edit mr-2"></i> Edit
+                      </span>
+                    )}
+                  </Button>
+                </div>
               </div>
             </div>
           </h4>
@@ -88,10 +106,12 @@ const DashboardAccount = () => {
           {!isEditing ? (
             <div className="personal_info_text">
               <p>
-                <span>Name:</span> {user?.fullName}
+                <span className="font-medium text-base">Name:</span>{' '}
+                {user?.fullName}
               </p>
               <p>
-                <span>Email:</span> {user?.email}
+                <span className="font-medium text-base">Email:</span>{' '}
+                {user?.email}
               </p>
             </div>
           ) : (
@@ -127,18 +147,19 @@ const DashboardAccount = () => {
                       <Input placeholder="Email" />
                     </Form.Item>
                   </div>
-                  <div className="col-xl-3">
+                  <div className="col-xl-4">
                     <Button
                       type="primary"
                       shape="round"
                       htmlType="submit"
                       block
                       size="large"
+                      disabled={isLoading}
                       loading={isLoading}
                     >
-                      <div className="font-medium text-center">
-                        Update Information
-                      </div>
+                      <span className="text-white font-medium text-center text-base">
+                        <i className="fas fa-save mr-2"></i> Update Information
+                      </span>
                     </Button>
                   </div>
                 </div>

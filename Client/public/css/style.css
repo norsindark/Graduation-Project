@@ -82,7 +82,7 @@ button {
 }
 
 :root {
-  --colorPrimary: #f86f03;
+  --colorPrimary: #81c784;
   --paraColor: #494949;
   --colorBlack: #010f1c;
   --colorWhite: #ffffff;
@@ -116,7 +116,7 @@ button {
 }
 
 .common_btn:hover {
-  background: var(--colorBlack);
+  background-color: var(--colorBlack);
 }
 
 .fp__section_heading h4 {
@@ -239,7 +239,7 @@ button {
 
 .main_menu .navbar-brand {
   display: inline-block;
-  width: 190px;
+  width: 115px;
   margin: 0;
   padding: 0;
 }
@@ -1442,7 +1442,7 @@ button {
   -webkit-animation: zoom linear 2.5s infinite alternate;
 }
 
-.menu_filter button {
+/* .menu_filter button {
   padding: 5px 25px;
   text-transform: capitalize;
   color: var(--colorPrimary);
@@ -1459,8 +1459,25 @@ button {
 .menu_filter button.active {
   background: var(--colorPrimary);
   color: var(--colorWhite);
+} */
+
+.menu_filter button {
+  padding: 5px 25px;
+  text-transform: capitalize;
+  color: var(--colorBlack);
+  margin: 5px 5px 0px 5px;
+  border-radius: 30px;
+  background: none;
+  border: 1px solid var(--colorPrimary);
+  font-weight: 600;
+  font-size: 15px;
+  transition: all linear 0.3s;
 }
 
+.menu_filter button:hover,
+.menu_filter button.active {
+  color: var(--colorPrimary);
+}
 .fp__menu_item {
   margin-top: 25px;
   position: relative;
@@ -1946,8 +1963,8 @@ button {
   content: '+';
   color: var(--colorWhite);
   font-size: 40px;
-  top: -3px;
-  right: -30px;
+  top: 0px;
+  right: -35px;
 }
 
 .fp__single_counter .text p {
@@ -2508,14 +2525,13 @@ footer {
 }
 
 .fp__breadcrumb_overlay {
-  padding: 250px 0px 125px 0px;
-  background: #f86f03a3;
+  padding: 155px 0px 87px 0px;
   position: relative;
 }
 
 .fp__breadcrumb_text h1 {
   text-align: center;
-  color: var(--colorWhite);
+  color: var(--colorPrimary);
   text-transform: capitalize;
   font-size: 50px;
   font-weight: 800;
@@ -2525,13 +2541,15 @@ footer {
 .fp__breadcrumb_text ul {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   justify-content: center;
 }
 
 .fp__breadcrumb_text ul li a {
   text-transform: capitalize;
-  color: var(--colorWhite);
-  font-size: 16px;
+  color: var(--colorBlack);
+  font-size: 20px;
+  font-weight: 600;
   position: relative;
   padding-right: 25px;
 }
@@ -2541,7 +2559,7 @@ footer {
   content: '';
   width: 8px;
   height: 1px;
-  background: var(--colorWhite);
+  color: var(--colorPrimary);
   top: 13px;
   right: 10px;
 }
@@ -2561,12 +2579,12 @@ footer {
 .fp__breadcrumb_text ul li:first-child a::before {
   position: absolute;
   content: '\f015';
-  color: var(--colorWhite);
+  color: var(--colorBlack);
   font-family: 'Font Awesome 5 Free';
   font-weight: 600;
   top: 1px;
   left: 0;
-  font-size: 16px;
+  font-size: 20px;
   border-radius: 50%;
 }
 
@@ -6693,4 +6711,16 @@ CHECKOUT PAGE START
 
 .color-bg-client {
   background-color: var(--colorPrimary) !important;
+}
+.fade-in {
+  opacity: 0;
+  transform: translateY(20px);
+  transition:
+    opacity 0.5s ease-out,
+    transform 0.5s ease-out;
+}
+
+.fade-in.is-visible {
+  opacity: 1;
+  transform: translateY(0);
 }
