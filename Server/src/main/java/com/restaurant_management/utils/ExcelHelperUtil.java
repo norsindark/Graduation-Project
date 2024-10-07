@@ -1,10 +1,7 @@
 package com.restaurant_management.utils;
 
 import com.restaurant_management.dtos.WarehouseDto;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -32,10 +29,13 @@ public class ExcelHelperUtil {
             while (rows.hasNext()) {
                 Row currentRow = rows.next();
 
-                // Skip header row
                 if (rowNumber == 0) {
                     rowNumber++;
                     continue;
+                }
+
+                if (isRowEmpty(currentRow)) {
+                    break;
                 }
 
                 Iterator<Cell> cellsInRow = currentRow.iterator();
@@ -85,5 +85,14 @@ public class ExcelHelperUtil {
             throw new RuntimeException("Fail to parse Excel file: " + e.getMessage());
         }
         return warehouseDtos;
+    }
+
+    private static boolean isRowEmpty(Row row) {
+        for (Cell cell : row) {
+            if (cell.getCellType() != CellType.BLANK) {
+                return false;
+            }
+        }
+        return true;
     }
 }

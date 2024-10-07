@@ -24,6 +24,7 @@ import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -43,12 +44,12 @@ public class WarehouseServiceImpl implements WarehouseService {
 
 
     @Override
+    @Transactional
     public ApiResponse addNewWarehouse(WarehouseDto request) throws DataExitsException {
         Optional<Warehouse> warehouse = warehouseRepository.findByIngredientName(request.getIngredientName());
         if (warehouse.isPresent()) {
             throw new DataExitsException(request.getIngredientName() + " already exists!");
         }
-
 
         Optional<Category> categoryOpl = categoryRepository.findById(request.getCategoryId());
         if (categoryOpl.isEmpty()) {
@@ -88,11 +89,13 @@ public class WarehouseServiceImpl implements WarehouseService {
 
         try {
             List<WarehouseDto> warehouses = ExcelHelperUtil.excelToWarehouseDtos(file.getInputStream());
+            int successCount = 0;
 
             for (WarehouseDto warehouseDto : warehouses) {
                 addNewWarehouse(warehouseDto);
+                successCount++;
             }
-            return new ApiResponse("Warehouses imported successfully", HttpStatus.CREATED);
+            return new ApiResponse(successCount + " ingredient imported successfully", HttpStatus.CREATED);
         } catch (IOException e) {
             return new ApiResponse("Failed to import warehouses: ", ApiUtil.createErrorDetails(e.getMessage()) , HttpStatus.INTERNAL_SERVER_ERROR);
         }
