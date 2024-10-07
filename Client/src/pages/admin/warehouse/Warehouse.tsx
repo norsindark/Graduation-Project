@@ -1,9 +1,27 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Button, notification, Card, Space, Popconfirm } from 'antd';
-import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
+import {
+  Table,
+  Button,
+  notification,
+  Card,
+  Space,
+  Popconfirm,
+  Row,
+  Col,
+} from 'antd';
+import {
+  DeleteOutlined,
+  DownloadOutlined,
+  EditOutlined,
+  PlusOutlined,
+  UploadOutlined,
+} from '@ant-design/icons';
 import WarehouseNew from './WarehouseNew';
 import WarehouseEdit from './WarehouseEdit';
-import { callGetAllWarehouse } from '../../../services/serverApi';
+import {
+  callDeleteWarehouse,
+  callGetAllWarehouse,
+} from '../../../services/serverApi';
 import dayjs from 'dayjs';
 interface WarehouseItem {
   warehouseId: string;
@@ -45,7 +63,7 @@ const Warehouse: React.FC = () => {
       if (sortQuery) {
         query += `&sortBy=${sortQuery}`;
       } else {
-        query += `&sortBy=ingredientName&sortDir=desc`;
+        query += `&sortBy=importedDate&sortDir=desc`;
       }
       const response = await callGetAllWarehouse(query);
       if (
@@ -179,6 +197,7 @@ const Warehouse: React.FC = () => {
               danger
               shape="round"
               icon={<DeleteOutlined />}
+              loading={loading}
             >
               Delete
             </Button>
@@ -199,19 +218,35 @@ const Warehouse: React.FC = () => {
   };
 
   const handleDelete = async (id: string) => {
-    // try {
-    //   await axios.delete(`/api/warehouse-items/${id}`);
-    //   notification.success({
-    //     message: 'Item deleted successfully!',
-    //     duration: 5,
-    //   });
-    //   fetchItemsWarehouse();
-    // } catch (error) {
-    //   notification.error({
-    //     message: 'Cannot delete the item',
-    //     description: 'Please try again later.',
-    //   });
-    // }
+    setLoading(true);
+    try {
+      const response = await callDeleteWarehouse(id);
+      if (response?.status === 200) {
+        notification.success({
+          message: 'Item deleted successfully!',
+          duration: 5,
+          showProgress: true,
+        });
+        fetchItemsWarehouse();
+      } else {
+        notification.error({
+          message: 'Cannot delete the item',
+          description: response.data.errors?.error || 'Please try again later.',
+          duration: 5,
+          showProgress: true,
+        });
+      }
+    } catch (error) {
+      notification.error({
+        message: 'Cannot delete the item',
+        description:
+          'An error occurred while deleting the item. Please try again.',
+        duration: 5,
+        showProgress: true,
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const onChange = (pagination: any, sortDir: any) => {
@@ -231,14 +266,40 @@ const Warehouse: React.FC = () => {
         extra={
           !showWarehouseNew &&
           !showWarehouseEdit && (
-            <Button
-              type="primary"
-              onClick={() => setShowWarehouseNew(true)}
-              shape="round"
-              icon={<PlusOutlined />}
+            <Row
+              gutter={[8, 8]}
+              className="flex justify-center items-center flex-col	mt-4"
             >
-              Create Item Warehouse
-            </Button>
+              <Col span={24} md={24}>
+                <Button
+                  type="primary"
+                  onClick={() => setShowWarehouseNew(true)}
+                  shape="round"
+                  icon={<PlusOutlined />}
+                >
+                  Create Item Warehouse
+                </Button>
+              </Col>
+              <Col span={24} md={24}>
+                <Button
+                  type="primary"
+                  shape="round"
+                  icon={<UploadOutlined />}
+                  className="mr-4"
+                  // onClick={() => setShowImportExcelWarehouse(true)}
+                >
+                  Import Excel
+                </Button>
+                <Button
+                  type="primary"
+                  shape="round"
+                  icon={<DownloadOutlined />}
+                  // onClick={() => setShowExportExcelWarehouse(true)}
+                >
+                  Export Excel
+                </Button>
+              </Col>
+            </Row>
           )
         }
       >
