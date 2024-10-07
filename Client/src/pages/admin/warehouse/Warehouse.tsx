@@ -23,6 +23,8 @@ import {
   callGetAllWarehouse,
 } from '../../../services/serverApi';
 import dayjs from 'dayjs';
+import WarehouseInport from './data/WarehouseInport';
+
 interface WarehouseItem {
   warehouseId: string;
   ingredientName: string;
@@ -51,6 +53,9 @@ const Warehouse: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(10);
   const [totalItems, setTotalItems] = useState<number>(0);
+
+  const [openModalImportExcelWarehouse, setOpenModalImportExcelWarehouse] =
+    useState<boolean>(false);
 
   useEffect(() => {
     fetchItemsWarehouse();
@@ -286,7 +291,7 @@ const Warehouse: React.FC = () => {
                   shape="round"
                   icon={<UploadOutlined />}
                   className="mr-4"
-                  // onClick={() => setShowImportExcelWarehouse(true)}
+                  onClick={() => setOpenModalImportExcelWarehouse(true)}
                 >
                   Import Excel
                 </Button>
@@ -303,6 +308,12 @@ const Warehouse: React.FC = () => {
           )
         }
       >
+        <WarehouseInport
+          openModalImportExcelWarehouse={openModalImportExcelWarehouse}
+          setOpenModalImportExcelWarehouse={setOpenModalImportExcelWarehouse}
+          fetchItemsWarehouse={fetchItemsWarehouse}
+        />
+
         {showWarehouseNew ? (
           <WarehouseNew
             onAddSuccess={handleAddSuccess}

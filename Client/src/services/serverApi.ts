@@ -268,10 +268,8 @@ export const callDeleteWarehouse = async (id: string) => {
 };
 
 
-export const callImportExcelWarehouse = async (file: File) => {
-  const formData = new FormData();
-  formData.append('file', file);
-  return axios.post(`/api/v1/dashboard/warehouses/import-ingredients-from-excel`, formData, {
+export const callImportExcelWarehouse = async (file: FormData) => {
+  return axios.post(`/api/v1/dashboard/warehouses/import-ingredients-from-excel`, file, {
     headers: {
       'Content-Type': 'multipart/form-data',
     },
