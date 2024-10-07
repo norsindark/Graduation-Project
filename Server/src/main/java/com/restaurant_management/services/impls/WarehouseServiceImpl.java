@@ -49,6 +49,7 @@ public class WarehouseServiceImpl implements WarehouseService {
             throw new DataExitsException(request.getIngredientName() + " already exists!");
         }
 
+
         Optional<Category> categoryOpl = categoryRepository.findById(request.getCategoryId());
         if (categoryOpl.isEmpty()) {
             throw new DataExitsException("Category not found!");
@@ -58,6 +59,10 @@ public class WarehouseServiceImpl implements WarehouseService {
 
         Timestamp expiredDate = Timestamp.valueOf(LocalDateTime.parse(request.getExpiredDate()));
         Timestamp importedDate = Timestamp.valueOf(LocalDateTime.parse(request.getImportedDate()));
+
+        if (importedDate.after(expiredDate)) {
+            throw new DataExitsException("Imported date must be before expired date!");
+        }
 
         Warehouse _warehouse = Warehouse.builder()
                 .ingredientName(request.getIngredientName())
@@ -115,6 +120,10 @@ public class WarehouseServiceImpl implements WarehouseService {
 
         Timestamp importedDate = Timestamp.valueOf(LocalDateTime.parse(request.getImportedDate()));
         Timestamp expiredDate = Timestamp.valueOf(LocalDateTime.parse(request.getExpiredDate()));
+
+        if (importedDate.after(expiredDate)) {
+            throw new DataExitsException("Imported date must be before expired date!");
+        }
 
         warehouse.setIngredientName(request.getIngredientName());
         warehouse.setImportedQuantity(request.getImportedQuantity());
