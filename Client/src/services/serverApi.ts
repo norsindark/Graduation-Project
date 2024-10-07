@@ -262,3 +262,18 @@ export const callUpdateWarehouse = async (
     categoryId
   });
 };
+
+export const callDeleteWarehouse = async (id: string) => {
+  return axios.delete(`/api/v1/dashboard/warehouses/delete-ingredient/${id}`);
+};
+
+
+export const callImportExcelWarehouse = async (file: File) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  return axios.post(`/api/v1/dashboard/warehouses/import-ingredients-from-excel`, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+};
