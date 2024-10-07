@@ -29,7 +29,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.sql.Timestamp;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -58,8 +58,8 @@ public class WarehouseServiceImpl implements WarehouseService {
 
         UnitType unitType = UnitType.valueOf(request.getUnit().toUpperCase(Locale.ROOT));
 
-        Timestamp expiredDate = Timestamp.valueOf(LocalDateTime.parse(request.getExpiredDate()));
-        Timestamp importedDate = Timestamp.valueOf(LocalDateTime.parse(request.getImportedDate()));
+        Timestamp expiredDate = Timestamp.valueOf(LocalDate.parse(request.getExpiredDate()).atStartOfDay());
+        Timestamp importedDate = Timestamp.valueOf(LocalDate.parse(request.getImportedDate()).atStartOfDay());
 
         if (importedDate.after(expiredDate)) {
             throw new DataExitsException("Imported date must be before expired date!");
@@ -121,8 +121,8 @@ public class WarehouseServiceImpl implements WarehouseService {
 
         UnitType unitType = UnitType.valueOf(request.getUnit().toUpperCase(Locale.ROOT));
 
-        Timestamp importedDate = Timestamp.valueOf(LocalDateTime.parse(request.getImportedDate()));
-        Timestamp expiredDate = Timestamp.valueOf(LocalDateTime.parse(request.getExpiredDate()));
+        Timestamp expiredDate = Timestamp.valueOf(LocalDate.parse(request.getExpiredDate()).atStartOfDay());
+        Timestamp importedDate = Timestamp.valueOf(LocalDate.parse(request.getImportedDate()).atStartOfDay());
 
         if (importedDate.after(expiredDate)) {
             throw new DataExitsException("Imported date must be before expired date!");

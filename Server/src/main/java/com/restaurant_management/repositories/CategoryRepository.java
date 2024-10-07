@@ -12,7 +12,8 @@ import java.util.Optional;
 
 public interface CategoryRepository extends JpaRepository<Category, String> {
 
-    Optional<Category> findByName(String name);
+    @Query("SELECT c FROM Category c WHERE LOWER(c.name) = LOWER(:name)")
+    Optional<Category> findByName(@Param("name") String name);
 
     List<Category> findByParentCategory(Category category);
 
