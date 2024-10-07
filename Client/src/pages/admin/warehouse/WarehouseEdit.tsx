@@ -7,16 +7,28 @@ import {
   Button,
   notification,
   DatePicker,
+  Row,
+  Col,
 } from 'antd';
 import axios from 'axios';
-import moment from 'moment';
-
+import dayjs from 'dayjs';
+import { PlusOutlined, CloseOutlined } from '@ant-design/icons';
 const { Option } = Select;
+
+import {
+  callGetAllCategoriesName,
+  callUpdateWarehouse,
+} from '../../../services/serverApi';
 
 interface WarehouseEditProps {
   currentItem: WarehouseItem;
   onEditSuccess: () => void;
   setShowWarehouseEdit: (value: boolean) => void;
+}
+
+interface Category {
+  categoryId: string;
+  categoryName: string;
 }
 
 interface WarehouseItem {
@@ -31,6 +43,7 @@ interface WarehouseItem {
   importedPrice: number;
   supplierName: string;
   description: string;
+  categoryId: string;
   categoryName: string;
 }
 
@@ -41,34 +54,78 @@ const WarehouseEdit: React.FC<WarehouseEditProps> = ({
 }) => {
   const [form] = Form.useForm();
   const [isSubmit, setIsSubmit] = useState(false);
+  const [categoryList, setCategoryList] = useState<Category[]>([]);
 
   useEffect(() => {
+    const fetchCategoryList = async () => {
+      const responseCategory = await callGetAllCategoriesName();
+      setCategoryList(responseCategory.data);
+    };
+    fetchCategoryList();
+
     form.setFieldsValue({
       ...currentItem,
-      expiredDate: moment(currentItem.expiredDate),
+      importedDate: dayjs(currentItem.importedDate),
+      expiredDate: dayjs(currentItem.expiredDate),
+      categoryId: currentItem.categoryName,
     });
   }, [currentItem, form]);
 
   const onFinish = async (values: WarehouseItem) => {
     setIsSubmit(true);
     try {
-      const updatedValues = {
-        ...values,
-        expiredDate: moment(values.expiredDate).format('YYYY-MM-DD'),
-      };
-      // Giả lập API call
-      console.log('Cập nhật mặt hàng:', updatedValues);
-      // await axios.put(`/api/warehouse-items/${currentItem.id}`, updatedValues);
-      notification.success({
-        message: 'Mặt hàng đã được cập nhật thành công!',
-        duration: 5,
-      });
-      onEditSuccess();
+      const {
+        ingredientName,
+        importedQuantity,
+        unit,
+        expiredDate,
+        importedDate,
+        importedPrice,
+        supplierName,
+        description,
+        categoryId,
+      } = values;
+      const formattedImportedDate = dayjs(importedDate).format(
+        'YYYY-MM-DDTHH:mm:ss'
+      );
+      const formattedExpiredDate = dayjs(expiredDate).format(
+        'YYYY-MM-DDTHH:mm:ss'
+      );
+      const responseWarehouse = await callUpdateWarehouse(
+        currentItem.warehouseId,
+        ingredientName,
+        importedQuantity,
+        unit,
+        formattedExpiredDate,
+        formattedImportedDate,
+        importedPrice,
+        supplierName,
+        description,
+        categoryId
+      );
+      if (responseWarehouse.status === 200) {
+        notification.success({
+          message: 'Item updated successfully!',
+          duration: 5,
+          showProgress: true,
+        });
+        onEditSuccess();
+      } else {
+        notification.error({
+          message: 'Unable to update item',
+          description:
+            responseWarehouse.data.errors?.error ||
+            'Error during update process!',
+          duration: 5,
+          showProgress: true,
+        });
+      }
     } catch (error: any) {
       notification.error({
-        message: 'Lỗi khi cập nhật mặt hàng',
+        message: 'Unable to update item',
         description: error.message,
         duration: 5,
+        showProgress: true,
       });
     } finally {
       setIsSubmit(false);
@@ -76,104 +133,213 @@ const WarehouseEdit: React.FC<WarehouseEditProps> = ({
   };
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 bg-white shadow rounded-md">
-      <h4 className="text-center text-xl font-semibold mb-4">
-        Chỉnh sửa mặt hàng
-      </h4>
-      <Form
-        form={form}
-        onFinish={onFinish}
-        layout="vertical"
-        initialValues={{
-          ...currentItem,
-          expiredDate: moment(currentItem.expiredDate),
-        }}
-      >
-        <Form.Item
-          name="name"
-          label="Tên mặt hàng"
-          rules={[{ required: true, message: 'Vui lòng nhập tên mặt hàng!' }]}
-        >
-          <Input />
-        </Form.Item>
-        <Form.Item
-          name="quantity"
-          label="Số lượng"
-          rules={[{ required: true, message: 'Vui lòng nhập số lượng!' }]}
-        >
-          <InputNumber min={0} style={{ width: '100%' }} />
-        </Form.Item>
-        <Form.Item
-          name="unit"
-          label="Đơn vị"
-          rules={[{ required: true, message: 'Vui lòng chọn đơn vị!' }]}
-        >
-          <Select>
-            <Option value="kg">Kg</Option>
-            <Option value="g">Gram</Option>
-            <Option value="l">Lít</Option>
-            <Option value="ml">Mililít</Option>
-            <Option value="cái">Cái</Option>
-          </Select>
-        </Form.Item>
-        <Form.Item
-          name="category"
-          label="Danh mục"
-          rules={[{ required: true, message: 'Vui lòng chọn danh mục!' }]}
-        >
-          <Select>
-            <Option value="Thực phẩm">Thực phẩm</Option>
-            <Option value="Đồ uống">Đồ uống</Option>
-            <Option value="Gia vị">Gia vị</Option>
-            <Option value="Khác">Khác</Option>
-          </Select>
-        </Form.Item>
-        <Form.Item
-          name="minThreshold"
-          label="Ngưỡng tối thiểu"
-          rules={[
-            { required: true, message: 'Vui lòng nhập ngưỡng tối thiểu!' },
-          ]}
-        >
-          <InputNumber min={0} style={{ width: '100%' }} />
-        </Form.Item>
-        <Form.Item
-          name="expirationDate"
-          label="Ngày hết hạn"
-          rules={[{ required: true, message: 'Vui lòng chọn ngày hết hạn!' }]}
-        >
-          <DatePicker style={{ width: '100%' }} />
-        </Form.Item>
-        <Form.Item
-          name="supplier"
-          label="Nhà cung cấp"
-          rules={[{ required: true, message: 'Vui lòng nhập nhà cung cấp!' }]}
-        >
-          <Input />
-        </Form.Item>
-        <div className="flex flex-col sm:flex-row gap-2">
-          <Button
-            type="primary"
-            htmlType="submit"
-            loading={isSubmit}
-            size="large"
-            shape="round"
-            className="w-full sm:w-auto"
-          >
-            Cập nhật
-          </Button>
-          <Button
-            danger
-            size="large"
-            shape="round"
-            onClick={() => setShowWarehouseEdit(false)}
-            className="w-full sm:w-auto"
-          >
-            Hủy
-          </Button>
-        </div>
+    <>
+      <h4 className="text-center text-xl font-semibold mb-4">Update item</h4>
+      <Form form={form} onFinish={onFinish} layout="vertical">
+        <Row gutter={16}>
+          <Col xs={24} sm={12}>
+            <Form.Item
+              name="ingredientName"
+              label="Ingredient name"
+              className="font-medium"
+              rules={[
+                { required: true, message: 'Please enter ingredient name!' },
+              ]}
+            >
+              <Input />
+            </Form.Item>
+          </Col>
+          <Col xs={24} sm={12}>
+            <Form.Item
+              name="importedQuantity"
+              label="Imported quantity"
+              className="font-medium"
+              rules={[
+                { required: true, message: 'Please enter imported quantity!' },
+                {
+                  validator: (_, value) => {
+                    if (value === undefined || value === null || value === '') {
+                      return Promise.reject('Imported quantity is required!');
+                    }
+                    if (isNaN(value)) {
+                      return Promise.reject(
+                        'Imported quantity must be a number!'
+                      );
+                    }
+                    if (value < 0) {
+                      return Promise.reject(
+                        'Imported quantity cannot be negative!'
+                      );
+                    }
+                    return Promise.resolve();
+                  },
+                },
+              ]}
+            >
+              <InputNumber min={0} style={{ width: '100%' }} />
+            </Form.Item>
+          </Col>
+          <Col xs={24} sm={12}>
+            <Form.Item
+              name="unit"
+              label="Unit"
+              className="font-medium"
+              rules={[{ required: true, message: 'Please select unit!' }]}
+            >
+              <Select>
+                <Option value="kilogram">Kilogram</Option>
+                <Option value="gram">Gram</Option>
+                <Option value="liter">Liter</Option>
+                <Option value="milliliter">Milliliter</Option>
+                <Option value="piece">Piece</Option>
+              </Select>
+            </Form.Item>
+          </Col>
+          <Col xs={24} sm={12}>
+            <Form.Item
+              label="Category"
+              className="font-medium"
+              name="categoryId"
+              rules={[{ required: true, message: 'Please select category!' }]}
+            >
+              <Select placeholder="Select category">
+                {categoryList.map((category) => (
+                  <Select.Option
+                    key={category.categoryId}
+                    value={category.categoryId}
+                  >
+                    {category.categoryName}
+                  </Select.Option>
+                ))}
+              </Select>
+            </Form.Item>
+          </Col>
+          <Col xs={24} sm={12}>
+            <Form.Item
+              name="importedDate"
+              label="Imported date"
+              className="font-medium"
+              rules={[
+                { required: true, message: 'Please select imported date!' },
+              ]}
+            >
+              <DatePicker
+                style={{ width: '100%' }}
+                showTime
+                format="YYYY-MM-DD HH:mm:ss"
+                defaultValue={dayjs()}
+              />
+            </Form.Item>
+          </Col>
+          <Col xs={24} sm={12}>
+            <Form.Item
+              name="expiredDate"
+              label="Expired date"
+              className="font-medium"
+              dependencies={['importedDate']}
+              rules={[
+                { required: true, message: 'Please select expired date!' },
+                ({ getFieldValue }) => ({
+                  validator(_, value) {
+                    const importedDate = getFieldValue('importedDate');
+                    if (!value || !importedDate) {
+                      return Promise.resolve();
+                    }
+                    if (dayjs(value).isBefore(dayjs(importedDate))) {
+                      return Promise.reject(
+                        new Error(
+                          'Expired date cannot be earlier than imported date!'
+                        )
+                      );
+                    }
+                    return Promise.resolve();
+                  },
+                }),
+              ]}
+            >
+              <DatePicker
+                style={{ width: '100%' }}
+                showTime
+                format="YYYY-MM-DD HH:mm:ss"
+              />
+            </Form.Item>
+          </Col>
+
+          <Col xs={24} sm={12}>
+            <Form.Item
+              name="importedPrice"
+              label="Imported price"
+              className="font-medium"
+              rules={[
+                { required: true, message: 'Please enter imported price!' },
+                {
+                  validator: (_, value) => {
+                    if (value === undefined || value === null || value === '') {
+                      return Promise.reject('Imported price is required!');
+                    }
+                    if (isNaN(value)) {
+                      return Promise.reject('Imported price must be a number!');
+                    }
+                    if (value < 0) {
+                      return Promise.reject(
+                        'Imported price cannot be negative!'
+                      );
+                    }
+                    return Promise.resolve();
+                  },
+                },
+              ]}
+            >
+              <InputNumber min={0} style={{ width: '100%' }} />
+            </Form.Item>
+          </Col>
+          <Col xs={24} sm={12}>
+            <Form.Item
+              name="supplierName"
+              label="Supplier name"
+              className="font-medium"
+              rules={[
+                { required: true, message: 'Please enter supplier name!' },
+              ]}
+            >
+              <Input />
+            </Form.Item>
+          </Col>
+          <Col xs={24} sm={12}>
+            <Form.Item
+              name="description"
+              label="Description"
+              className="font-medium"
+            >
+              <Input.TextArea />
+            </Form.Item>
+          </Col>
+          <div className="flex flex-col sm:flex-row gap-2 mt-4 ml-2">
+            <Button
+              type="primary"
+              htmlType="submit"
+              loading={isSubmit}
+              size="large"
+              shape="round"
+              className="w-full sm:w-auto"
+              icon={<PlusOutlined />}
+            >
+              Update
+            </Button>
+            <Button
+              danger
+              size="large"
+              shape="round"
+              onClick={() => setShowWarehouseEdit(false)}
+              className="w-full sm:w-auto"
+              icon={<CloseOutlined />}
+            >
+              Cancel
+            </Button>
+          </div>
+        </Row>
       </Form>
-    </div>
+    </>
   );
 };
 

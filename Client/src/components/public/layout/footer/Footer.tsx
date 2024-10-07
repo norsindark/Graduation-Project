@@ -1,3 +1,5 @@
+import logo from '../../../../assets/images/imagelogosyndev1.png';
+
 const Footer = () => {
   return (
     <footer>
@@ -7,27 +9,23 @@ const Footer = () => {
             <div className="col-lg-4 col-sm-8 col-md-6">
               <div className="fp__footer_content">
                 <a className="footer_logo" href="index.html">
-                  <img
-                    src="images/footer_logo.png"
-                    alt="FoodPark"
-                    className="img-fluid w-100"
-                  />
+                  <img src={logo} alt="FoodPark" className="img-fluid " />
                 </a>
                 <span>
                   There are many variations of Lorem Ipsum available, but the
                   majority have suffered.
                 </span>
                 <p className="info">
-                  <i className="far fa-map-marker-alt"></i> 7232 Broadway Suite
-                  308, Jackson Heights, 11372, NY, United States
+                  <i className="far fa-map-marker-alt"></i> 307 Hà Huy Tập,
+                  Thành phố Buôn Ma Thuột, Đắk Lắk
                 </p>
-                <a className="info" href="callto:1234567890123">
+                <a className="info" href="callto:0966666666">
                   <i className="fas fa-phone-alt"></i>
-                  +1347-430-9510
+                  +84 966 666 666
                 </a>
                 <a className="info" href="mailto:websolutionus1@gmail.com">
                   <i className="fas fa-envelope"></i>
-                  websolutionus1@gmail.com
+                  synfood.bmt@gmail.com
                 </a>
               </div>
             </div>
@@ -113,7 +111,7 @@ const Footer = () => {
             <div className="col-12">
               <div className="fp__footer_bottom_text d-flex flex-wrap justify-content-between">
                 <p>
-                  Copyright 2022 <b>FoodPark</b> All Rights Reserved.
+                  Copyright 2024 <b>SynFood</b> All Rights Reserved.
                 </p>
                 <ul className="d-flex flex-wrap">
                   <li>

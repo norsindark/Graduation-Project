@@ -237,3 +237,28 @@ export const callAddNewWarehouse = async (
     categoryId
   });
 };
+
+export const callUpdateWarehouse = async (
+  warehouseId: string,
+  ingredientName: string,
+  importedQuantity: number,
+  unit: string,
+  importedDate: string,
+  expiredDate: string,
+  importedPrice: number,
+  description: string,
+  supplierName: string,
+  categoryId: string) => {
+  return axios.put(`/api/v1/dashboard/warehouses/update-ingredient`, {
+    warehouseId,
+    ingredientName,
+    importedQuantity,
+    unit,
+    importedDate,
+    expiredDate,
+    importedPrice,
+    description,
+    supplierName,
+    categoryId
+  });
+};
