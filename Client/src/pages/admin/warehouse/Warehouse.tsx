@@ -24,6 +24,7 @@ import {
 } from '../../../services/serverApi';
 import dayjs from 'dayjs';
 import WarehouseInport from './data/WarehouseInport';
+import * as XLSX from 'xlsx';
 
 interface WarehouseItem {
   warehouseId: string;
@@ -51,7 +52,7 @@ const Warehouse: React.FC = () => {
   const [sortQuery, setSortQuery] = useState<string>('');
 
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const [pageSize, setPageSize] = useState<number>(10);
+  const [pageSize, setPageSize] = useState<number>(5);
   const [totalItems, setTotalItems] = useState<number>(0);
 
   const [openModalImportExcelWarehouse, setOpenModalImportExcelWarehouse] =
@@ -138,6 +139,18 @@ const Warehouse: React.FC = () => {
       title: 'Unit',
       dataIndex: 'unit',
       key: 'unit',
+      render: (unit: string) => {
+        if (unit === 'kg') {
+          return 'Kilogram';
+        } else if (unit === 'g') {
+          return 'Gram';
+        } else if (unit === 'l') {
+          return 'Liter';
+        } else if (unit === 'ml') {
+          return 'Milliliter';
+        }
+        return unit;
+      },
     },
     {
       title: 'Description',
@@ -173,7 +186,7 @@ const Warehouse: React.FC = () => {
       dataIndex: 'supplierName',
       key: 'supplierName',
       sorter: (a: WarehouseItem, b: WarehouseItem) =>
-        a.supplierName.localeCompare(b.supplierName), // Add sorting functionality
+        a.supplierName.localeCompare(b.supplierName),
     },
     {
       title: 'Actions',
@@ -264,6 +277,15 @@ const Warehouse: React.FC = () => {
       setSortQuery('');
     }
   };
+
+  const handleExportData = () => {
+    if (dataSource.length > 0) {
+      const worksheet = XLSX.utils.json_to_sheet(dataSource);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
+      XLSX.writeFile(workbook, 'ExportWarehouse.csv');
+    }
+  };
   return (
     <div className="layout-content">
       <Card
@@ -299,7 +321,7 @@ const Warehouse: React.FC = () => {
                   type="primary"
                   shape="round"
                   icon={<DownloadOutlined />}
-                  // onClick={() => setShowExportExcelWarehouse(true)}
+                  onClick={() => handleExportData()}
                 >
                   Export Excel
                 </Button>
