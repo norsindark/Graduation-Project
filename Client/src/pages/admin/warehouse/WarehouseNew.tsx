@@ -69,12 +69,8 @@ const WarehouseNew: React.FC<WarehouseNewProps> = ({
       categoryId,
     } = values;
 
-    const formattedImportedDate = dayjs(importedDate).format(
-      'YYYY-MM-DDTHH:mm:ss'
-    );
-    const formattedExpiredDate = dayjs(expiredDate).format(
-      'YYYY-MM-DDTHH:mm:ss'
-    );
+    const formattedImportedDate = dayjs(importedDate).format('YYYY-MM-DD');
+    const formattedExpiredDate = dayjs(expiredDate).format('YYYY-MM-DD');
 
     setIsSubmit(true);
     try {
@@ -82,14 +78,14 @@ const WarehouseNew: React.FC<WarehouseNewProps> = ({
         ingredientName,
         importedQuantity,
         unit,
-        formattedExpiredDate,
         formattedImportedDate,
+        formattedExpiredDate,
         importedPrice,
         supplierName,
         description,
         categoryId
       );
-      if (responseWarehouse.status === 200) {
+      if (responseWarehouse?.status === 200) {
         notification.success({
           message: 'Item created successfully!',
           duration: 5,
@@ -216,8 +212,7 @@ const WarehouseNew: React.FC<WarehouseNewProps> = ({
             >
               <DatePicker
                 style={{ width: '100%' }}
-                showTime
-                format="YYYY-MM-DD HH:mm:ss"
+                format="YYYY-MM-DD"
                 defaultValue={dayjs()}
               />
             </Form.Item>
@@ -227,32 +222,11 @@ const WarehouseNew: React.FC<WarehouseNewProps> = ({
               name="expiredDate"
               label="Expired date"
               className="font-medium"
-              dependencies={['importedDate']} // depends on importedDate field
               rules={[
                 { required: true, message: 'Please select expired date!' },
-                ({ getFieldValue }) => ({
-                  validator(_, value) {
-                    const importedDate = getFieldValue('importedDate');
-                    if (!value || !importedDate) {
-                      return Promise.resolve();
-                    }
-                    if (dayjs(value).isBefore(dayjs(importedDate))) {
-                      return Promise.reject(
-                        new Error(
-                          'Expired date cannot be earlier than imported date!'
-                        )
-                      );
-                    }
-                    return Promise.resolve();
-                  },
-                }),
               ]}
             >
-              <DatePicker
-                style={{ width: '100%' }}
-                showTime
-                format="YYYY-MM-DD HH:mm:ss"
-              />
+              <DatePicker style={{ width: '100%' }} format="YYYY-MM-DD" />
             </Form.Item>
           </Col>
 
