@@ -280,10 +280,32 @@ const Warehouse: React.FC = () => {
 
   const handleExportData = () => {
     if (dataSource.length > 0) {
-      const worksheet = XLSX.utils.json_to_sheet(dataSource);
+      const exportData = dataSource.map((item) => ({
+        ...item,
+        unit: formatUnit(item.unit),
+        expiredDate: dayjs(item.expiredDate).format('DD/MM/YYYY'),
+        importedDate: dayjs(item.importedDate).format('DD/MM/YYYY'),
+      }));
+
+      const worksheet = XLSX.utils.json_to_sheet(exportData);
       const workbook = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
-      XLSX.writeFile(workbook, 'ExportWarehouse.csv');
+      XLSX.writeFile(workbook, 'ExportWarehouseSyncFood.xlsx');
+    }
+  };
+
+  const formatUnit = (unit: string): string => {
+    switch (unit) {
+      case 'kg':
+        return 'Kilogram';
+      case 'g':
+        return 'Gram';
+      case 'l':
+        return 'Liter';
+      case 'ml':
+        return 'Milliliter';
+      default:
+        return unit;
     }
   };
   return (

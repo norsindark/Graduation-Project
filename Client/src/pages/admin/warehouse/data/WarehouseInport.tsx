@@ -53,7 +53,7 @@ const WarehouseImport = (props: WarehouseImportProps) => {
 
   const propsUpload: UploadProps = {
     name: 'file',
-    multiple: false,
+    multiple: true,
     maxCount: 1,
     accept:
       '.csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
@@ -269,7 +269,7 @@ const WarehouseImport = (props: WarehouseImportProps) => {
           dataSource={dataExcel}
           title={() => <span className="font-medium">Uploaded data:</span>}
           columns={columns}
-          rowKey="ingredientName"
+          rowKey={(record) => record.ingredientName}
           loading={loading}
           pagination={{
             current: currentPage,
