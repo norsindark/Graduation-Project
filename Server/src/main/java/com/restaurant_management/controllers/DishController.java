@@ -2,6 +2,7 @@ package com.restaurant_management.controllers;
 
 import com.restaurant_management.dtos.DishDto;
 import com.restaurant_management.exceptions.DataExitsException;
+import com.restaurant_management.payloads.requests.DishRequest;
 import com.restaurant_management.payloads.responses.ApiResponse;
 import com.restaurant_management.payloads.responses.DishResponse;
 import com.restaurant_management.services.interfaces.DishService;
@@ -39,4 +40,9 @@ public class DishController {
         return ResponseEntity.ok(dishService.addDish(dishDto));
     }
 
+    @PutMapping("/update-dish")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse> updateDish(@RequestBody DishRequest request) throws DataExitsException, IOException {
+        return ResponseEntity.ok(dishService.updateDish(request));
+    }
 }
