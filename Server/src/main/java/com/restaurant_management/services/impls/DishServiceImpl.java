@@ -7,6 +7,7 @@ import com.restaurant_management.entites.*;
 import com.restaurant_management.exceptions.DataExitsException;
 import com.restaurant_management.payloads.requests.DishRequest;
 import com.restaurant_management.payloads.requests.RecipeRequest;
+import com.restaurant_management.payloads.requests.UpdateThumbRequest;
 import com.restaurant_management.payloads.responses.ApiResponse;
 import com.restaurant_management.payloads.responses.DishResponse;
 import com.restaurant_management.repositories.*;
@@ -23,8 +24,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -38,6 +40,17 @@ public class DishServiceImpl implements DishService {
     private final PagedResourcesAssembler<DishResponse> pagedResourcesAssembler;
 
     @Override
+    public DishResponse getDishById(String dishId) throws DataExitsException {
+        Dish dish = dishRepository.findById(dishId)
+                .orElseThrow(() -> new DataExitsException("Dish not found"));
+
+        List<Recipe> recipes = recipeRepository.findByDish(dish);
+        List<DishImage> images = dishImageRepository.findByDish(dish);
+
+        return new DishResponse(dish, recipes, images);
+    }
+
+    @Override
     public PagedModel<EntityModel<DishResponse>> getAllDishes(int pageNo, int pageSize, String sortBy, String order) throws DataExitsException {
         Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.fromString(order), sortBy));
         Page<Dish> dishes = dishRepository.findAll(pageable);
@@ -46,34 +59,36 @@ public class DishServiceImpl implements DishService {
             throw new DataExitsException("Dishes not found");
         }
 
-        List<DishResponse> dishResponses = new ArrayList<>();
-        for (Dish dish : dishes) {
-            List<Recipe> recipes = recipeRepository.findByDish(dish);
-            List<DishImage> images = dishImageRepository.findByDish(dish);
-            dishResponses.add(new DishResponse(dish, recipes, images));
-        }
+        List<DishResponse> dishResponses = dishes.stream()
+                .map(dish -> {
+                    List<Recipe> recipes = recipeRepository.findByDish(dish);
+                    List<DishImage> images = dishImageRepository.findByDish(dish);
+                    return new DishResponse(dish, recipes, images);
+                })
+                .collect(Collectors.toList());
 
-        Page<DishResponse> dishResponsePage = new PageImpl<>(dishResponses, pageable, dishes.getTotalElements());
-        return pagedResourcesAssembler.toModel(dishResponsePage);
+        return pagedResourcesAssembler.toModel(new PageImpl<>(dishResponses, pageable, dishes.getTotalElements()));
     }
 
     @Override
     @Transactional
     public ApiResponse addDish(DishDto dishDto) throws DataExitsException, IOException {
         Category category = getCategory(dishDto.getCategoryId());
+        String[] uploadResult = uploadThumbnail(dishDto.getThumbImage());
 
-        String thumbImageUrl = uploadThumbnail(dishDto.getThumbImage());
+        Dish dish = createDish(dishDto, category, uploadResult[0], uploadResult[1]);
+        List<Recipe> recipes = createRecipes(dishDto.getRecipes(), dish);
 
-        Dish dish = createDish(dishDto, category, thumbImageUrl);
+        if (recipes.isEmpty()) {
+            throw new DataExitsException("No valid ingredients found for the dish.");
+        }
+
         dish = dishRepository.save(dish);
-
         if (dishDto.getImages() != null && !dishDto.getImages().isEmpty()) {
             uploadImages(dishDto.getImages(), dish);
         }
 
-        List<Recipe> recipes = createRecipes(dishDto.getRecipes(), dish);
         recipeRepository.saveAll(recipes);
-
         return new ApiResponse("Dish added successfully", HttpStatus.OK);
     }
 
@@ -84,18 +99,8 @@ public class DishServiceImpl implements DishService {
                 .orElseThrow(() -> new DataExitsException("Dish not found"));
         Category category = getCategory(request.getCategoryId());
 
-        if (request.getThumbImage() != null) {
-            String thumbImageUrl = imgBBUploaderUtil.uploadImage(request.getThumbImage());
-            dish.setThumbImage(thumbImageUrl);
-        }
-
-        dish.setDishName(request.getDishName());
-        dish.setDescription(request.getDescription());
-        dish.setStatus(request.getStatus());
-        dish.setOfferPrice(request.getOfferPrice());
-        dish.setPrice(request.getPrice());
-        dish.setCategory(category);
-
+        updateThumbnailIfPresent(request, dish);
+        updateDishDetails(request, dish, category);
         dishRepository.save(dish);
 
         if (request.getImages() != null && !request.getImages().isEmpty()) {
@@ -109,21 +114,67 @@ public class DishServiceImpl implements DishService {
         return new ApiResponse("Dish updated successfully", HttpStatus.OK);
     }
 
+    @Override
+    public ApiResponse updateThumbnail(UpdateThumbRequest request) throws DataExitsException, IOException {
+        Dish dish = dishRepository.findById(request.getDishId())
+                .orElseThrow(() -> new DataExitsException("Dish not found"));
+
+        String[] uploadResult = uploadThumbnail(request.getThumbImage());
+
+        dish.setThumbImage(uploadResult[0]);
+        dish.setDeleteThumbImage(uploadResult[1]);
+
+        dishRepository.save(dish);
+        return new ApiResponse("Thumbnail updated successfully", HttpStatus.OK);
+    }
+
+
+    @Override
+    @Transactional
+    public ApiResponse deleteDish(String dishId) throws DataExitsException {
+        Dish dish = dishRepository.findById(dishId)
+                .orElseThrow(() -> new DataExitsException("Dish not found"));
+
+        recipeRepository.deleteAll(recipeRepository.findByDish(dish));
+        dishRepository.delete(dish);
+
+        return new ApiResponse("Dish deleted successfully", HttpStatus.OK);
+    }
+
     private Category getCategory(String categoryId) throws DataExitsException {
         return categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new DataExitsException("Category not found"));
     }
 
-    private String uploadThumbnail(MultipartFile thumbImage) throws IOException {
-        return imgBBUploaderUtil.uploadImage(thumbImage);
+    private void updateThumbnailIfPresent(DishRequest request, Dish dish) throws IOException {
+        if (request.getThumbImage() != null) {
+            String[] uploadResult = uploadThumbnail(request.getThumbImage());
+            dish.setThumbImage(uploadResult[0]);
+            dish.setDeleteThumbImage(uploadResult[1]);
+        }
     }
 
-    private Dish createDish(DishDto dishDto, Category category, String thumbImageUrl) {
+    private void updateDishDetails(DishRequest request, Dish dish, Category category) {
+        dish.setDishName(request.getDishName());
+        dish.setDescription(request.getDescription());
+        dish.setStatus(request.getStatus());
+        dish.setOfferPrice(request.getOfferPrice());
+        dish.setPrice(request.getPrice());
+        dish.setCategory(category);
+    }
+
+    private String[] uploadThumbnail(MultipartFile thumbImage) throws IOException {
+        Map<String, String> uploadResult = imgBBUploaderUtil.uploadImage(thumbImage);
+        return new String[]{uploadResult.get("imageUrl"), uploadResult.get("deleteUrl")};
+    }
+
+    private Dish createDish(DishDto dishDto, Category category, String thumbImageUrl, String deleteThumbUrl) {
         return Dish.builder()
                 .dishName(dishDto.getDishName())
                 .description(dishDto.getDescription())
                 .status(dishDto.getStatus())
                 .thumbImage(thumbImageUrl)
+                .deleteThumbImage(deleteThumbUrl)
                 .offerPrice(dishDto.getOfferPrice())
                 .price(dishDto.getPrice())
                 .category(category)
@@ -131,44 +182,35 @@ public class DishServiceImpl implements DishService {
     }
 
     private void uploadImages(List<ImageDto> imageDtos, Dish dish) throws IOException {
-        List<String> imageUrls = new ArrayList<>();
-
         for (ImageDto imageDto : imageDtos) {
-            String imageUrl = imgBBUploaderUtil.uploadImage(imageDto.getImageFile());
-            imageUrls.add(imageUrl);
-        }
-
-        for (String imageUrl : imageUrls) {
+            String[] uploadResult = uploadThumbnail(imageDto.getImageFile());
             DishImage dishImage = new DishImage();
             dishImage.setDish(dish);
-            dishImage.setImageUrl(imageUrl);
-
+            dishImage.setImageUrl(uploadResult[0]);
+            dishImage.setDeleteUrl(uploadResult[1]);
             dishImageRepository.save(dishImage);
         }
     }
 
-
     private List<Recipe> createRecipes(List<RecipeDto> recipeDtos, Dish dish) throws DataExitsException {
-        List<Recipe> recipes = new ArrayList<>();
-        for (RecipeDto recipeDto : recipeDtos) {
-            Warehouse warehouse = warehouseRepository.findById(recipeDto.getWarehouseId())
-                    .orElseThrow(() -> new DataExitsException("Ingredient not found"));
-            Recipe recipe = Recipe.builder()
-                    .dish(dish)
-                    .warehouse(warehouse)
-                    .quantityUsed(recipeDto.getQuantityUsed())
-                    .unit(recipeDto.getUnit())
-                    .build();
-            recipes.add(recipe);
-        }
-        return recipes;
+        return recipeDtos.stream()
+                .map(recipeDto -> {
+                    Warehouse warehouse = warehouseRepository.findById(recipeDto.getWarehouseId())
+                            .orElseThrow(() -> new RuntimeException("Ingredient not found"));
+                    return Recipe.builder()
+                            .dish(dish)
+                            .warehouse(warehouse)
+                            .quantityUsed(recipeDto.getQuantityUsed())
+                            .unit(recipeDto.getUnit())
+                            .build();
+                })
+                .collect(Collectors.toList());
     }
 
     private void updateRecipes(List<RecipeRequest> requests, Dish dish) throws DataExitsException {
         for (RecipeRequest request : requests) {
             Recipe recipe = recipeRepository.findById(request.getRecipeId())
                     .orElseThrow(() -> new DataExitsException("Recipe not found"));
-
             Warehouse warehouse = warehouseRepository.findById(request.getWarehouseId())
                     .orElseThrow(() -> new DataExitsException("Ingredient not found"));
 
@@ -180,6 +222,4 @@ public class DishServiceImpl implements DishService {
             recipeRepository.save(recipe);
         }
     }
-
-
 }

@@ -7,6 +7,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 @Component
 public class ImgBBUploaderUtil {
@@ -18,7 +20,7 @@ public class ImgBBUploaderUtil {
         this.client = new OkHttpClient();
     }
 
-    public String uploadImage(MultipartFile file) throws IOException {
+    public Map<String, String> uploadImage(MultipartFile file) throws IOException {
         byte[] fileBytes = file.getBytes();
         String API_KEY = "dbafecb8223549d55c292838ce7c5fad";
 
@@ -40,8 +42,32 @@ public class ImgBBUploaderUtil {
             }
 
             String jsonResponse = response.body() != null ? response.body().string() : null;
+
             JsonObject jsonObject = JsonParser.parseString(jsonResponse).getAsJsonObject();
-            return jsonObject.getAsJsonObject("data").get("url").getAsString();
+            JsonObject data = jsonObject.getAsJsonObject("data");
+
+            String imageUrl = data.get("url").getAsString();
+            String deleteUrl = data.get("delete_url").getAsString();
+
+            Map<String, String> result = new HashMap<>();
+            result.put("imageUrl", imageUrl);
+            result.put("deleteUrl", deleteUrl);
+
+            return result;
+        }
+    }
+
+
+    public boolean deleteImage(String deleteUrl) throws IOException {
+        Request request = new Request.Builder()
+                .url(deleteUrl)
+                .delete()
+                .build();
+
+        try (Response response = client.newCall(request).execute()) {
+            return response.isSuccessful();
+        } catch (IOException e) {
+            throw new IOException("Error occurred while deleting image from ImgBB", e);
         }
     }
 }

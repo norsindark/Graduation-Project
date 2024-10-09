@@ -3,6 +3,7 @@ package com.restaurant_management.controllers;
 import com.restaurant_management.dtos.DishDto;
 import com.restaurant_management.exceptions.DataExitsException;
 import com.restaurant_management.payloads.requests.DishRequest;
+import com.restaurant_management.payloads.requests.UpdateThumbRequest;
 import com.restaurant_management.payloads.responses.ApiResponse;
 import com.restaurant_management.payloads.responses.DishResponse;
 import com.restaurant_management.services.interfaces.DishService;
@@ -24,6 +25,12 @@ public class DishController {
 
     private final DishService dishService;
 
+    @GetMapping("/get-dish-by-id/{dishId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<DishResponse> getDishById(@PathVariable String dishId) throws DataExitsException {
+        return ResponseEntity.ok(dishService.getDishById(dishId));
+    }
+
     @GetMapping("/get-all-dishes")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<PagedModel<EntityModel<DishResponse>>> getAllDishes(
@@ -42,7 +49,19 @@ public class DishController {
 
     @PutMapping("/update-dish")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse> updateDish(@RequestBody DishRequest request) throws DataExitsException, IOException {
+    public ResponseEntity<ApiResponse> updateDish(@ModelAttribute DishRequest request) throws DataExitsException, IOException {
         return ResponseEntity.ok(dishService.updateDish(request));
+    }
+
+    @PutMapping("/update-thumbnail")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse> updateThumbnail(@ModelAttribute UpdateThumbRequest request) throws DataExitsException, IOException {
+        return ResponseEntity.ok(dishService.updateThumbnail(request));
+    }
+
+    @DeleteMapping("/delete-dish/{dishId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse> deleteDish(@PathVariable String dishId) throws DataExitsException {
+        return ResponseEntity.ok(dishService.deleteDish(dishId));
     }
 }

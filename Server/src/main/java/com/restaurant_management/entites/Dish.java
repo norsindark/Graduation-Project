@@ -38,6 +38,9 @@ public class Dish {
     @Column(name = "thumb_image")
     private String thumbImage;
 
+    @Column(name = "delete_thumb_image")
+    private String deleteThumbImage;
+
     @OneToMany(mappedBy = "dish", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<DishImage> images;
 

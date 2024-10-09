@@ -9,11 +9,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class DishImageResponse {
-    private String id;
+    private String imageId;
     private String imageUrl;
 
     public DishImageResponse(DishImage dishImage) {
-        this.id = dishImage.getId();
+        this.imageId = dishImage.getId();
         this.imageUrl = dishImage.getImageUrl();
     }
 }

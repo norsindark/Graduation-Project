@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.Map;
 
 @Service
 @Component
@@ -15,9 +16,10 @@ import java.io.IOException;
 public class UploadFileImplService implements UploadFileService {
 
     @Override
-    public String uploadFile(MultipartFile file) throws IOException {
+    public Map<String, String> uploadFile(MultipartFile file) throws IOException {
         ImgBBUploaderUtil imgBBUploaderUtil = new ImgBBUploaderUtil();
         return imgBBUploaderUtil.uploadImage(file);
     }
+
 
 }
