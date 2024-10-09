@@ -9,13 +9,15 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class RecipeResponse {
-    private String id;
+    private String RecipeId;
+    private String warehouseId;
     private String ingredientName;
     private Double quantityUsed;
     private String unit;
 
     public RecipeResponse(Recipe recipe) {
-        this.id = recipe.getId();
+        this.RecipeId = recipe.getId();
+        this.warehouseId = recipe.getWarehouse().getId();
         this.ingredientName = recipe.getWarehouse().getIngredientName();
         this.quantityUsed = recipe.getQuantityUsed();
         this.unit = recipe.getUnit();

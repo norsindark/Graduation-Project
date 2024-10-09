@@ -23,6 +23,9 @@ public class DishImage {
     @Column(name = "image_url", nullable = false)
     private String imageUrl;
 
+    @Column(name = "delete_url", nullable = false)
+    private String deleteUrl;
+
     @ManyToOne
     @JoinColumn(name = "dish_id", nullable = false)
     private Dish dish;

@@ -23,6 +23,8 @@ public class DishResponse {
     private Double price;
     private List<DishImageResponse> images;
     private List<RecipeResponse> recipes;
+    private String categoryId;
+    private String categoryName;
 
     public DishResponse(Dish dish, List<Recipe> recipes, List<DishImage> images) {
         this.id = dish.getId();
@@ -34,5 +36,7 @@ public class DishResponse {
         this.price = dish.getPrice();
         this.images = images.stream().map(DishImageResponse::new).toList();
         this.recipes = recipes.stream().map(RecipeResponse::new).toList();
+        this.categoryId = dish.getCategory().getId();
+        this.categoryName = dish.getCategory().getName();
     }
 }
