@@ -1,6 +1,7 @@
 package com.restaurant_management.exceptions;
 
 import com.restaurant_management.payloads.responses.ApiResponse;
+import com.restaurant_management.utils.ApiUtil;
 import io.jsonwebtoken.ExpiredJwtException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,7 +31,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse> handleException(Exception e) {
-        ApiResponse apiResponse = new ApiResponse("Failed to authenticate user!", HttpStatus.UNAUTHORIZED);
-        return new ResponseEntity<>(apiResponse, HttpStatus.UNAUTHORIZED);
+        ApiResponse apiResponse = new ApiResponse("An error occurred!", ApiUtil.createErrorDetails(e.getMessage()), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(apiResponse, HttpStatus.BAD_REQUEST);
     }
 }

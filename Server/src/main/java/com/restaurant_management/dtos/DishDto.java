@@ -22,5 +22,5 @@ public class DishDto {
     private Double price;
     private String categoryId;
     private List<RecipeDto> recipes;
-
+    private List<String> optionIds;
 }
