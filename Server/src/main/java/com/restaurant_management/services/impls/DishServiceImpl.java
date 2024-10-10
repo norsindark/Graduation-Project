@@ -24,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -37,6 +38,8 @@ public class DishServiceImpl implements DishService {
     private final CategoryRepository categoryRepository;
     private final WarehouseRepository warehouseRepository;
     private final ImgBBUploaderUtil imgBBUploaderUtil;
+    private final DishOptionRepository dishOptionRepository;
+    private final DishOptionSelectionRepository dishOptionSelectionRepository;
     private final PagedResourcesAssembler<DishResponse> pagedResourcesAssembler;
 
     @Override
@@ -88,6 +91,10 @@ public class DishServiceImpl implements DishService {
             uploadImages(dishDto.getImages(), dish);
         }
 
+        if (dishDto.getOptionIds() != null && !dishDto.getOptionIds().isEmpty()) {
+            addNewOption(dish, dishDto.getOptionIds());
+        }
+
         recipeRepository.saveAll(recipes);
         return new ApiResponse("Dish added successfully", HttpStatus.OK);
     }
@@ -111,6 +118,10 @@ public class DishServiceImpl implements DishService {
             updateRecipes(request.getRecipes(), dish);
         }
 
+        if (request.getOptionIds() != null && !request.getOptionIds().isEmpty()) {
+            updateOption(dish, request);
+        }
+
         return new ApiResponse("Dish updated successfully", HttpStatus.OK);
     }
 
@@ -127,7 +138,6 @@ public class DishServiceImpl implements DishService {
         dishRepository.save(dish);
         return new ApiResponse("Thumbnail updated successfully", HttpStatus.OK);
     }
-
 
     @Override
     @Transactional
@@ -222,4 +232,51 @@ public class DishServiceImpl implements DishService {
             recipeRepository.save(recipe);
         }
     }
+
+    private void addNewOption(Dish dish, List<String> optionIds) throws DataExitsException {
+        List<DishOption> options = dishOptionRepository.findAllById(optionIds);
+
+        if (options.isEmpty()) {
+            throw new DataExitsException("No valid options found.");
+        }
+
+        options.forEach(option -> {
+            DishOptionSelection newSelection = new DishOptionSelection();
+            newSelection.setDish(dish);
+            newSelection.setDishOption(option);
+            dishOptionSelectionRepository.save(newSelection);
+
+            if (dish.getSelectedOptions() == null) {
+                dish.setSelectedOptions(new ArrayList<>());
+            }
+            dish.getSelectedOptions().add(newSelection);
+        });
+    }
+
+    private void addNewOption(Dish dish, DishOption option) {
+        DishOptionSelection newSelection = new DishOptionSelection();
+        newSelection.setDish(dish);
+        newSelection.setDishOption(option);
+        dishOptionSelectionRepository.save(newSelection);
+        if (dish.getSelectedOptions() == null) {
+            dish.setSelectedOptions(new ArrayList<>());
+        }
+        dish.getSelectedOptions().add(newSelection);
+    }
+
+    private void updateOption(Dish dish, DishRequest request) {
+        List<DishOption> options = dishOptionRepository.findAllById(request.getOptionIds());
+        List<DishOptionSelection> currentSelections = dish.getSelectedOptions();
+        currentSelections.removeIf(selection ->
+                !request.getOptionIds().contains(selection.getDishOption().getId()));
+        options.forEach(option -> {
+            boolean alreadySelected = currentSelections.stream()
+                    .anyMatch(selection -> selection.getDishOption().getId().equals(option.getId()));
+
+            if (!alreadySelected) {
+                addNewOption(dish, option);
+            }
+        });
+    }
+
 }

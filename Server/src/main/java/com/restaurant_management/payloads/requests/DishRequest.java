@@ -24,4 +24,5 @@ public class DishRequest {
     private Double price;
     private String categoryId;
     private List<RecipeRequest> recipes;
+    private List<String> optionIds;
 }

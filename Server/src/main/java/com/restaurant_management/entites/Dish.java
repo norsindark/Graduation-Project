@@ -55,6 +55,10 @@ public class Dish {
     @JsonIgnore
     private Category category;
 
+    @OneToMany(mappedBy = "dish", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private List<DishOptionSelection> selectedOptions;
+
     @Column(name = "created_at")
     @CreationTimestamp
     private Timestamp createdAt;
