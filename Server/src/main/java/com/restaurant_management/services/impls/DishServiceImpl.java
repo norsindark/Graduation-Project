@@ -1,10 +1,12 @@
 package com.restaurant_management.services.impls;
 
 import com.restaurant_management.dtos.DishDto;
+import com.restaurant_management.dtos.DishOptionSelectionDto;
 import com.restaurant_management.dtos.ImageDto;
 import com.restaurant_management.dtos.RecipeDto;
 import com.restaurant_management.entites.*;
 import com.restaurant_management.exceptions.DataExitsException;
+import com.restaurant_management.payloads.requests.DishOptionSelectionRequest;
 import com.restaurant_management.payloads.requests.DishRequest;
 import com.restaurant_management.payloads.requests.RecipeRequest;
 import com.restaurant_management.payloads.requests.UpdateThumbRequest;
@@ -53,8 +55,29 @@ public class DishServiceImpl implements DishService {
         return new DishResponse(dish, recipes, images);
     }
 
+//    @Override
+//    public PagedModel<EntityModel<DishResponse>> getAllDishes(int pageNo, int pageSize, String sortBy, String order) throws DataExitsException {
+//        Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.fromString(order), sortBy));
+//        Page<Dish> dishes = dishRepository.findAll(pageable);
+//
+//        if (dishes.isEmpty()) {
+//            throw new DataExitsException("Dishes not found");
+//        }
+//
+//        List<DishResponse> dishResponses = dishes.stream()
+//                .map(dish -> {
+//                    List<Recipe> recipes = recipeRepository.findByDish(dish);
+//                    List<DishImage> images = dishImageRepository.findByDish(dish);
+//                    return new DishResponse(dish, recipes, images);
+//                })
+//                .collect(Collectors.toList());
+//
+//        return pagedResourcesAssembler.toModel(new PageImpl<>(dishResponses, pageable, dishes.getTotalElements()));
+//    }
+
     @Override
-    public PagedModel<EntityModel<DishResponse>> getAllDishes(int pageNo, int pageSize, String sortBy, String order) throws DataExitsException {
+    public PagedModel<EntityModel<DishResponse>> getAllDishes(int pageNo, int pageSize, String sortBy, String order)
+            throws DataExitsException {
         Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.fromString(order), sortBy));
         Page<Dish> dishes = dishRepository.findAll(pageable);
 
@@ -65,13 +88,17 @@ public class DishServiceImpl implements DishService {
         List<DishResponse> dishResponses = dishes.stream()
                 .map(dish -> {
                     List<Recipe> recipes = recipeRepository.findByDish(dish);
+
                     List<DishImage> images = dishImageRepository.findByDish(dish);
-                    return new DishResponse(dish, recipes, images);
+
+                    List<DishOptionSelection> optionSelections = dishOptionSelectionRepository.findByDish(dish);
+
+                    return new DishResponse(dish, recipes, images, optionSelections);
                 })
                 .collect(Collectors.toList());
-
         return pagedResourcesAssembler.toModel(new PageImpl<>(dishResponses, pageable, dishes.getTotalElements()));
     }
+
 
     @Override
     @Transactional
@@ -91,8 +118,8 @@ public class DishServiceImpl implements DishService {
             uploadImages(dishDto.getImages(), dish);
         }
 
-        if (dishDto.getOptionIds() != null && !dishDto.getOptionIds().isEmpty()) {
-            addNewOption(dish, dishDto.getOptionIds());
+        if (dishDto.getOptionSelections() != null && !dishDto.getOptionSelections().isEmpty()) {
+            addNewOption(dish, dishDto.getOptionSelections());
         }
 
         recipeRepository.saveAll(recipes);
@@ -118,8 +145,12 @@ public class DishServiceImpl implements DishService {
             updateRecipes(request.getRecipes(), dish);
         }
 
-        if (request.getOptionIds() != null && !request.getOptionIds().isEmpty()) {
-            updateOption(dish, request);
+        if (request.getOptionSelections() != null && !request.getOptionSelections().isEmpty()) {
+            updateOptionSelection(request);
+        }
+
+        if (request.getOptions() !=null && !request.getOptions().isEmpty()) {
+            addNewOption(dish, request.getOptions());
         }
 
         return new ApiResponse("Dish updated successfully", HttpStatus.OK);
@@ -233,8 +264,11 @@ public class DishServiceImpl implements DishService {
         }
     }
 
-    private void addNewOption(Dish dish, List<String> optionIds) throws DataExitsException {
-        List<DishOption> options = dishOptionRepository.findAllById(optionIds);
+    private void addNewOption(Dish dish, List<DishOptionSelectionDto> optionSelections) throws DataExitsException {
+        List<DishOption> options = dishOptionRepository.findAllById(optionSelections
+                .stream()
+                .map(DishOptionSelectionDto::getOptionId)
+                .collect(Collectors.toList()));
 
         if (options.isEmpty()) {
             throw new DataExitsException("No valid options found.");
@@ -244,6 +278,11 @@ public class DishServiceImpl implements DishService {
             DishOptionSelection newSelection = new DishOptionSelection();
             newSelection.setDish(dish);
             newSelection.setDishOption(option);
+            newSelection.setAdditionalPrice(optionSelections.stream()
+                    .filter(selection -> selection.getOptionId().equals(option.getId()))
+                    .findFirst()
+                    .map(DishOptionSelectionDto::getAdditionalPrice)
+                    .orElse(0.0));
             dishOptionSelectionRepository.save(newSelection);
 
             if (dish.getSelectedOptions() == null) {
@@ -253,30 +292,32 @@ public class DishServiceImpl implements DishService {
         });
     }
 
-    private void addNewOption(Dish dish, DishOption option) {
-        DishOptionSelection newSelection = new DishOptionSelection();
-        newSelection.setDish(dish);
-        newSelection.setDishOption(option);
-        dishOptionSelectionRepository.save(newSelection);
-        if (dish.getSelectedOptions() == null) {
-            dish.setSelectedOptions(new ArrayList<>());
+    private void updateOptionSelection(DishRequest request) {
+        List<Object[]> selections = dishOptionSelectionRepository.findAllById(request.getOptionSelections()
+                .stream()
+                .map(DishOptionSelectionRequest::getOptionSelectionId)
+                .collect(Collectors.toList()));
+
+        if (selections.isEmpty()) {
+            throw new RuntimeException("No valid selections found.");
         }
-        dish.getSelectedOptions().add(newSelection);
-    }
 
-    private void updateOption(Dish dish, DishRequest request) {
-        List<DishOption> options = dishOptionRepository.findAllById(request.getOptionIds());
-        List<DishOptionSelection> currentSelections = dish.getSelectedOptions();
-        currentSelections.removeIf(selection ->
-                !request.getOptionIds().contains(selection.getDishOption().getId()));
-        options.forEach(option -> {
-            boolean alreadySelected = currentSelections.stream()
-                    .anyMatch(selection -> selection.getDishOption().getId().equals(option.getId()));
+        selections.forEach(selection -> {
+            String id = (String) selection[0];
+            Double currentAdditionalPrice = (Double) selection[1];
 
-            if (!alreadySelected) {
-                addNewOption(dish, option);
+            DishOptionSelectionRequest matchingRequest = request.getOptionSelections().stream()
+                    .filter(optionSelection -> optionSelection.getOptionSelectionId().equals(id))
+                    .findFirst()
+                    .orElse(null);
+
+            if (matchingRequest != null) {
+                Double newAdditionalPrice = matchingRequest.getAdditionalPrice();
+
+                if (!currentAdditionalPrice.equals(newAdditionalPrice)) {
+                    dishOptionSelectionRepository.updateAdditionalPriceById(id, newAdditionalPrice);
+                }
             }
         });
     }
-
 }

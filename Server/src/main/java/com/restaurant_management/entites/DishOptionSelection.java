@@ -27,4 +27,7 @@ public class DishOptionSelection {
     @ManyToOne
     @JoinColumn(name = "dish_option_id", nullable = false)
     private DishOption dishOption;
+
+    @Column(name = "additional_price")
+    private Double additionalPrice;
 }

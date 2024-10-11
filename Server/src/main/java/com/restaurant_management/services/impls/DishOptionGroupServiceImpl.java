@@ -117,7 +117,7 @@ public class DishOptionGroupServiceImpl implements DishOptionGroupService {
         }
 
         dishOption.setOptionName(request.getOptionName());
-        dishOption.setAdditionalPrice(request.getAdditionalPrice());
+//        dishOption.setAdditionalPrice(request.getAdditionalPrice());
 
         dishOptionRepository.save(dishOption);
 
@@ -144,7 +144,7 @@ public class DishOptionGroupServiceImpl implements DishOptionGroupService {
 
                 DishOption dishOption = new DishOption();
                 dishOption.setOptionName(dto.getOptionName());
-                dishOption.setAdditionalPrice(dto.getAdditionalPrice());
+//                dishOption.setAdditionalPrice(dto.getAdditionalPrice());
                 dishOption.setOptionGroup(dishOptionGroup);
                 return dishOption;
             }).collect(Collectors.toList());
@@ -166,7 +166,7 @@ public class DishOptionGroupServiceImpl implements DishOptionGroupService {
                 }
 
                 option.setOptionName(updatedOption.get().getOptionName());
-                option.setAdditionalPrice(updatedOption.get().getAdditionalPrice());
+//                option.setAdditionalPrice(updatedOption.get().getAdditionalPrice());
             }
         }
     }
@@ -184,7 +184,7 @@ public class DishOptionGroupServiceImpl implements DishOptionGroupService {
 
                 DishOption dishOption = new DishOption();
                 dishOption.setOptionName(dto.getOptionName());
-                dishOption.setAdditionalPrice(dto.getAdditionalPrice());
+//                dishOption.setAdditionalPrice(dto.getAdditionalPrice());
                 dishOption.setOptionGroup(dishOptionGroup);
                 return dishOption;
             }).collect(Collectors.toList());
