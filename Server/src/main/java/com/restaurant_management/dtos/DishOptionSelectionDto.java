@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class DishOptionDto {
-    private String optionName;
-//    private Double additionalPrice;
+public class DishOptionSelectionDto {
+    private String optionId;
+    private double additionalPrice;
 }

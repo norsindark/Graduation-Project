@@ -1,5 +1,6 @@
 package com.restaurant_management.payloads.requests;
 
+import com.restaurant_management.dtos.DishOptionSelectionDto;
 import com.restaurant_management.dtos.ImageDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -24,5 +25,6 @@ public class DishRequest {
     private Double price;
     private String categoryId;
     private List<RecipeRequest> recipes;
-    private List<String> optionIds;
+    private List<DishOptionSelectionRequest> optionSelections;
+    private List<DishOptionSelectionDto> options;
 }

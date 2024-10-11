@@ -28,8 +28,8 @@ public class DishOption {
     @Column(name = "option_name", nullable = false)
     private String optionName;
 
-    @Column(name = "additional_price")
-    private Double additionalPrice;
+//    @Column(name = "additional_price")
+//    private Double additionalPrice;
 
     @ManyToOne
     @JoinColumn(name = "dish_option_group_id", nullable = false)

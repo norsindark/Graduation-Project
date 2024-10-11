@@ -9,8 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class DishOptionRequest {
-    private String dishOptionId;
-    private String optionName;
-//    private Double additionalPrice;
+public class DishOptionSelectionRequest {
+    private String optionSelectionId;
+    private Double additionalPrice;
 }

@@ -15,7 +15,9 @@ public interface DishService {
 
     DishResponse getDishById(String dishId) throws DataExitsException;
 
-    PagedModel<EntityModel<DishResponse>> getAllDishes(int pageNo, int pageSize, String sortBy, String order) throws DataExitsException;
+    PagedModel<EntityModel<DishResponse>> getAllDishes(int pageNo, int pageSize, String sortBy, String order)
+            throws DataExitsException;
+
     ApiResponse addDish(DishDto dishDto) throws DataExitsException, IOException;
 
     ApiResponse updateDish(DishRequest request) throws DataExitsException, IOException;

@@ -11,11 +11,9 @@ import lombok.NoArgsConstructor;
 public class DishOptionResponse {
     private String optionId;
     private String optionName;
-    private double additionalPrice;
 
     public DishOptionResponse(DishOption dishOption) {
         this.optionId = dishOption.getId();
         this.optionName = dishOption.getOptionName();
-        this.additionalPrice = dishOption.getAdditionalPrice();
     }
 }
