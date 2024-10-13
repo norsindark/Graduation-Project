@@ -1,4 +1,5 @@
-import MenuHome from '../../components/public/menuhome/MenuHome';
+import { NavLink } from 'react-router-dom';
+import MenuAbout from '../../components/public/menuabout/MenuAbout';
 
 function MenuPage() {
   return (
@@ -13,20 +14,20 @@ function MenuPage() {
               <h1>Menu UniFood</h1>
               <ul>
                 <li>
-                  <a href="/">home</a>
+                  <NavLink to="/">home</NavLink>
                 </li>
                 <span>
                   <i className="fas fa-angle-right mr-4"></i>
                 </span>
                 <li>
-                  <a href="/menu">menu</a>
+                  <NavLink to="/menu">menu</NavLink>
                 </li>
               </ul>
             </div>
           </div>
         </div>
       </section>
-      <MenuHome />
+      <MenuAbout />
     </>
   );
 }

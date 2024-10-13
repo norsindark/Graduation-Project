@@ -4044,10 +4044,12 @@ footer {
 .fp__cart_list .fp__pro_img {
   width: 130px;
   padding: 10px;
+  align-items: center;
 }
 
 .fp__cart_list .fp__pro_name {
-  width: 240px;
+  width: 220px;
+  align-items: center;
 }
 
 .fp__cart_list td.fp__pro_name {
@@ -4066,12 +4068,15 @@ footer {
 }
 
 .fp__cart_list .fp__pro_select {
-  width: 184px;
+  width: 180px;
+  text-align: center;
+  align-items: center;
 }
 
 .fp__cart_list .fp__pro_tk,
 .fp__cart_list .fp__pro_status {
-  width: 102px;
+  width: 100px;
+  align-items: center;
 }
 
 .fp__cart_list .fp__pro_tk h6,
@@ -4088,6 +4093,7 @@ footer {
 
 .fp__cart_list .fp__pro_icon {
   width: 95px;
+  align-items: center;
   border-right: none !important;
 }
 
@@ -6675,7 +6681,7 @@ CHECKOUT PAGE START
 }
 
 .fp__search_menu_form button {
-  width: 100%;
+  /* width: 100%; */
   text-align: center;
   padding: 14px 20px !important;
   border-radius: 30px;
