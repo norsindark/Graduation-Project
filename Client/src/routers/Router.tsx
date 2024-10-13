@@ -23,6 +23,9 @@ import Order from '../pages/admin/order/Order';
 import AttendanceManagement from '../pages/admin/attendanceManagement/AttendanceManagement';
 import AboutPage from '../pages/public/AboutPage';
 import MenuPage from '../pages/public/MenuPage';
+import ProductDetail from '../pages/public/ProductDetail';
+import CartPage from '../pages/public/CartPage';
+import CheckoutPage from '../pages/public/CheckoutPage';
 export const router = createBrowserRouter([
   {
     path: '/',
@@ -72,6 +75,18 @@ export const router = createBrowserRouter([
       {
         path: '/menu',
         element: <MenuPage />,
+      },
+      {
+        path: '/product-detail',
+        element: <ProductDetail />,
+      },
+      {
+        path: '/cart',
+        element: <CartPage />,
+      },
+      {
+        path: '/checkout',
+        element: <CheckoutPage />,
       },
     ],
   },
