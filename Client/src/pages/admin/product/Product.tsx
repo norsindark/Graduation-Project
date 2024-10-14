@@ -1,283 +1,320 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Button, notification, Row, Col } from 'antd';
+import {
+  Table,
+  Button,
+  notification,
+  Space,
+  Tag,
+  Image,
+  Popconfirm,
+  Card,
+} from 'antd';
+import {
+  EditOutlined,
+  DeleteOutlined,
+  PlusOutlined,
+  EyeOutlined,
+} from '@ant-design/icons';
+import { callDeleteDish, callGetAllDishes } from '../../../services/serverApi';
 import ProductNew from './ProductNew';
 import ProductEdit from './ProductEdit';
-import axios from 'axios';
-
-interface ProductItem {
-  id: number;
-  name: string;
-  description: string;
-  price: number;
-  ingredients: Ingredient[];
-  preparationTime: number;
-  allergens: string[];
-  nutritionalInfo: {
-    calories: number;
-    protein: number;
-    carbs: number;
-    fat: number;
-  };
-  image?: string; // Thêm trường image
+import ProductDetail from './ProductDetail';
+interface DishImage {
+  imageId: string;
+  imageUrl: string;
 }
 
-interface Ingredient {
-  id: number;
-  name: string;
-  quantity: number;
+interface Recipe {
+  warehouseId: string;
+  ingredientName: string;
+  quantityUsed: number;
   unit: string;
+  recipeId: string;
 }
 
-const sampleData: ProductItem[] = [
-  {
-    id: 1,
-    name: 'Phở bò',
-    description: 'Phở bò truyền thống Hà Nội',
-    price: 50000,
-    ingredients: [
-      { id: 1, name: 'Bánh phở', quantity: 200, unit: 'g' },
-      { id: 2, name: 'Thịt bò', quantity: 100, unit: 'g' },
-      { id: 3, name: 'Hành lá', quantity: 20, unit: 'g' },
-    ],
-    preparationTime: 15,
-    allergens: ['Gluten', 'Bò'],
-    nutritionalInfo: {
-      calories: 450,
-      protein: 25,
-      carbs: 60,
-      fat: 10,
-    },
-  },
-  {
-    id: 2,
-    name: 'Bún chả',
-    description: 'Bún chả Hà Nội',
-    price: 45000,
-    ingredients: [
-      { id: 4, name: 'Bún', quantity: 150, unit: 'g' },
-      { id: 5, name: 'Thịt lợn', quantity: 100, unit: 'g' },
-      { id: 6, name: 'Nước mắm', quantity: 30, unit: 'ml' },
-    ],
-    preparationTime: 20,
-    allergens: ['Cá', 'Thịt lợn'],
-    nutritionalInfo: {
-      calories: 500,
-      protein: 30,
-      carbs: 55,
-      fat: 15,
-    },
-  },
-];
-
-interface ProductNewProps {
-  onAddSuccess: () => void;
-  setShowProductNew: React.Dispatch<React.SetStateAction<boolean>>;
+interface Option {
+  optionSelectionId: string;
+  optionName: string;
+  additionalPrice: number;
 }
 
-interface ProductEditProps {
-  currentItem: ProductItem;
-  onEditSuccess: () => void;
-  setShowProductEdit: React.Dispatch<React.SetStateAction<boolean>>;
+interface OptionGroup {
+  optionGroupId: string;
+  optionGroupName: string;
+  options: Option[];
+}
+
+interface Dish {
+  dishId: string;
+  dishName: string;
+  description: string;
+  status: string;
+  thumbImage: string;
+  offerPrice: number;
+  price: number;
+  categoryId: string;
+  categoryName: string;
+  images: DishImage[];
+  recipes: Recipe[];
+  listOptions: OptionGroup[];
 }
 
 const Product: React.FC = () => {
-  const [dataSource, setDataSource] = useState<ProductItem[]>(sampleData);
-  const [showProductNew, setShowProductNew] = useState<boolean>(false);
-  const [showProductEdit, setShowProductEdit] = useState<boolean>(false);
-  const [currentItem, setCurrentItem] = useState<ProductItem | null>(null);
+  const [dataSource, setDataSource] = useState<Dish[]>([]);
+  const [currentDish, setCurrentDish] = useState<Dish | null>(null);
+
+  const [showProductNew, setShowProductNew] = useState(false);
+  const [showProductEdit, setShowProductEdit] = useState(false);
+
+  const [sortQuery, setSortQuery] = useState<string>('');
+  const [current, setCurrent] = useState<number>(1);
+  const [pageSize, setPageSize] = useState<number>(5);
+  const [total, setTotal] = useState<number>(0);
+
   const [loading, setLoading] = useState(false);
+  const [selectedDishId, setSelectedDishId] = useState<string | null>(null);
+  const [isDishDetailVisible, setIsDishDetailVisible] = useState(false);
 
   useEffect(() => {
-    fetchItems();
-  }, []);
+    fetchDishes();
+  }, [current, pageSize]);
 
-  const fetchItems = async () => {
+  const fetchDishes = async () => {
     setLoading(true);
     try {
-      // Uncomment the following lines when you have a real API
-      // const response = await axios.get('/api/products');
-      // if (Array.isArray(response.data)) {
-      //   setDataSource(response.data);
-      // } else {
-      //   console.error('Dữ liệu nhận được không phải là mảng:', response.data);
-      //   setDataSource([]);
-      // }
-
-      // For now, we'll use the sample data
-      setDataSource(sampleData);
+      let query = `pageNo=${current - 1}&pageSize=${pageSize}`;
+      if (sortQuery) {
+        query += `&sortBy=${sortQuery}`;
+      } else {
+        query += `&sortBy=dishName&order=asc`;
+      }
+      const response = await callGetAllDishes(query);
+      console.log('response', response);
+      if (
+        response.status === 200 &&
+        response.data._embedded?.dishResponseList
+      ) {
+        setDataSource(response.data._embedded.dishResponseList);
+        setTotal(response.data.page.totalElements);
+        setCurrent(response.data.page.number + 1);
+      } else {
+        setDataSource([]);
+        setTotal(0);
+      }
     } catch (error) {
-      console.error('Lỗi khi tải danh sách sản phẩm:', error);
       notification.error({
-        message: 'Không thể tải danh sách sản phẩm',
-        duration: 5,
+        message: 'Error loading list dishes',
+        description: 'Please try again later',
       });
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const handleAddSuccess = () => {
+    fetchDishes();
     setShowProductNew(false);
-    notification.success({
-      message: 'Sản phẩm đã được thêm thành công!',
-      duration: 5,
-    });
-    fetchItems();
   };
 
-  const handleEditSuccess = () => {
-    setShowProductEdit(false);
-    setCurrentItem(null);
-    notification.success({
-      message: 'Sản phẩm đã được cập nhật thành công!',
-      duration: 5,
-    });
-    fetchItems();
-  };
-
-  const handleEditClick = (item: ProductItem) => {
-    setCurrentItem(item);
+  const handleEditClick = (record: Dish) => {
+    setCurrentDish(record);
     setShowProductEdit(true);
   };
 
-  const handleDeleteClick = async (id: number) => {
+  const handleDelete = async (id: string) => {
     try {
-      await axios.delete(`/api/products/${id}`);
-      notification.success({
-        message: 'Sản phẩm đã được xóa thành công!',
-        duration: 5,
-      });
-      fetchItems();
+      const res = await callDeleteDish(id);
+      if (res?.status === 200) {
+        notification.success({
+          message: 'Dish deleted successfully!',
+          duration: 5,
+          showProgress: true,
+        });
+        fetchDishes();
+      } else if (res?.status === 400) {
+        notification.error({
+          message: 'Error deleting dish: This dish has been used.',
+          duration: 5,
+          showProgress: true,
+        });
+      } else {
+        notification.error({
+          message: 'Error deleting dish.',
+          description: res.data.errors?.error || 'Error during delete process!',
+          duration: 5,
+          showProgress: true,
+        });
+      }
     } catch (error) {
       notification.error({
-        message: 'Không thể xóa sản phẩm',
+        message: 'Error deleting dish.',
         duration: 5,
+        showProgress: true,
       });
     }
   };
 
+  const onChange = (pagination: any, sortDir: any) => {
+    setCurrent(pagination.current);
+    setPageSize(pagination.pageSize);
+    if (sortDir && sortDir.field) {
+      const order = sortDir.order === 'ascend' ? 'asc' : 'desc';
+      setSortQuery(`${sortDir.field},${order}`);
+    } else {
+      setSortQuery('');
+    }
+  };
+
+  const handleViewDetail = (record: Dish) => {
+    setSelectedDishId(record.dishId);
+    setIsDishDetailVisible(true);
+  };
+
   const columns = [
-    { title: 'Tên', dataIndex: 'name', key: 'name' },
-    { title: 'Mô tả', dataIndex: 'description', key: 'description' },
+    {
+      title: 'Tên món',
+      dataIndex: 'dishName',
+      key: 'dishName',
+      sorter: (a: Dish, b: Dish) => a.dishName.localeCompare(b.dishName),
+    },
+    {
+      title: 'Hình ảnh',
+      dataIndex: 'thumbImage',
+      key: 'thumbImage',
+      render: (thumbImage: string) => <Image src={thumbImage} width={70} />,
+    },
     {
       title: 'Giá',
       dataIndex: 'price',
       key: 'price',
-      render: (price: number) => `${price.toLocaleString()} VNĐ`,
+      render: (price: number) => `${price.toLocaleString()} VND`,
+      sorter: (a: Dish, b: Dish) => a.price - b.price,
     },
     {
-      title: 'Ảnh',
-      dataIndex: 'image',
-      key: 'image',
-      render: (image: string) => (
-        <img
-          src={image}
-          alt="Product"
-          style={{ width: '50px', height: '50px' }}
-        />
+      title: 'Giá khuyến mãi',
+      dataIndex: 'offerPrice',
+      key: 'offerPrice',
+      render: (offerPrice: number) =>
+        offerPrice ? `${offerPrice.toLocaleString()} VND` : 'N/A',
+      sorter: (a: Dish, b: Dish) => a.offerPrice - b.offerPrice,
+    },
+    {
+      title: 'Danh mục',
+      dataIndex: 'categoryName',
+      key: 'categoryName',
+      sorter: (a: Dish, b: Dish) =>
+        a.categoryName.localeCompare(b.categoryName),
+    },
+    {
+      title: 'Trạng thái',
+      dataIndex: 'status',
+      key: 'status',
+      render: (status: string) => (
+        <Tag color={status === 'AVAILABLE' ? 'green' : 'red'}>{status}</Tag>
       ),
     },
     {
-      title: 'Thời gian chuẩn bị',
-      dataIndex: 'preparationTime',
-      key: 'preparationTime',
-      render: (time: number) => `${time} phút`,
-    },
-    {
-      title: 'Thông tin dị ứng',
-      dataIndex: 'allergens',
-      key: 'allergens',
-      render: (allergens: string[]) => allergens.join(', '),
-    },
-    {
-      title: 'Thông tin dinh dưỡng',
-      dataIndex: 'nutritionalInfo',
-      key: 'nutritionalInfo',
-      render: (info: any) => (
-        <ul>
-          <li>Calories: {info.calories}</li>
-          <li>Protein: {info.protein}g</li>
-          <li>Carbs: {info.carbs}g</li>
-          <li>Fat: {info.fat}g</li>
-        </ul>
-      ),
-    },
-    {
-      title: 'Hành động',
-      key: 'actions',
-      render: (_: any, record: ProductItem) => (
-        <Row gutter={[8, 8]}>
-          <Col xs={24} sm={12} md={12} lg={8} xl={6} xxl={6}>
+      title: 'Thao tác',
+      key: 'action',
+      render: (_: any, record: Dish) => (
+        <Space size="small">
+          <Button
+            type="primary"
+            icon={<EyeOutlined />}
+            shape="round"
+            onClick={() => handleViewDetail(record)}
+          >
+            Xem
+          </Button>
+          <Button
+            type="primary"
+            icon={<EditOutlined />}
+            shape="round"
+            onClick={() => handleEditClick(record)}
+          >
+            Sửa
+          </Button>
+          <Popconfirm
+            title="Bạn có chắc chắn muốn xóa món ăn này?"
+            onConfirm={() => handleDelete(record.dishId)}
+            okText="Có"
+            cancelText="Không"
+          >
             <Button
               type="primary"
-              shape="round"
-              block
-              onClick={() => handleEditClick(record)}
-            >
-              Sửa
-            </Button>
-          </Col>
-          <Col xs={24} sm={12} md={12} lg={8} xl={6} xxl={6}>
-            <Button
-              type="primary"
-              shape="round"
               danger
-              block
-              onClick={() => handleDeleteClick(record.id)}
+              icon={<DeleteOutlined />}
+              shape="round"
             >
               Xóa
             </Button>
-          </Col>
-        </Row>
+          </Popconfirm>
+        </Space>
       ),
     },
   ];
+
   return (
     <div className="layout-content">
-      <Row>
-        <Col xs={24} sm={12} md={12} lg={8} xl={4} xxl={4}>
-          {!showProductNew && !showProductEdit && (
+      <Card
+        title="Manage dishes"
+        extra={
+          !showProductNew &&
+          !showProductEdit && (
             <Button
               type="primary"
-              className="mb-3"
-              onClick={() => setShowProductNew(true)}
-              size="large"
+              icon={<PlusOutlined />}
               shape="round"
-              block
+              onClick={() => setShowProductNew(true)}
             >
-              Thêm sản phẩm mới
+              Create new dish
             </Button>
-          )}
-        </Col>
-      </Row>
-
-      <Row>
-        <Col xs={24} sm={24} md={24} lg={24} xl={24} xxl={24}>
-          {showProductNew ? (
-            <ProductNew
-              onAddSuccess={handleAddSuccess}
-              setShowProductNew={setShowProductNew}
-            />
-          ) : showProductEdit && currentItem ? (
-            <ProductEdit
-              currentItem={currentItem}
-              onEditSuccess={handleEditSuccess}
-              setShowProductEdit={setShowProductEdit}
-            />
-          ) : (
-            <Table
-              dataSource={dataSource}
-              columns={columns}
-              rowKey="id"
-              loading={loading}
-              pagination={{
-                pageSize: 5,
-                showSizeChanger: true,
-                total: dataSource.length,
-              }}
-            />
-          )}
-        </Col>
-      </Row>
+          )
+        }
+      >
+        {showProductNew ? (
+          <ProductNew
+            onAddSuccess={handleAddSuccess}
+            setShowProductNew={setShowProductNew}
+          />
+        ) : showProductEdit && currentDish ? (
+          <ProductEdit
+            currentDish={currentDish}
+            onEditSuccess={() => fetchDishes()}
+            setShowProductEdit={setShowProductEdit}
+          />
+        ) : isDishDetailVisible && selectedDishId ? (
+          <ProductDetail
+            dishId={selectedDishId}
+            visible={isDishDetailVisible}
+            onClose={() => setIsDishDetailVisible(false)}
+          />
+        ) : (
+          <Table
+            columns={columns}
+            dataSource={dataSource}
+            rowKey="dishId"
+            loading={loading}
+            onChange={onChange}
+            pagination={{
+              current,
+              pageSize,
+              total,
+              showSizeChanger: true,
+              pageSizeOptions: ['5', '10', '20', '50'],
+              onShowSizeChange: (_, size) => {
+                setCurrent(1);
+                setPageSize(size);
+              },
+            }}
+            scroll={{ x: 'max-content' }}
+            bordered
+            rowClassName={(record, index) =>
+              index % 2 === 0 ? 'table-row-light' : 'table-row-dark'
+            }
+          />
+        )}
+      </Card>
     </div>
   );
 };

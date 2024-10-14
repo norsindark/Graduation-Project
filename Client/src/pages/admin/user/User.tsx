@@ -13,8 +13,9 @@ import {
   Typography,
   Avatar,
   Pagination,
+  Tag,
 } from 'antd';
-import { UserOutlined } from '@ant-design/icons';
+import { EyeOutlined, UserOutlined } from '@ant-design/icons';
 import {
   EditOutlined,
   DeleteOutlined,
@@ -187,16 +188,6 @@ const User: React.FC = () => {
 
   const columns = [
     {
-      title: 'ID',
-      dataIndex: 'id',
-      key: 'id',
-      render: (text: string) => (
-        <Button type="link" onClick={() => handleDetailClick(text)}>
-          {text.slice(0, 7)}
-        </Button>
-      ),
-    },
-    {
       title: 'Full Name',
       dataIndex: 'fullName',
       key: 'fullName',
@@ -212,19 +203,43 @@ const User: React.FC = () => {
       title: 'Role',
       dataIndex: ['role', 'name'],
       key: 'role',
-      render: (text: string) => text || 'N/A',
+      render: (role: string) => {
+        let color = 'default';
+        switch (role) {
+          case 'ADMIN':
+            color = 'blue';
+            break;
+          case 'USER':
+            color = 'green';
+            break;
+          case 'EMPLOYEE':
+            color = 'orange';
+            break;
+        }
+        return <Tag color={color}>{role}</Tag>;
+      },
     },
     {
       title: 'Status',
       dataIndex: 'status',
       key: 'status',
-      render: (text: string) => text || 'N/A',
+      render: (status: string) => (
+        <Tag color={status === 'ACTIVE' ? 'green' : 'red'}>{status}</Tag>
+      ),
     },
     {
       title: 'Actions',
       key: 'actions',
       render: (_: any, record: UserItem) => (
         <Space size="small">
+          <Button
+            type="primary"
+            shape="round"
+            icon={<EyeOutlined />}
+            onClick={() => handleDetailClick(record.id)}
+          >
+            View
+          </Button>
           <Button
             type="primary"
             shape="round"

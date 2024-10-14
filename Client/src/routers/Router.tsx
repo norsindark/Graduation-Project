@@ -26,6 +26,7 @@ import MenuPage from '../pages/public/MenuPage';
 import ProductDetail from '../pages/public/ProductDetail';
 import CartPage from '../pages/public/CartPage';
 import CheckoutPage from '../pages/public/CheckoutPage';
+import ProductOption from '../pages/admin/productoption/ProductOption';
 export const router = createBrowserRouter([
   {
     path: '/',
@@ -127,6 +128,10 @@ export const router = createBrowserRouter([
       {
         path: '/product',
         element: <Product />,
+      },
+      {
+        path: '/product-option',
+        element: <ProductOption />,
       },
       {
         path: '/order',

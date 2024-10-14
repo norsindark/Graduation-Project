@@ -1,5 +1,13 @@
 import { useState, useEffect } from 'react';
-import { DatePicker, Table, Button, message, Card, notification } from 'antd';
+import {
+  DatePicker,
+  Table,
+  Button,
+  message,
+  Card,
+  notification,
+  Tag,
+} from 'antd';
 
 import dayjs from 'dayjs';
 import { Row, Col } from 'antd';
@@ -220,20 +228,34 @@ const AttendanceManagement = () => {
       key: 'status',
       render: (status: string, record: AttendanceManagement) => {
         const editable = isEditing(record);
-        return editable ? (
-          <Select
-            value={status}
-            onChange={(value) => handleStatusChange(record.attendanceId, value)}
-          >
-            <Select.Option value="PRESENT">PRESENT</Select.Option>
-            <Select.Option value="ABSENT">ABSENT</Select.Option>
-            <Select.Option value="LATE">LATE</Select.Option>
-          </Select>
-        ) : ['PRESENT', 'ABSENT', 'LATE'].includes(status) ? (
-          { PRESENT: 'PRESENT', ABSENT: 'ABSENT', LATE: 'LATE' }[status]
-        ) : (
-          status
-        );
+        if (editable) {
+          return (
+            <Select
+              value={status}
+              onChange={(value) =>
+                handleStatusChange(record.attendanceId, value)
+              }
+            >
+              <Select.Option value="PRESENT">PRESENT</Select.Option>
+              <Select.Option value="ABSENT">ABSENT</Select.Option>
+              <Select.Option value="LATE">LATE</Select.Option>
+            </Select>
+          );
+        } else {
+          let color = 'default';
+          switch (status) {
+            case 'PRESENT':
+              color = 'green';
+              break;
+            case 'ABSENT':
+              color = 'red';
+              break;
+            case 'LATE':
+              color = 'orange';
+              break;
+          }
+          return <Tag color={color}>{status}</Tag>;
+        }
       },
     },
     {

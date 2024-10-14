@@ -1,67 +1,63 @@
 import React, { useState, useEffect, Children } from 'react';
+import { Table, Button, notification, Card, Space, Popconfirm } from 'antd';
+import ProductOptionNew from './ProductOptionNew';
+import ProductOptionEdit from './ProductOptionEdit';
 import {
-  Table,
-  Button,
-  notification,
-  Card,
-  Space,
-  Popconfirm,
-  Tag,
-} from 'antd';
-import CategoryNew from './CategoryNew';
-import CategoryEdit from './CategoryEdit';
-import {
-  callGetAllCategory,
-  callDeleteCategory,
+  callGetAllDishOptionGroup,
+  callDeleteDishOptionGroup,
+  callDeleteDishOption,
 } from '../../../services/serverApi';
 import { EditOutlined, DeleteOutlined, PlusOutlined } from '@ant-design/icons';
 
-interface CategoryItem {
-  id: string;
-  name: string;
-  description: string;
-  status: string;
-  parentName: string | null;
-  createdAt: string;
-  updatedAt: string;
-  children?: CategoryItem[];
-  subCategories?: CategoryItem[];
-  displayOrder: string;
+interface DishOptionItem {
+  optionId: string;
+  optionName: string;
 }
 
-const Category: React.FC = () => {
-  const [dataSource, setDataSource] = useState<CategoryItem[]>([]);
+interface DishOptionGroupItem {
+  groupId: string;
+  groupName: string;
+  description: string;
+  createdAt: string;
+  updatedAt: string;
+  options: DishOptionItem[];
+  displayOrder?: string;
+  children?: DishOptionGroupItem[];
+}
+
+const ProductOption: React.FC = () => {
+  const [dataSource, setDataSource] = useState<DishOptionGroupItem[]>([]);
   const [showCategoryNew, setShowCategoryNew] = useState<boolean>(false);
   const [showCategoryEdit, setShowCategoryEdit] = useState<boolean>(false);
-  const [currentCategory, setCurrentCategory] = useState<CategoryItem | null>(
-    null
-  );
+  const [currentCategory, setCurrentCategory] =
+    useState<DishOptionGroupItem | null>(null);
   const [sortQuery, setSortQuery] = useState<string>('');
   const [current, setCurrent] = useState<number>(1);
-  const [pageSize, setPageSize] = useState<number>(10);
+  const [pageSize, setPageSize] = useState<number>(5);
   const [total, setTotal] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(false);
 
   useEffect(() => {
-    fetchCategories();
+    fetchProductOptions();
   }, [current, pageSize]);
 
-  const fetchCategories = async () => {
+  const fetchProductOptions = async () => {
     setLoading(true);
     try {
-      let query = `pageNo=${current - 1}&pageSize`;
+      let query = `pageNo=${current - 1}&pageSize=${pageSize}`;
       if (sortQuery) {
         query += `&sortBy=${sortQuery}`;
       } else {
-        query += `&sortBy=name&sortDir=desc`;
+        query += `&sortBy=groupName&sortDir=asc`;
       }
-      const response = await callGetAllCategory(query);
+      const response = await callGetAllDishOptionGroup(query);
       if (
         response?.status === 200 &&
-        response.data._embedded?.categoryResponseList
+        response.data._embedded?.dishOptionGroupResponseList
       ) {
-        const categories = response.data._embedded.categoryResponseList;
-        setDataSource(buildCategoryTree(categories));
+        const dishOptionGroups =
+          response.data._embedded.dishOptionGroupResponseList;
+        setDataSource(buildProductOptionTree(dishOptionGroups));
         setTotal(response.data.page.totalElements);
         setCurrent(response.data.page.number + 1);
       } else {
@@ -70,7 +66,7 @@ const Category: React.FC = () => {
       }
     } catch {
       notification.error({
-        message: 'Error loading category list',
+        message: 'Error loading list group option products',
         description: 'Please try again later',
       });
     } finally {
@@ -78,77 +74,70 @@ const Category: React.FC = () => {
     }
   };
 
-  const buildCategoryTree = (categories: CategoryItem[]): CategoryItem[] => {
+  const buildProductOptionTree = (
+    dishOptionGroups: DishOptionGroupItem[]
+  ): DishOptionGroupItem[] => {
     let rootOrder = 1;
 
     const assignDisplayOrder = (
-      category: CategoryItem,
+      group: DishOptionGroupItem,
       parentOrder: string = ''
     ) => {
-      if (!category.displayOrder) {
-        category.displayOrder = parentOrder ? parentOrder : `${rootOrder++}`;
+      if (!group.displayOrder) {
+        group.displayOrder = parentOrder
+          ? `${parentOrder}-${rootOrder++}`
+          : `${rootOrder++}`;
       }
 
-      if (category.subCategories && category.subCategories.length > 0) {
-        category.subCategories.forEach((subCategory, index) => {
-          subCategory.displayOrder = `${category.displayOrder}-${index + 1}`;
-          assignDisplayOrder(subCategory, subCategory.displayOrder);
-        });
-      }
-    };
-
-    const processCategory = (category: CategoryItem) => {
-      if (category.subCategories && category.subCategories.length > 0) {
-        category.children = category.subCategories.map((subCategory) => ({
-          ...subCategory,
-          children: [],
+      if (group.options && group.options.length > 0) {
+        group.children = group.options.map((option, index) => ({
+          groupId: option.optionId,
+          groupName: option.optionName,
+          description: '',
+          createdAt: '',
+          updatedAt: '',
+          options: [],
+          displayOrder: `${group.displayOrder}-${index + 1}`,
         }));
-        category.subCategories.forEach(processCategory);
       }
     };
 
-    // Xử lý các danh mục gốc trước
-    const rootCategories = categories.filter(
-      (category) => !category.parentName
-    );
-    rootCategories.forEach((category, index) => {
-      category.displayOrder = `${index + 1}`;
-      processCategory(category);
-      assignDisplayOrder(category);
-    });
+    dishOptionGroups.forEach((group) => assignDisplayOrder(group));
 
-    return rootCategories;
+    return dishOptionGroups;
   };
 
   const handleAddSuccess = () => {
-    fetchCategories();
+    fetchProductOptions();
     setShowCategoryNew(false);
   };
 
-  const handleEditClick = (record: CategoryItem) => {
+  const handleEditClick = (record: DishOptionGroupItem) => {
     setCurrentCategory(record);
     setShowCategoryEdit(true);
   };
 
   const handleDeleteClick = async (id: string) => {
     try {
-      const res = await callDeleteCategory(id);
+      const res = await callDeleteDishOptionGroup(id);
+      console.log('res', res);
       if (res?.status === 200) {
         notification.success({
-          message: 'Category deleted successfully!',
+          message: 'Group option product deleted successfully!',
           duration: 5,
           showProgress: true,
         });
-        fetchCategories();
+        fetchProductOptions();
       } else if (res?.status === 400) {
         notification.error({
-          message: 'Error deleting category: This category has subcategories.',
+          message:
+            'Error deleting group option product: This group has subcategories.',
           duration: 5,
           showProgress: true,
         });
       } else {
         notification.error({
-          message: 'Error deleting category.',
+          message: 'Error deleting group option product.',
           description: res.data.errors?.error || 'Error during delete process!',
           duration: 5,
           showProgress: true,
@@ -156,7 +145,40 @@ const Category: React.FC = () => {
       }
     } catch (error) {
       notification.error({
-        message: 'Error deleting category.',
+        message: 'Error deleting group option product.',
+        duration: 5,
+        showProgress: true,
+      });
+    }
+  };
+  const handleDeleteClickOption = async (id: string) => {
+    try {
+      const res = await callDeleteDishOption(id);
+      if (res?.status === 200) {
+        notification.success({
+          message: 'Option product deleted successfully!',
+          duration: 5,
+          showProgress: true,
+        });
+        fetchProductOptions();
+      } else if (res?.status === 400) {
+        notification.error({
+          message:
+            'Error deleting option product: This option has subcategories.',
+          duration: 5,
+          showProgress: true,
+        });
+      } else {
+        notification.error({
+          message: 'Error deleting option product.',
+          description: res.data.errors?.error || 'Error during delete process!',
+          duration: 5,
+          showProgress: true,
+        });
+      }
+    } catch (error) {
+      notification.error({
+        message: 'Error deleting option product.',
         duration: 5,
         showProgress: true,
       });
@@ -176,45 +198,33 @@ const Category: React.FC = () => {
 
   const columns = [
     {
-      title: 'Display Order',
+      title: 'Display order',
       dataIndex: 'displayOrder',
       key: 'displayOrder',
       render: (displayOrder: string) => displayOrder,
-      sorter: (a: CategoryItem, b: CategoryItem) =>
-        a.displayOrder.localeCompare(b.displayOrder),
+      sorter: (a: DishOptionGroupItem, b: DishOptionGroupItem) =>
+        a.displayOrder!.localeCompare(b.displayOrder!),
     },
     {
-      title: 'Category Name',
-      dataIndex: 'name',
-      key: 'name',
-      sorter: (a: CategoryItem, b: CategoryItem) =>
-        a.name.localeCompare(b.name),
+      title: 'Group name',
+      dataIndex: 'groupName',
+      key: 'groupName',
+      sorter: (a: DishOptionGroupItem, b: DishOptionGroupItem) =>
+        a.groupName.localeCompare(b.groupName),
     },
     {
       title: 'Description',
       dataIndex: 'description',
       key: 'description',
       render: (description: string) =>
-        description ? description : 'No Description',
-      sorter: (a: CategoryItem, b: CategoryItem) =>
-        a.description.localeCompare(b.description),
-    },
-    {
-      title: 'Status',
-      dataIndex: 'status',
-      key: 'status',
-      render: (status: string) => (
-        <Tag color={status === 'INACTIVE' ? 'red' : 'green'}>{status}</Tag>
-      ),
-      sorter: (a: CategoryItem, b: CategoryItem) =>
-        a.status.localeCompare(b.status),
+        description ? description : 'No description',
     },
     {
       title: 'Action',
-      key: 'action',
-      render: (_: any, record: CategoryItem) => (
+      key: 'actions',
+      render: (_: any, record: DishOptionGroupItem) => (
         <Space>
-          {record.parentName ? null : (
+          {record.children && (
             <Button
               type="primary"
               shape="round"
@@ -226,11 +236,15 @@ const Category: React.FC = () => {
           )}
           <Popconfirm
             title={
-              record.parentName
-                ? 'Delete this sub category?'
-                : 'Delete this category?'
+              !record.children
+                ? 'Delete this sub group option product?'
+                : 'Delete this group option product?'
             }
-            onConfirm={() => handleDeleteClick(record.id)}
+            onConfirm={() =>
+              record.children
+                ? handleDeleteClick(record.groupId)
+                : handleDeleteClickOption(record.groupId)
+            }
           >
             <Button
               type="primary"
@@ -238,7 +252,7 @@ const Category: React.FC = () => {
               shape="round"
               icon={<DeleteOutlined />}
             >
-              {record.parentName ? 'Delete Sub Category' : 'Delete'}
+              {!record.children ? 'Delete Sub Group' : 'Delete'}
             </Button>
           </Popconfirm>
         </Space>
@@ -249,7 +263,7 @@ const Category: React.FC = () => {
   return (
     <div className="layout-content">
       <Card
-        title="Manage Category"
+        title="Manage group option products"
         extra={
           !showCategoryNew &&
           !showCategoryEdit && (
@@ -259,27 +273,27 @@ const Category: React.FC = () => {
               shape="round"
               icon={<PlusOutlined />}
             >
-              Create Category
+              Create new group option product
             </Button>
           )
         }
       >
         {showCategoryNew ? (
-          <CategoryNew
+          <ProductOptionNew
             onAddSuccess={handleAddSuccess}
             setShowCategoryNew={setShowCategoryNew}
           />
         ) : showCategoryEdit && currentCategory ? (
-          <CategoryEdit
+          <ProductOptionEdit
             currentCategory={currentCategory}
-            onEditSuccess={() => fetchCategories()}
+            onEditSuccess={() => fetchProductOptions()}
             setShowCategoryEdit={setShowCategoryEdit}
           />
         ) : (
           <Table
             dataSource={dataSource}
             columns={columns}
-            rowKey="id"
+            rowKey="groupId"
             loading={loading}
             onChange={onChange}
             pagination={{
@@ -298,7 +312,7 @@ const Category: React.FC = () => {
             }}
             scroll={{ x: 'max-content' }}
             bordered
-            expandable={{ childrenColumnName: 'subCategories' }}
+            expandable={{ childrenColumnName: 'children' }}
             rowClassName={(record, index) =>
               index % 2 === 0 ? 'table-row-light' : 'table-row-dark'
             }
@@ -309,4 +323,4 @@ const Category: React.FC = () => {
   );
 };
 
-export default Category;
+export default ProductOption;

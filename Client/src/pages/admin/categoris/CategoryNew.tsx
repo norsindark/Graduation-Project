@@ -39,7 +39,7 @@ const CategoryNew: React.FC<CategoryNewProps> = ({
         })) || [];
       const categoryStatus = status ? 'ACTIVE' : 'INACTIVE';
 
-      await callAddNewCategory(
+      const response = await callAddNewCategory(
         name,
         name
           .toLowerCase()
@@ -51,19 +51,30 @@ const CategoryNew: React.FC<CategoryNewProps> = ({
         description,
         formattedSubCategories
       );
+      if (response?.status === 200) {
+        notification.success({
+          message: 'Success!',
+          description: 'The category has been created successfully.',
+          duration: 5,
+          showProgress: true,
+        });
 
-      notification.success({
-        message: 'Success!',
-        description: 'The category has been created successfully.',
-      });
-
-      onAddSuccess();
-      setShowCategoryNew(false);
+        onAddSuccess();
+        setShowCategoryNew(false);
+      } else {
+        notification.error({
+          message: 'Error creating category',
+          description: response?.data.errors?.error || 'Please try again later',
+          duration: 5,
+          showProgress: true,
+        });
+      }
     } catch (error: any) {
       notification.error({
         message: 'Error while creating category',
         description: error.message,
         duration: 5,
+        showProgress: true,
       });
     } finally {
       setIsSubmit(false);
