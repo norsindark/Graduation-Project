@@ -309,3 +309,10 @@ export const callGetDishById = async (id: string) => {
 };
 
 
+export const callAddNewDish = async (file: FormData) => {
+  return axios.post(`/api/v1/dashboard/dish/add-new-dish`, file, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+};

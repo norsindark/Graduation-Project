@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, Descriptions, Image, Carousel, Table, Spin } from 'antd';
+import { Modal, Descriptions, Image, Carousel, Table, Spin, Tag } from 'antd';
 import { callGetDishById } from '../../../services/serverApi';
 
 interface DishDetailProps {
@@ -26,7 +26,7 @@ interface Option {
   additionalPrice: number;
 }
 
-interface listOptions {
+interface OptionGroup {
   optionGroupId: string;
   optionGroupName: string;
   options: Option[];
@@ -36,6 +36,7 @@ interface Dish {
   dishId: string;
   dishName: string;
   description: string;
+  longDescription: string;
   status: string;
   thumbImage: string;
   offerPrice: number;
@@ -44,7 +45,7 @@ interface Dish {
   categoryName: string;
   images: DishImage[];
   recipes: Recipe[];
-  listOptions: listOptions[];
+  listOptions: OptionGroup[];
 }
 
 const ProductDetail: React.FC<DishDetailProps> = ({
@@ -127,26 +128,53 @@ const ProductDetail: React.FC<DishDetailProps> = ({
       ),
     },
     {
-      title: 'listOptions',
+      title: 'List Options',
       dataIndex: 'listOptions',
       key: 'listOptions',
-      render: (listOptions: listOptions) => (
-        <div className="flex justify-center items-center flex-row gap-2">
-          {listOptions.options.map((option: Option, index: number) => (
-            <div key={index}>
-              {option.optionName} - {option.additionalPrice}
+      render: (listOptions: OptionGroup[]) => (
+        <div className="flex flex-col gap-2">
+          {listOptions.map((group, groupIndex) => (
+            <div key={group.optionGroupId}>
+              <strong className="text-base">{group.optionGroupName}:</strong>
+              <div className="ml-4 ">
+                {group.options.map((option, optionIndex) => (
+                  <div key={option.optionSelectionId}>
+                    <Tag color="blue">
+                      {option.optionName} -{' '}
+                      {option.additionalPrice.toLocaleString()} đ
+                    </Tag>
+                  </div>
+                ))}
+              </div>
             </div>
           ))}
         </div>
       ),
     },
   ];
+
+  const renderLongDescriptionColumn = [
+    {
+      title: 'Description',
+      dataIndex: 'description',
+      key: 'description',
+    },
+    {
+      title: 'Long Description',
+      dataIndex: 'longDescription',
+      key: 'longDescription',
+      render: (longDescription: string) => (
+        <div style={{ whiteSpace: 'pre-wrap' }}>{longDescription}</div>
+      ),
+    },
+  ];
+
   return (
     <Modal
       title="Dish Detail"
       open={visible}
       onCancel={onClose}
-      width={1000}
+      width={1200}
       footer={null}
       centered
     >
@@ -171,7 +199,24 @@ const ProductDetail: React.FC<DishDetailProps> = ({
           ) : (
             <p>No image.</p>
           )}
-          <h4 className="text-center text-xl font-semibold mb-4">Recipe</h4>
+          <h4 className="text-center text-xl font-semibold mb-4 mt-2">
+            Description
+          </h4>
+          {dish.description && (
+            <Table
+              dataSource={[dish]}
+              columns={renderLongDescriptionColumn}
+              rowKey="dishId"
+              pagination={false}
+              rowClassName={(record, index) =>
+                index % 2 === 0 ? 'table-row-light' : 'table-row-dark'
+              }
+              bordered
+            />
+          )}
+          <h4 className="text-center text-xl font-semibold mb-4 mt-2">
+            Recipe
+          </h4>
           {dish.recipes.length > 0 ? (
             <Table
               dataSource={dish.recipes}
