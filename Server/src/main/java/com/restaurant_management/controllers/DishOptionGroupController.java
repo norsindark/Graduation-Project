@@ -6,6 +6,7 @@ import com.restaurant_management.exceptions.DataExitsException;
 import com.restaurant_management.payloads.requests.DishOptionGroupRequest;
 import com.restaurant_management.payloads.responses.ApiResponse;
 import com.restaurant_management.payloads.responses.DishOptionGroupResponse;
+import com.restaurant_management.payloads.responses.GetOptionNameResponse;
 import com.restaurant_management.services.interfaces.DishOptionGroupService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +25,12 @@ import java.util.List;
 public class DishOptionGroupController {
 
     private final DishOptionGroupService dishOptionGroupService;
+
+    @GetMapping("/get-all-option-name")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<GetOptionNameResponse>> getAllOptionName() throws DataExitsException {
+        return ResponseEntity.ok(dishOptionGroupService.getAllOptionName());
+    }
 
     @GetMapping("/get-all-dish-option-groups")
     @PreAuthorize("hasRole('ADMIN')")

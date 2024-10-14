@@ -6,12 +6,15 @@ import com.restaurant_management.exceptions.DataExitsException;
 import com.restaurant_management.payloads.requests.DishOptionGroupRequest;
 import com.restaurant_management.payloads.responses.ApiResponse;
 import com.restaurant_management.payloads.responses.DishOptionGroupResponse;
+import com.restaurant_management.payloads.responses.GetOptionNameResponse;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
 
 import java.util.List;
 
 public interface DishOptionGroupService {
+
+    List<GetOptionNameResponse> getAllOptionName() throws DataExitsException;
 
     PagedModel<EntityModel<DishOptionGroupResponse>> getAllDishOptionGroups(int pageNo, int pageSize, String sortBy, String sortDir)
             throws DataExitsException;

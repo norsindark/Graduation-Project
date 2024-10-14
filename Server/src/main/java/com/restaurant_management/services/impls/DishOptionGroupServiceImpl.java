@@ -9,6 +9,7 @@ import com.restaurant_management.payloads.requests.DishOptionGroupRequest;
 import com.restaurant_management.payloads.requests.DishOptionRequest;
 import com.restaurant_management.payloads.responses.ApiResponse;
 import com.restaurant_management.payloads.responses.DishOptionGroupResponse;
+import com.restaurant_management.payloads.responses.GetOptionNameResponse;
 import com.restaurant_management.repositories.DishOptionGroupRepository;
 import com.restaurant_management.repositories.DishOptionRepository;
 import com.restaurant_management.services.interfaces.DishOptionGroupService;
@@ -35,6 +36,17 @@ public class DishOptionGroupServiceImpl implements DishOptionGroupService {
     private final DishOptionGroupRepository dishOptionGroupRepository;
     private final DishOptionRepository dishOptionRepository;
     private final PagedResourcesAssembler<DishOptionGroupResponse> pagedResourcesAssembler;
+
+    @Override
+    public List<GetOptionNameResponse> getAllOptionName() throws DataExitsException {
+        List<DishOption> dishOptionGroups = dishOptionRepository.findAll();
+        if (dishOptionGroups.isEmpty()) {
+            throw new DataExitsException("No dish option group found");
+        }
+        return dishOptionGroups.stream()
+                .map(GetOptionNameResponse::new)
+                .toList();
+    }
 
     @Override
     public PagedModel<EntityModel<DishOptionGroupResponse>> getAllDishOptionGroups(

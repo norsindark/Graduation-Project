@@ -7,6 +7,7 @@ import com.restaurant_management.enums.UnitType;
 import com.restaurant_management.exceptions.DataExitsException;
 import com.restaurant_management.payloads.requests.WarehouseRequest;
 import com.restaurant_management.payloads.responses.ApiResponse;
+import com.restaurant_management.payloads.responses.GetIngredientNameResponse;
 import com.restaurant_management.payloads.responses.WarehouseResponse;
 import com.restaurant_management.repositories.CategoryRepository;
 import com.restaurant_management.repositories.WarehouseRepository;
@@ -42,6 +43,16 @@ public class WarehouseServiceImpl implements WarehouseService {
     private final CategoryRepository categoryRepository;
     private final PagedResourcesAssembler<WarehouseResponse> pagedResourcesAssembler;
 
+    @Override
+    public List<GetIngredientNameResponse> getAllIngredientName() throws DataExitsException {
+        List<Warehouse> ingredients = warehouseRepository.findAll();
+        if (ingredients.isEmpty()) {
+            throw new DataExitsException("No ingredient found!");
+        }
+        return ingredients.stream()
+                .map(GetIngredientNameResponse::new)
+                .toList();
+    }
 
     @Override
     @Transactional
