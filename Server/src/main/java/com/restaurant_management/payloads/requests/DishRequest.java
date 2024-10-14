@@ -18,6 +18,7 @@ public class DishRequest {
     private String dishId;
     private String dishName;
     private String description;
+    private String longDescription;
     private String status;
     private MultipartFile thumbImage;
     private List<ImageDto> images;

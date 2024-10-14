@@ -198,6 +198,7 @@ public class DishServiceImpl implements DishService {
     private void updateDishDetails(DishRequest request, Dish dish, Category category) {
         dish.setDishName(request.getDishName());
         dish.setDescription(request.getDescription());
+        dish.setLongDescription(request.getLongDescription());
         dish.setStatus(request.getStatus());
         dish.setOfferPrice(request.getOfferPrice());
         dish.setPrice(request.getPrice());
@@ -213,6 +214,7 @@ public class DishServiceImpl implements DishService {
         return Dish.builder()
                 .dishName(dishDto.getDishName())
                 .description(dishDto.getDescription())
+                .longDescription(dishDto.getLongDescription())
                 .status(dishDto.getStatus())
                 .thumbImage(thumbImageUrl)
                 .deleteThumbImage(deleteThumbUrl)
