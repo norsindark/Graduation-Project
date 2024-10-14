@@ -15,20 +15,22 @@
   var MUTATION = window.MutationObserver !== undefined;
   var animationend = 'animationend webkitAnimationEnd oAnimationEnd';
   var transitionend = 'transitionend webkitTransitionEnd oTransitionEnd';
-  var fullscreenchange = 'webkitfullscreenchange mozfullscreenchange fullscreenchange MSFullscreenChange';
+  var fullscreenchange =
+    'webkitfullscreenchange mozfullscreenchange fullscreenchange MSFullscreenChange';
 
-  var Scope = window.StickScope = {
+  var Scope = (window.StickScope = {
     Parent: 0,
-    Document: 1
-  };
+    Document: 1,
+  });
 
   var Stick = {
     None: 0,
     Fixed: 1,
-    Absolute: 2
+    Absolute: 2,
   };
 
-  var init = false, lock = false;
+  var init = false,
+    lock = false;
 
   $.expr[':'][KEY] = function (element) {
     return !!$(element).data(KEY);
@@ -61,7 +63,8 @@
     this.spacer[0].className = element.className;
     this.spacer[0].style.cssText = element.style.cssText;
     this.spacer.addClass(SPACER_KEY);
-    this.spacer[0].style.cssText += ';visibility: hidden !important;display: none !important';
+    this.spacer[0].style.cssText +=
+      ';visibility: hidden !important;display: none !important';
     this.spacer.insertAfter(this.element);
     if (this.element.parent().css('position') == 'static') {
       this.element.parent().css('position', 'relative');
@@ -73,7 +76,10 @@
     if (transform == 'none') {
       this.element.css('transform', 'translateZ(0)');
     } else if (transform.indexOf('matrix3d') == -1) {
-      this.element.css('transform', this.element.css('transform') + ' translateZ(0)');
+      this.element.css(
+        'transform',
+        this.element.css('transform') + ' translateZ(0)'
+      );
     }
     this.bound();
     this.precalculate();
@@ -89,13 +95,22 @@
   };
 
   Sticker.prototype.isActive = function (options) {
-    return (options.screenMinWidth === undefined || screenWidth >= options.screenMinWidth) &&
-      (options.screenMaxWidth === undefined || screenWidth <= options.screenMaxWidth);
+    return (
+      (options.screenMinWidth === undefined ||
+        screenWidth >= options.screenMinWidth) &&
+      (options.screenMaxWidth === undefined ||
+        screenWidth <= options.screenMaxWidth)
+    );
   };
 
   Sticker.prototype.updateCss = function (options) {
-    if (this.element.hasClass(this.options.className) && options.className != this.options.className) {
-      this.element.removeClass(this.options.className).addClass(options.className);
+    if (
+      this.element.hasClass(this.options.className) &&
+      options.className != this.options.className
+    ) {
+      this.element
+        .removeClass(this.options.className)
+        .addClass(options.className);
     }
     var update = {};
     if (this.stick == Stick.Absolute) {
@@ -104,7 +119,7 @@
       }
     } else {
       if (this.options.top != options.top) {
-        update.top = (options.top + this.offsetY) + 'px';
+        update.top = options.top + this.offsetY + 'px';
       }
     }
     if (this.options.zIndex != options.zIndex) {
@@ -142,7 +157,7 @@
 
   Sticker.prototype.getActiveOptionsKey = function () {
     var indices = [];
-    for (var i = 0;i < this.optionList.length;++i) {
+    for (var i = 0; i < this.optionList.length; ++i) {
       if (this.isActive(this.optionList[i])) {
         indices.push(i);
       }
@@ -152,7 +167,7 @@
 
   Sticker.prototype.getActiveOptions = function () {
     var options = {};
-    for (var i = 0;i < this.optionList.length;++i) {
+    for (var i = 0; i < this.optionList.length; ++i) {
       var opt = this.optionList[i];
       if (this.isActive(opt)) {
         $.extend(options, opt);
@@ -176,7 +191,7 @@
       left: element.style.left,
       top: element.style.top,
       bottom: element.style.bottom,
-      zIndex: element.style.zIndex
+      zIndex: element.style.zIndex,
     };
   };
 
@@ -200,20 +215,26 @@
       top: parseFloat(element.css('margin-top')) || 0,
       bottom: parseFloat(element.css('margin-bottom')) || 0,
       left: parseFloat(element.css('margin-left')) || 0,
-      right: parseFloat(element.css('margin-right')) || 0
+      right: parseFloat(element.css('margin-right')) || 0,
     };
     this.parent = {
       border: {
-        bottom: parseFloat(element.parent().css('border-bottom-width')) || 0
-      }
+        bottom: parseFloat(element.parent().css('border-bottom-width')) || 0,
+      },
     };
   };
 
   Sticker.prototype.precalculate = function () {
     this.baseTop = this.margin.top + this.options.top;
     this.basePadding = this.baseTop + this.margin.bottom;
-    this.baseParentOffset = this.options.extraHeight - this.parent.border.bottom;
-    this.offsetHeight = this.options.overflowScrolling ? Math.max(this.element.outerHeight(false) + this.basePadding - screenHeight, 0) : 0;
+    this.baseParentOffset =
+      this.options.extraHeight - this.parent.border.bottom;
+    this.offsetHeight = this.options.overflowScrolling
+      ? Math.max(
+          this.element.outerHeight(false) + this.basePadding - screenHeight,
+          0
+        )
+      : 0;
     this.minOffsetHeight = -this.offsetHeight;
   };
 
@@ -246,7 +267,7 @@
       top: this.origStyle.top,
       left: left + 'px',
       bottom: -this.options.extraHeight + 'px',
-      'z-index': this.zIndex
+      'z-index': this.zIndex,
     });
   };
 
@@ -264,12 +285,12 @@
     this.lastY = lastY;
     this.offsetY = offsetY;
     this.element.css({
-      width: this.element.width() + this.extraWidth  + 'px',
+      width: this.element.width() + this.extraWidth + 'px',
       position: 'fixed',
-      top: (this.options.top + offsetY) + 'px',
+      top: this.options.top + offsetY + 'px',
       left: left + 'px',
       bottom: this.origStyle.bottom,
-      'z-index': this.zIndex
+      'z-index': this.zIndex,
     });
   };
 
@@ -277,25 +298,36 @@
     if (this.offsetHeight == 0 || !this.options.overflowScrolling) {
       return;
     }
-    var offsetY = Math.max(this.offsetY + newY - this.lastY, this.minOffsetHeight);
+    var offsetY = Math.max(
+      this.offsetY + newY - this.lastY,
+      this.minOffsetHeight
+    );
     offsetY = Math.min(offsetY, 0);
     this.lastY = newY;
     if (this.offsetY == offsetY) {
       return;
     }
     this.offsetY = offsetY;
-    this.element.css('top', (this.options.top + this.offsetY) + 'px');
+    this.element.css('top', this.options.top + this.offsetY + 'px');
   };
 
   Sticker.prototype.isHeigher = function () {
-    return this.options.scope == Scope.Parent && this.element.parent().height() <= this.element.outerHeight(false) + this.margin.bottom;
+    return (
+      this.options.scope == Scope.Parent &&
+      this.element.parent().height() <=
+        this.element.outerHeight(false) + this.margin.bottom
+    );
   };
 
   Sticker.prototype.locate = function () {
     if (!this.activeKey) {
       return;
     }
-    var rect, top, left, element = this.element, spacer = this.spacer;
+    var rect,
+      top,
+      left,
+      element = this.element,
+      spacer = this.spacer;
     switch (this.stick) {
       case Stick.Fixed:
         rect = spacer[0].getBoundingClientRect();
@@ -304,7 +336,10 @@
           this.reset();
         } else if (this.options.scope == Scope.Parent) {
           rect = element.parent()[0].getBoundingClientRect();
-          if (rect.bottom + this.baseParentOffset + this.offsetHeight <= element.outerHeight(false) + this.basePadding) {
+          if (
+            rect.bottom + this.baseParentOffset + this.offsetHeight <=
+            element.outerHeight(false) + this.basePadding
+          ) {
             this.setAbsolute(this.spacer.position().left);
           } else {
             this.updateScroll(rect.bottom);
@@ -321,7 +356,10 @@
           this.reset();
         } else {
           rect = element.parent()[0].getBoundingClientRect();
-          if (rect.bottom + this.baseParentOffset + this.offsetHeight > element.outerHeight(false) + this.basePadding) {
+          if (
+            rect.bottom + this.baseParentOffset + this.offsetHeight >
+            element.outerHeight(false) + this.basePadding
+          ) {
             this.setFixed(left + OFFSET, rect.bottom, -this.offsetHeight);
           }
         }
@@ -342,7 +380,10 @@
         if (this.options.scope == Scope.Document) {
           this.setFixed(left, rect.bottom, 0);
         } else {
-          if (rect2.bottom + this.baseParentOffset + this.offsetHeight <= element.outerHeight(false) + this.basePadding) {
+          if (
+            rect2.bottom + this.baseParentOffset + this.offsetHeight <=
+            element.outerHeight(false) + this.basePadding
+          ) {
             this.setAbsolute(this.element.position().left);
           } else {
             this.setFixed(left + OFFSET, rect.bottom, 0);
@@ -367,16 +408,16 @@
     var element = this.element;
     var spacer = this.spacer;
     if (this.lastValues.width != spacer.width()) {
-      element.width(this.lastValues.width = spacer.width());
+      element.width((this.lastValues.width = spacer.width()));
     }
     if (this.lastValues.height != element.height()) {
-      spacer.height(this.lastValues.height = element.height());
+      spacer.height((this.lastValues.height = element.height()));
     }
     if (this.stick == Stick.Fixed) {
       var rect = this.spacer[0].getBoundingClientRect();
       var left = rect.left - this.margin.left;
       if (this.lastValues.left != left + 'px') {
-        element.css('left', this.lastValues.left = left + 'px');
+        element.css('left', (this.lastValues.left = left + 'px'));
       }
     }
     this.locate();
@@ -392,7 +433,10 @@
     if (this.origWillChange != 'auto') {
       return;
     }
-    this.element.css('will-change', enabled ? 'transform' : this.origWillChange);
+    this.element.css(
+      'will-change',
+      enabled ? 'transform' : this.origWillChange
+    );
   };
 
   var screenHeight, screenWidth;
@@ -420,10 +464,15 @@
     setTimeout(function () {
       lock = false;
     });
-  };
+  }
 
   function onFullscreenChange() {
-    var fullscreen = !!(document.fullscreenElement || document.mozFullScreenElement || document.webkitFullscreenElement || document.msFullscreenElement);
+    var fullscreen = !!(
+      document.fullscreenElement ||
+      document.mozFullScreenElement ||
+      document.webkitFullscreenElement ||
+      document.msFullscreenElement
+    );
     $(SELECTOR).each(function () {
       $(this).data(KEY).enableWillChange(!fullscreen);
     });
@@ -438,7 +487,7 @@
   var PublicMethods = ['destroy', 'refresh'];
   $.fn.stickit = function (method, options) {
     // init
-    if (typeof(method) == 'string') {
+    if (typeof method == 'string') {
       if ($.inArray(method, PublicMethods) != -1) {
         var args = arguments;
         this.each(function () {
@@ -464,7 +513,7 @@
             attributes: true,
             childList: true,
             characterData: true,
-            subtree: true
+            subtree: true,
           });
         }
       }
@@ -484,6 +533,6 @@
   };
 
   $.stickit = {
-    refresh: refresh
+    refresh: refresh,
   };
 })(jQuery);
