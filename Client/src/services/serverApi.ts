@@ -316,3 +316,12 @@ export const callAddNewDish = async (file: FormData) => {
     },
   });
 };
+
+export const callGetAllIngredients = async () => {
+  return axios.get(`/api/v1/dashboard/warehouses/get-all-ingredients-name`);
+}
+
+export const callGetAllOptionSelections = async () => {
+  return axios.get(`/api/v1/dashboard/dish-option-group/get-all-option-name`);
+}
+

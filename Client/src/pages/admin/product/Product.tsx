@@ -89,7 +89,6 @@ const Product: React.FC = () => {
         query += `&sortBy=dishName&order=asc`;
       }
       const response = await callGetAllDishes(query);
-      console.log('response', response);
       if (
         response.status === 200 &&
         response.data._embedded?.dishResponseList
