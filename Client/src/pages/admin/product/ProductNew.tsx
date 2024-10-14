@@ -42,25 +42,20 @@ interface Dish {
   description: string;
   longDescription: string;
   status: string;
-  thumbImage: File | null;
-  images: Array<{
-    imageFile: File;
-  }>;
+  thumbImage: File;
+  images: File[];
   offerPrice: number;
   price: number;
   categoryId: string;
-  categoryName: string;
-  recipes: Array<{
-    ingredientId: string;
-    ingredientName: string;
-    quantityUsed: number;
-    unit: string;
-  }>;
-  optionSelections: Array<{
-    optionId: string;
-    optionName: string;
-    additionalPrice: number;
-  }>;
+  recipes: RecipeDto[];
+  optionSelections: OptionSelection[];
+}
+
+interface RecipeDto {
+  warehouseId: string;
+  quantityUsed: number;
+  ingredientId: string;
+  unit: string;
 }
 
 interface Category {
@@ -125,9 +120,7 @@ const ProductNew: React.FC<ProductNewProps> = ({
     console.log('values', values);
     setIsSubmit(true);
     const formData = new FormData();
-    // Object.entries(values).forEach(([key, value]) => {
-    //   formData.append(key, value);
-    // });
+
     formData.append('dishName', values.dishName);
     formData.append('description', values.description);
     formData.append('longDescription', values.longDescription);
@@ -136,19 +129,33 @@ const ProductNew: React.FC<ProductNewProps> = ({
     formData.append('price', values.price.toString());
     formData.append('categoryId', values.categoryId);
 
-    // Xử lý thumbImage
-    if (values.thumbImage && values.thumbImage instanceof File) {
+    if (values.thumbImage) {
       formData.append('thumbImage', values.thumbImage);
     }
 
-    // Xử lý images
-    if (values.images && Array.isArray(values.images)) {
-      values.images.forEach((image, index) => {
-        if (image && image.imageFile instanceof File) {
-          formData.append(`images[${index}]`, image.imageFile);
+    if (values.images && values.images.length > 0) {
+      values.images.forEach((image) => {
+        if (image instanceof File) {
+          formData.append('images', image);
         }
       });
     }
+
+    values.recipes.forEach((recipe, index, ingredientList) => {
+      console.log('ingredientList', ingredientList);
+      console.log('recipe', recipe);
+
+
+      formData.append(`recipes[${index}].warehouseId`, recipe.ingredientId);
+      formData.append(`recipes[${index}].quantityUsed`, recipe.quantityUsed.toString());
+      formData.append(`recipes[${index}].unit`, recipe.unit);
+    });
+
+    values.optionSelections.forEach((option, index) => {
+      formData.append(`optionSelections[${index}].optionId`, option.optionId);
+      formData.append(`optionSelections[${index}].additionalPrice`, option.additionalPrice.toString());
+    });
+
     try {
       const response = await callAddNewDish(formData);
       console.log('response', response);
@@ -301,9 +308,9 @@ const ProductNew: React.FC<ProductNewProps> = ({
               name="offerPrice"
               label="Offer price"
               className="font-medium"
-              // rules={[
-              //   { required: true, message: 'Vui lòng nhập giá khuyến mãi!' },
-              // ]}
+            // rules={[
+            //   { required: true, message: 'Vui lòng nhập giá khuyến mãi!' },
+            // ]}
             >
               <InputNumber min={0} style={{ width: '100%' }} />
             </Form.Item>
@@ -392,7 +399,7 @@ const ProductNew: React.FC<ProductNewProps> = ({
           </Col>
           <Col xs={24} sm={12}>
             <Form.List
-              name="ingredients"
+              name="recipes"
               rules={[
                 {
                   validator: async (_, value) => {
@@ -534,7 +541,7 @@ const ProductNew: React.FC<ProductNewProps> = ({
                     >
                       <Form.Item
                         {...restField}
-                        name={[name, 'name']}
+                        name={[name, 'optionId']}
                         className="mb-0 w-full"
                         rules={[
                           {
@@ -606,9 +613,9 @@ const ProductNew: React.FC<ProductNewProps> = ({
               name="longDescription"
               label="Long description"
               className="font-medium"
-              // rules={[
-              //   { required: true, message: 'Vui lòng nhập mô tả chi tiết!' },
-              // ]}
+            // rules={[
+            //   { required: true, message: 'Vui lòng nhập mô tả chi tiết!' },
+            // ]}
             >
               <ReactQuill
                 className=" h-[250px] w-full bg-white"
