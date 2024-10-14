@@ -39,7 +39,7 @@ public class Dish {
     @Column(name = "long_description", columnDefinition = "TEXT")
     private String longDescription;
 
-    @Column(name = "status", length = 10)
+    @Column(name = "status", length = 20)
     private String status;
 
     @Column(name = "thumb_image")
