@@ -162,21 +162,24 @@ public class DishServiceImpl implements DishService {
         return new ApiResponse("Dish deleted successfully", HttpStatus.OK);
     }
 
-    private Category getCategory(String categoryId) throws DataExitsException {
-        return categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new DataExitsException("Category not found"));
-    }
-
-    private void updateThumbnailIfPresent(DishRequest request, Dish dish) throws IOException {
-        if (request.getThumbImage() != null) {
-            String[] uploadResult = uploadThumbnail(request.getThumbImage());
-            dish.setThumbImage(uploadResult[0]);
-            dish.setDeleteThumbImage(uploadResult[1]);
-        }
+    private Dish createDish(DishDto dishDto, Category category, String thumbImageUrl, String deleteThumbUrl) {
+        return Dish.builder()
+                .dishName(dishDto.getDishName())
+                .slug(dishDto.getDishName().toLowerCase().replace(" ", "-"))
+                .description(dishDto.getDescription())
+                .longDescription(dishDto.getLongDescription())
+                .status(dishDto.getStatus())
+                .thumbImage(thumbImageUrl)
+                .deleteThumbImage(deleteThumbUrl)
+                .offerPrice(dishDto.getOfferPrice())
+                .price(dishDto.getPrice())
+                .category(category)
+                .build();
     }
 
     private void updateDishDetails(DishRequest request, Dish dish, Category category) {
         dish.setDishName(request.getDishName());
+        dish.setSlug(request.getDishName().toLowerCase().replace(" ", "-"));
         dish.setDescription(request.getDescription());
         dish.setLongDescription(request.getLongDescription());
         dish.setStatus(request.getStatus());
@@ -190,19 +193,20 @@ public class DishServiceImpl implements DishService {
         return new String[]{uploadResult.get("imageUrl"), uploadResult.get("deleteUrl")};
     }
 
-    private Dish createDish(DishDto dishDto, Category category, String thumbImageUrl, String deleteThumbUrl) {
-        return Dish.builder()
-                .dishName(dishDto.getDishName())
-                .description(dishDto.getDescription())
-                .longDescription(dishDto.getLongDescription())
-                .status(dishDto.getStatus())
-                .thumbImage(thumbImageUrl)
-                .deleteThumbImage(deleteThumbUrl)
-                .offerPrice(dishDto.getOfferPrice())
-                .price(dishDto.getPrice())
-                .category(category)
-                .build();
+
+    private Category getCategory(String categoryId) throws DataExitsException {
+        return categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new DataExitsException("Category not found"));
     }
+
+    private void updateThumbnailIfPresent(DishRequest request, Dish dish) throws IOException {
+        if (request.getThumbImage() != null) {
+            String[] uploadResult = uploadThumbnail(request.getThumbImage());
+            dish.setThumbImage(uploadResult[0]);
+            dish.setDeleteThumbImage(uploadResult[1]);
+        }
+    }
+
 
     private void uploadImages(List<ImageDto> imageDtos, Dish dish) throws IOException {
         for (ImageDto imageDto : imageDtos) {

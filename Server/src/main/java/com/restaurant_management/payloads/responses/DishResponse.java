@@ -18,6 +18,7 @@ public class DishResponse {
 
     private String dishId;
     private String dishName;
+    private String slug;
     private String description;
     private String longDescription;
     private String status;
@@ -48,6 +49,7 @@ public class DishResponse {
     public DishResponse(Dish dish, List<Recipe> recipes, List<DishImage> images, List<DishOptionSelection> optionSelections) {
         this.dishId = dish.getId();
         this.dishName = dish.getDishName();
+        this.slug = dish.getSlug();
         this.description = dish.getDescription();
         this.longDescription = dish.getLongDescription();
         this.status = dish.getStatus();
