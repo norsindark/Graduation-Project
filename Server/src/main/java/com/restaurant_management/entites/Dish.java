@@ -29,10 +29,14 @@ public class Dish {
     @Column(name = "dish_name", nullable = false)
     private String dishName;
 
+    @Column(name = "slug", nullable = false)
+    private String slug;
+
     @Column(name = "description")
     private String description;
 
-    @Column(name = "long_description", length = 2500)
+    @Lob
+    @Column(name = "long_description", columnDefinition = "TEXT")
     private String longDescription;
 
     @Column(name = "status", length = 10)
