@@ -1,0 +1,86 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.mobileMenu {
+  max-height: 0;
+
+  transition:
+    max-height 0.3s ease-out,
+    opacity 0.3s ease-out;
+  opacity: 0;
+}
+
+.mobileMenu.show {
+  max-height: 450px;
+  opacity: 1;
+  height: 650px;
+  transition:
+    max-height 0.5s ease-in,
+    opacity 0.3s ease-in;
+}
+
+@media (max-width: 991px) {
+  .navbar-collapse {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background-color: #fff;
+    padding: 0 15px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  }
+
+  .menu_icon {
+    margin-top: 15px;
+    gap: 1rem;
+  }
+
+  .menu_icon > * {
+    cursor: pointer;
+  }
+
+  .cart-icon {
+    position: relative;
+  }
+
+  .cart-count {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background-color: #ff6a00;
+    color: white;
+    border-radius: 50%;
+    padding: 2px 6px;
+    font-size: 0.75rem;
+  }
+
+  .reservation-btn {
+    background-color: #ff6a00;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    text-decoration: none;
+  }
+
+  .navbar-content {
+    flex-direction: column;
+  }
+
+  .menu_icon {
+    width: 100%;
+    margin-top: 1rem;
+  }
+}
+
+@media (min-width: 992px) {
+  .navbar-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .menu_icon {
+    width: auto;
+  }
+}
