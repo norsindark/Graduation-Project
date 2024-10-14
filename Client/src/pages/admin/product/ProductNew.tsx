@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Form,
   Input,
@@ -9,6 +9,8 @@ import {
   Space,
   Row,
   Col,
+  Modal,
+  Slider,
 } from 'antd';
 import { Upload, message } from 'antd';
 import {
@@ -22,7 +24,11 @@ import 'react-quill/dist/quill.snow.css';
 import {
   callAddNewDish,
   callGetAllCategoriesName,
+  callGetAllIngredients,
+  callGetAllOptionSelections,
 } from '../../../services/serverApi';
+import Cropper, { Area } from 'react-easy-crop';
+import getCroppedImg from '../../../utils/getCroppedImg';
 
 const { Option } = Select;
 
@@ -36,9 +42,9 @@ interface Dish {
   description: string;
   longDescription: string;
   status: string;
-  thumbImage: string;
+  thumbImage: File | null;
   images: Array<{
-    imageFile: string;
+    imageFile: File;
   }>;
   offerPrice: number;
   price: number;
@@ -63,7 +69,7 @@ interface Category {
 }
 
 interface Ingredient {
-  ingredientId: string;
+  warehouseId: string;
   ingredientName: string;
   quantityUsed: number;
   unit: string;
@@ -88,6 +94,12 @@ const ProductNew: React.FC<ProductNewProps> = ({
     OptionSelection[]
   >([]);
 
+  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
+  const [previewVisible, setPreviewVisible] = useState(false);
+  const [previewImage, setPreviewImage] = useState<string>('');
+
   useEffect(() => {
     const fetchCategoryList = async () => {
       const responseCategory = await callGetAllCategoriesName();
@@ -97,6 +109,7 @@ const ProductNew: React.FC<ProductNewProps> = ({
 
     const fetchIngredientList = async () => {
       const responseIngredient = await callGetAllIngredients();
+
       setIngredientList(responseIngredient.data);
     };
     fetchIngredientList();
@@ -112,10 +125,30 @@ const ProductNew: React.FC<ProductNewProps> = ({
     console.log('values', values);
     setIsSubmit(true);
     const formData = new FormData();
-    Object.entries(values).forEach(([key, value]) => {
-      formData.append(key, value);
-    });
-    console.log('formData', formData);
+    // Object.entries(values).forEach(([key, value]) => {
+    //   formData.append(key, value);
+    // });
+    formData.append('dishName', values.dishName);
+    formData.append('description', values.description);
+    formData.append('longDescription', values.longDescription);
+    formData.append('status', values.status);
+    formData.append('offerPrice', values.offerPrice.toString());
+    formData.append('price', values.price.toString());
+    formData.append('categoryId', values.categoryId);
+
+    // Xử lý thumbImage
+    if (values.thumbImage && values.thumbImage instanceof File) {
+      formData.append('thumbImage', values.thumbImage);
+    }
+
+    // Xử lý images
+    if (values.images && Array.isArray(values.images)) {
+      values.images.forEach((image, index) => {
+        if (image && image.imageFile instanceof File) {
+          formData.append(`images[${index}]`, image.imageFile);
+        }
+      });
+    }
     try {
       const response = await callAddNewDish(formData);
       console.log('response', response);
@@ -192,6 +225,33 @@ const ProductNew: React.FC<ProductNewProps> = ({
     'code-block',
   ];
 
+  const handleImageUpload = (file: File, fieldName: string) => {
+    const previewUrl = URL.createObjectURL(file);
+    setPreviewImage(previewUrl);
+    setPreviewVisible(true);
+    form.setFieldsValue({ [fieldName]: file });
+  };
+
+  const onCropComplete = useCallback(
+    (croppedArea: Area, croppedAreaPixels: Area) => {
+      setCroppedAreaPixels(croppedAreaPixels);
+    },
+    []
+  );
+
+  const handleCropCancel = () => {
+    setPreviewVisible(false);
+    setPreviewImage('');
+  };
+
+  const handleCropConfirm = async () => {
+    if (previewImage && croppedAreaPixels) {
+      const croppedImage = await getCroppedImg(previewImage, croppedAreaPixels);
+      form.setFieldsValue({ thumbImage: croppedImage });
+      setPreviewVisible(false);
+    }
+  };
+
   return (
     <>
       <h4 className="text-center text-xl font-semibold mb-4">
@@ -266,8 +326,10 @@ const ProductNew: React.FC<ProductNewProps> = ({
                     file.type === 'image/jpeg' || file.type === 'image/png';
                   if (!isJpgOrPng) {
                     message.error('You can only upload JPG/PNG files!');
+                  } else {
+                    handleImageUpload(file, 'thumbImage');
                   }
-                  return isJpgOrPng;
+                  return false;
                 }}
               >
                 <div>
@@ -333,10 +395,18 @@ const ProductNew: React.FC<ProductNewProps> = ({
               name="ingredients"
               rules={[
                 {
-                  validator: (_, value) =>
-                    value && value.length > 0
-                      ? Promise.resolve()
-                      : Promise.reject('Please enter ingredient!'),
+                  validator: async (_, value) => {
+                    if (!value || value.length === 0) {
+                      notification.error({
+                        message: 'Error',
+                        description: 'Please enter ingredients!',
+                        duration: 5,
+                        showProgress: true,
+                      });
+                      return Promise.reject();
+                    }
+                    return Promise.resolve();
+                  },
                 },
               ]}
             >
@@ -353,42 +423,60 @@ const ProductNew: React.FC<ProductNewProps> = ({
                     >
                       <Form.Item
                         {...restField}
-                        name={[name, 'name']}
+                        name={[name, 'ingredientId']}
                         className="mb-0 flex-1"
-                        rules={[
-                          {
-                            required: true,
-                            message: 'Please enter ingredient name!',
-                          },
-                        ]}
                       >
-                        <Input placeholder="Ingredient name" />
+                        <Select
+                          placeholder="Select ingredient"
+                          showSearch
+                          style={{ width: '180px' }}
+                          filterOption={(input, option) =>
+                            !!(
+                              (option?.label as string)
+                                ?.toLowerCase()
+                                .includes(input.toLowerCase()) ||
+                              (option?.value as string)
+                                ?.toLowerCase()
+                                ?.includes(input.toLowerCase())
+                            )
+                          }
+                        >
+                          {ingredientList.map((ingredient) => (
+                            <Option
+                              key={ingredient.warehouseId}
+                              value={ingredient.warehouseId}
+                            >
+                              {ingredient.ingredientName}
+                            </Option>
+                          ))}
+                        </Select>
                       </Form.Item>
                       <Form.Item
                         {...restField}
                         name={[name, 'quantityUsed']}
-                        className="mb-0 flex-1 mx-2"
-                        rules={[
-                          {
-                            required: true,
-                            message: 'Please enter quantity used!',
-                          },
-                        ]}
+                        className="mb-0 flex-1 mx-2 "
                       >
-                        <Input placeholder="Quantity used" />
+                        <InputNumber
+                          min={0}
+                          placeholder="Quantity used"
+                          style={{ width: '100%' }}
+                        />
                       </Form.Item>
                       <Form.Item
                         {...restField}
                         name={[name, 'unit']}
                         className="mb-0 flex-1"
-                        rules={[
-                          {
-                            required: true,
-                            message: 'Please enter unit!',
-                          },
-                        ]}
                       >
-                        <Input placeholder="Unit" />
+                        <Select
+                          placeholder="Select unit"
+                          style={{ width: '150px' }}
+                        >
+                          <Option value="kg">Kilogram</Option>
+                          <Option value="g">Gram</Option>
+                          <Option value="l">Liter</Option>
+                          <Option value="ml">Milliliter</Option>
+                          <Option value="piece">Piece</Option>
+                        </Select>
                       </Form.Item>
                       <MinusCircleOutlined
                         onClick={() => remove(name)}
@@ -416,10 +504,20 @@ const ProductNew: React.FC<ProductNewProps> = ({
               name="optionSelections"
               rules={[
                 {
-                  validator: (_, value) =>
-                    value && value.length > 0
-                      ? Promise.resolve()
-                      : Promise.reject('Please enter option selection!'),
+                  validator: async (_, value) => {
+                    if (!value || value.length === 0) {
+                      setTimeout(() => {
+                        notification.error({
+                          message: 'Error',
+                          description: 'Please enter option selection!',
+                          duration: 5,
+                          showProgress: true,
+                        });
+                      }, 800);
+                      return Promise.reject();
+                    }
+                    return Promise.resolve();
+                  },
                 },
               ]}
             >
@@ -445,20 +543,43 @@ const ProductNew: React.FC<ProductNewProps> = ({
                           },
                         ]}
                       >
-                        <Input placeholder="Option name" />
+                        <Select
+                          placeholder="Select option"
+                          showSearch
+                          style={{ width: '200px' }}
+                          filterOption={(input, option) =>
+                            !!(
+                              (option?.label as string)
+                                ?.toLowerCase()
+                                .includes(input.toLowerCase()) ||
+                              (option?.value as string)
+                                ?.toLowerCase()
+                                ?.includes(input.toLowerCase())
+                            )
+                          }
+                        >
+                          {optionSelectionList.map((option) => (
+                            <Option
+                              key={option.optionId}
+                              value={option.optionId}
+                            >
+                              {option.optionName}
+                            </Option>
+                          ))}
+                        </Select>
                       </Form.Item>
                       <Form.Item
                         {...restField}
                         name={[name, 'additionalPrice']}
                         className="mb-0 w-full mx-2"
-                        rules={[
-                          {
-                            required: true,
-                            message: 'Please enter additional price!',
-                          },
-                        ]}
                       >
-                        <Input placeholder="Additional price" />
+                        <InputNumber
+                          min={0}
+                          style={{ width: '100%' }}
+                          formatter={(value) =>
+                            `$ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+                          }
+                        />
                       </Form.Item>
                       <MinusCircleOutlined
                         onClick={() => remove(name)}
@@ -524,6 +645,34 @@ const ProductNew: React.FC<ProductNewProps> = ({
           </div>
         </Row>
       </Form>
+      <Modal
+        open={previewVisible}
+        title="Crop Image"
+        onCancel={handleCropCancel}
+        onOk={handleCropConfirm}
+        okText="Confirm"
+        cancelText="Cancel"
+        width={450}
+      >
+        <div style={{ position: 'relative', width: '100%', height: 300 }}>
+          <Cropper
+            image={previewImage}
+            crop={crop}
+            zoom={zoom}
+            aspect={1}
+            onCropChange={setCrop}
+            onZoomChange={setZoom}
+            onCropComplete={onCropComplete}
+          />
+        </div>
+        <Slider
+          value={zoom}
+          min={1}
+          max={5}
+          step={0.1}
+          onChange={(value) => setZoom(value)}
+        />
+      </Modal>
     </>
   );
 };
