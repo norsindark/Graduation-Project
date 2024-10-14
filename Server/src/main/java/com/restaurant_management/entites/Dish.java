@@ -29,6 +29,9 @@ public class Dish {
     @Column(name = "dish_name", nullable = false)
     private String dishName;
 
+    @Column(name = "slug", nullable = false)
+    private String slug;
+
     @Column(name = "description")
     private String description;
 
