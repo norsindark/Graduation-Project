@@ -47,6 +47,7 @@ public class DishController {
         return ResponseEntity.ok(dishService.addDish(dishDto));
     }
 
+
     @PutMapping("/update-dish")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse> updateDish(@ModelAttribute DishRequest request) throws DataExitsException, IOException {

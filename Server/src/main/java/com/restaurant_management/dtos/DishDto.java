@@ -15,6 +15,7 @@ import java.util.List;
 public class DishDto {
     private String dishName;
     private String description;
+    private String longDescription;
     private String status;
     private MultipartFile thumbImage;
     private List<ImageDto> images;

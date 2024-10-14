@@ -19,6 +19,7 @@ public class DishResponse {
     private String dishId;
     private String dishName;
     private String description;
+    private String longDescription;
     private String status;
     private String thumbImage;
     private Double offerPrice;
@@ -33,6 +34,7 @@ public class DishResponse {
         this.dishId = dish.getId();
         this.dishName = dish.getDishName();
         this.description = dish.getDescription();
+        this.longDescription = dish.getLongDescription();
         this.status = dish.getStatus();
         this.thumbImage = dish.getThumbImage();
         this.offerPrice = dish.getOfferPrice();
@@ -47,6 +49,7 @@ public class DishResponse {
         this.dishId = dish.getId();
         this.dishName = dish.getDishName();
         this.description = dish.getDescription();
+        this.longDescription = dish.getLongDescription();
         this.status = dish.getStatus();
         this.thumbImage = dish.getThumbImage();
         this.offerPrice = dish.getOfferPrice();
