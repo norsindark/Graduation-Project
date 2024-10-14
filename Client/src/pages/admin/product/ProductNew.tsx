@@ -52,6 +52,7 @@ const ProductNew: React.FC<ProductNewProps> = ({
       notification.success({
         message: 'Mặt hàng đã được thêm thành công!',
         duration: 5,
+        showProgress: true,
       });
       onAddSuccess();
     } catch (error: any) {
@@ -59,6 +60,7 @@ const ProductNew: React.FC<ProductNewProps> = ({
         message: 'Lỗi khi thêm mặt hàng mới',
         description: error.message,
         duration: 5,
+        showProgress: true,
       });
     } finally {
       setIsSubmit(false);
@@ -66,7 +68,7 @@ const ProductNew: React.FC<ProductNewProps> = ({
   };
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 bg-white shadow rounded-md">
+    <>
       <h4 className="text-center text-xl font-semibold mb-4">
         Thêm mặt hàng mới
       </h4>
@@ -249,7 +251,7 @@ const ProductNew: React.FC<ProductNewProps> = ({
           </Button>
         </div>
       </Form>
-    </div>
+    </>
   );
 };
 

@@ -79,6 +79,21 @@ function Sidenav({ color }: { color: string }) {
     {
       key: '6',
       label: (
+        <NavLink to="/product-option">
+          <span
+            className="icon"
+            style={{ background: page === 'product-option' ? color : '' }}
+          >
+            {' '}
+            <BiSolidDashboard />
+          </span>
+          <span className="label">Product Option</span>
+        </NavLink>
+      ),
+    },
+    {
+      key: '7',
+      label: (
         <NavLink to="/product">
           <span
             className="icon"
@@ -92,7 +107,7 @@ function Sidenav({ color }: { color: string }) {
       ),
     },
     {
-      key: '7',
+      key: '8',
       label: (
         <NavLink to="/warehouse">
           <span
@@ -106,7 +121,7 @@ function Sidenav({ color }: { color: string }) {
       ),
     },
     {
-      key: '8',
+      key: '9',
       label: (
         <NavLink to="/order">
           <span

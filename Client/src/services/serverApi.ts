@@ -275,3 +275,37 @@ export const callImportExcelWarehouse = async (file: FormData) => {
     },
   });
 };
+
+export const callGetAllDishOptionGroup = async (query: string) => {
+  return axios.get(`/api/v1/dashboard/dish-option-group/get-all-dish-option-groups?${query}`);
+};
+
+export const callAddNewDishOptionGroup = async (groupName: string, description: string, options: []) => {
+  return axios.post(`/api/v1/dashboard/dish-option-group/add-dish-option-group`, { groupName, description, options });
+};
+
+export const callUpdateDishOptionGroup = async (groupId: string, groupName: string, description: string, options: []) => {
+  return axios.put(`/api/v1/dashboard/dish-option-group/update-dish-option-group/${groupId}`, { groupName, description, options });
+};
+
+export const callDeleteDishOptionGroup = async (groupId: string) => {
+  return axios.delete(`/api/v1/dashboard/dish-option-group/delete-dish-option-group/${groupId}`);
+};
+
+export const callDeleteDishOption = async (optionId: string) => {
+  return axios.delete(`/api/v1/dashboard/dish-option-group/delete-dish-option/${optionId}`);
+};
+
+export const callGetAllDishes = async (query: string) => {
+  return axios.get(`/api/v1/dashboard/dish/get-all-dishes?${query}`);
+};
+
+export const callDeleteDish = async (id: string) => {
+  return axios.delete(`/api/v1/dashboard/dish/delete-dish/${id}`);
+};
+
+export const callGetDishById = async (id: string) => {
+  return axios.get(`/api/v1/dashboard/dish/get-dish-by-id/${id}`);
+};
+
+
