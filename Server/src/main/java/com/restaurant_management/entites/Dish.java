@@ -35,7 +35,8 @@ public class Dish {
     @Column(name = "description")
     private String description;
 
-    @Column(name = "long_description", length = 2500)
+    @Lob
+    @Column(name = "long_description", columnDefinition = "TEXT")
     private String longDescription;
 
     @Column(name = "status", length = 10)

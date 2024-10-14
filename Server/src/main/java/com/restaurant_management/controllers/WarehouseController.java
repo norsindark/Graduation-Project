@@ -4,6 +4,7 @@ import com.restaurant_management.dtos.WarehouseDto;
 import com.restaurant_management.exceptions.DataExitsException;
 import com.restaurant_management.payloads.requests.WarehouseRequest;
 import com.restaurant_management.payloads.responses.ApiResponse;
+import com.restaurant_management.payloads.responses.GetIngredientNameResponse;
 import com.restaurant_management.payloads.responses.WarehouseResponse;
 import com.restaurant_management.services.interfaces.WarehouseService;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -15,6 +16,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @Tag(name = "Warehouse", description = "Warehouse API")
@@ -22,6 +25,12 @@ import org.springframework.web.multipart.MultipartFile;
 public class WarehouseController {
 
     private final WarehouseService warehouseService;
+
+    @GetMapping("/get-all-ingredients-name")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<GetIngredientNameResponse>> getAllIngredientName() throws DataExitsException {
+        return ResponseEntity.ok(warehouseService.getAllIngredientName());
+    }
 
     @GetMapping("/get-all-ingredients")
     @PreAuthorize("hasRole('ADMIN')")

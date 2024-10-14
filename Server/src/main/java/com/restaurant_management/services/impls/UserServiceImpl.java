@@ -89,7 +89,7 @@ public class UserServiceImpl implements UserService {
         User _user = user.get();
         _user.setAvatar(imageUrl);
         this.userRepository.save(_user);
-        return new ApiResponse(imageUrl, HttpStatus.OK);
+        return new ApiResponse(_user.getAvatar(), HttpStatus.OK);
     }
 
     @Override
