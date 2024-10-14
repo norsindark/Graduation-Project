@@ -51,29 +51,10 @@ public class DishServiceImpl implements DishService {
 
         List<Recipe> recipes = recipeRepository.findByDish(dish);
         List<DishImage> images = dishImageRepository.findByDish(dish);
+        List<DishOptionSelection> optionSelections = dishOptionSelectionRepository.findByDish(dish);
 
-        return new DishResponse(dish, recipes, images);
+        return new DishResponse(dish, recipes, images, optionSelections);
     }
-
-//    @Override
-//    public PagedModel<EntityModel<DishResponse>> getAllDishes(int pageNo, int pageSize, String sortBy, String order) throws DataExitsException {
-//        Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.fromString(order), sortBy));
-//        Page<Dish> dishes = dishRepository.findAll(pageable);
-//
-//        if (dishes.isEmpty()) {
-//            throw new DataExitsException("Dishes not found");
-//        }
-//
-//        List<DishResponse> dishResponses = dishes.stream()
-//                .map(dish -> {
-//                    List<Recipe> recipes = recipeRepository.findByDish(dish);
-//                    List<DishImage> images = dishImageRepository.findByDish(dish);
-//                    return new DishResponse(dish, recipes, images);
-//                })
-//                .collect(Collectors.toList());
-//
-//        return pagedResourcesAssembler.toModel(new PageImpl<>(dishResponses, pageable, dishes.getTotalElements()));
-//    }
 
     @Override
     public PagedModel<EntityModel<DishResponse>> getAllDishes(int pageNo, int pageSize, String sortBy, String order)
@@ -98,7 +79,6 @@ public class DishServiceImpl implements DishService {
                 .collect(Collectors.toList());
         return pagedResourcesAssembler.toModel(new PageImpl<>(dishResponses, pageable, dishes.getTotalElements()));
     }
-
 
     @Override
     @Transactional
