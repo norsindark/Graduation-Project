@@ -4,17 +4,18 @@ import { callResendVerifyEmail } from '../../../../services/clientApi';
 import { Modal, Form, Input, Button } from 'antd';
 import { Link } from 'react-router-dom';
 import useResponsiveModalWidth from '../../../../hooks/useResponsiveModalWidth';
-import { useLocation, useNavigate } from 'react-router-dom';
 
-const ResendVerifyEmail = () => {
-  const location = useLocation();
-  const navigate = useNavigate();
+interface ResendVerifyEmailProps {
+  onClose: () => void;
+  setActiveModal: (modal: string | null) => void;
+}
+
+const ResendVerifyEmail: React.FC<ResendVerifyEmailProps> = ({
+  onClose,
+  setActiveModal,
+}) => {
   const modalWidth = useResponsiveModalWidth();
   const [isSubmit, setIsSubmit] = useState(false);
-
-  const handleCancel = () => {
-    navigate('/');
-  };
 
   const onFinish = async (values: { email: string }) => {
     const { email } = values;
@@ -27,7 +28,8 @@ const ResendVerifyEmail = () => {
           duration: 5,
           showProgress: true,
         });
-        navigate('/login');
+        onClose();
+        setActiveModal('login');
       } else {
         notification.error({
           message: 'Verification email failed!',
@@ -48,16 +50,28 @@ const ResendVerifyEmail = () => {
     }
   };
 
+  const handleLoginClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    onClose();
+    setActiveModal('login');
+  };
+
+  const handleRegisterClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    onClose();
+    setActiveModal('register');
+  };
+
   return (
     <Modal
-      open={location.pathname === '/resend-verification-email'}
-      onCancel={handleCancel}
+      open={true}
+      onCancel={onClose}
       footer={null}
       width={modalWidth}
       centered
       closeIcon={
         <div className="fp__menu_cart_header">
-          <span className="close_cart-client" onClick={handleCancel}>
+          <span className="close_cart-client" onClick={onClose}>
             <i className="fal fa-times"></i>
           </span>
         </div>

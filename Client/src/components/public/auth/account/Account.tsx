@@ -8,24 +8,23 @@ import WishListAccount from './WishListAccount';
 import ReviewAccount from './ReviewAccount';
 import ResetPasswordAccount from './changepassword/ResetPasswordAccount';
 
-const Account = () => {
-  const location = useLocation();
-  const navigate = useNavigate();
-  const handleCancel = () => {
-    navigate('/');
-  };
+interface AccountProps {
+  onClose: () => void;
+  setActiveModal: (modal: string | null) => void;
+}
 
+const Account: React.FC<AccountProps> = ({ onClose, setActiveModal }) => {
   return (
     <Modal
-      open={location.pathname === '/account'}
-      onCancel={handleCancel}
+      open={true}
+      onCancel={onClose}
       footer={null}
       width={1300}
       centered
       styles={{ body: { height: 'auto', overflowY: 'auto' } }}
       closeIcon={
         <div className="fp__menu_cart_header">
-          <span className="close_cart-client" onClick={handleCancel}>
+          <span className="close_cart-client" onClick={onClose}>
             <i className="fal fa-times"></i>
           </span>
         </div>

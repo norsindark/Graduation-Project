@@ -6,7 +6,11 @@ import Cart from '../../cart/Cart';
 import Auth from '../../auth/Auth';
 import Reservation from '../../reservation/Reservation';
 
-const Header = () => {
+interface HeaderProps {
+  setActiveModal: (modal: string | null) => void;
+}
+
+const Header = ({ setActiveModal }: HeaderProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [isFixed, setIsFixed] = useState(false);
@@ -72,7 +76,7 @@ const Header = () => {
           <ul className="menu_icon flex flex-wrap px-3">
             <Search />
             <Cart />
-            <Auth />
+            <Auth setActiveModal={setActiveModal} />
             <Reservation />
           </ul>
         </div>

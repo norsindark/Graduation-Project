@@ -2,26 +2,32 @@ import { useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { notification } from 'antd';
 import { callVerifyEmail } from '../../../../services/clientApi';
-import { useNavigate } from 'react-router-dom';
 
-const VerifyEmail = () => {
+interface VerifyEmailProps {
+  onClose: () => void;
+  setActiveModal: (modal: string | null) => void;
+}
+
+const VerifyEmail: React.FC<VerifyEmailProps> = ({
+  onClose,
+  setActiveModal,
+}) => {
   const [searchParams] = useSearchParams();
   const token = searchParams.get('token');
-  const navigate = useNavigate();
 
   useEffect(() => {
     const verifyEmail = async () => {
       if (token) {
         try {
           const response = await callVerifyEmail(token);
-          console.log(response);
           if (response.status === 200) {
             notification.success({
               message: 'Email verified successfully!',
               duration: 5,
               showProgress: true,
             });
-            navigate('/login');
+            onClose();
+            setActiveModal('login');
           } else {
             notification.error({
               message: 'Email verification failed!',
@@ -43,9 +49,9 @@ const VerifyEmail = () => {
     };
 
     verifyEmail();
-  }, [token, navigate]);
+  }, [token, onClose, setActiveModal]);
 
-  return <></>;
+  return null;
 };
 
 export default VerifyEmail;

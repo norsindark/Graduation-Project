@@ -2,23 +2,24 @@ import { Form, Input, Button, notification, Modal } from 'antd';
 import { useState } from 'react';
 import { callForgotPassword } from '../../../../services/clientApi';
 import useResponsiveModalWidth from '../../../../hooks/useResponsiveModalWidth';
-import { useNavigate, useLocation, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
-const ForgotPassword = () => {
+interface ForgotPasswordProps {
+  onClose: () => void;
+  setActiveModal: (modal: string | null) => void;
+}
+
+const ForgotPassword: React.FC<ForgotPasswordProps> = ({
+  onClose,
+  setActiveModal,
+}) => {
   const [isSubmit, setIsSubmit] = useState(false);
   const modalWidth = useResponsiveModalWidth();
-  const navigate = useNavigate();
-  const location = useLocation();
-
-  const handleCancel = () => {
-    navigate('/');
-  };
 
   const onFinish = async (values: { email: string }) => {
     setIsSubmit(true);
     try {
       const res = await callForgotPassword(values.email);
-      console.log(res);
       if (res?.status === 200) {
         notification.success({
           message: 'Password reset email sent successfully!',
@@ -26,7 +27,7 @@ const ForgotPassword = () => {
           duration: 5,
           showProgress: true,
         });
-        handleCancel();
+        onClose();
       } else {
         notification.error({
           message: 'Failed to send password reset email!',
@@ -48,16 +49,28 @@ const ForgotPassword = () => {
     }
   };
 
+  const handleLoginClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    onClose();
+    setActiveModal('login');
+  };
+
+  const handleRegisterClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    onClose();
+    setActiveModal('register');
+  };
+
   return (
     <Modal
-      open={location.pathname === '/forgot-password'}
-      onCancel={handleCancel}
+      open={true}
+      onCancel={onClose}
       footer={null}
       width={modalWidth}
       centered
       closeIcon={
         <div className="fp__menu_cart_header">
-          <span className="close_cart-client" onClick={handleCancel}>
+          <span className="close_cart-client" onClick={onClose}>
             <i className="fal fa-times"></i>
           </span>
         </div>

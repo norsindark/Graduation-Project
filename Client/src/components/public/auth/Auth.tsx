@@ -1,4 +1,4 @@
-import { NavLink } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../redux/store';
 import { useState, useEffect, useRef } from 'react';
@@ -8,7 +8,11 @@ import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { notification } from 'antd';
 
-const Auth = () => {
+const Auth = ({
+  setActiveModal,
+}: {
+  setActiveModal: (modal: string | null) => void;
+}) => {
   const style = 'w-[245px] h-[51px]';
   const isAuthenticated = useSelector(
     (state: RootState) => state.account.isAuthenticated
@@ -20,6 +24,7 @@ const Auth = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [submit, setSubmit] = useState(false);
+  const location = useLocation();
 
   const handleLogout = async () => {
     try {
@@ -71,11 +76,23 @@ const Auth = () => {
     setIsMenuOpen(!isMenuOpen);
   };
 
+  const handleNavLinkClick = (event: React.MouseEvent, modalName: string) => {
+    event.preventDefault();
+    setActiveModal(modalName);
+    setIsMenuOpen(false);
+  };
+  const handleDashboardClick = (event: React.MouseEvent) => {
+    event.preventDefault();
+    navigate('/dashboard');
+    setIsMenuOpen(false);
+  };
+
   const items = [
     {
       label: 'Account management',
       key: 'account',
       link: '/account',
+      onClick: (e: React.MouseEvent) => handleNavLinkClick(e, 'account'),
     },
     {
       label: 'Logout',
@@ -89,6 +106,7 @@ const Auth = () => {
       label: 'Dashboard',
       key: 'dashboard',
       link: '/dashboard',
+      onClick: handleDashboardClick,
     });
   }
 
@@ -105,22 +123,40 @@ const Auth = () => {
               {!isAuthenticated ? (
                 <>
                   <li className={style}>
-                    <NavLink to="/login" className={style}>
+                    <NavLink
+                      to="/login"
+                      onClick={(e) => handleNavLinkClick(e, 'login')}
+                      className={style}
+                    >
                       Login
                     </NavLink>
                   </li>
                   <li className={style}>
-                    <NavLink to="/register" className={style}>
+                    <NavLink
+                      to="/register"
+                      onClick={(e) => handleNavLinkClick(e, 'register')}
+                      className={style}
+                    >
                       Register
                     </NavLink>
                   </li>
                   <li className={style}>
-                    <NavLink to="/forgot-password" className={style}>
+                    <NavLink
+                      to="/forgot-password"
+                      onClick={(e) => handleNavLinkClick(e, 'forgotPassword')}
+                      className={style}
+                    >
                       Forgot Password
                     </NavLink>
                   </li>
                   <li className={style}>
-                    <NavLink to="/resend-verification-email" className={style}>
+                    <NavLink
+                      to="/resend-verification-email"
+                      onClick={(e) =>
+                        handleNavLinkClick(e, 'resendVerifyEmail')
+                      }
+                      className={style}
+                    >
                       Resend Verify Email
                     </NavLink>
                   </li>

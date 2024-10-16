@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, Descriptions, Image, Carousel, Table, Spin, Tag } from 'antd';
 import { callGetDishById } from '../../../services/serverApi';
+import ReactQuill from 'react-quill';
 
 interface DishDetailProps {
   dishId: string;
@@ -119,13 +120,23 @@ const ProductDetail: React.FC<DishDetailProps> = ({
       dataIndex: 'images',
       key: 'images',
       className: 'flex justify-center items-center ',
-      render: (dishImages: DishImage[]) => (
-        <div className="flex justify-center items-center flex-row gap-4">
-          {dishImages.map((image, index) => (
-            <Image key={index} src={image.imageUrl} width={100} height={100} />
-          ))}
-        </div>
-      ),
+      render: (dishImages: DishImage[]) =>
+        dishImages.length > 0 ? (
+          <div className="flex justify-center items-center flex-row gap-4">
+            {dishImages.map((image, index) => (
+              <Image
+                key={index}
+                src={image.imageUrl}
+                width={100}
+                height={100}
+              />
+            ))}
+          </div>
+        ) : (
+          <span className="text-center mt-8 bg-gray-200 p-2 rounded-md">
+            No image
+          </span>
+        ),
     },
     {
       title: 'List Options',
@@ -140,7 +151,7 @@ const ProductDetail: React.FC<DishDetailProps> = ({
                 {group.options.map((option, optionIndex) => (
                   <div key={option.optionSelectionId}>
                     <Tag color="blue">
-                      {option.optionName} -{' '}
+                      {option.optionName} :{' '}
                       {option.additionalPrice.toLocaleString()} đ
                     </Tag>
                   </div>
@@ -164,7 +175,12 @@ const ProductDetail: React.FC<DishDetailProps> = ({
       dataIndex: 'longDescription',
       key: 'longDescription',
       render: (longDescription: string) => (
-        <div style={{ whiteSpace: 'pre-wrap' }}>{longDescription}</div>
+        <ReactQuill
+          value={longDescription}
+          readOnly={true}
+          theme="bubble"
+          modules={{ toolbar: false }}
+        />
       ),
     },
   ];
@@ -197,7 +213,16 @@ const ProductDetail: React.FC<DishDetailProps> = ({
               bordered
             />
           ) : (
-            <p>No image.</p>
+            <Table
+              dataSource={[dish]}
+              columns={descriptionColumns}
+              rowKey="dishId"
+              pagination={false}
+              rowClassName={(record, index) =>
+                index % 2 === 0 ? 'table-row-light' : 'table-row-dark'
+              }
+              bordered
+            />
           )}
           <h4 className="text-center text-xl font-semibold mb-4 mt-2">
             Description

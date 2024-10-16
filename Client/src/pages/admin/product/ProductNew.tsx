@@ -142,18 +142,20 @@ const ProductNew: React.FC<ProductNewProps> = ({
     }
 
     values.recipes.forEach((recipe, index, ingredientList) => {
-      console.log('ingredientList', ingredientList);
-      console.log('recipe', recipe);
-
-
       formData.append(`recipes[${index}].warehouseId`, recipe.ingredientId);
-      formData.append(`recipes[${index}].quantityUsed`, recipe.quantityUsed.toString());
+      formData.append(
+        `recipes[${index}].quantityUsed`,
+        recipe.quantityUsed.toString()
+      );
       formData.append(`recipes[${index}].unit`, recipe.unit);
     });
 
     values.optionSelections.forEach((option, index) => {
       formData.append(`optionSelections[${index}].optionId`, option.optionId);
-      formData.append(`optionSelections[${index}].additionalPrice`, option.additionalPrice.toString());
+      formData.append(
+        `optionSelections[${index}].additionalPrice`,
+        option.additionalPrice.toString()
+      );
     });
 
     try {
@@ -308,9 +310,9 @@ const ProductNew: React.FC<ProductNewProps> = ({
               name="offerPrice"
               label="Offer price"
               className="font-medium"
-            // rules={[
-            //   { required: true, message: 'Vui lòng nhập giá khuyến mãi!' },
-            // ]}
+              // rules={[
+              //   { required: true, message: 'Vui lòng nhập giá khuyến mãi!' },
+              // ]}
             >
               <InputNumber min={0} style={{ width: '100%' }} />
             </Form.Item>
@@ -353,6 +355,7 @@ const ProductNew: React.FC<ProductNewProps> = ({
               <Upload
                 name="images"
                 listType="picture-card"
+                maxCount={10}
                 multiple
                 beforeUpload={(file) => {
                   const isJpgOrPng =
@@ -378,8 +381,8 @@ const ProductNew: React.FC<ProductNewProps> = ({
               rules={[{ required: true, message: 'Please select status!' }]}
             >
               <Select>
-                <Option value="available">Available</Option>
-                <Option value="unavailable">Unavailable</Option>
+                <Option value="AVAILABLE">Available</Option>
+                <Option value="UNAVAILABLE">Unavailable</Option>
               </Select>
             </Form.Item>
             <Form.Item
@@ -613,12 +616,12 @@ const ProductNew: React.FC<ProductNewProps> = ({
               name="longDescription"
               label="Long description"
               className="font-medium"
-            // rules={[
-            //   { required: true, message: 'Vui lòng nhập mô tả chi tiết!' },
-            // ]}
+              // rules={[
+              //   { required: true, message: 'Vui lòng nhập mô tả chi tiết!' },
+              // ]}
             >
               <ReactQuill
-                className=" h-[250px] w-full bg-white"
+                className=" h-[250px] max-h-[1200px] w-full bg-white"
                 theme="snow"
                 modules={modules}
                 formats={formats}
