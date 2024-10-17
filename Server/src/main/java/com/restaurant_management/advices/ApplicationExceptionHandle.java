@@ -18,18 +18,6 @@ import java.util.Map;
 @RestControllerAdvice
 public class ApplicationExceptionHandle {
 
-//    @ExceptionHandler(MethodArgumentNotValidException.class)
-//    @ResponseBody
-//    public ResponseEntity<ApiResponse> handleInvalidArgument(MethodArgumentNotValidException e) {
-//        Map<String, String> errors = new HashMap<>();
-//        e.getBindingResult().getAllErrors().forEach(error -> {
-//            String errorMessage = error.getDefaultMessage();
-//            errors.put("error", errorMessage);
-//        });
-//        ApiResponse apiResponse = new ApiResponse("Validation error occurred",errors, HttpStatus.BAD_REQUEST);
-//        return new ResponseEntity<>(apiResponse, HttpStatus.BAD_REQUEST);
-//    }
-
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseBody
     public ResponseEntity<ApiResponse> handleInvalidArgument(MethodArgumentNotValidException e) {
@@ -59,6 +47,13 @@ public class ApplicationExceptionHandle {
     @ResponseBody
     public ResponseEntity<ApiResponse> handleIllegalArgumentException(IllegalArgumentException e) {
         ApiResponse apiResponse = new ApiResponse("Validation error: ",ApiUtil.createErrorDetails( e.getMessage()), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(apiResponse, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(IllegalStateException.class)
+    @ResponseBody
+    public ResponseEntity<ApiResponse> handleIllegalStateException(IllegalStateException e) {
+        ApiResponse apiResponse = new ApiResponse("An illegal state has occurred: ", ApiUtil.createErrorDetails(e.getMessage()), HttpStatus.BAD_REQUEST);
         return new ResponseEntity<>(apiResponse, HttpStatus.BAD_REQUEST);
     }
 

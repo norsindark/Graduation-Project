@@ -31,9 +31,9 @@ public class OrderItemOption {
     private OrderItem orderItem;
 
     @ManyToOne
-    @JoinColumn(name = "dish_option_id", nullable = false)
+    @JoinColumn(name = "dish_option_selection_id", nullable = false)
     @JsonIgnore
-    private DishOption dishOption;
+    private DishOptionSelection dishOptionSelection;
 
     @Column(name = "additional_price")
     private Double additionalPrice;

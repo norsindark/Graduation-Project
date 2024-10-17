@@ -21,7 +21,7 @@ public class Coupon {
     @Id
     @UuidGenerator
     @Column(name = "coupon_id", length = 36, nullable = false)
-    private String Id;
+    private String id;
 
     @Column(name = "code", nullable = false)
     private String code;
@@ -34,6 +34,15 @@ public class Coupon {
 
     @Column(name = "max_discount")
     private Double maxDiscount;
+
+    @Column(name = "status")
+    private String status;
+
+    @Column(name = "description")
+    private String description;
+
+    @Column(name = "quantity")
+    private Integer quantity;
 
     @Column(name = "start_date")
     private String startDate;

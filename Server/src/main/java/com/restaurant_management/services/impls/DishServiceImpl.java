@@ -84,9 +84,15 @@ public class DishServiceImpl implements DishService {
     @Transactional
     public ApiResponse addDish(DishDto dishDto) throws DataExitsException, IOException {
         Category category = getCategory(dishDto.getCategoryId());
-        String[] uploadResult = uploadThumbnail(dishDto.getThumbImage());
+        String thumbImageUrl = null;
+        String deleteThumbUrl = null;
+        if (dishDto.getThumbImage() != null) {
+            String[] uploadResult = uploadThumbnail(dishDto.getThumbImage());
+            thumbImageUrl = uploadResult[0];
+            deleteThumbUrl = uploadResult[1];
+        }
 
-        Dish dish = createDish(dishDto, category, uploadResult[0], uploadResult[1]);
+        Dish dish = createDish(dishDto, category, thumbImageUrl, deleteThumbUrl);
         List<Recipe> recipes = createRecipes(dishDto.getRecipes(), dish);
 
         if (recipes.isEmpty()) {
