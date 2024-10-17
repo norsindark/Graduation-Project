@@ -11,6 +11,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -47,7 +48,7 @@ public class OrderItem {
 
     @OneToMany(mappedBy = "orderItem", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
-    private List<OrderItemOption> options;
+    private List<OrderItemOption> options = new ArrayList<>();
 
     @Column(name = "created_at")
     @CreationTimestamp

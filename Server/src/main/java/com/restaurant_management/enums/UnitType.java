@@ -1,5 +1,8 @@
 package com.restaurant_management.enums;
 
+import lombok.Getter;
+
+@Getter
 public enum UnitType {
     GRAM("g", 1.0),
     KILOGRAM("kg", 1000.0),
@@ -15,15 +18,17 @@ public enum UnitType {
         this.conversionFactorToGram = conversionFactorToGram;
     }
 
-    public String getUnit() {
-        return unit;
-    }
-
-    public Double getConversionFactorToGram() {
-        return conversionFactorToGram;
-    }
     public static double convert(double quantity, UnitType fromUnit, UnitType toUnit) {
         double quantityInGrams = quantity * fromUnit.getConversionFactorToGram();
         return quantityInGrams / toUnit.getConversionFactorToGram();
+    }
+
+    public static UnitType fromString(String unit) {
+        for (UnitType unitType : UnitType.values()) {
+            if (unitType.getUnit().equalsIgnoreCase(unit)) {
+                return unitType;
+            }
+        }
+        throw new IllegalArgumentException("Unknown unit: " + unit);
     }
 }

@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface DishOptionSelectionRepository extends JpaRepository<DishOptionSelection, String> {
 
@@ -21,4 +22,7 @@ public interface DishOptionSelectionRepository extends JpaRepository<DishOptionS
 
     @Query("SELECT dos FROM DishOptionSelection dos WHERE dos.dish = :dish")
     List<DishOptionSelection> findByDish(@Param("dish") Dish dish);
+
+    @Query("SELECT dos FROM DishOptionSelection dos WHERE dos.id = :id")
+    Optional<DishOptionSelection> findByDishOptionSelectionId(@Param("id") String id);
 }
