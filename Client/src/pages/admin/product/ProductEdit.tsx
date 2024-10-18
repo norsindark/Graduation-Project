@@ -31,6 +31,7 @@ import {
   callUpdateDish,
 } from '../../../services/serverApi';
 import { RcFile, UploadFile } from 'antd/es/upload';
+import { Options } from './TypeProduct';
 const { Option } = Select;
 
 interface ProductEditProps {
@@ -52,6 +53,8 @@ const ProductEdit: React.FC<ProductEditProps> = ({
   const [optionSelectionList, setOptionSelectionList] = useState<
     OptionSelection[]
   >([]);
+
+  const [options, setOptions] = useState<Options[]>([]);
 
   const [previewVisible, setPreviewVisible] = useState(false);
   const [previewImage, setPreviewImage] = useState('');
@@ -85,13 +88,13 @@ const ProductEdit: React.FC<ProductEditProps> = ({
           })),
           thumbImage: currentDish.thumbImage
             ? [
-                {
-                  uid: '-1',
-                  name: 'thumbImage.png',
-                  status: 'done',
-                  url: currentDish.thumbImage,
-                },
-              ]
+              {
+                uid: '-1',
+                name: 'thumbImage.png',
+                status: 'done',
+                url: currentDish.thumbImage,
+              },
+            ]
             : [],
           images:
             currentDish.images?.map((img: any, index: number) => ({
@@ -102,18 +105,22 @@ const ProductEdit: React.FC<ProductEditProps> = ({
             })) || [],
           optionSelections: currentDish.listOptions[0]?.options.map(
             (option) => ({
-              optionId: option.optionName, // Store the ID
-              optionName: option.optionName, // Store the name for display
+              optionSelectionId: option.optionSelectionId,
+              optionName: option.optionName,
               additionalPrice: option.additionalPrice,
             })
           ),
+          // options: currentDish.optionSelections.map((option) => ({
+          //   optionId: option.optionId,
+          //   additionalPrice: option.additionalPrice,
+          // })),
           longDescription: currentDish.longDescription,
         });
       }
     };
     fetchList();
   }, [form, currentDish]);
-  console.log('currentDish', currentDish);
+
   const onFinish = async (values: any) => {
     const {
       thumbImage,
@@ -166,9 +173,17 @@ const ProductEdit: React.FC<ProductEditProps> = ({
     });
 
     optionSelections.forEach((option: any, index: number) => {
-      formData.append(`optionSelections[${index}].optionId`, option.optionId);
+      formData.append(`optionSelections[${index}].optionSelectionId`, option.optionSelectionId);
       formData.append(
         `optionSelections[${index}].additionalPrice`,
+        option.additionalPrice.toString()
+      );
+    });
+
+    options.forEach((option: any, index: number) => {
+      formData.append(`options[${index}].optionId`, option.optionId);
+      formData.append(
+        `options[${index}].additionalPrice`,
         option.additionalPrice.toString()
       );
     });
@@ -328,9 +343,9 @@ const ProductEdit: React.FC<ProductEditProps> = ({
               name="offerPrice"
               label="Offer price"
               className="font-medium"
-              // rules={[
-              //   { required: true, message: 'Vui lòng nhập giá khuyến mãi!' },
-              // ]}
+            // rules={[
+            //   { required: true, message: 'Vui lòng nhập giá khuyến mãi!' },
+            // ]}
             >
               <InputNumber min={0} style={{ width: '100%' }} />
             </Form.Item>
@@ -555,24 +570,24 @@ const ProductEdit: React.FC<ProductEditProps> = ({
           <Col xs={24} sm={12}>
             <Form.List
               name="optionSelections"
-              rules={[
-                {
-                  validator: async (_, value) => {
-                    if (!value || value.length === 0) {
-                      setTimeout(() => {
-                        notification.error({
-                          message: 'Error',
-                          description: 'Please enter option selection!',
-                          duration: 5,
-                          showProgress: true,
-                        });
-                      }, 800);
-                      return Promise.reject();
-                    }
-                    return Promise.resolve();
-                  },
-                },
-              ]}
+            // rules={[
+            //   {
+            //     validator: async (_, value) => {
+            //       if (!value || value.length === 0) {
+            //         setTimeout(() => {
+            //           notification.error({
+            //             message: 'Error',
+            //             description: 'Please enter option selection!',
+            //             duration: 5,
+            //             showProgress: true,
+            //           });
+            //         }, 800);
+            //         return Promise.reject();
+            //       }
+            //       return Promise.resolve();
+            //     },
+            //   },
+            // ]}
             >
               {(fields, { add, remove }) => (
                 <>
@@ -587,14 +602,14 @@ const ProductEdit: React.FC<ProductEditProps> = ({
                     >
                       <Form.Item
                         {...restField}
-                        name={[name, 'optionId']}
+                        name={[name, 'optionName']}
                         className="mb-0 w-full"
-                        rules={[
-                          {
-                            required: true,
-                            message: 'Please select an option!',
-                          },
-                        ]}
+                      // rules={[
+                      //   {
+                      //     required: true,
+                      //     message: 'Please select an option!',
+                      //   },
+                      // ]}
                       >
                         <Select
                           placeholder="Select option"
@@ -614,8 +629,8 @@ const ProductEdit: React.FC<ProductEditProps> = ({
                           {optionSelectionList.map((option) => (
                             <Option
                               key={option.optionId}
-                              value={option.optionId} // Use ID as value
-                              label={option.optionName} // Use name as label
+                              value={option.optionId}
+                              label={option.optionName}
                             >
                               {option.optionName}
                             </Option>
@@ -680,7 +695,7 @@ const ProductEdit: React.FC<ProductEditProps> = ({
                 className="w-full sm:w-auto"
                 icon={<PlusOutlined />}
               >
-                Create new
+                Update dish
               </Button>
               <Button
                 danger
