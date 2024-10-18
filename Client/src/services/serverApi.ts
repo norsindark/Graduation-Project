@@ -309,12 +309,18 @@ export const callGetDishById = async (id: string) => {
 };
 
 
-export const callAddNewDish = async (file: FormData) => {
-  return axios.post(`/api/v1/dashboard/dish/add-new-dish`, file, {
-    headers: {
-      'Content-Type': 'multipart/form-data',
-    },
-  });
+export const callAddNewDish = async (formData: FormData) => {
+  try {
+    const response = await axios.post(`/api/v1/dashboard/dish/add-new-dish`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response;
+  } catch (error) {
+    console.error('Error in callAddNewDish:', error);
+    throw error;
+  }
 };
 
 export const callGetAllIngredients = async () => {
@@ -325,3 +331,15 @@ export const callGetAllOptionSelections = async () => {
   return axios.get(`/api/v1/dashboard/dish-option-group/get-all-option-name`);
 }
 
+export const callUpdateDish = async (formData: FormData) => {
+  try {
+    const response = await axios.put(`/api/v1/dashboard/dish/update-dish`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response;
+  } catch (error) {
+    console.error('Error in callAddNewDish:', error);
+    throw error;
+  }};

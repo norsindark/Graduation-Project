@@ -6,7 +6,7 @@ import HomePage from '../pages/public/HomePage';
 
 // import LoginModal from '../pages/public/LoginModal';
 import NotFound from '../components/NotFound/NotFound';
-// import ProtectedRoute from '../components/ProtectedRoute/ProtectedRoute';
+import ProtectedRoute from '../components/ProtectedRoute/ProtectedRoute';
 // import ForgotPassword from '../components/public/auth/forgotpassword/ForgotPassword';
 // import ResetPassword from '../components/public/auth/resetpassword/ResetPassword';
 // import ResendVerifyEmail from '../components/public/auth/resendverifyemail/ResendVerifyEmail';
@@ -94,9 +94,9 @@ export const router = createBrowserRouter([
   {
     path: '/',
     element: (
-      // <ProtectedRoute>
+      //<ProtectedRoute>
       <Main />
-      //* </ProtectedRoute> */}
+      //</ProtectedRoute>
     ),
     errorElement: <NotFound />,
     children: [

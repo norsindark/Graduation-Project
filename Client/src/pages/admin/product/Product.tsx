@@ -19,45 +19,8 @@ import { callDeleteDish, callGetAllDishes } from '../../../services/serverApi';
 import ProductNew from './ProductNew';
 import ProductEdit from './ProductEdit';
 import ProductDetail from './ProductDetail';
-interface DishImage {
-  imageId: string;
-  imageUrl: string;
-}
 
-interface Recipe {
-  warehouseId: string;
-  ingredientName: string;
-  quantityUsed: number;
-  unit: string;
-  recipeId: string;
-}
-
-interface Option {
-  optionSelectionId: string;
-  optionName: string;
-  additionalPrice: number;
-}
-
-interface OptionGroup {
-  optionGroupId: string;
-  optionGroupName: string;
-  options: Option[];
-}
-
-interface Dish {
-  dishId: string;
-  dishName: string;
-  description: string;
-  status: string;
-  thumbImage: string;
-  offerPrice: number;
-  price: number;
-  categoryId: string;
-  categoryName: string;
-  images: DishImage[];
-  recipes: Recipe[];
-  listOptions: OptionGroup[];
-}
+import { Dish } from './TypeProduct';
 
 const Product: React.FC = () => {
   const [dataSource, setDataSource] = useState<Dish[]>([]);
@@ -118,6 +81,11 @@ const Product: React.FC = () => {
   const handleEditClick = (record: Dish) => {
     setCurrentDish(record);
     setShowProductEdit(true);
+  };
+
+  const handleEditSuccess = () => {
+    fetchDishes();
+    setShowProductEdit(false);
   };
 
   const handleDelete = async (id: string) => {
@@ -279,7 +247,7 @@ const Product: React.FC = () => {
         ) : showProductEdit && currentDish ? (
           <ProductEdit
             currentDish={currentDish}
-            onEditSuccess={() => fetchDishes()}
+            onEditSuccess={handleEditSuccess}
             setShowProductEdit={setShowProductEdit}
           />
         ) : isDishDetailVisible && selectedDishId ? (
