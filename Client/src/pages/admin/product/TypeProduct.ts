@@ -83,3 +83,7 @@ export interface Dish {
   listOptions: OptionGroup[];
 }
 
+export interface Options {
+  optionId: string;
+  additionalPrice: number;
+}
