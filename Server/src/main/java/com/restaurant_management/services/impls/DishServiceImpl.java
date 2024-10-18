@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -112,35 +113,6 @@ public class DishServiceImpl implements DishService {
         return new ApiResponse("Dish added successfully", HttpStatus.OK);
     }
 
-    @Override
-    @Transactional
-    public ApiResponse updateDish(DishRequest request) throws DataExitsException, IOException {
-        Dish dish = dishRepository.findById(request.getDishId())
-                .orElseThrow(() -> new DataExitsException("Dish not found"));
-        Category category = getCategory(request.getCategoryId());
-
-        updateThumbnailIfPresent(request, dish);
-        updateDishDetails(request, dish, category);
-        dishRepository.save(dish);
-
-        if (request.getImages() != null && !request.getImages().isEmpty()) {
-            uploadImages(request.getImages(), dish);
-        }
-
-        if (request.getRecipes() != null && !request.getRecipes().isEmpty()) {
-            updateRecipes(request.getRecipes(), dish);
-        }
-
-        if (request.getOptionSelections() != null && !request.getOptionSelections().isEmpty()) {
-            updateOptionSelection(request);
-        }
-
-        if (request.getOptions() !=null && !request.getOptions().isEmpty()) {
-            addNewOption(dish, request.getOptions());
-        }
-
-        return new ApiResponse("Dish updated successfully", HttpStatus.OK);
-    }
 
     @Override
     public ApiResponse updateThumbnail(UpdateThumbRequest request) throws DataExitsException, IOException {
@@ -240,10 +212,65 @@ public class DishServiceImpl implements DishService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    @Transactional
+    public ApiResponse updateDish(DishRequest request) throws DataExitsException, IOException {
+        Dish dish = dishRepository.findById(request.getDishId())
+                .orElseThrow(() -> new DataExitsException("Dish not found"));
+        Category category = getCategory(request.getCategoryId());
+
+        updateThumbnailIfPresent(request, dish);
+        updateDishDetails(request, dish, category);
+        dishRepository.save(dish);
+
+        if (request.getImages() != null && !request.getImages().isEmpty()) {
+            uploadImages(request.getImages(), dish);
+        }
+
+        if (request.getRecipes() != null && !request.getRecipes().isEmpty()) {
+            updateRecipes(request.getRecipes(), dish);
+        }
+
+        if (request.getOptionSelections() != null && !request.getOptionSelections().isEmpty()) {
+            updateOptionSelection(request);
+            removeExtraOptionSelectionsIfNeeded(request.getOptionSelections(), dish);
+        } else {
+            removeAllOptionSelections(dish);
+        }
+
+
+        if (request.getOptions() != null && !request.getOptions().isEmpty()) {
+            addNewOption(dish, request.getOptions());
+        }
+
+        return new ApiResponse("Dish updated successfully", HttpStatus.OK);
+    }
+
+
     private void updateRecipes(List<RecipeRequest> requests, Dish dish) throws DataExitsException {
+        List<String> requestRecipeIds = requests.stream()
+                .map(RecipeRequest::getRecipeId)
+                .filter(Objects::nonNull)
+                .toList();
+
+        List<Recipe> existingRecipes = recipeRepository.findByDish(dish);
+
+        List<Recipe> recipesToDelete = existingRecipes.stream()
+                .filter(recipe -> !requestRecipeIds.contains(recipe.getId()))
+                .collect(Collectors.toList());
+
+        recipeRepository.deleteAll(recipesToDelete);
+
         for (RecipeRequest request : requests) {
-            Recipe recipe = recipeRepository.findById(request.getRecipeId())
-                    .orElseThrow(() -> new DataExitsException("Recipe not found"));
+            Recipe recipe;
+
+            if (request.getRecipeId() == null || request.getRecipeId().isEmpty()) {
+                recipe = new Recipe();
+            } else {
+                recipe = recipeRepository.findById(request.getRecipeId())
+                        .orElseThrow(() -> new DataExitsException("Recipe not found"));
+            }
+
             Warehouse warehouse = warehouseRepository.findById(request.getWarehouseId())
                     .orElseThrow(() -> new DataExitsException("Ingredient not found"));
 
@@ -312,4 +339,30 @@ public class DishServiceImpl implements DishService {
             }
         });
     }
+
+    private void removeExtraOptionSelectionsIfNeeded(List<DishOptionSelectionRequest> optionSelections, Dish dish) {
+        List<String> requestOptionIds = optionSelections.stream()
+                .map(DishOptionSelectionRequest::getOptionSelectionId)
+                .toList();
+        List<DishOptionSelection> existingOptionSelections = dishOptionSelectionRepository.findByDish(dish);
+        List<DishOptionSelection> optionsToDelete = existingOptionSelections.stream()
+                .filter(optionSelection -> !requestOptionIds.contains(optionSelection.getId()))
+                .collect(Collectors.toList());
+        if (!optionsToDelete.isEmpty()) {
+            dishOptionSelectionRepository.deleteAll(optionsToDelete);
+        }
+    }
+
+    private void removeAllOptionSelections(Dish dish) {
+        List<DishOptionSelection> existingOptionSelections = dishOptionSelectionRepository.findByDish(dish);
+        if (!existingOptionSelections.isEmpty()) {
+            existingOptionSelections.forEach(optionSelection ->
+                    System.out.println("Option to delete: " + optionSelection.getId())
+            );
+
+            System.out.println("Options to delete: " + existingOptionSelections.size());
+            dishOptionSelectionRepository.deleteAll(existingOptionSelections);
+        }
+    }
+
 }
