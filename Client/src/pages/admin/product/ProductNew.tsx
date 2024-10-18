@@ -10,9 +10,9 @@ import {
   Row,
   Col,
   Modal,
-  Slider,
+  Upload,
+  message,
 } from 'antd';
-import { Upload, message } from 'antd';
 import {
   CloseOutlined,
   MinusCircleOutlined,
@@ -27,53 +27,13 @@ import {
   callGetAllIngredients,
   callGetAllOptionSelections,
 } from '../../../services/serverApi';
-import Cropper, { Area } from 'react-easy-crop';
-import getCroppedImg from '../../../utils/getCroppedImg';
-
+import { RcFile, UploadFile } from 'antd/es/upload';
+import { formats, modules } from '../../../utils/config-reactquill';
+import { Category, Ingredient, Dish, OptionSelection } from './TypeProduct';
 const { Option } = Select;
-
 interface ProductNewProps {
   onAddSuccess: () => void;
   setShowProductNew: React.Dispatch<React.SetStateAction<boolean>>;
-}
-
-interface Dish {
-  dishName: string;
-  description: string;
-  longDescription: string;
-  status: string;
-  thumbImage: File;
-  images: File[];
-  offerPrice: number;
-  price: number;
-  categoryId: string;
-  recipes: RecipeDto[];
-  optionSelections: OptionSelection[];
-}
-
-interface RecipeDto {
-  warehouseId: string;
-  quantityUsed: number;
-  ingredientId: string;
-  unit: string;
-}
-
-interface Category {
-  categoryId: string;
-  categoryName: string;
-}
-
-interface Ingredient {
-  warehouseId: string;
-  ingredientName: string;
-  quantityUsed: number;
-  unit: string;
-}
-
-interface OptionSelection {
-  optionId: string;
-  optionName: string;
-  additionalPrice: number;
 }
 
 const ProductNew: React.FC<ProductNewProps> = ({
@@ -89,59 +49,80 @@ const ProductNew: React.FC<ProductNewProps> = ({
     OptionSelection[]
   >([]);
 
-  const [crop, setCrop] = useState({ x: 0, y: 0 });
-  const [zoom, setZoom] = useState(1);
-  const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
   const [previewVisible, setPreviewVisible] = useState(false);
-  const [previewImage, setPreviewImage] = useState<string>('');
+  const [previewImage, setPreviewImage] = useState('');
+  const [previewTitle, setPreviewTitle] = useState('');
 
-  useEffect(() => {
-    const fetchCategoryList = async () => {
-      const responseCategory = await callGetAllCategoriesName();
-      setCategoryList(responseCategory.data);
-    };
-    fetchCategoryList();
-
-    const fetchIngredientList = async () => {
-      const responseIngredient = await callGetAllIngredients();
-
-      setIngredientList(responseIngredient.data);
-    };
-    fetchIngredientList();
-
-    const fetchOptionSelectionList = async () => {
-      const responseOptionSelection = await callGetAllOptionSelections();
-      setOptionSelectionList(responseOptionSelection.data);
-    };
-    fetchOptionSelectionList();
+  const normFile = useCallback((e: any) => {
+    if (Array.isArray(e)) {
+      return e;
+    }
+    if (e && e.fileList) {
+      return e.fileList.map((file: any) => ({
+        ...file,
+        originFileObj: file.originFileObj || file,
+      }));
+    }
+    return [];
   }, []);
 
+  useEffect(() => {
+    const fetchList = async () => {
+      const [responseCategory, responseIngredient, responseOptionSelection] =
+        await Promise.all([
+          callGetAllCategoriesName(),
+          callGetAllIngredients(),
+          callGetAllOptionSelections(),
+        ]);
+
+      setCategoryList(responseCategory.data);
+      setIngredientList(responseIngredient.data);
+      setOptionSelectionList(responseOptionSelection.data);
+    };
+    fetchList();
+  }, [form]);
+
   const onFinish = async (values: Dish) => {
-    console.log('values', values);
+    const {
+      thumbImage,
+      images,
+      dishName,
+      description,
+      longDescription,
+      status,
+      offerPrice,
+      price,
+      categoryId,
+      recipes,
+      optionSelections,
+    } = values;
     setIsSubmit(true);
     const formData = new FormData();
 
-    formData.append('dishName', values.dishName);
-    formData.append('description', values.description);
-    formData.append('longDescription', values.longDescription);
-    formData.append('status', values.status);
-    formData.append('offerPrice', values.offerPrice.toString());
-    formData.append('price', values.price.toString());
-    formData.append('categoryId', values.categoryId);
+    formData.append('dishName', dishName);
+    formData.append('description', description);
+    formData.append('longDescription', longDescription);
+    formData.append('status', status);
+    formData.append('offerPrice', offerPrice.toString());
+    formData.append('price', price.toString());
+    formData.append('categoryId', categoryId);
 
-    if (values.thumbImage) {
-      formData.append('thumbImage', values.thumbImage);
+    if (thumbImage && thumbImage.fileList && thumbImage.fileList.length > 0) {
+      const thumbImageFile = values.thumbImage.fileList[0].originFileObj;
+      if (thumbImageFile) {
+        formData.append('thumbImage', thumbImageFile);
+      }
     }
 
-    if (values.images && values.images.length > 0) {
-      values.images.forEach((image) => {
-        if (image instanceof File) {
-          formData.append('images', image);
+    if (images && Array.isArray(images)) {
+      images.forEach((file: any, index: number) => {
+        if (file.originFileObj) {
+          formData.append(`images[${index}].imageFile`, file.originFileObj);
         }
       });
     }
 
-    values.recipes.forEach((recipe, index, ingredientList) => {
+    recipes.forEach((recipe, index) => {
       formData.append(`recipes[${index}].warehouseId`, recipe.ingredientId);
       formData.append(
         `recipes[${index}].quantityUsed`,
@@ -150,7 +131,7 @@ const ProductNew: React.FC<ProductNewProps> = ({
       formData.append(`recipes[${index}].unit`, recipe.unit);
     });
 
-    values.optionSelections.forEach((option, index) => {
+    optionSelections.forEach((option, index) => {
       formData.append(`optionSelections[${index}].optionId`, option.optionId);
       formData.append(
         `optionSelections[${index}].additionalPrice`,
@@ -160,7 +141,6 @@ const ProductNew: React.FC<ProductNewProps> = ({
 
     try {
       const response = await callAddNewDish(formData);
-      console.log('response', response);
       if (response.status === 200) {
         notification.success({
           message: 'Dish added successfully!',
@@ -189,76 +169,80 @@ const ProductNew: React.FC<ProductNewProps> = ({
     }
   };
 
-  const modules = {
-    toolbar: [
-      [{ header: [1, 2, 3, 4, 5, 6, false] }],
-      [
-        {
-          font: [],
-        },
-      ],
-      [{ size: ['small', false, 'large', 'huge'] }],
-      ['bold', 'italic', 'underline', 'strike', 'blockquote'],
-      [
-        { list: 'ordered' },
-        { list: 'bullet' },
-        { indent: '-1' },
-        { indent: '+1' },
-      ],
-      ['link', 'image', 'video'],
-      ['clean'],
-      [{ color: [] }, { background: [] }],
-      [{ align: [] }],
-      ['code-block'],
-    ],
-  };
+  const getBase64 = (file: RcFile): Promise<string> =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = (error) => reject(error);
+    });
 
-  const formats = [
-    'header',
-    'font',
-    'size',
-    'bold',
-    'italic',
-    'underline',
-    'strike',
-    'blockquote',
-    'list',
-    'bullet',
-    'indent',
-    'link',
-    'image',
-    'video',
-    'color',
-    'background',
-    'align',
-    'code-block',
-  ];
-
-  const handleImageUpload = (file: File, fieldName: string) => {
-    const previewUrl = URL.createObjectURL(file);
-    setPreviewImage(previewUrl);
-    setPreviewVisible(true);
-    form.setFieldsValue({ [fieldName]: file });
-  };
-
-  const onCropComplete = useCallback(
-    (croppedArea: Area, croppedAreaPixels: Area) => {
-      setCroppedAreaPixels(croppedAreaPixels);
-    },
-    []
-  );
-
-  const handleCropCancel = () => {
-    setPreviewVisible(false);
-    setPreviewImage('');
-  };
-
-  const handleCropConfirm = async () => {
-    if (previewImage && croppedAreaPixels) {
-      const croppedImage = await getCroppedImg(previewImage, croppedAreaPixels);
-      form.setFieldsValue({ thumbImage: croppedImage });
-      setPreviewVisible(false);
+  const handlePreview = async (file: UploadFile) => {
+    if (!file.url && !file.preview) {
+      file.preview = await getBase64(file.originFileObj as RcFile);
     }
+
+    setPreviewImage(file.url || (file.preview as string));
+    setPreviewVisible(true);
+    setPreviewTitle(
+      file.name || file.url!.substring(file.url!.lastIndexOf('/') + 1)
+    );
+  };
+
+  const handleCancel = () => setPreviewVisible(false);
+
+  const handleThumbImageUpload = (file: RcFile) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const base64 = e.target?.result as string;
+      setPreviewImage(base64);
+    };
+    reader.readAsDataURL(file);
+    const previewUrl = URL.createObjectURL(file);
+    const thumbImageFile = {
+      uid: file.uid,
+      name: file.name,
+      status: 'done',
+      url: previewUrl,
+      originFileObj: file,
+    };
+
+    form.setFieldsValue({
+      thumbImage: {
+        file: thumbImageFile,
+        fileList: [thumbImageFile],
+      },
+    });
+    return false;
+  };
+
+  const handleImagesOtherUpload = (file: RcFile) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const base64 = e.target?.result as string;
+      setPreviewImage(base64);
+    };
+    reader.readAsDataURL(file);
+    const currentFileList = form.getFieldValue('images') || [];
+
+    const isFileAlreadyExist = currentFileList.some(
+      (existingFile: any) =>
+        existingFile.uid === file.uid || existingFile.name === file.name
+    );
+
+    if (!isFileAlreadyExist) {
+      const newFile = {
+        uid: file.uid,
+        name: file.name,
+        status: 'done',
+        url: URL.createObjectURL(file),
+        originFileObj: file,
+      };
+      const newFileList = [...currentFileList, newFile];
+      form.setFieldsValue({ images: newFileList });
+    }
+
+    return false;
   };
 
   return (
@@ -266,7 +250,6 @@ const ProductNew: React.FC<ProductNewProps> = ({
       <h4 className="text-center text-xl font-semibold mb-4">
         Create new dish
       </h4>
-
       <Form form={form} onFinish={onFinish} layout="vertical">
         <Row gutter={16}>
           <Col xs={24} sm={12}>
@@ -310,9 +293,6 @@ const ProductNew: React.FC<ProductNewProps> = ({
               name="offerPrice"
               label="Offer price"
               className="font-medium"
-              // rules={[
-              //   { required: true, message: 'Vui lòng nhập giá khuyến mãi!' },
-              // ]}
             >
               <InputNumber min={0} style={{ width: '100%' }} />
             </Form.Item>
@@ -336,10 +316,15 @@ const ProductNew: React.FC<ProductNewProps> = ({
                   if (!isJpgOrPng) {
                     message.error('You can only upload JPG/PNG files!');
                   } else {
-                    handleImageUpload(file, 'thumbImage');
+                    handleThumbImageUpload(file);
                   }
                   return false;
                 }}
+                showUploadList={{
+                  showPreviewIcon: true,
+                  showRemoveIcon: true,
+                }}
+                onPreview={handlePreview}
               >
                 <div>
                   <UploadOutlined />
@@ -351,20 +336,37 @@ const ProductNew: React.FC<ProductNewProps> = ({
               name="images"
               label="Other images"
               className="font-medium"
+              valuePropName="fileList"
+              getValueFromEvent={normFile}
             >
               <Upload
                 name="images"
                 listType="picture-card"
                 maxCount={10}
                 multiple
+                fileList={form.getFieldValue('images') || []}
                 beforeUpload={(file) => {
                   const isJpgOrPng =
                     file.type === 'image/jpeg' || file.type === 'image/png';
                   if (!isJpgOrPng) {
                     message.error('You can only upload JPG/PNG files!');
+                    return false;
                   }
-                  return isJpgOrPng;
+                  handleImagesOtherUpload(file);
+                  return false;
                 }}
+                onChange={({ fileList }) => {
+                  const updatedFileList = fileList.map((file) => ({
+                    ...file,
+                    status: 'done',
+                  }));
+                  form.setFieldsValue({ images: updatedFileList });
+                }}
+                showUploadList={{
+                  showPreviewIcon: true,
+                  showRemoveIcon: true,
+                }}
+                onPreview={handlePreview}
               >
                 <div>
                   <UploadOutlined />
@@ -616,9 +618,6 @@ const ProductNew: React.FC<ProductNewProps> = ({
               name="longDescription"
               label="Long description"
               className="font-medium"
-              // rules={[
-              //   { required: true, message: 'Vui lòng nhập mô tả chi tiết!' },
-              // ]}
             >
               <ReactQuill
                 className=" h-[250px] max-h-[1200px] w-full bg-white"
@@ -657,31 +656,12 @@ const ProductNew: React.FC<ProductNewProps> = ({
       </Form>
       <Modal
         open={previewVisible}
-        title="Crop Image"
-        onCancel={handleCropCancel}
-        onOk={handleCropConfirm}
-        okText="Confirm"
-        cancelText="Cancel"
-        width={450}
+        title={previewTitle}
+        footer={null}
+        onCancel={handleCancel}
+        width={800}
       >
-        <div style={{ position: 'relative', width: '100%', height: 300 }}>
-          <Cropper
-            image={previewImage}
-            crop={crop}
-            zoom={zoom}
-            aspect={1}
-            onCropChange={setCrop}
-            onZoomChange={setZoom}
-            onCropComplete={onCropComplete}
-          />
-        </div>
-        <Slider
-          value={zoom}
-          min={1}
-          max={5}
-          step={0.1}
-          onChange={(value) => setZoom(value)}
-        />
+        <img alt="preview" style={{ width: '100%' }} src={previewImage} />
       </Modal>
     </>
   );
