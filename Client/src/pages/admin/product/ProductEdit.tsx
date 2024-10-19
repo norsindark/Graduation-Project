@@ -13,7 +13,13 @@ import {
 } from 'antd';
 
 import { Button } from 'antd';
-import { Category, Dish, Ingredient, OptionSelection } from './TypeProduct';
+import {
+  Category,
+  Dish,
+  DishImage,
+  Ingredient,
+  OptionSelection,
+} from './TypeProduct';
 import { useCallback, useEffect, useState } from 'react';
 import {
   PlusOutlined,
@@ -29,9 +35,9 @@ import {
   callGetAllIngredients,
   callGetAllOptionSelections,
   callUpdateDish,
+  callDeleteDishImageOther,
 } from '../../../services/serverApi';
 import { RcFile, UploadFile } from 'antd/es/upload';
-import { Options } from './TypeProduct';
 const { Option } = Select;
 
 interface ProductEditProps {
@@ -54,8 +60,6 @@ const ProductEdit: React.FC<ProductEditProps> = ({
     OptionSelection[]
   >([]);
 
-  const [options, setOptions] = useState<Options[]>([]);
-
   const [previewVisible, setPreviewVisible] = useState(false);
   const [previewImage, setPreviewImage] = useState('');
   const [previewTitle, setPreviewTitle] = useState('');
@@ -72,7 +76,7 @@ const ProductEdit: React.FC<ProductEditProps> = ({
       setCategoryList(responseCategory.data);
       setIngredientList(responseIngredient.data);
       setOptionSelectionList(responseOptionSelection.data);
-      console.log('optionSelectionList', optionSelectionList);
+
       if (currentDish) {
         form.setFieldsValue({
           dishName: currentDish.dishName,
@@ -88,13 +92,13 @@ const ProductEdit: React.FC<ProductEditProps> = ({
           })),
           thumbImage: currentDish.thumbImage
             ? [
-              {
-                uid: '-1',
-                name: 'thumbImage.png',
-                status: 'done',
-                url: currentDish.thumbImage,
-              },
-            ]
+                {
+                  uid: '-1',
+                  name: 'thumbImage.png',
+                  status: 'done',
+                  url: currentDish.thumbImage,
+                },
+              ]
             : [],
           images:
             currentDish.images?.map((img: any, index: number) => ({
@@ -103,17 +107,13 @@ const ProductEdit: React.FC<ProductEditProps> = ({
               status: 'done',
               url: img.imageUrl,
             })) || [],
-          optionSelections: currentDish.listOptions[0]?.options.map(
-            (option) => ({
+          optionSelections: currentDish.listOptions?.flatMap((option) =>
+            option.options.map((option) => ({
               optionSelectionId: option.optionSelectionId,
               optionName: option.optionName,
               additionalPrice: option.additionalPrice,
-            })
+            }))
           ),
-          // options: currentDish.optionSelections.map((option) => ({
-          //   optionId: option.optionId,
-          //   additionalPrice: option.additionalPrice,
-          // })),
           longDescription: currentDish.longDescription,
         });
       }
@@ -134,8 +134,8 @@ const ProductEdit: React.FC<ProductEditProps> = ({
       categoryId,
       recipes,
       optionSelections,
+      options = [],
     } = values;
-    console.log('values', values);
     setIsSubmit(true);
     const formData = new FormData();
 
@@ -148,17 +148,21 @@ const ProductEdit: React.FC<ProductEditProps> = ({
     formData.append('offerPrice', offerPrice.toString());
     formData.append('price', price.toString());
     formData.append('categoryId', categoryId);
-    if (thumbImage && thumbImage.fileList && thumbImage.fileList.length > 0) {
-      const thumbImageFile = thumbImage.fileList[0].originFileObj;
+
+    if (thumbImage && Array.isArray(thumbImage) && thumbImage.length > 0) {
+      const thumbImageFile = thumbImage[0].originFileObj;
       if (thumbImageFile) {
         formData.append('thumbImage', thumbImageFile);
       }
     }
 
+    let flag = 0;
+
     if (images && Array.isArray(images)) {
-      images.forEach((file: any, index: number) => {
+      images.forEach((file: any) => {
         if (file.originFileObj) {
-          formData.append(`images[${index}].imageFile`, file.originFileObj);
+          formData.append(`images[${flag}].imageFile`, file.originFileObj);
+          flag++;
         }
       });
     }
@@ -173,7 +177,10 @@ const ProductEdit: React.FC<ProductEditProps> = ({
     });
 
     optionSelections.forEach((option: any, index: number) => {
-      formData.append(`optionSelections[${index}].optionSelectionId`, option.optionSelectionId);
+      formData.append(
+        `optionSelections[${index}].optionSelectionId`,
+        option.optionSelectionId
+      );
       formData.append(
         `optionSelections[${index}].additionalPrice`,
         option.additionalPrice.toString()
@@ -181,7 +188,7 @@ const ProductEdit: React.FC<ProductEditProps> = ({
     });
 
     options.forEach((option: any, index: number) => {
-      formData.append(`options[${index}].optionId`, option.optionId);
+      formData.append(`options[${index}].optionId`, option.optionName);
       formData.append(
         `options[${index}].additionalPrice`,
         option.additionalPrice.toString()
@@ -295,6 +302,49 @@ const ProductEdit: React.FC<ProductEditProps> = ({
 
   const handleCancel = () => setPreviewVisible(false);
 
+  const handleRemoveImage = async (file: UploadFile) => {
+    const imageToDelete = currentDish.images.find(
+      (img: any) => img.imageUrl === file.url
+    );
+
+    if (imageToDelete) {
+      try {
+        const response = await callDeleteDishImageOther(
+          imageToDelete.imageId || ''
+        );
+        if (response.status === 200) {
+          notification.success({
+            message: 'Image deleted successfully',
+            duration: 5,
+            showProgress: true,
+          });
+        } else {
+          notification.error({
+            message: 'Error deleting image',
+            description: response.data.errors?.error || 'Something went wrong',
+            duration: 5,
+            showProgress: true,
+          });
+        }
+
+        const currentImages = form.getFieldValue('images') || [];
+        const updatedImages = currentImages.filter(
+          (img: UploadFile) => img.url !== file.url
+        );
+        form.setFieldsValue({ images: updatedImages });
+      } catch (error) {
+        notification.error({
+          message: 'Failed to delete image',
+          duration: 5,
+          showProgress: true,
+        });
+        console.error('Error deleting image:', error);
+        return false;
+      }
+    }
+    return true;
+  };
+
   return (
     <>
       <h4 className="text-center text-xl font-semibold mb-4">
@@ -343,9 +393,9 @@ const ProductEdit: React.FC<ProductEditProps> = ({
               name="offerPrice"
               label="Offer price"
               className="font-medium"
-            // rules={[
-            //   { required: true, message: 'Vui lòng nhập giá khuyến mãi!' },
-            // ]}
+              // rules={[
+              //   { required: true, message: 'Vui lòng nhập giá khuyến mãi!' },
+              // ]}
             >
               <InputNumber min={0} style={{ width: '100%' }} />
             </Form.Item>
@@ -423,6 +473,7 @@ const ProductEdit: React.FC<ProductEditProps> = ({
                   showRemoveIcon: true,
                 }}
                 onPreview={handlePreview}
+                onRemove={handleRemoveImage}
               >
                 <div>
                   <UploadOutlined />
@@ -570,24 +621,24 @@ const ProductEdit: React.FC<ProductEditProps> = ({
           <Col xs={24} sm={12}>
             <Form.List
               name="optionSelections"
-            // rules={[
-            //   {
-            //     validator: async (_, value) => {
-            //       if (!value || value.length === 0) {
-            //         setTimeout(() => {
-            //           notification.error({
-            //             message: 'Error',
-            //             description: 'Please enter option selection!',
-            //             duration: 5,
-            //             showProgress: true,
-            //           });
-            //         }, 800);
-            //         return Promise.reject();
-            //       }
-            //       return Promise.resolve();
-            //     },
-            //   },
-            // ]}
+              // rules={[
+              //   {
+              //     validator: async (_, value) => {
+              //       if (!value || value.length === 0) {
+              //         setTimeout(() => {
+              //           notification.error({
+              //             message: 'Error',
+              //             description: 'Please enter option selection!',
+              //             duration: 5,
+              //             showProgress: true,
+              //           });
+              //         }, 800);
+              //         return Promise.reject();
+              //       }
+              //       return Promise.resolve();
+              //     },
+              //   },
+              // ]}
             >
               {(fields, { add, remove }) => (
                 <>
@@ -604,12 +655,12 @@ const ProductEdit: React.FC<ProductEditProps> = ({
                         {...restField}
                         name={[name, 'optionName']}
                         className="mb-0 w-full"
-                      // rules={[
-                      //   {
-                      //     required: true,
-                      //     message: 'Please select an option!',
-                      //   },
-                      // ]}
+                        // rules={[
+                        //   {
+                        //     required: true,
+                        //     message: 'Please select an option!',
+                        //   },
+                        // ]}
                       >
                         <Select
                           placeholder="Select option"
@@ -631,6 +682,103 @@ const ProductEdit: React.FC<ProductEditProps> = ({
                               key={option.optionId}
                               value={option.optionId}
                               label={option.optionName}
+                            >
+                              {option.optionName}
+                            </Option>
+                          ))}
+                        </Select>
+                      </Form.Item>
+                      <Form.Item
+                        {...restField}
+                        name={[name, 'additionalPrice']}
+                        className="mb-0 w-full mx-2"
+                      >
+                        <InputNumber
+                          min={0}
+                          style={{ width: '100%' }}
+                          formatter={(value) =>
+                            `$ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+                          }
+                        />
+                      </Form.Item>
+                      <MinusCircleOutlined
+                        onClick={() => remove(name)}
+                        className="text-red-500 ml-4"
+                      />
+                    </Space>
+                  ))}
+                  {/* <Form.Item>
+                    <Button
+                      type="dashed"
+                      onClick={() => add()}
+                      icon={<PlusOutlined />}
+                      className="w-full font-medium"
+                    >
+                      Add option selection
+                    </Button>
+                  </Form.Item> */}
+                </>
+              )}
+            </Form.List>
+            <Form.List
+              name="options"
+              // rules={[
+              //   {
+              //     validator: async (_, value) => {
+              //       if (!value || value.length === 0) {
+              //         setTimeout(() => {
+              //           notification.error({
+              //             message: 'Error',
+              //             description: 'Please enter option selection!',
+              //             duration: 5,
+              //             showProgress: true,
+              //           });
+              //         }, 800);
+              //         return Promise.reject();
+              //       }
+              //       return Promise.resolve();
+              //     },
+              //   },
+              // ]}
+            >
+              {(fields, { add, remove }) => (
+                <>
+                  {fields.map(({ key, name, ...restField }) => (
+                    <Space
+                      key={key}
+                      align="baseline"
+                      className="mb-4 flex items-center justify-center w-full"
+                    >
+                      <Form.Item
+                        {...restField}
+                        name={[name, 'optionName']}
+                        className="mb-0 w-full"
+                        // rules={[
+                        //   {
+                        //     required: true,
+                        //     message: 'Please select an option!',
+                        //   },
+                        // ]}
+                      >
+                        <Select
+                          placeholder="Select option"
+                          showSearch
+                          style={{ width: '200px' }}
+                          filterOption={(input, option) =>
+                            !!(
+                              (option?.label as string)
+                                ?.toLowerCase()
+                                .includes(input.toLowerCase()) ||
+                              (option?.value as string)
+                                ?.toLowerCase()
+                                ?.includes(input.toLowerCase())
+                            )
+                          }
+                        >
+                          {optionSelectionList.map((option) => (
+                            <Option
+                              key={option.optionId}
+                              value={option.optionId}
                             >
                               {option.optionName}
                             </Option>

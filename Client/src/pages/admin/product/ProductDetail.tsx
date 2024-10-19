@@ -72,7 +72,6 @@ const ProductDetail: React.FC<DishDetailProps> = ({
       const response = await callGetDishById(dishId);
       if (response.status === 200) {
         setDish(response.data);
-        console.log(response.data);
       }
     } catch (error) {
       console.error('Error fetching dish details:', error);
@@ -80,7 +79,7 @@ const ProductDetail: React.FC<DishDetailProps> = ({
       setLoading(false);
     }
   };
-
+  console.log('dish', dish);
   const recipeColumns = [
     {
       title: 'Ingredient',

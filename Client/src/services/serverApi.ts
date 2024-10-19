@@ -343,3 +343,7 @@ export const callUpdateDish = async (formData: FormData) => {
     console.error('Error in callAddNewDish:', error);
     throw error;
   }};
+
+export const callDeleteDishImageOther = async (dishImageId: string) => {
+  return axios.delete(`/api/v1/dashboard/dish/image/${dishImageId}`);
+};
