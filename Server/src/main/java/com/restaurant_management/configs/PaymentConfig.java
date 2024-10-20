@@ -14,13 +14,13 @@ import java.util.*;
 
 public class PaymentConfig {
     @Value("${vnp_PayUrl}")
-    public String vnp_PayUrl;
+    public static String vnp_PayUrl;
 
     @Value("${vnp_ReturnUrl}")
-    public String vnp_ReturnUrl;
+    public static String vnp_ReturnUrl;
 
     @Value("${vnp_TmnCode}")
-    public String vnp_TmnCode;
+    public static String vnp_TmnCode;
 
     @Value("${secretKey}")
     public static String secretKey;
