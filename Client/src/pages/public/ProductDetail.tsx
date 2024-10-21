@@ -45,7 +45,7 @@ const ProductDetail: React.FC = () => {
     <>
       <section
         className="fp__breadcrumb"
-        style={{ background: 'url(images/counter_bg.jpg)' }}
+        style={{ background: 'url(../../../public/images/counter_bg.jpg)' }}
       >
         <div className="fp__breadcrumb_overlay">
           <div className="container">
@@ -75,15 +75,24 @@ const ProductDetail: React.FC = () => {
       <section className="fp__menu_details mt_115 xs_mt_85 mb_95 xs_mb_65">
         <div className="container">
           <div className="row">
-            <div className="col-lg-5 col-md-9 wow fadeInUp" data-wow-duration="1s">
+            <div
+              className="col-lg-5 col-md-9 wow fadeInUp"
+              data-wow-duration="1s"
+            >
               <ImageGallery
                 items={images}
                 showBullets={true}
                 showThumbnails={true}
                 autoPlay={autoPlay}
                 infinite={true}
-                slideDuration={300} 
-                showNav={false} 
+                slideDuration={300}
+                showNav={false}
+                // renderItem={(item) => (
+                //   <div style={{ border: '3px solid #81c784' }}>
+                //     {' '}
+                //     <img src={item.original} alt={item.originalAlt} />
+                //   </div>
+                // )}
               />
             </div>
             <div className="col-lg-7 wow fadeInUp" data-wow-duration="1s">
@@ -97,8 +106,8 @@ const ProductDetail: React.FC = () => {
                         index < Math.floor(product.rating)
                           ? 'fas fa-star'
                           : index < product.rating
-                          ? 'fas fa-star-half-alt'
-                          : 'far fa-star'
+                            ? 'fas fa-star-half-alt'
+                            : 'far fa-star'
                       }`}
                     ></i>
                   ))}
@@ -124,7 +133,12 @@ const ProductDetail: React.FC = () => {
                       <label className="form-check-label" htmlFor={size}>
                         {size}{' '}
                         <span>
-                          + $ {size === 'large' ? 350 : size === 'medium' ? 250 : 150}
+                          + ${' '}
+                          {size === 'large'
+                            ? 350
+                            : size === 'medium'
+                              ? 250
+                              : 150}
                         </span>
                       </label>
                     </div>

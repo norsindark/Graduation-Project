@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 
 import Footer from './footer/Footer';
@@ -22,6 +22,7 @@ const LayoutPublic = () => {
   const [showScrollBtn, setShowScrollBtn] = useState(false);
   const [activeModal, setActiveModal] = useState<string | null>(null);
   const location = useLocation();
+  const scrollPosition = useRef(0);
 
   const handleScroll = useCallback(() => {
     const position = window.scrollY;
@@ -47,13 +48,21 @@ const LayoutPublic = () => {
       closeModal();
       return;
     }
-    setActiveModal(modalName);
+    scrollPosition.current = window.scrollY;
     document.body.style.overflow = 'hidden';
+    document.body.style.position = 'fixed';
+    document.body.style.top = `-${scrollPosition.current}px`;
+    document.body.style.width = '100%';
+    setActiveModal(modalName);
   }, []);
 
   const closeModal = useCallback(() => {
-    setActiveModal(null);
     document.body.style.overflow = '';
+    document.body.style.position = '';
+    document.body.style.top = '';
+    document.body.style.width = '';
+    window.scrollTo(0, scrollPosition.current);
+    setActiveModal(null);
   }, []);
 
   const layoutContext: LayoutContextType = {
