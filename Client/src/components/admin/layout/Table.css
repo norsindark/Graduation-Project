@@ -218,3 +218,15 @@
 
 .ant-table-cell {
 }
+
+.image-gallery-thumbnail.active,
+.image-gallery-thumbnail:focus {
+  border: 3px solid #66bb6a !important;
+}
+
+.image-gallery-icon:hover {
+  color: #66bb6a !important;
+}
+.image-gallery-thumbnail:hover {
+  border: 3px solid #66bb6a !important;
+}
