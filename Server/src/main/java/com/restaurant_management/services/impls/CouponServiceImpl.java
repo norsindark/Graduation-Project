@@ -25,6 +25,15 @@ public class CouponServiceImpl implements CouponService {
     private final PagedResourcesAssembler<CouponResponse> pagedResourcesAssembler;
 
     @Override
+    public CouponResponse getCouponByCode(String code) throws DataExitsException {
+        Coupon coupon = couponRepository.findByCode(code);
+        if (coupon == null) {
+            throw new DataExitsException("Coupon not found");
+        }
+        return new CouponResponse(coupon);
+    }
+
+    @Override
     public PagedModel<EntityModel<CouponResponse>> getAllCoupons(int pageNo, int pageSize, String sortBy, String sortDir)
             throws DataExitsException {
         Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.fromString(sortDir), sortBy));
@@ -39,6 +48,9 @@ public class CouponServiceImpl implements CouponService {
 
     @Override
     public ApiResponse addNewCoupon(CouponDto request) {
+        if (couponRepository.existsByCode(request.getCode())) {
+            return new ApiResponse("Coupon already exists", HttpStatus.BAD_REQUEST);
+        }
         Coupon coupon = Coupon.builder()
                 .code(request.getCode())
                 .description(request.getDescription())

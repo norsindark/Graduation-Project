@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CouponResponse {
+    private String couponId;
     private String couponCode;
     private String description;
     private double discountPercent;
@@ -19,6 +20,7 @@ public class CouponResponse {
     private String expirationDate;
 
     public CouponResponse(Coupon coupon) {
+        this.couponId = coupon.getId();
         this.couponCode = coupon.getCode();
         this.description = coupon.getDescription();
         this.discountPercent = coupon.getDiscountPercent();

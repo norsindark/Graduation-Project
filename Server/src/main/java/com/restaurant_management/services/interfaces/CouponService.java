@@ -8,6 +8,7 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
 
 public interface CouponService {
+    CouponResponse getCouponByCode(String code) throws DataExitsException;
     ApiResponse addNewCoupon(CouponDto request) throws DataExitsException;
 
     PagedModel<EntityModel<CouponResponse>> getAllCoupons(int pageNo, int pageSize, String sortBy, String sortDir)

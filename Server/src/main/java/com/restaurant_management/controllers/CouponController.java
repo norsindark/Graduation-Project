@@ -19,6 +19,11 @@ import org.springframework.web.bind.annotation.*;
 public class CouponController {
     private final CouponService couponService;
 
+    @GetMapping("/get-coupon/{code}")
+    public ResponseEntity<CouponResponse> getCouponByCode(@RequestParam String code) throws DataExitsException {
+        return ResponseEntity.ok(couponService.getCouponByCode(code));
+    }
+
     @GetMapping("/get-all-coupons")
     public ResponseEntity<PagedModel<EntityModel<CouponResponse>>> getAllCoupons(
             @RequestParam(defaultValue = "0") int pageNo,

@@ -2,9 +2,11 @@ package com.restaurant_management.controllers;
 
 import com.restaurant_management.exceptions.DataExitsException;
 import com.restaurant_management.payloads.responses.CategoryResponse;
+import com.restaurant_management.payloads.responses.CouponResponse;
 import com.restaurant_management.payloads.responses.DishResponse;
 import com.restaurant_management.payloads.responses.GetCategoriesNameResponse;
 import com.restaurant_management.services.interfaces.CategoryService;
+import com.restaurant_management.services.interfaces.CouponService;
 import com.restaurant_management.services.interfaces.DishService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +26,7 @@ public class GuestController {
 
     private final DishService dishService;
     private final CategoryService categoryService;
+    private final CouponService couponService;
 
     @GetMapping("/get-dish-by-id/{dishId}")
     public ResponseEntity<DishResponse> getDishById(@PathVariable String dishId) throws DataExitsException {
@@ -53,5 +56,19 @@ public class GuestController {
             @RequestParam(defaultValue = "name") String sortBy,
             @RequestParam(defaultValue = "asc") String sortDir) throws DataExitsException {
         return ResponseEntity.ok(categoryService.getAllCategories(pageNo, pageSize, sortBy, sortDir));
+    }
+
+    @GetMapping("/get-coupon/{code}")
+    public ResponseEntity<CouponResponse> getCouponByCode(@RequestParam String code) throws DataExitsException {
+        return ResponseEntity.ok(couponService.getCouponByCode(code));
+    }
+
+    @GetMapping("/get-all-coupons")
+    public ResponseEntity<PagedModel<EntityModel<CouponResponse>>> getAllCoupons(
+            @RequestParam(defaultValue = "0") int pageNo,
+            @RequestParam(defaultValue = "10") int pageSize,
+            @RequestParam(defaultValue = "startDate") String sortBy,
+            @RequestParam(defaultValue = "asc") String sortDir) throws DataExitsException {
+        return ResponseEntity.ok(couponService.getAllCoupons(pageNo, pageSize, sortBy, sortDir));
     }
 }
