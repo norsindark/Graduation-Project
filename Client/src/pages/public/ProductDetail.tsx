@@ -2,24 +2,30 @@ import React, { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import ReLatedItem from '../../components/public/productdetal/ReLatedItem';
 import TabsDescriptionAndReview from '../../components/public/productdetal/TabsDescriptionAndReview';
+import ImageGallery from 'react-image-gallery';
+import 'react-image-gallery/styles/css/image-gallery.css';
 
 // Dữ liệu giả cho hình ảnh
 const images = [
   {
     id: 1,
-    src: '../../../public/images/menu1.png',
+    original: '../../../public/images/menu1.png',
+    thumbnail: '../../../public/images/menu1.png',
   },
   {
     id: 2,
-    src: '../../../public/images/menu2.png',
+    original: '../../../public/images/menu2.png',
+    thumbnail: '../../../public/images/menu2.png',
   },
   {
     id: 3,
-    src: '../../../public/images/menu3.png',
+    original: '../../../public/images/menu3.png',
+    thumbnail: '../../../public/images/menu3.png',
   },
   {
     id: 4,
-    src: '../../../public/images/menu4.png',
+    original: '../../../public/images/menu4.png',
+    thumbnail: '../../../public/images/menu4.png',
   },
 ];
 
@@ -33,19 +39,7 @@ const product = {
 };
 
 const ProductDetail: React.FC = () => {
-  const [currentIndex, setCurrentIndex] = useState(0);
-
-  const handlePrev = () => {
-    setCurrentIndex((prevIndex) =>
-      prevIndex === 0 ? images.length - 1 : prevIndex - 1
-    );
-  };
-
-  const handleNext = () => {
-    setCurrentIndex((prevIndex) =>
-      prevIndex === images.length - 1 ? 0 : prevIndex + 1
-    );
-  };
+  const [autoPlay, setAutoPlay] = useState(true);
 
   return (
     <>
@@ -81,51 +75,16 @@ const ProductDetail: React.FC = () => {
       <section className="fp__menu_details mt_115 xs_mt_85 mb_95 xs_mb_65">
         <div className="container">
           <div className="row">
-            <div
-              className="col-lg-5 col-md-9 wow fadeInUp"
-              data-wow-duration="1s"
-            >
-              <div className="exzoom " id="exzoom">
-                <div className="exzoom_img_box fp__menu_details_images">
-                  <ul className="exzoom_img_ul">
-                    {images.map((image, index) => (
-                      <li
-                        key={index}
-                        className={index === currentIndex ? 'active' : ''}
-                      >
-                        <img
-                          className="zoom img-fluid w-100"
-                          src={image.src}
-                          alt="product"
-                        />
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                <div className="exzoom_nav"></div>
-                <p className="exzoom_btn">
-                  <a
-                    href="#"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      handlePrev();
-                    }}
-                    className="exzoom_prev_btn"
-                  >
-                    <i className="far fa-chevron-left"></i>
-                  </a>
-                  <a
-                    href="#"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      handleNext();
-                    }}
-                    className="exzoom_next_btn"
-                  >
-                    <i className="far fa-chevron-right"></i>
-                  </a>
-                </p>
-              </div>
+            <div className="col-lg-5 col-md-9 wow fadeInUp" data-wow-duration="1s">
+              <ImageGallery
+                items={images}
+                showBullets={true}
+                showThumbnails={true}
+                autoPlay={autoPlay}
+                infinite={true}
+                slideDuration={300} 
+                showNav={false} 
+              />
             </div>
             <div className="col-lg-7 wow fadeInUp" data-wow-duration="1s">
               <div className="fp__menu_details_text">
@@ -138,8 +97,8 @@ const ProductDetail: React.FC = () => {
                         index < Math.floor(product.rating)
                           ? 'fas fa-star'
                           : index < product.rating
-                            ? 'fas fa-star-half-alt'
-                            : 'far fa-star'
+                          ? 'fas fa-star-half-alt'
+                          : 'far fa-star'
                       }`}
                     ></i>
                   ))}
@@ -165,12 +124,7 @@ const ProductDetail: React.FC = () => {
                       <label className="form-check-label" htmlFor={size}>
                         {size}{' '}
                         <span>
-                          + $
-                          {size === 'large'
-                            ? 350
-                            : size === 'medium'
-                              ? 250
-                              : 150}
+                          + $ {size === 'large' ? 350 : size === 'medium' ? 250 : 150}
                         </span>
                       </label>
                     </div>
