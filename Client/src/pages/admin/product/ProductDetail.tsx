@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Modal, Descriptions, Image, Carousel, Table, Spin, Tag } from 'antd';
 import { callGetDishById } from '../../../services/serverApi';
 import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.bubble.css'; // Đảm bảo import CSS cho Quill
 
 interface DishDetailProps {
   dishId: string;
@@ -168,6 +169,11 @@ const ProductDetail: React.FC<DishDetailProps> = ({
       title: 'Description',
       dataIndex: 'description',
       key: 'description',
+      render: (description: string) => (
+        <div style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+          {description}
+        </div>
+      ),
     },
     {
       title: 'Long Description',
@@ -179,6 +185,7 @@ const ProductDetail: React.FC<DishDetailProps> = ({
           readOnly={true}
           theme="bubble"
           modules={{ toolbar: false }}
+          style={{ maxHeight: '300px', overflowY: 'auto' }}
         />
       ),
     },

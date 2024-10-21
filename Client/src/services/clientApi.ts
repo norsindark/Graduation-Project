@@ -131,3 +131,12 @@ export const callChangePassword = (
     newPassword,
   });
 };
+
+
+export const callGetAllCategory = async () => {
+  return axios.get(`/api/v1/dashboard/category/get-all-categories?&sortBy=createdAt&sortDir=asc`);
+};
+
+export const callGetAllDishes = async (query: string) => {
+  return axios.get(`/api/v1/dashboard/dish/get-all-dishes?${query}`);
+};

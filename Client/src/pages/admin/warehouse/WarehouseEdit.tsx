@@ -59,7 +59,9 @@ const WarehouseEdit: React.FC<WarehouseEditProps> = ({
   useEffect(() => {
     const fetchCategoryList = async () => {
       const responseCategory = await callGetAllCategoriesName();
-      setCategoryList(responseCategory.data);
+      setCategoryList(
+        Array.isArray(responseCategory.data) ? responseCategory.data : []
+      );
     };
     fetchCategoryList();
 
@@ -273,7 +275,13 @@ const WarehouseEdit: React.FC<WarehouseEditProps> = ({
                 },
               ]}
             >
-              <InputNumber min={0} style={{ width: '100%' }} />
+              <InputNumber
+                min={0}
+                style={{ width: '100%' }}
+                formatter={(value) =>
+                  `$ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+                }
+              />
             </Form.Item>
           </Col>
           <Col xs={24} sm={12}>

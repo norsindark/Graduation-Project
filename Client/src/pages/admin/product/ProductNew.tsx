@@ -68,19 +68,34 @@ const ProductNew: React.FC<ProductNewProps> = ({
 
   useEffect(() => {
     const fetchList = async () => {
-      const [responseCategory, responseIngredient, responseOptionSelection] =
-        await Promise.all([
-          callGetAllCategoriesName(),
-          callGetAllIngredients(),
-          callGetAllOptionSelections(),
-        ]);
+      try {
+        const [responseCategory, responseIngredient, responseOptionSelection] =
+          await Promise.all([
+            callGetAllCategoriesName(),
+            callGetAllIngredients(),
+            callGetAllOptionSelections(),
+          ]);
 
-      setCategoryList(responseCategory.data);
-      setIngredientList(responseIngredient.data);
-      setOptionSelectionList(responseOptionSelection.data);
+        setCategoryList(
+          Array.isArray(responseCategory.data) ? responseCategory.data : []
+        );
+        setIngredientList(
+          Array.isArray(responseIngredient.data) ? responseIngredient.data : []
+        );
+        setOptionSelectionList(
+          Array.isArray(responseOptionSelection.data)
+            ? responseOptionSelection.data
+            : []
+        );
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        setCategoryList([]);
+        setIngredientList([]);
+        setOptionSelectionList([]);
+      }
     };
     fetchList();
-  }, [form]);
+  }, []);
 
   const onFinish = async (values: Dish) => {
     const {
@@ -284,7 +299,13 @@ const ProductNew: React.FC<ProductNewProps> = ({
                 { required: true, message: 'Please enter original price!' },
               ]}
             >
-              <InputNumber min={0} style={{ width: '100%' }} />
+              <InputNumber
+                min={0}
+                style={{ width: '100%' }}
+                formatter={(value) =>
+                  `$ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+                }
+              />
             </Form.Item>
           </Col>
           <Col xs={24} sm={12}>
@@ -294,7 +315,13 @@ const ProductNew: React.FC<ProductNewProps> = ({
               label="Offer price"
               className="font-medium"
             >
-              <InputNumber min={0} style={{ width: '100%' }} />
+              <InputNumber
+                min={0}
+                style={{ width: '100%' }}
+                formatter={(value) =>
+                  `$ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+                }
+              />
             </Form.Item>
           </Col>
           <Col xs={24} sm={12}>
@@ -514,24 +541,24 @@ const ProductNew: React.FC<ProductNewProps> = ({
           <Col xs={24} sm={12}>
             <Form.List
               name="optionSelections"
-              rules={[
-                {
-                  validator: async (_, value) => {
-                    if (!value || value.length === 0) {
-                      setTimeout(() => {
-                        notification.error({
-                          message: 'Error',
-                          description: 'Please enter option selection!',
-                          duration: 5,
-                          showProgress: true,
-                        });
-                      }, 800);
-                      return Promise.reject();
-                    }
-                    return Promise.resolve();
-                  },
-                },
-              ]}
+              // rules={[
+              //   {
+              //     validator: async (_, value) => {
+              //       if (!value || value.length === 0) {
+              //         setTimeout(() => {
+              //           notification.error({
+              //             message: 'Error',
+              //             description: 'Please enter option selection!',
+              //             duration: 5,
+              //             showProgress: true,
+              //           });
+              //         }, 800);
+              //         return Promise.reject();
+              //       }
+              //       return Promise.resolve();
+              //     },
+              //   },
+              // ]}
             >
               {(fields, { add, remove }) => (
                 <>
@@ -548,12 +575,12 @@ const ProductNew: React.FC<ProductNewProps> = ({
                         {...restField}
                         name={[name, 'optionId']}
                         className="mb-0 w-full"
-                        rules={[
-                          {
-                            required: true,
-                            message: 'Please enter option name!',
-                          },
-                        ]}
+                        // rules={[
+                        //   {
+                        //     required: true,
+                        //     message: 'Please enter option name!',
+                        //   },
+                        // ]}
                       >
                         <Select
                           placeholder="Select option"
