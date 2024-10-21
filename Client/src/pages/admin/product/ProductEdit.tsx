@@ -73,9 +73,17 @@ const ProductEdit: React.FC<ProductEditProps> = ({
           callGetAllOptionSelections(),
         ]);
 
-      setCategoryList(responseCategory.data);
-      setIngredientList(responseIngredient.data);
-      setOptionSelectionList(responseOptionSelection.data);
+      setCategoryList(
+        Array.isArray(responseCategory.data) ? responseCategory.data : []
+      );
+      setIngredientList(
+        Array.isArray(responseIngredient.data) ? responseIngredient.data : []
+      );
+      setOptionSelectionList(
+        Array.isArray(responseOptionSelection.data)
+          ? responseOptionSelection.data
+          : []
+      );
 
       if (currentDish) {
         form.setFieldsValue({
@@ -384,7 +392,13 @@ const ProductEdit: React.FC<ProductEditProps> = ({
                 { required: true, message: 'Please enter original price!' },
               ]}
             >
-              <InputNumber min={0} style={{ width: '100%' }} />
+              <InputNumber
+                min={0}
+                style={{ width: '100%' }}
+                formatter={(value) =>
+                  `$ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+                }
+              />
             </Form.Item>
           </Col>
           <Col xs={24} sm={12}>
@@ -397,7 +411,13 @@ const ProductEdit: React.FC<ProductEditProps> = ({
               //   { required: true, message: 'Vui lòng nhập giá khuyến mãi!' },
               // ]}
             >
-              <InputNumber min={0} style={{ width: '100%' }} />
+              <InputNumber
+                min={0}
+                style={{ width: '100%' }}
+                formatter={(value) =>
+                  `$ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+                }
+              />
             </Form.Item>
           </Col>
           <Col xs={24} sm={12}>
