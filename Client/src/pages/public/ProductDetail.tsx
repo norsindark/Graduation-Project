@@ -1,45 +1,88 @@
 import React, { useState, useEffect } from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useParams } from 'react-router-dom';
 import ReLatedItem from '../../components/public/productdetal/ReLatedItem';
 import TabsDescriptionAndReview from '../../components/public/productdetal/TabsDescriptionAndReview';
 import ImageGallery from 'react-image-gallery';
 import 'react-image-gallery/styles/css/image-gallery.css';
-
+import { callGetAllDishes, callGetDishDetail } from '../../services/clientApi';
 // Dữ liệu giả cho hình ảnh
-const images = [
-  {
-    id: 1,
-    original: '../../../public/images/menu1.png',
-    thumbnail: '../../../public/images/menu1.png',
-  },
-  {
-    id: 2,
-    original: '../../../public/images/menu2.png',
-    thumbnail: '../../../public/images/menu2.png',
-  },
-  {
-    id: 3,
-    original: '../../../public/images/menu3.png',
-    thumbnail: '../../../public/images/menu3.png',
-  },
-  {
-    id: 4,
-    original: '../../../public/images/menu4.png',
-    thumbnail: '../../../public/images/menu4.png',
-  },
-];
 
-const product = {
-  name: 'Maxican Pizza Test Better',
-  rating: 4.5,
-  reviewsCount: 201,
-  price: 320.0,
-  originalPrice: 350.0,
-  description: `Pizza is a savory dish of Italian origin consisting of a usually round, flattened base of leavened wheat-based dough topped with tomatoes, cheese, and often various other ingredients, which is then baked at a high temperature, traditionally in a wood-fired oven. A small pizza is sometimes called a pizzetta.`,
-};
+interface imageOption {
+  imageId: string;
+  imageUrl: string;
+}
+
+interface DishDetail {
+  categoryId: string;
+  categoryName: string;
+  description: string;
+  dishId: string;
+  dishName: string;
+  images: imageOption[];
+  listOptions: {
+    optionGroupId: string;
+    optionGroupName: string;
+    options: {
+      additionalPrice: string;
+      optionName: string;
+      optionSelectionId: string;
+    }[];
+  }[];
+  longDescription: string;
+  offerPrice: number;
+  price: number;
+  status: string;
+  thumbImage: string;
+  rating: number;
+  slug: string;
+}
 
 const ProductDetail: React.FC = () => {
+  const { slug } = useParams();
   const [autoPlay, setAutoPlay] = useState(true);
+  const [dishDetail, setDishDetail] = useState<DishDetail | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchDishDetail = async () => {
+      setLoading(true);
+      try {
+        const allDishesResponse = await callGetAllDishes('');
+        const allDishes = allDishesResponse.data._embedded?.dishResponseList;
+
+        const matchingDish = allDishes.find(
+          (dish: DishDetail) => dish.slug === slug
+        );
+        if (matchingDish) {
+          const detailResponse = await callGetDishDetail(matchingDish.dishId);
+          setDishDetail(detailResponse.data);
+        } else {
+          console.error('Dish not found');
+        }
+      } catch (error) {
+        console.error('Error fetching dish detail:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDishDetail();
+  }, [slug]);
+
+  const images = dishDetail
+    ? [
+        {
+          id: 'thumb',
+          original: dishDetail.thumbImage,
+          // thumbnail: dishDetail.thumbImage,
+        },
+        ...dishDetail.images.map((image) => ({
+          id: image.imageId,
+          original: image.imageUrl,
+          thumbnail: image.imageUrl,
+        })),
+      ]
+    : [];
 
   return (
     <>
@@ -80,93 +123,73 @@ const ProductDetail: React.FC = () => {
               data-wow-duration="1s"
             >
               <ImageGallery
-                items={images}
+                items={images || []}
                 showBullets={true}
                 showThumbnails={true}
                 autoPlay={autoPlay}
                 infinite={true}
-                slideDuration={300}
+                slideDuration={500}
                 showNav={false}
-                // renderItem={(item) => (
-                //   <div style={{ border: '3px solid #81c784' }}>
-                //     {' '}
-                //     <img src={item.original} alt={item.originalAlt} />
-                //   </div>
-                // )}
+                thumbnailPosition="bottom"
+                additionalClass="uniform-gallery"
               />
             </div>
             <div className="col-lg-7 wow fadeInUp" data-wow-duration="1s">
               <div className="fp__menu_details_text">
-                <h2>{product.name}</h2>
+                <h2>{dishDetail?.dishName}</h2>
                 <p className="rating">
                   {Array.from({ length: 5 }, (_, index) => (
                     <i
                       key={index}
                       className={`${
-                        index < Math.floor(product.rating)
+                        index < Math.floor(dishDetail?.rating || 0)
                           ? 'fas fa-star'
-                          : index < product.rating
+                          : index < (dishDetail?.rating || 0)
                             ? 'fas fa-star-half-alt'
                             : 'far fa-star'
                       }`}
                     ></i>
                   ))}
-                  <span>({product.reviewsCount})</span>
+                  <span>({dishDetail?.rating})</span>
                 </p>
                 <h3 className="price">
-                  ${product.price.toFixed(2)}{' '}
-                  <del>${product.originalPrice.toFixed(2)}</del>
+                  {dishDetail?.offerPrice.toLocaleString('vi-VN')} VNĐ
+                  <del>{dishDetail?.price.toLocaleString('vi-VN')} VNĐ</del>
                 </h3>
-                <p className="short_description">{product.description}</p>
+                <p className="short_description">{dishDetail?.description}</p>
 
-                <div className="details_size">
-                  <h5>select size</h5>
-                  {['large', 'medium', 'small'].map((size, index) => (
-                    <div className="form-check" key={index}>
-                      <input
-                        className="form-check-input"
-                        type="radio"
-                        name="flexRadioDefault"
-                        id={size}
-                        defaultChecked={size === 'large'}
-                      />
-                      <label className="form-check-label" htmlFor={size}>
-                        {size}{' '}
-                        <span>
-                          + ${' '}
-                          {size === 'large'
-                            ? 350
-                            : size === 'medium'
-                              ? 250
-                              : 150}
-                        </span>
-                      </label>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="details_extra_item">
-                  <h5>
-                    select option <span>(optional)</span>
-                  </h5>
-                  {['coca-cola', '7up'].map((option, index) => (
-                    <div className="form-check" key={index}>
-                      <input
-                        className="form-check-input"
-                        type="checkbox"
-                        id={option}
-                      />
-                      <label className="form-check-label" htmlFor={option}>
-                        {option}{' '}
-                        <span>+ ${option === 'coca-cola' ? 10 : 15}</span>
-                      </label>
-                    </div>
-                  ))}
-                </div>
+                {dishDetail?.listOptions.map((optionGroup, groupIndex) => (
+                  <div className="details_size" key={groupIndex}>
+                    <h5>
+                      Select {optionGroup.optionGroupName}
+                      {groupIndex !== 0 && <span> (optional)</span>}
+                    </h5>
+                    {optionGroup.options.map((option, optionIndex) => (
+                      <div className="form-check" key={optionIndex}>
+                        <input
+                          className="form-check-input"
+                          type="radio"
+                          name={`optionGroup${groupIndex}`}
+                          id={`${optionGroup.optionGroupName}-${option.optionName}`}
+                        />
+                        <label
+                          className="form-check-label"
+                          htmlFor={`${optionGroup.optionGroupName}-${option.optionName}`}
+                        >
+                          {option.optionName}{' '}
+                          <span>
+                            + {Number(option.additionalPrice).toLocaleString()}{' '}
+                            VNĐ
+                          </span>
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                ))}
 
                 <div className="details_quentity">
                   <h5>select quentity</h5>
-                  <div className="quentity_btn_area d-flex flex-wrap align-items-center">
+                  <div className="quentity_btn_area  flex-wrap  align-items-center justify-start">
                     <div className="quentity_btn">
                       <button className="btn btn-danger">
                         <i className="fal fa-minus"></i>
@@ -176,7 +199,9 @@ const ProductDetail: React.FC = () => {
                         <i className="fal fa-plus"></i>
                       </button>
                     </div>
-                    <h3>${product.price.toFixed(2)}</h3>
+                    <h3 className="mt-4">
+                      {dishDetail?.offerPrice.toLocaleString('vi-VN')} VNĐ
+                    </h3>
                   </div>
                 </div>
                 <ul className="details_button_area d-flex flex-wrap justify-content-start">
@@ -194,7 +219,7 @@ const ProductDetail: React.FC = () => {
               </div>
             </div>
             <div className="col-12 wow fadeInUp" data-wow-duration="1s">
-              <TabsDescriptionAndReview />
+              <TabsDescriptionAndReview dishDetail={dishDetail} />
             </div>
           </div>
           <ReLatedItem />

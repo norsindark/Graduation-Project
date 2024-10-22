@@ -1,4 +1,17 @@
-function TabsDescriptionAndReview() {
+import React from 'react';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.bubble.css';
+
+interface DishDetail {
+  longDescription: string;
+  // ... other properties
+}
+
+function TabsDescriptionAndReview({
+  dishDetail,
+}: {
+  dishDetail: DishDetail | null;
+}) {
   return (
     <>
       <div className="fp__menu_description_area mt_100 xs_mt_70">
@@ -41,100 +54,12 @@ function TabsDescriptionAndReview() {
             tabIndex={0}
           >
             <div className="menu_det_description">
-              <p>
-                Ipsum dolor, sit amet consectetur adipisicing elit. Doloribus
-                consectetur ullam in? Beatae, dolorum ad ea deleniti ratione
-                voluptatum similique omnis voluptas tempora optio soluta vero
-                veritatis reiciendis blanditiis architecto. Debitis nesciunt
-                inventore voluptate tempora ea incidunt iste, corporis, quo
-                cumque facere doloribus possimus nostrum sed magni quasi,
-                assumenda autem! Repudiandae nihil magnam provident illo alias
-                vero odit repellendus, ipsa nemo itaque. Aperiam fuga, magnam
-                quia illum minima blanditiis tempore. vero veritatis reiciendis
-                blanditiis architecto. Debitis nesciunt inventore voluptate
-                tempora ea incidunt iste, corporis, quo cumque facere doloribus
-                possimus nostrum sed magni quasi
-              </p>
-              <ul>
-                <li>
-                  Lorem ipsum dolor, sit amet consectetur adipisicing elit.
-                  Doloribus consectetur ullam in
-                </li>
-                <li>
-                  Dolor sit amet consectetur adipisicing elit. Earum itaque
-                  nesciunt.
-                </li>
-                <li>
-                  Corporis, quo cumque facere doloribus possimus nostrum sed
-                  magni quasi.
-                </li>
-                <li>
-                  Reiciendis blanditiis architecto. Debitis nesciunt inventore
-                  voluptate tempora ea.
-                </li>
-                <li>
-                  Incidunt iste, corporis, quo cumque facere doloribus possimus
-                  nostrum sed magni quasi
-                </li>
-                <li>
-                  Architecto. Debitis nesciunt inventore voluptate tempora ea
-                  incidunt iste corporis.
-                </li>
-                <li>
-                  Earum itaque nesciunt dolor laudantium placeat sed velit
-                  aspernatur.
-                </li>
-                <li>
-                  Laudantium placeat sed velit aspernatur, nobis quos quibusdam
-                  distinctio voluptatum.
-                </li>
-              </ul>
-              <p>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Earum
-                itaque nesciunt dolor laudantium placeat sed velit aspernatur,
-                nobis quos quibusdam distinctio voluptatum officia vel sapiente
-                enim, reprehenderit impedit beatae molestias dolorum. A laborum
-                consectetur sed quis exercitationem optio consequatur, unde
-                neque est odit, pariatur quae incidunt quasi dolorem nihil
-                aliquid ut veritatis porro eaque cupiditate voluptatem vel ad!
-                Asperiores, praesentium. sit amet consectetur adipisicing elit.
-                Doloribus consectetur ullam in? Beatae, dolorum ad ea deleniti
-                ratione voluptatum similique omnis voluptas tempora optio soluta
-              </p>
-
-              <ul>
-                <li>
-                  Reiciendis blanditiis architecto. Debitis nesciunt inventore
-                  voluptate tempora ea.
-                </li>
-                <li>
-                  Incidunt iste, corporis, quo cumque facere doloribus possimus
-                  nostrum sed magni quasi
-                </li>
-                <li>
-                  Architecto. Debitis nesciunt inventore voluptate tempora ea
-                  incidunt iste corporis.
-                </li>
-                <li>
-                  Earum itaque nesciunt dolor laudantium placeat sed velit
-                  aspernatur.
-                </li>
-                <li>
-                  Laudantium placeat sed velit aspernatur, nobis quos quibusdam
-                  distinctio voluptatum.
-                </li>
-              </ul>
-              <p>
-                Lorem ipsum dolor, sit amet consectetur adipisicing elit.
-                Doloribus consectetur ullam in? Beatae, dolorum ad ea deleniti
-                ratione voluptatum similique omnis voluptas tempora optio soluta
-                vero veritatis reiciendis blanditiis architecto. Debitis
-                nesciunt inventore voluptate tempora ea incidunt iste, corporis,
-                quo cumque facere doloribus possimus nostrum sed magni quasi,
-                assumenda autem! Repudiandae nihil magnam provident illo alias
-                vero odit repellendus, ipsa nemo itaque. Aperiam fuga, magnam
-                quia illum minima blanditiis tempore.
-              </p>
+              <ReactQuill
+                value={dishDetail?.longDescription || ''}
+                readOnly={true}
+                theme="bubble"
+                modules={{ toolbar: false }}
+              />
             </div>
           </div>
           <div

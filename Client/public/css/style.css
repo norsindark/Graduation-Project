@@ -3729,6 +3729,7 @@ footer {
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  font-size: 16px;
 }
 
 .details_size,

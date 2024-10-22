@@ -154,7 +154,7 @@ const Product: React.FC = () => {
       title: 'Original price',
       dataIndex: 'price',
       key: 'price',
-      render: (price: number) => `${price.toLocaleString()} VND`,
+      render: (price: number) => `${price.toLocaleString()} VNĐ`,
       sorter: (a: Dish, b: Dish) => a.price - b.price,
     },
     {
@@ -162,7 +162,7 @@ const Product: React.FC = () => {
       dataIndex: 'offerPrice',
       key: 'offerPrice',
       render: (offerPrice: number) =>
-        offerPrice ? `${offerPrice.toLocaleString()} VND` : 'N/A',
+        offerPrice ? `${offerPrice.toLocaleString()} VNĐ` : 'N/A',
       sorter: (a: Dish, b: Dish) => a.offerPrice - b.offerPrice,
     },
     {
