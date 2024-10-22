@@ -4,6 +4,7 @@ import {
   callGetAllDishes,
 } from '../../../services/clientApi';
 import { notification, Pagination } from 'antd';
+import { Link } from 'react-router-dom';
 
 interface Product {
   dishId: string;
@@ -68,6 +69,7 @@ function MenuHome() {
     try {
       const query = `pageNo=${current - 1}&pageSize=${pageSize}&sortBy=dishName&order=asc`;
       const response = await callGetAllDishes(query);
+      console.log('responseProducts', response.data);
       if (
         response.status === 200 &&
         response.data._embedded?.dishResponseList
@@ -223,13 +225,18 @@ function MenuHome() {
                     ))}
                     <span> {Math.round(product.rating * 10) / 10 || 0}</span>
                   </p>
-                  <a className="title" href={`/product-detail/${product.slug}`}>
+                  <Link
+                    className="title"
+                    to={`/product-detail/${product.slug}`}
+                  >
                     {product.dishName}
-                  </a>
+                  </Link>
                   <h5 className="price">
-                    ${product.offerPrice.toFixed(2)}
+                    {product.offerPrice.toLocaleString()} VNĐ
                     {product.offerPrice < product.price && (
-                      <del className="ml-2">${product.price.toFixed(2)}</del>
+                      <del className="ml-2">
+                        {product.price.toLocaleString()} VNĐ
+                      </del>
                     )}
                   </h5>
                   <ul className="d-flex flex-wrap justify-content-center">
@@ -244,9 +251,9 @@ function MenuHome() {
                       </a>
                     </li>
                     <li>
-                      <a href="#">
+                      <Link to={`/product-detail/${product.slug}`}>
                         <i className="far fa-eye"></i>
-                      </a>
+                      </Link>
                     </li>
                   </ul>
                 </div>

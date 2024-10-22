@@ -132,11 +132,15 @@ export const callChangePassword = (
   });
 };
 
-
+// guest 
 export const callGetAllCategory = async () => {
-  return axios.get(`/api/v1/dashboard/category/get-all-categories?&sortBy=createdAt&sortDir=asc`);
+  return axios.get(`/api/v1/auth/guest/get-all-categories?sortBy=createdAt&sortDir=asc`);
 };
 
 export const callGetAllDishes = async (query: string) => {
-  return axios.get(`/api/v1/dashboard/dish/get-all-dishes?${query}`);
+  return axios.get(`/api/v1/auth/guest/get-all-dishes?${query}`);
+};
+  
+export const callGetDishDetail = async (dishId: string) => {
+  return axios.get(`/api/v1/auth/guest/get-dish-by-id/${dishId}`);
 };
