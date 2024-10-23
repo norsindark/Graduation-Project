@@ -3,6 +3,7 @@ package com.restaurant_management.services.impls;
 import com.restaurant_management.dtos.CouponDto;
 import com.restaurant_management.entites.Coupon;
 import com.restaurant_management.exceptions.DataExitsException;
+import com.restaurant_management.payloads.requests.CouponRequest;
 import com.restaurant_management.payloads.responses.ApiResponse;
 import com.restaurant_management.payloads.responses.CouponResponse;
 import com.restaurant_management.repositories.CouponRepository;
@@ -17,6 +18,9 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Service
 @RequiredArgsConstructor
@@ -63,6 +67,31 @@ public class CouponServiceImpl implements CouponService {
                 .build();
         couponRepository.save(coupon);
         return new ApiResponse("Coupon created successfully", HttpStatus.CREATED);
+    }
+
+    @Override
+    public ApiResponse updateCoupon(String id, CouponRequest request) throws DataExitsException {
+        Coupon coupon = couponRepository.findById(id)
+                .orElseThrow(() -> new DataExitsException("Coupon not found"));
+        if (couponRepository.existsByCode(request.getCode())) {
+            return new ApiResponse("Coupon already exists", HttpStatus.BAD_REQUEST);
+        }
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        LocalDateTime startDate = LocalDateTime.parse(request.getStartDate(), formatter);
+        LocalDateTime expirationDate = LocalDateTime.parse(request.getExpirationDate(), formatter);
+        if (startDate.isAfter(expirationDate)) {
+            return new ApiResponse("Start date must be before expiration date", HttpStatus.BAD_REQUEST);
+        }
+        coupon.setCode(request.getCode());
+        coupon.setDescription(request.getDescription());
+        coupon.setDiscountPercent(request.getDiscountPercent());
+        coupon.setMaxDiscount(request.getMaxDiscount());
+        coupon.setMinOrderValue(request.getMinOrderValue());
+        coupon.setQuantity(request.getMaxUsage());
+        coupon.setStartDate(request.getStartDate());
+        coupon.setExpirationDate(request.getExpirationDate());
+        couponRepository.save(coupon);
+        return new ApiResponse("Coupon updated successfully", HttpStatus.OK);
     }
 
     @Override

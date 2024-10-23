@@ -2,6 +2,7 @@ package com.restaurant_management.controllers;
 
 import com.restaurant_management.dtos.CouponDto;
 import com.restaurant_management.exceptions.DataExitsException;
+import com.restaurant_management.payloads.requests.CouponRequest;
 import com.restaurant_management.payloads.responses.ApiResponse;
 import com.restaurant_management.payloads.responses.CouponResponse;
 import com.restaurant_management.services.interfaces.CouponService;
@@ -19,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
 public class CouponController {
     private final CouponService couponService;
 
-    @GetMapping("/get-coupon/{code}")
+    @GetMapping("/get-coupon")
     public ResponseEntity<CouponResponse> getCouponByCode(@RequestParam String code) throws DataExitsException {
         return ResponseEntity.ok(couponService.getCouponByCode(code));
     }
@@ -36,6 +37,11 @@ public class CouponController {
     @PostMapping("/add-new-coupon")
     public ResponseEntity<ApiResponse> addNewCoupon(@RequestBody CouponDto request) throws DataExitsException {
         return ResponseEntity.ok(couponService.addNewCoupon(request));
+    }
+
+    @PutMapping("/update-coupon")
+    public ResponseEntity<ApiResponse> updateCoupon(@RequestParam String couponId, @RequestBody CouponRequest request) throws DataExitsException {
+        return ResponseEntity.ok(couponService.updateCoupon(couponId, request));
     }
 
     @DeleteMapping("/delete-coupon/{id}")
