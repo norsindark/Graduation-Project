@@ -347,3 +347,15 @@ export const callUpdateDish = async (formData: FormData) => {
 export const callDeleteDishImageOther = async (dishImageId: string) => {
   return axios.delete(`/api/v1/dashboard/dish/image/${dishImageId}`);
 };
+
+export const callGetAllCoupon = async (query: string) => {
+  return axios.get(`/api/v1/dashboard/coupon/get-all-coupons?${query}`);
+};
+
+export const callAddNewCoupon = async (code: string, discountPercent: number, minOrderValue: number, maxDiscount: string, description: string, maxUsage: string, startDate: string, expirationDate: string) => {
+  return axios.post(`/api/v1/dashboard/coupon/add-new-coupon`, { code, discountPercent, minOrderValue, maxDiscount, description, maxUsage, startDate, expirationDate });
+};
+
+export const callGetCouponByCode = async (code: string) => {
+  return axios.get(`/api/v1/dashboard/coupon/get-coupon/{code}?code=${code}`);
+};

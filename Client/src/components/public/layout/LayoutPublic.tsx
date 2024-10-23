@@ -118,7 +118,11 @@ const LayoutPublic = () => {
         <VerifyEmail onClose={closeModal} setActiveModal={openModal} />
       )}
       {activeModal === 'account' && (
-        <Account onClose={closeModal} setActiveModal={openModal} />
+        <Account
+          onClose={closeModal}
+          setActiveModal={openModal}
+          initialActiveTab={activeModal}
+        />
       )}
     </>
   );

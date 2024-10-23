@@ -4,13 +4,30 @@ import { doLogoutAction } from '../../../../redux/account/accountSlice';
 import { useNavigate } from 'react-router-dom';
 import { callLogout } from '../../../../services/clientApi';
 import { notification } from 'antd'; // Import Spin
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Loading from '../../../Loading/Loading';
 
-const NavigationAccount = () => {
+interface NavigationAccountProps {
+  initialActiveTab: string | null;
+}
+
+const NavigationAccount: React.FC<NavigationAccountProps> = ({
+  initialActiveTab,
+}) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [submit, setSubmit] = useState(false);
+
+  useEffect(() => {
+    if (initialActiveTab) {
+      const tabElement = document.getElementById(
+        `v-pills-${initialActiveTab}-tab`
+      );
+      if (tabElement) {
+        tabElement.click();
+      }
+    }
+  }, [initialActiveTab]);
 
   const handleLogout = async () => {
     try {
