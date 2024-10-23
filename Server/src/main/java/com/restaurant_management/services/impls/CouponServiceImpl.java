@@ -19,7 +19,7 @@ import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
 @Service
@@ -74,12 +74,12 @@ public class CouponServiceImpl implements CouponService {
     public ApiResponse updateCoupon(String id, CouponRequest request) throws DataExitsException {
         Coupon coupon = couponRepository.findById(id)
                 .orElseThrow(() -> new DataExitsException("Coupon not found"));
-        if (couponRepository.existsByCode(request.getCode())) {
+        if (couponRepository.existsByCodeAndIdNot(request.getCode(), id)) {
             return new ApiResponse("Coupon already exists", HttpStatus.BAD_REQUEST);
         }
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        LocalDateTime startDate = LocalDateTime.parse(request.getStartDate(), formatter);
-        LocalDateTime expirationDate = LocalDateTime.parse(request.getExpirationDate(), formatter);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        LocalDate startDate = LocalDate.parse(request.getStartDate(), formatter);
+        LocalDate expirationDate = LocalDate.parse(request.getExpirationDate(), formatter);
         if (startDate.isAfter(expirationDate)) {
             return new ApiResponse("Start date must be before expiration date", HttpStatus.BAD_REQUEST);
         }
