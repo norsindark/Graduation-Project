@@ -3780,7 +3780,7 @@ footer {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
-  max-width: 25%;
+  max-width: 35%;
 }
 
 .quentity_btn {
@@ -3990,10 +3990,10 @@ footer {
   color: var(--colorPrimary);
 }
 
-.fp__post_review form input,
+/* .fp__post_review form input,
 .fp__post_review form textarea {
   margin-top: 20px;
-}
+} */
 
 .fp__post_review form button {
   margin-top: 15px;
@@ -6731,4 +6731,10 @@ CHECKOUT PAGE START
 .fade-in.is-visible {
   opacity: 1;
   transform: translateY(0);
+}
+
+.image-cart {
+  width: 100px !important;
+  height: 100px !important;
+  object-fit: cover;
 }

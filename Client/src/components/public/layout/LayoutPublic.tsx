@@ -11,6 +11,7 @@ import ResetPassword from '../../../components/public/auth/resetpassword/ResetPa
 import ResendVerifyEmail from '../../../components/public/auth/resendverifyemail/ResendVerifyEmail';
 import VerifyEmail from '../../../components/public/auth/verifyemail/VerifyEmail';
 import Account from '../../../components/public/auth/account/Account';
+import FullPageLoading from '../../Loading/FullPageLoading';
 
 export interface LayoutContextType {
   openModal: (modalName: string | null) => void;
@@ -23,6 +24,7 @@ const LayoutPublic = () => {
   const [activeModal, setActiveModal] = useState<string | null>(null);
   const location = useLocation();
   const scrollPosition = useRef(0);
+  const [isPageLoading, setIsPageLoading] = useState(false);
 
   const handleScroll = useCallback(() => {
     const position = window.scrollY;
@@ -71,6 +73,13 @@ const LayoutPublic = () => {
     activeModal,
   };
 
+  useEffect(() => {
+    setIsPageLoading(true);
+    window.scrollTo(0, 0);
+    const timer = setTimeout(() => setIsPageLoading(false), 300);
+    return () => clearTimeout(timer);
+  }, [location.pathname]);
+
   return (
     <>
       <header>
@@ -78,7 +87,11 @@ const LayoutPublic = () => {
         <Header setActiveModal={openModal} />
       </header>
       <main>
-        <Outlet context={layoutContext} />
+        {isPageLoading ? (
+          <FullPageLoading />
+        ) : (
+          <Outlet context={layoutContext} />
+        )}
       </main>
       <Footer />
       {showScrollBtn && (

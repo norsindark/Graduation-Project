@@ -6,6 +6,8 @@ import Search from '../../search/Search';
 import Auth from '../../auth/Auth';
 import Reservation from '../../reservation/Reservation';
 import Cart from '../../cart/Cart';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../../../redux/store';
 
 interface HeaderProps {
   setActiveModal: (modal: string | null) => void;
@@ -17,6 +19,8 @@ const Header = ({ setActiveModal }: HeaderProps) => {
   const [isFixed, setIsFixed] = useState(false);
 
   const [showCart, setShowCart] = useState(false);
+
+  const cartItems = useSelector((state: RootState) => state.order.carts);
   useEffect(() => {
     const handleResize = () => {
       const newIsMobile = window.innerWidth < 992;
@@ -81,7 +85,8 @@ const Header = ({ setActiveModal }: HeaderProps) => {
 
               <li className="md:px-1">
                 <a className="cart_icon" onClick={() => setShowCart(true)}>
-                  <i className="fas fa-shopping-basket"></i> <span>5</span>
+                  <i className="fas fa-shopping-basket"></i>{' '}
+                  <span>{cartItems.length}</span>
                 </a>
               </li>
 

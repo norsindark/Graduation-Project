@@ -1,12 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import { NavLink, useParams } from 'react-router-dom';
+import React, { useState, useEffect, useMemo } from 'react';
+import { NavLink, useParams, useNavigate } from 'react-router-dom';
 import ReLatedItem from '../../components/public/productdetal/ReLatedItem';
 import TabsDescriptionAndReview from '../../components/public/productdetal/TabsDescriptionAndReview';
 import ImageGallery from 'react-image-gallery';
 import 'react-image-gallery/styles/css/image-gallery.css';
 import { callGetAllDishes, callGetDishDetail } from '../../services/clientApi';
+import { useDispatch } from 'react-redux';
+import { doAddProductAction } from '../../redux/order/orderSlice';
+import { notification } from 'antd';
 // Dữ liệu giả cho hình ảnh
-
+import FullPageLoading from '../../components/Loading/FullPageLoading';
 interface imageOption {
   imageId: string;
   imageUrl: string;
@@ -35,13 +38,19 @@ interface DishDetail {
   thumbImage: string;
   rating: number;
   slug: string;
+  quantity: number;
 }
 
 const ProductDetail: React.FC = () => {
   const { slug } = useParams();
-  const [autoPlay, setAutoPlay] = useState(true);
+  const navigate = useNavigate();
   const [dishDetail, setDishDetail] = useState<DishDetail | null>(null);
   const [loading, setLoading] = useState(true);
+  const [currentQuantity, setCurrentQuantity] = useState(1);
+  const [selectedOptions, setSelectedOptions] = useState<{
+    [key: string]: { name: string; price: number }[];
+  }>({});
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const fetchDishDetail = async () => {
@@ -58,31 +67,176 @@ const ProductDetail: React.FC = () => {
           setDishDetail(detailResponse.data);
         } else {
           console.error('Dish not found');
+          notification.error({
+            message: 'Dish not found',
+            description: 'The requested dish could not be found.',
+            showProgress: true,
+            duration: 3,
+          });
+          navigate('/menu');
         }
       } catch (error) {
         console.error('Error fetching dish detail:', error);
+        notification.error({
+          message: 'Error loading dish details',
+          description: 'Please try again later.',
+          showProgress: true,
+          duration: 3,
+        });
+        navigate('/menu');
       } finally {
         setLoading(false);
       }
     };
 
     fetchDishDetail();
-  }, [slug]);
+  }, [slug, navigate]);
 
-  const images = dishDetail
-    ? [
-        {
-          id: 'thumb',
-          original: dishDetail.thumbImage,
-          // thumbnail: dishDetail.thumbImage,
+  const handleChangeButton = (type: string) => {
+    if (type === 'MINUS') {
+      if (currentQuantity > 1) {
+        setCurrentQuantity(currentQuantity - 1);
+      }
+    }
+    if (type === 'PLUS') {
+      if (dishDetail?.quantity && currentQuantity < dishDetail.quantity) {
+        setCurrentQuantity(currentQuantity + 1);
+      }
+    }
+  };
+
+  const handleOptionChange = (
+    groupId: string,
+    optionName: string,
+    additionalPrice: number,
+    isChecked: boolean,
+    isRadio?: boolean
+  ) => {
+    setSelectedOptions((prev) => {
+      const newOptions = { ...prev };
+
+      if (isRadio) {
+        newOptions[groupId] = [{ name: optionName, price: additionalPrice }];
+      } else {
+        const currentOptions = newOptions[groupId] || [];
+
+        if (isChecked) {
+          newOptions[groupId] = [
+            ...currentOptions,
+            { name: optionName, price: additionalPrice },
+          ];
+        } else {
+          newOptions[groupId] = currentOptions.filter(
+            (option) => option.name !== optionName
+          );
+
+          if (newOptions[groupId].length === 0) {
+            delete newOptions[groupId];
+          }
+        }
+      }
+
+      return newOptions;
+    });
+  };
+
+  const calculateTotalPrice = () => {
+    const basePrice = dishDetail?.offerPrice ?? 0;
+
+    const optionsPrice = Object.values(selectedOptions).reduce(
+      (total, optionGroup) =>
+        total +
+        optionGroup.reduce(
+          (groupTotal, option) => groupTotal + option.price,
+          0
+        ),
+      0
+    );
+
+    return (basePrice + optionsPrice) * currentQuantity;
+  };
+
+  const handleAddToCart = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    if (dishDetail) {
+      const radioGroups = sortedOptions.filter(
+        (group) => group.optionGroupName.toLowerCase() === 'size'
+      );
+
+      const isRadioSelected = radioGroups.every(
+        (group) =>
+          selectedOptions[group.optionGroupId] &&
+          selectedOptions[group.optionGroupId].length > 0
+      );
+
+      if (!isRadioSelected) {
+        notification.error({
+          message: 'Please select size before adding to cart!',
+          showProgress: true,
+          duration: 3,
+        });
+        return;
+      }
+
+      const cartItem = {
+        quantity: currentQuantity,
+        dishId: dishDetail.dishId,
+        detail: {
+          dishName: dishDetail.dishName,
+          price: calculateTotalPrice(),
+          thumbImage: dishDetail.thumbImage,
         },
-        ...dishDetail.images.map((image) => ({
-          id: image.imageId,
-          original: image.imageUrl,
-          thumbnail: image.imageUrl,
-        })),
-      ]
-    : [];
+        selectedOptions: Object.entries(selectedOptions).reduce(
+          (acc, [key, value]) => {
+            if (value.length > 0) {
+              const formattedOptions = value.map(
+                (option) =>
+                  `${option.name} (+ ${option.price.toLocaleString('vi-VN')} VNĐ)`
+              );
+              acc[key] = formattedOptions.join(', ');
+            }
+            return acc;
+          },
+          {} as { [key: string]: string }
+        ),
+      };
+      dispatch(doAddProductAction(cartItem));
+      notification.success({
+        message: 'Add to cart successfully!!!',
+        showProgress: true,
+        duration: 3,
+      });
+    }
+  };
+
+  const sortedOptions = useMemo(() => {
+    const options = dishDetail?.listOptions || [];
+    return [...options].sort((a, b) => {
+      if (a.optionGroupName.toLowerCase() === 'size') return -1;
+      if (b.optionGroupName.toLowerCase() === 'size') return 1;
+      return 0;
+    });
+  }, [dishDetail?.listOptions]);
+
+  if (loading) {
+    return <FullPageLoading />;
+  }
+
+  if (!dishDetail) {
+    return null;
+  }
+
+  const images = [
+    {
+      id: 'thumb',
+      original: dishDetail.thumbImage,
+    },
+    ...dishDetail.images.map((image) => ({
+      id: image.imageId,
+      original: image.imageUrl,
+      thumbnail: image.imageUrl,
+    })),
+  ];
 
   return (
     <>
@@ -126,7 +280,7 @@ const ProductDetail: React.FC = () => {
                 items={images || []}
                 showBullets={true}
                 showThumbnails={true}
-                autoPlay={autoPlay}
+                autoPlay={true}
                 infinite={true}
                 slideDuration={500}
                 showNav={false}
@@ -158,19 +312,38 @@ const ProductDetail: React.FC = () => {
                 </h3>
                 <p className="short_description">{dishDetail?.description}</p>
 
-                {dishDetail?.listOptions.map((optionGroup, groupIndex) => (
-                  <div className="details_size" key={groupIndex}>
+                {sortedOptions.map((optionGroup, groupIndex) => (
+                  <div className="details_extra_item" key={groupIndex}>
                     <h5>
-                      Select {optionGroup.optionGroupName}
-                      {groupIndex !== 0 && <span> (optional)</span>}
+                      Select{' '}
+                      {optionGroup.optionGroupName.toLowerCase() === 'size'
+                        ? 'size'
+                        : optionGroup.optionGroupName}
+                      {optionGroup.optionGroupName.toLowerCase() !== 'size' && (
+                        <span> (optional)</span>
+                      )}
                     </h5>
                     {optionGroup.options.map((option, optionIndex) => (
                       <div className="form-check" key={optionIndex}>
                         <input
                           className="form-check-input"
-                          type="radio"
+                          type={
+                            optionGroup.optionGroupName.toLowerCase() === 'size'
+                              ? 'radio'
+                              : 'checkbox'
+                          }
                           name={`optionGroup${groupIndex}`}
                           id={`${optionGroup.optionGroupName}-${option.optionName}`}
+                          onChange={(e) =>
+                            handleOptionChange(
+                              optionGroup.optionGroupId,
+                              option.optionName,
+                              Number(option.additionalPrice),
+                              e.target.checked,
+                              optionGroup.optionGroupName.toLowerCase() ===
+                                'size'
+                            )
+                          }
                         />
                         <label
                           className="form-check-label"
@@ -188,25 +361,36 @@ const ProductDetail: React.FC = () => {
                 ))}
 
                 <div className="details_quentity">
-                  <h5>select quentity</h5>
-                  <div className="quentity_btn_area  flex-wrap  align-items-center justify-start">
+                  <h5>select quantity</h5>
+                  <div className="quentity_btn_area flex-wrap align-items-center justify-start">
                     <div className="quentity_btn">
-                      <button className="btn btn-danger">
+                      <button
+                        className="btn btn-danger"
+                        onClick={() => handleChangeButton('MINUS')}
+                      >
                         <i className="fal fa-minus"></i>
                       </button>
-                      <input type="text" placeholder="1" />
-                      <button className="btn btn-success">
+                      <input type="text" value={currentQuantity} readOnly />
+                      <button
+                        className="btn btn-success"
+                        onClick={() => handleChangeButton('PLUS')}
+                      >
                         <i className="fal fa-plus"></i>
                       </button>
                     </div>
                     <h3 className="mt-4">
-                      {dishDetail?.offerPrice.toLocaleString('vi-VN')} VNĐ
+                      {calculateTotalPrice().toLocaleString('vi-VN')} VNĐ
                     </h3>
                   </div>
                 </div>
                 <ul className="details_button_area d-flex flex-wrap justify-content-start">
                   <li>
-                    <a className="common_btn" href="#">
+                    <a
+                      className="common_btn"
+                      href="#"
+                      onClick={handleAddToCart}
+                    >
+                      <i className="fas fa-shopping-basket mr-2"></i>
                       add to cart
                     </a>
                   </li>
