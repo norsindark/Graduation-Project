@@ -26,6 +26,9 @@ function CheckoutPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(2);
   const [loading, setLoading] = useState(false);
+  const [selectedAddressId, setSelectedAddressId] = useState<string | null>(
+    null
+  );
 
   const userId = useSelector((state: RootState) => state.account.user?.id);
   const fetchAddresses = async () => {
@@ -102,6 +105,11 @@ function CheckoutPage() {
   ];
   const onFinish = (values: any) => {
     console.log(values);
+  };
+
+  const handleSelectAddress = (id: string) => {
+    setSelectedAddressId(id);
+    // Thêm logic khác nếu cần
   };
 
   return (
@@ -472,6 +480,16 @@ function CheckoutPage() {
                               </label>
                             </div>
                             <ul>
+                              <li>
+                                <a
+                                  className={`dash_check_icon ${selectedAddressId === address.id ? 'selected' : ''}`}
+                                  onClick={() =>
+                                    handleSelectAddress(address.id)
+                                  }
+                                >
+                                  <i className="far fa-check"></i>
+                                </a>
+                              </li>
                               <li>
                                 <a
                                   className="dash_edit_btn"

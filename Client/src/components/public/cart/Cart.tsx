@@ -1,3 +1,13 @@
+import React from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { RootState } from '../../../redux/store';
+import { Link } from 'react-router-dom';
+import {
+  doRemoveProductAction,
+  CartItem,
+  SelectedOption,
+} from '../../../redux/order/orderSlice';
+
 const Cart = ({
   showCart,
   setShowCart,
@@ -5,6 +15,47 @@ const Cart = ({
   showCart: boolean;
   setShowCart: (showCart: boolean) => void;
 }) => {
+  const dispatch = useDispatch();
+  const cartItems = useSelector((state: RootState) => state.order.carts);
+
+  const handleRemoveItem = (
+    dishId: string,
+    selectedOptions: CartItem['selectedOptions']
+  ) => {
+    dispatch(doRemoveProductAction({ dishId, selectedOptions }));
+  };
+
+  const formatPrice = (price: number | undefined) => {
+    return price ? price.toLocaleString('vi-VN') : '0';
+  };
+
+  const renderOptionValue = (
+    value: string | SelectedOption
+  ): React.ReactNode => {
+    if (typeof value === 'string') {
+      // Split the string by comma, but not within parentheses
+      const options = value.split(/,(?![^(]*\))/);
+      return (
+        <>
+          {options.map((option, index) => (
+            <React.Fragment key={index}>
+              {option.trim()}
+              {index < options.length - 1 && <br />}
+            </React.Fragment>
+          ))}
+        </>
+      );
+    } else {
+      // Handle SelectedOption object
+      return `${value.name} (+ ${formatPrice(value.price)} VNĐ)`;
+    }
+  };
+
+  const calculateTotalPrice = () => {
+    return cartItems.reduce((total, item) => {
+      return total + item.detail?.price * item.quantity;
+    }, 0);
+  };
   return (
     <>
       <div
@@ -12,129 +63,57 @@ const Cart = ({
       >
         <div className="fp__menu_cart_boody">
           <div className="fp__menu_cart_header">
-            <h5>total item (05)</h5>
+            <h5>total item ({cartItems.length})</h5>
             <span className="close_cart" onClick={() => setShowCart(false)}>
               <i className="fal fa-times"></i>
             </span>
           </div>
           <ul>
-            <li>
-              <div className="menu_cart_img">
-                <img
-                  src="images/menu8.png"
-                  alt="menu"
-                  className="img-fluid w-100"
-                />
-              </div>
-              <div className="menu_cart_text">
-                <a className="title" href="#">
-                  Hyderabadi Biryani{' '}
-                </a>
-                <p className="size">small</p>
-                <span className="extra">coca-cola</span>
-                <span className="extra">7up</span>
-                <p className="price">
-                  $99.00 <del>$110.00</del>
-                </p>
-              </div>
-              <span className="del_icon">
-                <i className="fal fa-times"></i>
-              </span>
-            </li>
-            <li>
-              <div className="menu_cart_img">
-                <img
-                  src="images/menu4.png"
-                  alt="menu"
-                  className="img-fluid w-100"
-                />
-              </div>
-              <div className="menu_cart_text">
-                <a className="title" href="#">
-                  Chicken Masalas
-                </a>
-                <p className="size">medium</p>
-                <span className="extra">7up</span>
-                <p className="price">$70.00</p>
-              </div>
-              <span className="del_icon">
-                <i className="fal fa-times"></i>
-              </span>
-            </li>
-            <li>
-              <div className="menu_cart_img">
-                <img
-                  src="images/menu5.png"
-                  alt="menu"
-                  className="img-fluid w-100"
-                />
-              </div>
-              <div className="menu_cart_text">
-                <a className="title" href="#">
-                  Competently Supply Customized Initiatives
-                </a>
-                <p className="size">large</p>
-                <span className="extra">coca-cola</span>
-                <span className="extra">7up</span>
-                <p className="price">
-                  $120.00 <del>$150.00</del>
-                </p>
-              </div>
-              <span className="del_icon">
-                <i className="fal fa-times"></i>
-              </span>
-            </li>
-            <li>
-              <div className="menu_cart_img">
-                <img
-                  src="images/menu6.png"
-                  alt="menu"
-                  className="img-fluid w-100"
-                />
-              </div>
-              <div className="menu_cart_text">
-                <a className="title" href="#">
-                  Hyderabadi Biryani
-                </a>
-                <p className="size">small</p>
-                <span className="extra">7up</span>
-                <p className="price">$59.00</p>
-              </div>
-              <span className="del_icon">
-                <i className="fal fa-times"></i>
-              </span>
-            </li>
-            <li>
-              <div className="menu_cart_img">
-                <img
-                  src="images/menu1.png"
-                  alt="menu"
-                  className="img-fluid w-100"
-                />
-              </div>
-              <div className="menu_cart_text">
-                <a className="title" href="#">
-                  Competently Supply
-                </a>
-                <p className="size">medium</p>
-                <span className="extra">coca-cola</span>
-                <span className="extra">7up</span>
-                <p className="price">
-                  $99.00 <del>$110.00</del>
-                </p>
-              </div>
-              <span className="del_icon">
-                <i className="fal fa-times"></i>
-              </span>
-            </li>
+            {cartItems.map((item) => (
+              <li key={item.dishId}>
+                <div className="menu_cart_img">
+                  <img
+                    src={item.detail?.thumbImage}
+                    alt="menu"
+                    className="img-fluid w-100"
+                  />
+                </div>
+                <div className="menu_cart_text">
+                  <a className="title" href="#">
+                    {item.detail?.dishName} ({item.quantity})
+                  </a>
+
+                  {Object.entries(item.selectedOptions || {}).map(
+                    ([key, value]) => (
+                      <span key={key} className="extra">
+                        {renderOptionValue(value)}
+                      </span>
+                    )
+                  )}
+
+                  <p className="price">{formatPrice(item.detail?.price)} VNĐ</p>
+                </div>
+                <span
+                  className="del_icon"
+                  onClick={() =>
+                    handleRemoveItem(item.dishId, item.selectedOptions)
+                  }
+                >
+                  <i className="fal fa-times"></i>
+                </span>
+              </li>
+            ))}
           </ul>
           <p className="subtotal">
-            sub total <span>$1220.00</span>
+            sub total <span>{formatPrice(calculateTotalPrice())} VNĐ</span>
           </p>
-          <a className="cart_view" href="cart_view.html">
-            {' '}
+          <Link
+            className="cart_view hover:bg-black"
+            onClick={() => setShowCart(false)}
+            to="/cart"
+          >
             view cart
-          </a>
+          </Link>
           <a className="checkout" href="check_out.html">
             checkout
           </a>

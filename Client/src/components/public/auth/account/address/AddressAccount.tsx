@@ -254,7 +254,7 @@ const AddressAccount = () => {
               </div>
             )}
             {addresses.length > 0 && !showAddressNew && !showAddressEdit && (
-              <div className="absolute bottom-20 left-1/2 transform z-1000 bg-white p-2 ">
+              <div className="absolute bottom-20 left-[55%] transform z-1000 bg-white p-2 ">
                 <Pagination
                   align="center"
                   current={currentPage}

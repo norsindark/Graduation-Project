@@ -4,7 +4,8 @@ import {
   callGetAllDishes,
 } from '../../../services/clientApi';
 import { notification, Pagination } from 'antd';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import Loading from '../../../components/Loading/Loading';
 
 interface Product {
   dishId: string;
@@ -34,6 +35,8 @@ function MenuHome() {
   const [total, setTotal] = useState<number>(0);
 
   const [categories, setCategories] = useState<Category[]>([]);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchCategories();
@@ -121,7 +124,10 @@ function MenuHome() {
     }
   });
 
-  console.log();
+  const handleProductClick = (slug: string) => {
+    navigate(`/product-detail/${slug}`);
+  };
+
   return (
     <section className="fp__menu mt_95 xs_mt_65">
       <div className="container">
@@ -225,12 +231,16 @@ function MenuHome() {
                     ))}
                     <span> {Math.round(product.rating * 10) / 10 || 0}</span>
                   </p>
-                  <Link
+                  <a
                     className="title"
-                    to={`/product-detail/${product.slug}`}
+                    href={`/product-detail/${product.slug}`}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleProductClick(product.slug);
+                    }}
                   >
                     {product.dishName}
-                  </Link>
+                  </a>
                   <h5 className="price">
                     {product.offerPrice.toLocaleString()} VNĐ
                     {product.offerPrice < product.price && (
@@ -251,7 +261,13 @@ function MenuHome() {
                       </a>
                     </li>
                     <li>
-                      <Link to={`/product-detail/${product.slug}`}>
+                      <Link
+                        to={`/product-detail/${product.slug}`}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handleProductClick(product.slug);
+                        }}
+                      >
                         <i className="far fa-eye"></i>
                       </Link>
                     </li>
