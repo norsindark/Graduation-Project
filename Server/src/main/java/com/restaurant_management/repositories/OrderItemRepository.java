@@ -11,4 +11,7 @@ public interface OrderItemRepository extends JpaRepository<OrderItem, String> {
 
     @Query("SELECT oi FROM OrderItem oi WHERE oi.order = ?1")
     List<OrderItem> findByOrder(Order order);
+
+    @Query("SELECT oi FROM OrderItem oi WHERE oi.order.id = ?1")
+    List<OrderItem> findByOrderId(String orderId);
 }

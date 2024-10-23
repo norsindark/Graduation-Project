@@ -46,6 +46,7 @@ public class OrderServiceImpl implements OrderService {
     private final OrderItemOptionRepository orderItemOptionRepository;
     private final PagedResourcesAssembler<OrderResponse> pagedResourcesAssembler;
 
+
     @Override
     @Transactional
     public PagedModel<EntityModel<OrderResponse>> getAllOrders(int pageNo, int pageSize, String sortBy, String sortDir)
@@ -76,11 +77,17 @@ public class OrderServiceImpl implements OrderService {
                 .orElseThrow(() -> new DataExitsException("Address not found"));
 
         updateWarehouse(request);
-        Double totalPrice = totalOrderPrice(request);
-        Order order = createNewOrder(request, user, totalPrice);
+        Order order = createNewOrder(request, user);
         addOrderItem(order, request);
 
-        sendEmailListOrderItems(user.getEmail(), request.getItems(), request.getCouponId(), totalPrice, request.getPaymentMethod());
+        if (request.getCouponId() != null && !request.getCouponId().isEmpty()) {
+            setCouponUsage(request);
+        }
+
+        sendEmailListOrderItems(
+                user.getEmail(), request.getItems(),
+                request.getCouponId(), order.getTotalPrice(),
+                request.getPaymentMethod(), order.getStatus());
 
         return new ApiResponse("Order created successfully", HttpStatus.CREATED);
     }
@@ -96,14 +103,15 @@ public class OrderServiceImpl implements OrderService {
         return new ApiResponse("Order updated successfully", HttpStatus.OK);
     }
 
-    private Order createNewOrder(OrderDto request, User user, Double totalPrice) throws DataExitsException {
+    private Order createNewOrder(OrderDto request, User user) throws DataExitsException {
         Order order = Order.builder()
                 .user(user)
                 .addressId(request.getAddressId())
                 .status("PENDING")
                 .note(request.getNote())
                 .paymentMethod(request.getPaymentMethod())
-                .totalPrice(totalPrice)
+                .shippingFee(request.getShippingFee())
+                .totalPrice(request.getTotalPrice())
                 .build();
         orderRepository.save(order);
         return order;
@@ -152,37 +160,7 @@ public class OrderServiceImpl implements OrderService {
         }
     }
 
-    private Double totalOrderPrice(OrderDto request) throws DataExitsException {
-        double totalOrderPrice = calculateTotalOrderPrice(request);
-        if (request.getCouponId() != null) {
-            totalOrderPrice = applyCoupon(request, totalOrderPrice);
-        }
-        return totalOrderPrice;
-    }
-
-    private Double calculateTotalOrderPrice(OrderDto request) throws DataExitsException {
-        double totalOrderPrice = 0;
-        for (OrderItemDto orderItemDto : request.getItems()) {
-            Dish dish = dishRepository.findById(orderItemDto.getDishId())
-                    .orElseThrow(() -> new DataExitsException("Dish not found"));
-
-            double dishBasePrice = dish.getPrice();
-
-            double totalAdditionalPrice = 0;
-            for (String dishOptionSelectionId : orderItemDto.getDishOptionSelectionIds()) {
-                double additionalPrice = dishOptionSelectionRepository.findById(dishOptionSelectionId)
-                        .orElseThrow(() -> new DataExitsException("Dish option selection not found"))
-                        .getAdditionalPrice();
-                totalAdditionalPrice += additionalPrice;
-            }
-            double totalPrice = (dishBasePrice * orderItemDto.getQuantity()) + totalAdditionalPrice;
-            totalOrderPrice += totalPrice;
-        }
-        return totalOrderPrice;
-    }
-
-
-    private Double applyCoupon(OrderDto request, Double totalOrderPrice) throws DataExitsException {
+    private void setCouponUsage(OrderDto request) throws DataExitsException {
         Coupon coupon = couponRepository.findById(request.getCouponId())
                 .orElseThrow(() -> new DataExitsException("Coupon not found"));
 
@@ -201,22 +179,12 @@ public class OrderServiceImpl implements OrderService {
         if (couponUsageRepository.existsByCouponIdAndUserId(coupon.getId(), request.getUserId())) {
             throw new IllegalStateException("Coupon has already been used by this user");
         }
-
-        if (totalOrderPrice >= coupon.getMinOrderValue()) {
-            double discount = totalOrderPrice * (coupon.getDiscountPercent() / 100);
-            discount = Math.min(discount, coupon.getMaxDiscount());
-            totalOrderPrice -= discount;
-
-            CouponUsage couponUsage = CouponUsage.builder()
-                    .couponId(request.getCouponId())
-                    .userId(request.getUserId())
-                    .usedAt(LocalDateTime.now().toString())
-                    .build();
-            couponUsageRepository.save(couponUsage);
-
-            coupon.setQuantity(coupon.getQuantity() - 1);
-        }
-        return totalOrderPrice;
+        CouponUsage couponUsage = CouponUsage.builder()
+                .couponId(request.getCouponId())
+                .userId(request.getUserId())
+                .usedAt(LocalDateTime.now().toString())
+                .build();
+        couponUsageRepository.save(couponUsage);
     }
 
     @Transactional
@@ -258,7 +226,7 @@ public class OrderServiceImpl implements OrderService {
         }
     }
 
-    private void sendEmailListOrderItems(String email, List<OrderItemDto> items, String couponId, Double totalPrice, String paymentMethod)
+    private void sendEmailListOrderItems(String email, List<OrderItemDto> items, String couponId, Double totalPrice, String paymentMethod, String status)
             throws MessagingException, UnsupportedEncodingException, DataExitsException {
         String fromAddress = "dvan78281@gmail.com";
         String senderName = "Sync Food";
@@ -322,7 +290,9 @@ public class OrderServiceImpl implements OrderService {
                 .append("Coupon Code: ").append(coupon != null ? coupon.getCode() : "N/A").append("</p>")
                 .append("<p style=\"font-family: Arial, sans-serif; font-size: 14px; color: #333;\">")
                 .append("Payment Method: ").append(paymentMethod).append("</p>")
-                .append("<p style=\"font-family: Arial, sans-serif; font-size: 16px; font-weight: bold; color: #333;\">") // Tăng kích thước và in đậm
+                .append("<p style=\"font-family: Arial, sans-serif; font-size: 14px; color: #333;\">")
+                .append("Order Status: ").append(status).append("</p>")
+                .append("<p style=\"font-family: Arial, sans-serif; font-size: 16px; font-weight: bold; color: #333;\">")
                 .append("Total Price: $").append(totalPrice).append("</p>")
                 .append("<p style=\"font-family: Arial, sans-serif; font-size: 14px; color: #333;\">")
                 .append("We will notify you when your order is on its way.</p>")
@@ -357,7 +327,6 @@ public class OrderServiceImpl implements OrderService {
                 "Thank you for your patience!</p>" +
                 "</body></html>";
 
-        // Tạo và gửi email
         MimeMessage message = javaMailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true);
 

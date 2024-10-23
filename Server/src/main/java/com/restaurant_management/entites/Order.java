@@ -33,6 +33,9 @@ public class Order {
     @JsonIgnore
     private List<OrderItem> items;
 
+    @Column(name = "shipping_fee", nullable = false)
+    private Double shippingFee;
+
     @Column(name = "total_price", nullable = false)
     private Double totalPrice;
 
