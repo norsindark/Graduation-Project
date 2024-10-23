@@ -10,4 +10,6 @@ public interface CouponRepository extends JpaRepository<Coupon, String> {
 
     @Query("SELECT CASE WHEN COUNT(c) > 0 THEN TRUE ELSE FALSE END FROM Coupon c WHERE c.code = ?1")
     boolean existsByCode(String code);
+
+    boolean existsByCodeAndIdNot(String code, String id);
 }
