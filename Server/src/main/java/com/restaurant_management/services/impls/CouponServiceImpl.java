@@ -60,6 +60,7 @@ public class CouponServiceImpl implements CouponService {
                 .description(request.getDescription())
                 .discountPercent(request.getDiscountPercent())
                 .maxDiscount(request.getMaxDiscount())
+                .status(request.getStatus().toUpperCase())
                 .minOrderValue(request.getMinOrderValue())
                 .quantity(request.getMaxUsage())
                 .startDate(request.getStartDate())

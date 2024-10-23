@@ -15,6 +15,7 @@ public class CouponDto {
     private Double minOrderValue;
     private Double maxDiscount;
     private String description;
+    private String status;
     private Integer maxUsage;
     private String startDate;
     private String expirationDate;
