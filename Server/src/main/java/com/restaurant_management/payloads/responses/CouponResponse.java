@@ -12,6 +12,7 @@ public class CouponResponse {
     private String couponId;
     private String couponCode;
     private String description;
+    private String status;
     private double discountPercent;
     private double maxDiscount;
     private double minOrderValue;
@@ -23,6 +24,7 @@ public class CouponResponse {
         this.couponId = coupon.getId();
         this.couponCode = coupon.getCode();
         this.description = coupon.getDescription();
+        this.status = coupon.getStatus();
         this.discountPercent = coupon.getDiscountPercent();
         this.maxDiscount = coupon.getMaxDiscount();
         this.minOrderValue = coupon.getMinOrderValue();
