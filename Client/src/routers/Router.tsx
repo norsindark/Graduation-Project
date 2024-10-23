@@ -27,6 +27,7 @@ import ProductDetail from '../pages/public/ProductDetail';
 import CartPage from '../pages/public/CartPage';
 import CheckoutPage from '../pages/public/CheckoutPage';
 import ProductOption from '../pages/admin/productoption/ProductOption';
+import Coupon from '../pages/admin/coupon/Coupon';
 export const router = createBrowserRouter([
   {
     path: '/',
@@ -133,6 +134,10 @@ export const router = createBrowserRouter([
       {
         path: '/product-option',
         element: <ProductOption />,
+      },
+      {
+        path: '/coupon',
+        element: <Coupon />,
       },
       {
         path: '/order',

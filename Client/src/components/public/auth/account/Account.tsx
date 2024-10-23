@@ -11,9 +11,14 @@ import ResetPasswordAccount from './changepassword/ResetPasswordAccount';
 interface AccountProps {
   onClose: () => void;
   setActiveModal: (modal: string | null) => void;
+  initialActiveTab: string | null;
 }
 
-const Account: React.FC<AccountProps> = ({ onClose, setActiveModal }) => {
+const Account: React.FC<AccountProps> = ({
+  onClose,
+  setActiveModal,
+  initialActiveTab,
+}) => {
   return (
     <Modal
       open={true}
@@ -38,7 +43,7 @@ const Account: React.FC<AccountProps> = ({ onClose, setActiveModal }) => {
                 className="col-xl-3 col-lg-4 wow fadeInUp"
                 data-wow-duration="1s"
               >
-                <NavigationAccount />
+                <NavigationAccount initialActiveTab={initialActiveTab} />
               </div>
               <div
                 className="col-xl-9 col-lg-8 wow fadeInUp"
