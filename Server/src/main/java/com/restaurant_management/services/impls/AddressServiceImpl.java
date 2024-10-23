@@ -116,7 +116,7 @@ public class AddressServiceImpl implements AddressService {
         if (pagedResult.hasContent()) {
             return pagedResourcesAssembler.toModel(pagedResult.map(AddressByUserIdResponse::new));
         } else {
-            throw new DataExitsException("No Category found");
+            throw new DataExitsException("No address found!");
         }
     }
 }

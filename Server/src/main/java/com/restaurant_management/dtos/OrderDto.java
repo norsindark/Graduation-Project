@@ -18,4 +18,6 @@ public class OrderDto {
     private String paymentMethod;
     private List<OrderItemDto> items;
     private String note;
+    private double shippingFee;
+    private double totalPrice;
 }
