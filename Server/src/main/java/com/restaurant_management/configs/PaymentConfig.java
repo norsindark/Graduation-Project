@@ -2,7 +2,6 @@ package com.restaurant_management.configs;
 
 
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.beans.factory.annotation.Value;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -13,20 +12,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
 public class PaymentConfig {
-    @Value("${vnp_PayUrl}")
-    public static String vnp_PayUrl;
-
-    @Value("${vnp_ReturnUrl}")
-    public static String vnp_ReturnUrl;
-
-    @Value("${vnp_TmnCode}")
-    public static String vnp_TmnCode;
-
-    @Value("${secretKey}")
-    public static String secretKey;
-
-    @Value("${vnp_ApiUrl}")
-    public String vnp_ApiUrl;
+    private final static String secretKey = "UTEFSD7GWMSVYE7U56BMN4BVG9V72CJT";
 
     public static String md5(String message) {
         String digest = null;
@@ -38,7 +24,9 @@ public class PaymentConfig {
                 sb.append(String.format("%02x", b & 0xff));
             }
             digest = sb.toString();
-        } catch (UnsupportedEncodingException | NoSuchAlgorithmException ex) {
+        } catch (UnsupportedEncodingException ex) {
+            digest = "";
+        } catch (NoSuchAlgorithmException ex) {
             digest = "";
         }
         return digest;
@@ -54,7 +42,9 @@ public class PaymentConfig {
                 sb.append(String.format("%02x", b & 0xff));
             }
             digest = sb.toString();
-        } catch (UnsupportedEncodingException | NoSuchAlgorithmException ex) {
+        } catch (UnsupportedEncodingException ex) {
+            digest = "";
+        } catch (NoSuchAlgorithmException ex) {
             digest = "";
         }
         return digest;
