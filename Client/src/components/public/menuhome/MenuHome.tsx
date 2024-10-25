@@ -39,8 +39,10 @@ function MenuHome() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    // return () => {
     fetchCategories();
     fetchProducts();
+    // };
   }, [current, pageSize]);
 
   const fetchCategories = async () => {
