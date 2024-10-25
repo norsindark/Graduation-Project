@@ -20,6 +20,10 @@ public class AddressResponse {
 
     private String street;
 
+    private String commune;
+
+    private String district;
+
     private String city;
 
     private String country;
@@ -40,6 +44,8 @@ public class AddressResponse {
         return AddressResponse.builder()
                 .id(address.getId())
                 .street(address.getStreet())
+                .commune(address.getCommune())
+                .district(address.getDistrict())
                 .city(address.getCity())
                 .country(address.getCountry())
                 .postalCode(address.getPostalCode())

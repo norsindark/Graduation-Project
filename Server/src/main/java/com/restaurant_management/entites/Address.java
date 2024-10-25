@@ -34,6 +34,12 @@ public class Address {
     private String street;
 
     @Column(nullable = true)
+    private String commune;
+
+    @Column(nullable = true)
+    private String district;
+
+    @Column(nullable = true)
     private String country;
 
     @Column(nullable = true)
@@ -56,8 +62,4 @@ public class Address {
     @JoinColumn(name = "user_id", referencedColumnName = "user_id")
     @JsonBackReference
     private User user;
-
-//    @OneToMany(mappedBy = "address", cascade = CascadeType.ALL, orphanRemoval = true)
-//    @JsonIgnore
-//    private List<OrderAddress> orderAddresses = new ArrayList<>();
 }

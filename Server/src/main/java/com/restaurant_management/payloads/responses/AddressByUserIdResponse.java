@@ -27,6 +27,8 @@ public class AddressByUserIdResponse {
         AddressResponse addressRes = new AddressResponse();
         addressRes.setId(address.getId());
         addressRes.setStreet(address.getStreet());
+        addressRes.setCommune(address.getCommune());
+        addressRes.setDistrict(address.getDistrict());
         addressRes.setCity(address.getCity());
         addressRes.setCountry(address.getCountry());
         addressRes.setPostalCode(address.getPostalCode());
