@@ -32,11 +32,11 @@ public class EmailServiceImpl implements EmailService {
     private final DishOptionSelectionRepository dishOptionSelectionRepository;
 
 
-    @Value("RestaurantManagement.app.ServerUrl")
-    private String serverUrl;
-
-    @Value("RestaurantManagement.app.ClientUrl")
+    @Value("${RestaurantManagement.app.ClientUrl}")
     private String clientUrl;
+
+    @Value("${RestaurantManagement.app.ServerUrl}")
+    private String serverUrl;
 
     @Autowired
     private JavaMailSender javaMailSender;
@@ -47,6 +47,7 @@ public class EmailServiceImpl implements EmailService {
         String fromAddress = "dvan78281@gmail.com";
         String senderName = "Sync Food";
         String subject = "Please click this URL to verify your email";
+        System.out.println("clientUrl: " + clientUrl);
 
         String verificationUrl = clientUrl + "verify-email?token=" + token;
 
@@ -68,7 +69,7 @@ public class EmailServiceImpl implements EmailService {
         helper.setFrom(fromAddress, senderName);
         helper.setTo(email);
         helper.setSubject(subject);
-        helper.setText(content.toString(), true); // Gửi nội dung HTML
+        helper.setText(content.toString(), true);
 
         javaMailSender.send(message);
     }
