@@ -1,13 +1,11 @@
 package com.restaurant_management.controllers;
 
 import com.restaurant_management.exceptions.DataExitsException;
-import com.restaurant_management.payloads.responses.CategoryResponse;
-import com.restaurant_management.payloads.responses.CouponResponse;
-import com.restaurant_management.payloads.responses.DishResponse;
-import com.restaurant_management.payloads.responses.GetCategoriesNameResponse;
+import com.restaurant_management.payloads.responses.*;
 import com.restaurant_management.services.interfaces.CategoryService;
 import com.restaurant_management.services.interfaces.CouponService;
 import com.restaurant_management.services.interfaces.DishService;
+import com.restaurant_management.services.interfaces.ReviewService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.hateoas.EntityModel;
@@ -27,6 +25,16 @@ public class GuestController {
     private final DishService dishService;
     private final CategoryService categoryService;
     private final CouponService couponService;
+    private final ReviewService reviewService;
+
+    @GetMapping("/get-all-reviews")
+    public ResponseEntity<PagedModel<EntityModel<ReviewResponse>>> getAllReviews(
+            @RequestParam(defaultValue = "0") int pageNo,
+            @RequestParam(defaultValue = "10") int pageSize,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String sortDir) throws DataExitsException {
+        return ResponseEntity.ok(reviewService.getAllReviews(pageNo, pageSize, sortBy, sortDir));
+    }
 
     @GetMapping("/get-dish-by-id/{dishId}")
     public ResponseEntity<DishResponse> getDishById(@PathVariable String dishId) throws DataExitsException {

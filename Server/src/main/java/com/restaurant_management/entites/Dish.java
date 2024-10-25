@@ -66,6 +66,9 @@ public class Dish {
     @JsonIgnore
     private List<DishOptionSelection> selectedOptions;
 
+    @OneToMany(mappedBy = "dish", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Review> reviews;
+
     @Column(name = "created_at")
     @CreationTimestamp
     private Timestamp createdAt;
