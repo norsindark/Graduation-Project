@@ -100,7 +100,9 @@ function Coupon({ cartItems }: { cartItems: any }) {
   };
 
   useEffect(() => {
+    // return () => {
     fetchCoupons();
+    // };
   }, []);
 
   const fetchCoupons = async () => {
@@ -148,7 +150,7 @@ function Coupon({ cartItems }: { cartItems: any }) {
 
       <Slider {...settings}>
         {coupons.filter(isValidCoupon).map((coupon: any) => (
-          <div key={coupon.id} className="px-2">
+          <div key={coupon.couponCode} className="px-2">
             <div
               className="coupon-card bg-orange-400 rounded overflow-hidden"
               style={{ maxWidth: '600px' }}

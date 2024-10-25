@@ -208,8 +208,8 @@ const CartPage: React.FC = () => {
   const handleCheckout = () => {
     if (!isAuthenticated) {
       notification.warning({
-        message: 'Đăng nhập cần thiết',
-        description: 'Vui lòng đăng nhập để tiến hành thanh toán.',
+        message: 'Please log in before checkout !!',
+        description: 'Please log in to proceed with the checkout.',
         duration: 3,
         showProgress: true,
       });

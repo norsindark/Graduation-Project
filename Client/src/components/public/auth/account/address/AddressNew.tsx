@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Form, Input, Radio, Button, notification, Select } from 'antd';
 import { callAddAddress } from '../../../../../services/clientApi'; // Import API call
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../../../redux/store';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 const AddressNew = ({
   onAddSuccess,
   setShowAddressNew,
@@ -15,14 +16,13 @@ const AddressNew = ({
   const navigate = useNavigate();
   const [isSubmit, setIsSubmit] = useState(false);
   const { Option } = Select;
-  const countries = [
-    { code: 'VN', name: 'Vietnam' },
-    { code: 'KR', name: 'Korea' },
-    { code: 'JP', name: 'Japan' },
-    { code: 'TH', name: 'Thailand' },
-    { code: 'CN', name: 'China' },
-    // Add more countries as needed
-  ];
+
+  const [selectedCity, setSelectedCity] = useState('');
+  const [selectedState, setSelectedState] = useState('');
+  const [cities, setCities] = useState([]);
+  const [states, setStates] = useState([]);
+  const [communes, setCommunes] = useState([]);
+
   const onFinish = async (values: {
     street: string;
     city: string;
@@ -41,59 +41,96 @@ const AddressNew = ({
       phoneNumber,
       addressType,
     } = values;
-    if (!userId) {
-      notification.error({
-        message: 'User not found',
-        description: 'Please login to create an address',
-        duration: 5,
-        showProgress: true,
-      });
-      setIsSubmit(false);
-      navigate('/login');
-      return;
-    }
-    setIsSubmit(true);
-    try {
-      const response = await callAddAddress(
-        street,
-        country,
-        city,
-        postalCode,
-        addressType,
-        state,
-        phoneNumber,
-        userId
-      );
-      console.log('response', response);
-      if (response?.status === 200) {
-        notification.success({
-          message: 'Address created successfully!',
-          duration: 5,
-          showProgress: true,
-        });
-        onAddSuccess();
-      } else {
-        notification.error({
-          message: 'Address created failed',
-          description: response.data.errors?.error || 'Something went wrong!',
-          duration: 5,
-          showProgress: true,
-        });
-      }
-    } catch (addressError) {
-      notification.error({
-        message: 'Error creating address',
-        description:
-          addressError instanceof Error
-            ? addressError.message
-            : 'Error during registration process!',
-        duration: 5,
-        showProgress: true,
-      });
-    } finally {
-      setIsSubmit(false);
-    }
+
+    console.log('values', values);
+    // if (!userId) {
+    //   notification.error({
+    //     message: 'User not found',
+    //     description: 'Please login to create an address',
+    //     duration: 5,
+    //     showProgress: true,
+    //   });
+    //   setIsSubmit(false);
+    //   navigate('/login');
+    //   return;
+    // }
+    // setIsSubmit(true);
+    // try {
+    //   const response = await callAddAddress(
+    //     street,
+    //     country,
+    //     city,
+    //     postalCode,
+    //     addressType,
+    //     state,
+    //     phoneNumber,
+    //     userId
+    //   );
+    //   console.log('response', response);
+    //   if (response?.status === 200) {
+    //     notification.success({
+    //       message: 'Address created successfully!',
+    //       duration: 5,
+    //       showProgress: true,
+    //     });
+    //     onAddSuccess();
+    //   } else {
+    //     notification.error({
+    //       message: 'Address created failed',
+    //       description: response.data.errors?.error || 'Something went wrong!',
+    //       duration: 5,
+    //       showProgress: true,
+    //     });
+    //   }
+    // } catch (addressError) {
+    //   notification.error({
+    //     message: 'Error creating address',
+    //     description:
+    //       addressError instanceof Error
+    //         ? addressError.message
+    //         : 'Error during registration process!',
+    //     duration: 5,
+    //     showProgress: true,
+    //   });
+    // } finally {
+    //   setIsSubmit(false);
+    // }
   };
+
+  useEffect(() => {
+    const fetchCities = async () => {
+      const response = await axios.get(
+        `https://api.mysupership.vn/v1/partner/areas/province`
+      );
+      setCities(response.data.results);
+    };
+
+    fetchCities();
+  }, []);
+
+  useEffect(() => {
+    if (selectedCity) {
+      const fetchStates = async () => {
+        const response = await axios.get(
+          `https://api.mysupership.vn/v1/partner/areas/district?province=${selectedCity}`
+        );
+        setStates(response.data.results);
+      };
+      fetchStates();
+    }
+  }, [selectedCity]);
+
+  useEffect(() => {
+    if (selectedState) {
+      const fetchCommunes = async () => {
+        const response = await axios.get(
+          `https://api.mysupership.vn/v1/partner/areas/commune?district=${selectedState}`
+        );
+        setCommunes(response.data.results);
+      };
+      fetchCommunes();
+    }
+  }, [selectedState]);
 
   return (
     <div className="container text-medium">
@@ -121,7 +158,16 @@ const AddressNew = ({
               name="city"
               rules={[{ required: true, message: 'Please input your City!' }]}
             >
-              <Input placeholder="City" autoComplete="city" />
+              <Select
+                placeholder="City"
+                onChange={(value, option: any) => setSelectedCity(option.key)}
+              >
+                {cities.map((city: any) => (
+                  <Option key={city.code} value={city.name}>
+                    {city.name}
+                  </Option>
+                ))}
+              </Select>
             </Form.Item>
           </div>
           <div className="col-md-6">
@@ -130,53 +176,45 @@ const AddressNew = ({
               name="state"
               rules={[{ required: true, message: 'Please input your State!' }]}
             >
-              <Input type="text" placeholder="State" autoComplete="state" />
+              <Select
+                placeholder="State"
+                disabled={!selectedCity}
+                onChange={(value, option: any) => setSelectedState(option.key)}
+              >
+                {states.map((state: any) => (
+                  <Option key={state.code} value={state.name}>
+                    {state.name}
+                  </Option>
+                ))}
+              </Select>
             </Form.Item>
           </div>
         </div>
         <div className="row">
           <div className="col-md-6">
             <Form.Item
-              label="Country"
-              name="country"
+              label="Commune"
+              name="commune"
               rules={[
-                { required: true, message: 'Please select your Country!' },
+                { required: true, message: 'Please input your Commune!' },
               ]}
             >
-              <Select
-                placeholder="Select a country"
-                showSearch
-                optionFilterProp="children"
-                filterOption={(input, option) =>
-                  (option?.children as unknown as string)
-                    .toLowerCase()
-                    .includes(input.toLowerCase())
-                }
-              >
-                {countries.map((country) => (
-                  <Option key={country.code} value={country.name}>
-                    {country.name}
+              <Select placeholder="Commune" disabled={!selectedState}>
+                {communes.map((commune: any) => (
+                  <Option key={commune.code} value={commune.name}>
+                    {commune.name}
                   </Option>
                 ))}
               </Select>
             </Form.Item>
           </div>
           <div className="col-md-6">
-            <Form.Item
-              label="Postal Code"
-              name="postalCode"
-              rules={[
-                { required: true, message: 'Please input your Postal Code!' },
-                {
-                  pattern: /^\d{5}$/,
-                  message: 'Postal Code must be exactly 5 digits!',
-                },
-              ]}
-            >
+            <Form.Item label="Country" name="country" initialValue="Việt Nam">
               <Input
                 type="text"
-                placeholder="Postal Code"
-                autoComplete="postal-code"
+                placeholder="Viet Nam"
+                autoComplete="country"
+                disabled
               />
             </Form.Item>
           </div>
