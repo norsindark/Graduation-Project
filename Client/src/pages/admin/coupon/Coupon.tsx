@@ -1,12 +1,25 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Button, notification, Card, Space, Popconfirm } from 'antd';
+import {
+  Table,
+  Button,
+  notification,
+  Card,
+  Space,
+  Popconfirm,
+  Tag,
+} from 'antd';
 import { EditOutlined, DeleteOutlined, EyeOutlined } from '@ant-design/icons';
 import { FaTags } from 'react-icons/fa';
 import CouponNew from './CouponNew';
 import CouponEdit from './CouponEdit';
-import { callGetAllCoupon, callDeleteUser } from '../../../services/serverApi';
+import {
+  callGetAllCoupon,
+  callDeleteUser,
+  callDeleteCoupon,
+} from '../../../services/serverApi';
 import type { ColumnType } from 'antd/es/table';
 import CouponDetail from './CouponDetail';
+
 interface CouponItem {
   couponId: string;
   couponCode: string;
@@ -17,6 +30,9 @@ interface CouponItem {
   availableQuantity: number;
   startDate: string;
   expirationDate: string;
+  status: string;
+  code: string;
+  maxUsage: string;
 }
 
 const Coupon: React.FC = () => {
@@ -100,17 +116,17 @@ const Coupon: React.FC = () => {
 
   const handleDeleteClick = async (id: string) => {
     try {
-      const res = await callDeleteUser(id);
+      const res = await callDeleteCoupon(id);
       if (res?.status == 200) {
         notification.success({
-          message: 'User deleted successfully!',
+          message: 'Coupon deleted successfully!',
           duration: 5,
           showProgress: true,
         });
         fetchItems();
       } else {
         notification.error({
-          message: 'Unable to delete user',
+          message: 'Unable to delete coupon',
           description: res.data.errors?.error || 'Error during delete process!',
           duration: 5,
           showProgress: true,
@@ -118,7 +134,7 @@ const Coupon: React.FC = () => {
       }
     } catch {
       notification.error({
-        message: 'Unable to delete user',
+        message: 'Unable to delete coupon',
         description: 'Error during delete process!',
         duration: 5,
         showProgress: true,
@@ -175,13 +191,13 @@ const Coupon: React.FC = () => {
         minOrderValue.toLocaleString() + ' VNĐ',
     },
     {
-      title: 'Available Quantity',
-      dataIndex: 'availableQuantity',
-      key: 'availableQuantity',
-      sorter: (a: any, b: any) =>
-        a.availableQuantity.localeCompare(b.availableQuantity),
+      title: 'Status',
+      dataIndex: 'status',
+      key: 'status',
+      render: (status: string) => (
+        <Tag color={status === 'ACTIVE' ? 'green' : 'red'}>{status}</Tag>
+      ),
     },
-
     {
       title: 'Actions',
       key: 'actions',

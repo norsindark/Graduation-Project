@@ -34,8 +34,8 @@ export const callResetPassword = (token: string, password: string) => {
   return axios.post('/api/v1/auth/reset-password', { token, password });
 };
 
-export const callResendVerifyEmail = (params: string) => {
-  return axios.get(`/api/v1/auth/resend-verification-email?email=${params}`);
+export const callResendVerifyEmail = (email: string) => {
+  return axios.get(`/api/v1/auth/resend-verification-email?email=${email}`);
 };
 
 export const callVerifyEmail = (token: string) => {
@@ -144,3 +144,8 @@ export const callGetAllDishes = async (query: string) => {
 export const callGetDishDetail = async (dishId: string) => {
   return axios.get(`/api/v1/auth/guest/get-dish-by-id/${dishId}`);
 };
+
+export const callGetAllCoupon = async (query: string) => {
+  return axios.get(`/api/v1/auth/guest/get-all-coupons?${query}`);
+};
+

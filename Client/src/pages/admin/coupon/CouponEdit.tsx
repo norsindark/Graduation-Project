@@ -1,19 +1,32 @@
 import React, { useState, useEffect } from 'react';
-import { Form, Input, Button, Select, notification, Row, Col } from 'antd';
-import { callUpdateUser } from '../../../services/serverApi';
+import {
+  Form,
+  Input,
+  Button,
+  InputNumber,
+  DatePicker,
+  notification,
+  Row,
+  Col,
+  Switch,
+} from 'antd';
 import { SaveOutlined, CloseOutlined } from '@ant-design/icons';
-
-const { Option } = Select;
+import { callUpdateCoupon } from '../../../services/serverApi';
+import dayjs from 'dayjs';
 
 interface CouponItem {
-  id: string;
-  email: string;
-  fullName: string;
-  role: {
-    id: string;
-    name: string;
-  };
+  couponId: string;
+  couponCode: string;
+  description: string;
+  discountPercent: number;
+  maxDiscount: number;
+  minOrderValue: number;
+  availableQuantity: number;
+  startDate: string;
+  expirationDate: string;
   status: string;
+  code: string;
+  maxUsage: string;
 }
 
 interface CouponEditProps {
@@ -29,29 +42,52 @@ const CouponEdit: React.FC<CouponEditProps> = ({
 }) => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
+  const [isActive, setIsActive] = useState(currentItem.status === 'ACTIVE');
 
   useEffect(() => {
     form.setFieldsValue({
       ...currentItem,
-      role: currentItem.role.name,
+      code: currentItem.couponCode,
+      maxUsage: currentItem.availableQuantity,
+      startDate: dayjs(currentItem.startDate),
+      expirationDate: dayjs(currentItem.expirationDate),
+      status: currentItem.status,
     });
   }, [currentItem, form]);
+  console.log('currentItem');
 
   const onFinish = async (values: any) => {
-    const { email, role, status, fullName } = values;
+    const {
+      code,
+      discountPercent,
+      minOrderValue,
+      maxDiscount,
+      description,
+      maxUsage,
+      startDate,
+      expirationDate,
+      status,
+    } = values;
+
     setLoading(true);
     try {
-      const res = await callUpdateUser(
-        email,
-        role,
-        status,
-        fullName,
-        currentItem.id
+      const res = await callUpdateCoupon(
+        currentItem.couponId,
+        code,
+        discountPercent,
+        minOrderValue,
+        maxDiscount,
+        description,
+        maxUsage,
+        startDate.format('YYYY-MM-DD'),
+        expirationDate.format('YYYY-MM-DD'),
+        status
       );
-      if (res?.status == 200) {
+
+      if (res.status === 200) {
         notification.success({
           message: 'Update successful',
-          description: 'User information has been updated.',
+          description: 'Coupon information has been updated.',
           duration: 5,
           showProgress: true,
         });
@@ -64,7 +100,7 @@ const CouponEdit: React.FC<CouponEditProps> = ({
           showProgress: true,
         });
       }
-    } catch {
+    } catch (error) {
       notification.error({
         message: 'Update failed',
         description: 'An error occurred!',
@@ -78,78 +114,179 @@ const CouponEdit: React.FC<CouponEditProps> = ({
 
   return (
     <>
-      <h4 className="text-2xl font-medium text-center mb-4">Edit User</h4>
-      <Form form={form} name="userEdit" onFinish={onFinish} layout="vertical">
+      <h4 className="text-2xl font-medium text-center mb-4">Edit Coupon</h4>
+
+      <Form form={form} name="couponEdit" onFinish={onFinish} layout="vertical">
         <Row gutter={16}>
-          <Col xs={24} sm={12}>
+          <Col xs={24} md={12}>
             <Form.Item
-              name="email"
-              label="Email"
+              name="code"
+              label="Coupon Code"
+              className="font-medium"
               rules={[
-                { required: true, message: 'Please enter an email!' },
-                { type: 'email', message: 'Invalid email format!' },
-              ]}
-            >
-              <Input disabled />
-            </Form.Item>
-          </Col>
-          <Col xs={24} sm={12}>
-            <Form.Item
-              name="fullName"
-              label="Full Name"
-              rules={[
-                { required: true, message: 'Please enter the full name!' },
+                { required: true, message: 'Please enter the coupon code!' },
               ]}
             >
               <Input />
             </Form.Item>
           </Col>
+          <Col xs={24} md={12}>
+            <Form.Item
+              name="discountPercent"
+              label="Discount Percentage"
+              className="font-medium"
+              rules={[
+                {
+                  required: true,
+                  message: 'Please enter the discount percentage!',
+                },
+              ]}
+            >
+              <InputNumber
+                min={0}
+                max={100}
+                formatter={(value) => `${value}%`}
+                parser={(value) => {
+                  const parsed = parseInt(value?.replace('%', '') ?? '', 10);
+                  return isNaN(parsed)
+                    ? 0
+                    : (Math.max(0, Math.min(parsed, 100)) as 0 | 100);
+                }}
+                className="w-full"
+              />
+            </Form.Item>
+          </Col>
         </Row>
 
         <Row gutter={16}>
-          <Col xs={24} sm={12}>
+          <Col xs={24} md={12}>
             <Form.Item
-              name="role"
-              label="Role"
-              rules={[{ required: true, message: 'Please select a role!' }]}
+              name="minOrderValue"
+              label="Minimum Order Value"
+              className="font-medium"
+              rules={[
+                {
+                  required: true,
+                  message: 'Please enter the minimum order value!',
+                },
+              ]}
             >
-              <Select>
-                <Option value="USER">User</Option>
-                <Option value="ADMIN">Admin</Option>
-                <Option value="EMPLOYEE">Employee</Option>
-              </Select>
+              <InputNumber
+                min={0}
+                formatter={(value) =>
+                  `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',') + ' VNĐ'
+                }
+                parser={(value: string | undefined): number => {
+                  const parsed = parseFloat(value?.replace(/,/g, '') ?? '');
+                  return isNaN(parsed) ? 0 : parsed;
+                }}
+                className="w-full"
+              />
             </Form.Item>
           </Col>
-          <Col xs={24} sm={12}>
+          <Col xs={24} md={12}>
             <Form.Item
-              name="status"
-              label="Status"
-              rules={[{ required: true, message: 'Please select a status!' }]}
+              name="maxDiscount"
+              label="Maximum Discount"
+              className="font-medium"
+              rules={[
+                {
+                  required: true,
+                  message: 'Please enter the maximum discount!',
+                },
+              ]}
             >
-              <Select>
-                <Option value="ACTIVE">Active</Option>
-                <Option value="INACTIVE">Inactive</Option>
-              </Select>
+              <InputNumber
+                min={0}
+                formatter={(value) =>
+                  `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',') + ' VNĐ'
+                }
+                parser={(value: string | undefined): number => {
+                  const parsed = parseFloat(value?.replace(/,/g, '') ?? '');
+                  return isNaN(parsed) ? 0 : parsed;
+                }}
+                className="w-full"
+              />
             </Form.Item>
           </Col>
         </Row>
 
-        <Form.Item>
+        <Form.Item
+          name="description"
+          label="Description"
+          className="font-medium"
+        >
+          <Input.TextArea rows={2} />
+        </Form.Item>
+
+        <Row gutter={16}>
+          <Col xs={24} md={8}>
+            <Form.Item
+              name="maxUsage"
+              label="Maximum Usage"
+              className="font-medium"
+              rules={[
+                { required: true, message: 'Please enter the maximum usage!' },
+              ]}
+            >
+              <InputNumber min={1} className="w-full" />
+            </Form.Item>
+          </Col>
+          <Col xs={24} md={8}>
+            <Form.Item
+              name="startDate"
+              label="Start Date"
+              className="font-medium"
+              rules={[
+                { required: true, message: 'Please select the start date!' },
+              ]}
+            >
+              <DatePicker className="w-full" />
+            </Form.Item>
+          </Col>
+          <Col xs={24} md={8}>
+            <Form.Item
+              name="expirationDate"
+              label="Expiration Date"
+              className="font-medium"
+              rules={[
+                {
+                  required: true,
+                  message: 'Please select the expiration date!',
+                },
+              ]}
+            >
+              <DatePicker className="w-full" />
+            </Form.Item>
+          </Col>
+        </Row>
+        <Form.Item label="Status" name="status" className="font-medium">
+          <Switch
+            checkedChildren="Active"
+            unCheckedChildren="Inactive"
+            checked={isActive}
+            onChange={(checked) => {
+              setIsActive(checked);
+              form.setFieldsValue({ status: checked ? 'ACTIVE' : 'INACTIVE' });
+            }}
+          />
+        </Form.Item>
+        <Form.Item className="mt-6">
           <Button
             type="primary"
             shape="round"
             htmlType="submit"
             loading={loading}
             icon={<SaveOutlined />}
+            className="mr-2"
           >
-            Update
+            Update Coupon
           </Button>
           <Button
-            type="primary"
             danger
-            onClick={() => setShowCouponEdit(false)}
-            style={{ marginLeft: 8 }}
+            type="primary"
             shape="round"
+            onClick={() => setShowCouponEdit(false)}
             icon={<CloseOutlined />}
           >
             Cancel

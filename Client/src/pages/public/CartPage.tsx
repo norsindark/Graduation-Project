@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { NavLink } from 'react-router-dom';
-import { Popconfirm } from 'antd';
+import { NavLink, useNavigate, useOutletContext } from 'react-router-dom';
+import { Popconfirm, notification } from 'antd';
 import { RootState } from '../../redux/store';
+import Coupon from '../../components/public/coupon/Coupon';
+import { callGetAllCoupon } from '../../services/clientApi';
 import {
   doRemoveProductAction,
   doUpdateQuantityAction,
@@ -10,10 +12,55 @@ import {
   CartItem,
   SelectedOption,
 } from '../../redux/order/orderSlice';
+import { LayoutContextType } from '../../components/public/layout/LayoutPublic';
+
+interface Coupon {
+  couponId: string;
+  couponCode: string;
+  description: string;
+  status: string;
+  discountPercent: number;
+  maxDiscount: number;
+  minOrderValue: number;
+  availableQuantity: number;
+  startDate: string;
+  expirationDate: string;
+}
+
+interface AppliedCoupon extends Coupon {
+  discountAmount: number;
+}
 
 const CartPage: React.FC = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { openModal } = useOutletContext<LayoutContextType>();
   const cartItems = useSelector((state: RootState) => state.order.carts);
+  const [coupons, setCoupons] = useState<Coupon[]>([]);
+  const [appliedCoupon, setAppliedCoupon] = useState<AppliedCoupon | null>(
+    null
+  );
+
+  const [couponCode, setCouponCode] = useState('');
+
+  const isAuthenticated = useSelector(
+    (state: RootState) => state.account.isAuthenticated
+  );
+
+  useEffect(() => {
+    fetchCoupons();
+  }, []);
+
+  const fetchCoupons = async () => {
+    try {
+      const query = `sortBy=startDate&order=desc`;
+      const response = await callGetAllCoupon(query);
+      const couponsData = response.data._embedded.couponResponseList;
+      setCoupons(couponsData);
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+    }
+  };
 
   const handleRemoveItem = (
     dishId: string,
@@ -77,8 +124,99 @@ const CartPage: React.FC = () => {
       0
     );
   };
+
+  const checkCouponValidity = (coupon: Coupon, subtotal: number) => {
+    const currentDate = new Date();
+    const startDate = new Date(coupon.startDate);
+    const expirationDate = new Date(coupon.expirationDate);
+
+    if (coupon.status !== 'ACTIVE') {
+      return 'Coupon is not active';
+    }
+    if (currentDate < startDate) {
+      return 'Coupon is not yet valid';
+    }
+    if (currentDate > expirationDate) {
+      return 'Coupon has expired';
+    }
+    if (subtotal < coupon.minOrderValue) {
+      return `Minimum order value of ${formatPrice(coupon.minOrderValue)} VNĐ not met`;
+    }
+    if (coupon.availableQuantity <= 0) {
+      return 'Coupon is out of stock';
+    }
+    return null;
+  };
+
+  useEffect(() => {
+    if (appliedCoupon) {
+      const subtotal = calculateSubtotal();
+      const discountAmount = Math.min(
+        (subtotal * appliedCoupon.discountPercent) / 100,
+        appliedCoupon.maxDiscount
+      );
+      setAppliedCoupon((prevCoupon) => ({ ...prevCoupon!, discountAmount }));
+    }
+  }, [cartItems]);
+
+  const applyCoupon = () => {
+    const coupon = coupons.find((c) => c.couponCode === couponCode);
+    if (!coupon) {
+      notification.error({
+        message: 'Invalid coupon code',
+        duration: 2,
+        showProgress: true,
+      });
+      setAppliedCoupon(null);
+      return;
+    }
+
+    const subtotal = calculateSubtotal();
+    const validationError = checkCouponValidity(coupon, subtotal);
+    if (validationError) {
+      notification.error({
+        message: validationError,
+        duration: 2,
+        showProgress: true,
+      });
+      setAppliedCoupon(null);
+      return;
+    }
+
+    const discountAmount = Math.min(
+      (subtotal * coupon.discountPercent) / 100,
+      coupon.maxDiscount
+    );
+    setAppliedCoupon({ ...coupon, discountAmount });
+    notification.success({
+      message: 'Coupon applied successfully',
+      duration: 2,
+      showProgress: true,
+    });
+  };
+
+  const calculateTotal = () => {
+    const subtotal = calculateSubtotal();
+    const discount = appliedCoupon ? appliedCoupon.discountAmount : 0;
+    return subtotal - discount;
+  };
+
   const handleClearCart = () => {
     dispatch(doClearCartAction());
+  };
+
+  const handleCheckout = () => {
+    if (!isAuthenticated) {
+      notification.warning({
+        message: 'Đăng nhập cần thiết',
+        description: 'Vui lòng đăng nhập để tiến hành thanh toán.',
+        duration: 3,
+        showProgress: true,
+      });
+      openModal('login');
+    } else {
+      navigate('/checkout');
+    }
   };
 
   return (
@@ -104,7 +242,7 @@ const CartPage: React.FC = () => {
         </div>
       </section>
 
-      <section className="fp__cart_view mt_125 xs_mt_95 mb_100 xs_mb_70">
+      <section className="fp__cart_view mt_50 xs_mt_95 mb_50 xs_mb_70">
         <div className="container">
           <div className="row">
             <div className="col-lg-8 wow fadeInUp" data-wow-duration="1s">
@@ -240,24 +378,41 @@ const CartPage: React.FC = () => {
                   delivery: <span>0 VNĐ</span>
                 </p>
                 <p>
-                  discount: <span>0 VNĐ</span>
+                  discount:{' '}
+                  <span>
+                    {appliedCoupon
+                      ? formatPrice(appliedCoupon.discountAmount)
+                      : 0}{' '}
+                    VNĐ
+                  </span>
                 </p>
                 <p className="total">
                   <span>total:</span>{' '}
-                  <span>{formatPrice(calculateSubtotal())} VNĐ</span>
+                  <span>{formatPrice(calculateTotal())} VNĐ</span>
                 </p>
-                <form>
-                  <input type="text" placeholder="Coupon Code" />
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    applyCoupon();
+                  }}
+                >
+                  <input
+                    type="text"
+                    placeholder="Coupon Code"
+                    value={couponCode}
+                    onChange={(e) => setCouponCode(e.target.value)}
+                  />
                   <button type="submit">apply</button>
                 </form>
-                <NavLink className="common_btn" to="/checkout">
+                <a className="common_btn" onClick={handleCheckout}>
                   checkout
-                </NavLink>
+                </a>
               </div>
             </div>
           </div>
         </div>
       </section>
+      <Coupon cartItems={cartItems} />
     </>
   );
 };

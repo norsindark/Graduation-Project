@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Form,
   Input,
@@ -8,6 +8,7 @@ import {
   notification,
   Row,
   Col,
+  Switch,
 } from 'antd';
 import { PlusOutlined, CloseOutlined } from '@ant-design/icons';
 import { callAddNewCoupon } from '../../../services/serverApi';
@@ -23,6 +24,11 @@ const CouponNew: React.FC<CouponNewProps> = ({
 }) => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
+  const [isActive, setIsActive] = useState(true);
+
+  useEffect(() => {
+    form.setFieldsValue({ status: isActive ? 'ACTIVE' : 'INACTIVE' });
+  }, [isActive, form]);
 
   const onFinish = async (values: any) => {
     const {
@@ -34,7 +40,10 @@ const CouponNew: React.FC<CouponNewProps> = ({
       maxUsage,
       startDate,
       expirationDate,
+      status,
     } = values;
+
+    console.log('startDate', startDate);
 
     setLoading(true);
     try {
@@ -46,7 +55,8 @@ const CouponNew: React.FC<CouponNewProps> = ({
         description,
         maxUsage,
         startDate,
-        expirationDate
+        expirationDate,
+        status
       );
 
       if (res.status === 200) {
@@ -143,7 +153,7 @@ const CouponNew: React.FC<CouponNewProps> = ({
               <InputNumber
                 min={0}
                 formatter={(value) =>
-                  `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+                  `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',') + ' VNĐ'
                 }
                 parser={(value: string | undefined): number => {
                   const parsed = parseFloat(value?.replace(/,/g, '') ?? '');
@@ -168,7 +178,7 @@ const CouponNew: React.FC<CouponNewProps> = ({
               <InputNumber
                 min={0}
                 formatter={(value) =>
-                  `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+                  `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',') + ' VNĐ'
                 }
                 parser={(value: string | undefined): number => {
                   const parsed = parseFloat(value?.replace(/,/g, '') ?? '');
@@ -184,9 +194,6 @@ const CouponNew: React.FC<CouponNewProps> = ({
           name="description"
           label="Description"
           className="font-medium"
-          rules={[
-            { required: true, message: 'Please enter the coupon description!' },
-          ]}
         >
           <Input.TextArea rows={2} />
         </Form.Item>
@@ -232,7 +239,17 @@ const CouponNew: React.FC<CouponNewProps> = ({
             </Form.Item>
           </Col>
         </Row>
-
+        <Form.Item label="Status" name="status" className="font-medium">
+          <Switch
+            checkedChildren="Active"
+            unCheckedChildren="Inactive"
+            checked={isActive}
+            onChange={(checked) => {
+              setIsActive(checked);
+              form.setFieldsValue({ status: checked ? 'ACTIVE' : 'INACTIVE' });
+            }}
+          />
+        </Form.Item>
         <Form.Item className="mt-6">
           <Button
             type="primary"

@@ -79,6 +79,13 @@ const CouponDetail: React.FC<CouponDetailProps> = ({
       ),
     },
     {
+      title: 'Available Quantity',
+      dataIndex: 'availableQuantity',
+      key: 'availableQuantity',
+      sorter: (a: any, b: any) =>
+        a.availableQuantity.localeCompare(b.availableQuantity),
+    },
+    {
       title: 'Start Date',
       dataIndex: 'startDate',
       key: 'startDate',
