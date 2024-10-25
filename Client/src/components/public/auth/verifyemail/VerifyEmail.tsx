@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { notification } from 'antd';
 import { callVerifyEmail } from '../../../../services/clientApi';
@@ -14,13 +14,15 @@ const VerifyEmail: React.FC<VerifyEmailProps> = ({
 }) => {
   const [searchParams] = useSearchParams();
   const token = searchParams.get('token');
+  const [isVerified, setIsVerified] = useState(false);
 
   useEffect(() => {
     const verifyEmail = async () => {
-      if (token) {
+      if (token && !isVerified) {
         try {
           const response = await callVerifyEmail(token);
           if (response.status === 200) {
+            setIsVerified(true);
             notification.success({
               message: 'Email verified successfully!',
               duration: 5,
@@ -28,14 +30,6 @@ const VerifyEmail: React.FC<VerifyEmailProps> = ({
             });
             onClose();
             setActiveModal('login');
-          } else {
-            notification.error({
-              message: 'Email verification failed!',
-              description:
-                response.data.errors?.error || 'Something went wrong!',
-              duration: 5,
-              showProgress: true,
-            });
           }
         } catch (error) {
           notification.error({
@@ -49,9 +43,9 @@ const VerifyEmail: React.FC<VerifyEmailProps> = ({
     };
 
     verifyEmail();
-  }, [token, onClose, setActiveModal]);
+  }, [token, onClose, setActiveModal, isVerified]);
 
-  return null;
+  return <></>;
 };
 
 export default VerifyEmail;
