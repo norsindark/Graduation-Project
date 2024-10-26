@@ -10,14 +10,14 @@ import ResetPasswordAccount from './changepassword/ResetPasswordAccount';
 
 interface AccountProps {
   onClose: () => void;
-  setActiveModal: (modal: string | null) => void;
   initialActiveTab: string | null;
+  editingAddressId: string | null;
 }
 
 const Account: React.FC<AccountProps> = ({
   onClose,
-  setActiveModal,
   initialActiveTab,
+  editingAddressId,
 }) => {
   return (
     <Modal
@@ -52,15 +52,10 @@ const Account: React.FC<AccountProps> = ({
                 <div className="fp__dashboard_content">
                   <div className="tab-content" id="v-pills-tabContent">
                     <DashboardAccount />
-
-                    <AddressAccount />
-
+                    <AddressAccount editingAddressId={editingAddressId} />
                     <OrderAccount />
-
                     <WishListAccount />
-
                     <ReviewAccount />
-
                     <ResetPasswordAccount />
                   </div>
                 </div>

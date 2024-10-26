@@ -1,143 +1,134 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Form, Input, Radio, Button, notification, Select } from 'antd';
-import { callAddAddress } from '../../../../../services/clientApi'; // Import API call
+import { callAddAddress } from '../../../../../services/clientApi';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../../../redux/store';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
-const AddressNew = ({
-  onAddSuccess,
-  setShowAddressNew,
-}: {
+
+interface AddressNewProps {
   onAddSuccess: () => void;
   setShowAddressNew: (show: boolean) => void;
+  fetchLocations: (
+    type: 'cities' | 'states' | 'communes',
+    parentCode?: string
+  ) => Promise<any[]>;
+}
+
+const AddressNew: React.FC<AddressNewProps> = ({
+  onAddSuccess,
+  setShowAddressNew,
+  fetchLocations,
 }) => {
+  const [form] = Form.useForm();
   const userId = useSelector((state: RootState) => state.account.user?.id);
   const navigate = useNavigate();
   const [isSubmit, setIsSubmit] = useState(false);
   const { Option } = Select;
 
+  const [cities, setCities] = useState<any[]>([]);
+  const [states, setStates] = useState<any[]>([]);
+  const [communes, setCommunes] = useState<any[]>([]);
   const [selectedCity, setSelectedCity] = useState('');
   const [selectedState, setSelectedState] = useState('');
-  const [cities, setCities] = useState([]);
-  const [states, setStates] = useState([]);
-  const [communes, setCommunes] = useState([]);
+
+  useEffect(() => {
+    const loadInitialData = async () => {
+      const citiesData = await fetchLocations('cities');
+      setCities(citiesData);
+    };
+
+    loadInitialData();
+  }, [fetchLocations]);
+
+  const handleCityChange = async (value: string, option: any) => {
+    setSelectedCity(option.key);
+    form.setFieldsValue({ state: undefined, commune: undefined });
+    setSelectedState('');
+    setCommunes([]);
+
+    const newStates = await fetchLocations('states', option.key);
+    setStates(newStates);
+  };
+
+  const handleStateChange = async (value: string, option: any) => {
+    setSelectedState(option.key);
+    form.setFieldsValue({ commune: undefined });
+
+    const newCommunes = await fetchLocations('communes', option.key);
+    setCommunes(newCommunes);
+  };
 
   const onFinish = async (values: {
     street: string;
     city: string;
-    country: string;
     state: string;
-    postalCode: string;
+    commune: string;
+    country: string;
     phoneNumber: string;
     addressType: string;
   }) => {
-    const {
-      street,
-      city,
-      country,
-      state,
-      postalCode,
-      phoneNumber,
-      addressType,
-    } = values;
+    const { street, city, country, state, commune, phoneNumber, addressType } =
+      values;
 
-    console.log('values', values);
-    // if (!userId) {
-    //   notification.error({
-    //     message: 'User not found',
-    //     description: 'Please login to create an address',
-    //     duration: 5,
-    //     showProgress: true,
-    //   });
-    //   setIsSubmit(false);
-    //   navigate('/login');
-    //   return;
-    // }
-    // setIsSubmit(true);
-    // try {
-    //   const response = await callAddAddress(
-    //     street,
-    //     country,
-    //     city,
-    //     postalCode,
-    //     addressType,
-    //     state,
-    //     phoneNumber,
-    //     userId
-    //   );
-    //   console.log('response', response);
-    //   if (response?.status === 200) {
-    //     notification.success({
-    //       message: 'Address created successfully!',
-    //       duration: 5,
-    //       showProgress: true,
-    //     });
-    //     onAddSuccess();
-    //   } else {
-    //     notification.error({
-    //       message: 'Address created failed',
-    //       description: response.data.errors?.error || 'Something went wrong!',
-    //       duration: 5,
-    //       showProgress: true,
-    //     });
-    //   }
-    // } catch (addressError) {
-    //   notification.error({
-    //     message: 'Error creating address',
-    //     description:
-    //       addressError instanceof Error
-    //         ? addressError.message
-    //         : 'Error during registration process!',
-    //     duration: 5,
-    //     showProgress: true,
-    //   });
-    // } finally {
-    //   setIsSubmit(false);
-    // }
-  };
-
-  useEffect(() => {
-    const fetchCities = async () => {
-      const response = await axios.get(
-        `https://api.mysupership.vn/v1/partner/areas/province`
+    if (!userId) {
+      notification.error({
+        message: 'User not found',
+        description: 'Please login to create an address',
+        duration: 5,
+        showProgress: true,
+      });
+      setIsSubmit(false);
+      navigate('/login');
+      return;
+    }
+    setIsSubmit(true);
+    try {
+      const response = await callAddAddress(
+        street,
+        country,
+        city,
+        addressType,
+        state,
+        commune,
+        phoneNumber,
+        userId
       );
-      setCities(response.data.results);
-    };
-
-    fetchCities();
-  }, []);
-
-  useEffect(() => {
-    if (selectedCity) {
-      const fetchStates = async () => {
-        const response = await axios.get(
-          `https://api.mysupership.vn/v1/partner/areas/district?province=${selectedCity}`
-        );
-        setStates(response.data.results);
-      };
-      fetchStates();
+      if (response?.status === 200) {
+        notification.success({
+          message: 'Address created successfully!',
+          duration: 5,
+          showProgress: true,
+        });
+        onAddSuccess();
+      } else {
+        notification.error({
+          message: 'Address creation failed',
+          description: response.data.errors?.error || 'Something went wrong!',
+          duration: 5,
+          showProgress: true,
+        });
+      }
+    } catch (addressError) {
+      notification.error({
+        message: 'Error creating address',
+        description:
+          addressError instanceof Error
+            ? addressError.message
+            : 'Error during creation process!',
+        duration: 5,
+        showProgress: true,
+      });
+    } finally {
+      setIsSubmit(false);
     }
-  }, [selectedCity]);
-
-  useEffect(() => {
-    if (selectedState) {
-      const fetchCommunes = async () => {
-        const response = await axios.get(
-          `https://api.mysupership.vn/v1/partner/areas/commune?district=${selectedState}`
-        );
-        setCommunes(response.data.results);
-      };
-      fetchCommunes();
-    }
-  }, [selectedState]);
+  };
 
   return (
     <div className="container text-medium">
       <h4 className="fp__dsahboard_overview_item text-center flex justify-center items-center p-3 font-[500] text-[18px]">
         Create New Address
       </h4>
-      <Form layout="vertical" onFinish={onFinish}>
+      <Form layout="vertical" form={form} onFinish={onFinish}>
         <div className="row">
           <div className="col-md-12">
             <Form.Item
@@ -158,10 +149,7 @@ const AddressNew = ({
               name="city"
               rules={[{ required: true, message: 'Please input your City!' }]}
             >
-              <Select
-                placeholder="City"
-                onChange={(value, option: any) => setSelectedCity(option.key)}
-              >
+              <Select placeholder="City" onChange={handleCityChange}>
                 {cities.map((city: any) => (
                   <Option key={city.code} value={city.name}>
                     {city.name}
@@ -178,8 +166,8 @@ const AddressNew = ({
             >
               <Select
                 placeholder="State"
+                onChange={handleStateChange}
                 disabled={!selectedCity}
-                onChange={(value, option: any) => setSelectedState(option.key)}
               >
                 {states.map((state: any) => (
                   <Option key={state.code} value={state.name}>

@@ -21,6 +21,7 @@ interface Address {
   createdAt: string;
   updatedAt: string | null;
   userId: string;
+  commune: string;
 }
 
 function CheckoutPage() {
@@ -33,7 +34,7 @@ function CheckoutPage() {
     null
   );
   const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
-  const [activeAccountTab, setActiveAccountTab] = useState<string | null>(null);
+  const [editingAddressId, setEditingAddressId] = useState<string | null>(null);
 
   const userId = useSelector((state: RootState) => state.account.user?.id);
   const fetchAddresses = async () => {
@@ -107,7 +108,12 @@ function CheckoutPage() {
 
   const handleCreateNewAddress = () => {
     setIsAccountModalOpen(true);
-    setActiveAccountTab('address');
+    setEditingAddressId(null);
+  };
+
+  const handleEditClick = (address: Address) => {
+    setEditingAddressId(address.id);
+    setIsAccountModalOpen(true);
   };
 
   return (
@@ -189,12 +195,12 @@ function CheckoutPage() {
                                           {address.street}
                                         </span>
                                       </div>
-                                      <div className="flex items-center mb-1">
+                                      <div className="flex items-center mb-1 ">
                                         <span className="font-semibold text-gray-700 mr-1">
-                                          City:
+                                          Commune:
                                         </span>
                                         <span className="text-gray-600">
-                                          {address.city}
+                                          {address.commune}
                                         </span>
                                       </div>
                                       <div className="flex items-center mb-1">
@@ -207,18 +213,18 @@ function CheckoutPage() {
                                       </div>
                                       <div className="flex items-center mb-1">
                                         <span className="font-semibold text-gray-700 mr-1">
-                                          Country:
+                                          City:
                                         </span>
                                         <span className="text-gray-600">
-                                          {address.country}
+                                          {address.city}
                                         </span>
                                       </div>
                                       <div className="flex items-center mb-1">
                                         <span className="font-semibold text-gray-700 mr-1">
-                                          Postal Code:
+                                          Country:
                                         </span>
                                         <span className="text-gray-600">
-                                          {address.postalCode}
+                                          {address.country}
                                         </span>
                                       </div>
                                     </div>
@@ -240,7 +246,7 @@ function CheckoutPage() {
                               <li>
                                 <a
                                   className="dash_edit_btn"
-                                  // onClick={() => handleEditClick(address)}
+                                  onClick={() => handleEditClick(address)}
                                 >
                                   <i className="far fa-edit"></i>
                                 </a>
@@ -303,9 +309,12 @@ function CheckoutPage() {
       </section>
       {isAccountModalOpen && (
         <Account
-          onClose={() => setIsAccountModalOpen(false)}
-          setActiveModal={setActiveAccountTab}
-          initialActiveTab={activeAccountTab}
+          onClose={() => {
+            setIsAccountModalOpen(false);
+            setEditingAddressId(null);
+          }}
+          initialActiveTab="address"
+          editingAddressId={editingAddressId}
         />
       )}
     </>
