@@ -27,13 +27,14 @@ public class GuestController {
     private final CouponService couponService;
     private final ReviewService reviewService;
 
-    @GetMapping("/get-all-reviews")
-    public ResponseEntity<PagedModel<EntityModel<ReviewResponse>>> getAllReviews(
+    @GetMapping("/get-all-reviews-by-dish/{dishId}")
+    public ResponseEntity<PagedModel<EntityModel<ReviewResponse>>> getAllReviewsByDishId(
+            @RequestParam String dishId,
             @RequestParam(defaultValue = "0") int pageNo,
             @RequestParam(defaultValue = "10") int pageSize,
             @RequestParam(defaultValue = "createdAt") String sortBy,
             @RequestParam(defaultValue = "desc") String sortDir) throws DataExitsException {
-        return ResponseEntity.ok(reviewService.getAllReviews(pageNo, pageSize, sortBy, sortDir));
+        return ResponseEntity.ok(reviewService.getAllReviewsByDishId(dishId, pageNo, pageSize, sortBy, sortDir));
     }
 
     @GetMapping("/get-dish-by-id/{dishId}")

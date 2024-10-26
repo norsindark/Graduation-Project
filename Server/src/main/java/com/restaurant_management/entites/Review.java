@@ -2,10 +2,7 @@ package com.restaurant_management.entites;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UuidGenerator;
 
@@ -34,11 +31,13 @@ public class Review {
     @ManyToOne
     @JoinColumn(name = "dish_id")
     @JsonIgnore
+    @ToString.Exclude
     private Dish dish;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     @JsonIgnore
+    @ToString.Exclude
     private User user;
 
     @ManyToOne

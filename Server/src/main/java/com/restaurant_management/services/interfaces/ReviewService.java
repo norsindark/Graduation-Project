@@ -8,6 +8,8 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
 
 public interface ReviewService {
+    PagedModel<EntityModel<ReviewResponse>> getAllReviewsByDishId(String dishId, int pageNo, int pageSize, String sortBy, String sortDir)
+            throws DataExitsException;
     PagedModel<EntityModel<ReviewResponse>> getAllReviews(int pageNo, int pageSize, String sortBy, String sortDir)
             throws DataExitsException;
 
