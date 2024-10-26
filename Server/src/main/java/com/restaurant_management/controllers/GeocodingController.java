@@ -13,12 +13,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @Tag(name = "Geocoding", description = "Geocoding API")
-@RequestMapping("/api/v1/auth/geocoding")
+@RequestMapping("/api/v1/client/geocoding")
 public class GeocodingController {
     private final GeocodingService geocodingService;
 
     @GetMapping("/coordinates")
-    public ResponseEntity<GeocodingResponse> getCoordinates(@RequestParam String address) {
+    public ResponseEntity<GeocodingResponse> getCoordinates(
+            @RequestParam String address) {
         return ResponseEntity.ok(geocodingService.getCoordinates(address));
     }
 }
