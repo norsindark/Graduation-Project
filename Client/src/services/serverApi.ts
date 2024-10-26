@@ -367,3 +367,14 @@ export const callDeleteCoupon = async (id: string) => {
 export const callUpdateCoupon = async (couponId: string, code: string, discountPercent: number, minOrderValue: number, maxDiscount: string, description: string, maxUsage: string, startDate: string, expirationDate: string, status: string) => {
   return axios.put(`/api/v1/dashboard/coupon/update-coupon?couponId=${couponId}`, { code, discountPercent, minOrderValue, maxDiscount, description, maxUsage, startDate, expirationDate, status });
 };
+
+
+// review
+
+export const callGetAllReview = async (query: string) => {
+  return axios.get(`/api/v1/dashboard/review/get-all-reviews?${query}`);
+};
+
+export const callDeleteReview = async (reviewId: string) => {
+  return axios.delete(`/api/v1/dashboard/review/delete-review/${reviewId}`);
+};

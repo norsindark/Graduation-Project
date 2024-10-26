@@ -28,6 +28,7 @@ import CartPage from '../pages/public/CartPage';
 import CheckoutPage from '../pages/public/CheckoutPage';
 import ProductOption from '../pages/admin/productoption/ProductOption';
 import Coupon from '../pages/admin/coupon/Coupon';
+import Review from '../pages/admin/review/Review';
 export const router = createBrowserRouter([
   {
     path: '/',
@@ -100,9 +101,9 @@ export const router = createBrowserRouter([
   {
     path: '/',
     element: (
-      <ProtectedRoute>
-        <Main />
-      </ProtectedRoute>
+      // <ProtectedRoute>
+      <Main />
+      // </ProtectedRoute>
     ),
     errorElement: <NotFound />,
     children: [
@@ -146,6 +147,10 @@ export const router = createBrowserRouter([
       {
         path: '/order',
         element: <Order />,
+      },
+      {
+        path: '/review',
+        element: <Review />,
       },
     ],
   },
