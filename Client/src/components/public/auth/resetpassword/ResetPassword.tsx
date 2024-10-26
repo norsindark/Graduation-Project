@@ -3,19 +3,21 @@ import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { callResetPassword } from '../../../../services/clientApi';
 import useResponsiveModalWidth from '../../../../hooks/useResponsiveModalWidth';
-import { useNavigate, useLocation, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
-const ResetPassword = () => {
+interface ResetPasswordProps {
+  onClose: () => void;
+  setActiveModal: (modal: string | null) => void;
+}
+
+const ResetPassword: React.FC<ResetPasswordProps> = ({
+  onClose,
+  setActiveModal,
+}) => {
   const [isSubmit, setIsSubmit] = useState(false);
   const modalWidth = useResponsiveModalWidth();
-  const navigate = useNavigate();
-  const location = useLocation();
-  const [searchParams] = useSearchParams(); // Di chuyển lên đầu
+  const [searchParams] = useSearchParams();
   const token = searchParams.get('token');
-
-  const handleCancel = () => {
-    navigate('/');
-  };
 
   const onFinish = async (values: {
     password: string;
@@ -41,7 +43,8 @@ const ResetPassword = () => {
           duration: 5,
           showProgress: true,
         });
-        navigate('/login');
+        onClose();
+        setActiveModal('login');
       } else {
         notification.error({
           message: 'Failed to reset password!',
@@ -65,14 +68,14 @@ const ResetPassword = () => {
 
   return (
     <Modal
-      open={location.pathname === '/reset-password'}
-      onCancel={handleCancel}
+      open={true}
+      onCancel={onClose}
       footer={null}
       width={modalWidth}
       centered
       closeIcon={
         <div className="fp__menu_cart_header">
-          <span className="close_cart-client" onClick={handleCancel}>
+          <span className="close_cart-client" onClick={onClose}>
             <i className="fal fa-times"></i>
           </span>
         </div>

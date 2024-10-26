@@ -1,13 +1,23 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { FaLocationDot } from 'react-icons/fa6';
 import { Button, Pagination, notification } from 'antd'; // Import Pagination
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../../../redux/store';
 import AddressNew from './AddressNew';
 import AddressEdit from './AddressEdit'; // Import AddressEdit
-import { callBulkAddress } from '../../../../../services/clientApi';
+import {
+  callBulkAddress,
+  callDeleteAddress,
+} from '../../../../../services/clientApi';
 import Loading from '../../../../Loading/Loading';
-import { callDeleteAddress } from '../../../../../services/clientApi';
+import axios from 'axios';
+
+// Định nghĩa interface cho props
+interface AddressAccountProps {
+  editingAddressId: string | null;
+}
+
+// Định nghĩa interface cho Address (nếu chưa có)
 interface Address {
   id: string;
   street: string;
@@ -21,9 +31,12 @@ interface Address {
   createdAt: string;
   updatedAt: string | null;
   userId: string;
+  commune: string;
 }
 
-const AddressAccount = () => {
+const AddressAccount: React.FC<AddressAccountProps> = ({
+  editingAddressId,
+}) => {
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [total, setTotal] = useState(0); // Total addresses
   const [currentPage, setCurrentPage] = useState(1); // Current page
@@ -34,7 +47,34 @@ const AddressAccount = () => {
   const [currentAddress, setCurrentAddress] = useState<Address | null>(null); // Current address being edited
   const userId = useSelector((state: RootState) => state.account.user?.id);
 
-  const fetchAddresses = async () => {
+  //fetch city, state, commune
+  const [cities, setCities] = useState<any[]>([]);
+  const [states, setStates] = useState<any[]>([]);
+  const [communes, setCommunes] = useState<any[]>([]);
+
+  const [selectedCity, setSelectedCity] = useState('');
+  const [selectedState, setSelectedState] = useState('');
+
+  const fetchLocations = useCallback(
+    async (type: 'cities' | 'states' | 'communes', parentCode?: string) => {
+      const endpoints = {
+        cities: 'https://api.mysupership.vn/v1/partner/areas/province',
+        states: `https://api.mysupership.vn/v1/partner/areas/district?province=${parentCode}`,
+        communes: `https://api.mysupership.vn/v1/partner/areas/commune?district=${parentCode}`,
+      };
+
+      try {
+        const response = await axios.get(endpoints[type]);
+        return response.data.results;
+      } catch (error) {
+        console.error(`Error fetching ${type}:`, error);
+        return [];
+      }
+    },
+    []
+  );
+
+  const fetchAddresses = useCallback(async () => {
     if (userId) {
       try {
         setLoading(true);
@@ -44,7 +84,6 @@ const AddressAccount = () => {
           currentPage - 1,
           pageSize
         );
-        console.log(response);
         if (response.status === 200) {
           const fetchedAddresses =
             response.data._embedded.addressByUserIdResponseList;
@@ -60,11 +99,11 @@ const AddressAccount = () => {
         setLoading(false);
       }
     }
-  };
+  }, [userId, currentPage, pageSize]);
 
   useEffect(() => {
     fetchAddresses();
-  }, [userId, currentPage, pageSize]);
+  }, [fetchAddresses]);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -81,42 +120,95 @@ const AddressAccount = () => {
     fetchAddresses(); // Refresh addresses after editing
   };
 
-  const handleEditClick = (address: Address) => {
-    setCurrentAddress(address);
-    setShowAddressEdit(true);
-  };
+  const handleEditClick = useCallback(
+    (address: Address) => {
+      setCurrentAddress(address);
+      setSelectedCity(address.city);
+      setSelectedState(address.state);
+      setShowAddressEdit(true);
 
-  const handleDeleteClick = (id: string) => {
-    callDeleteAddress(id)
-      .then(() => {
+      fetchLocations('states', address.city).then(setStates);
+      fetchLocations('communes', address.state).then(setCommunes);
+    },
+    [fetchLocations]
+  );
+
+  const handleDeleteClick = async (id: string) => {
+    try {
+      setLoading(true);
+      const response = await callDeleteAddress(id);
+      if (response.status === 200) {
         notification.success({
-          message: 'Address deleted successfully!',
+          message: 'Deleted successfully!',
           duration: 5,
           showProgress: true,
         });
-
-        // After deleting, adjust total count and check if we need to go back a page
         setTotal((prevTotal) => prevTotal - 1);
-
-        // If the current page becomes empty and it's not the first page, go back one page
         if (addresses.length === 1 && currentPage > 1) {
           setCurrentPage((prevPage) => prevPage - 1);
         } else {
-          fetchAddresses();
+          setAddresses((prevAddresses) =>
+            prevAddresses.filter((address) => address.id !== id)
+          );
         }
-      })
-      .catch((error) => {
+        if (total % pageSize === 1 && currentPage > 1) {
+          setCurrentPage((prevPage) => prevPage - 1);
+        }
+        fetchAddresses();
+      } else {
         notification.error({
           message: 'Error deleting address',
           description:
-            error instanceof Error
-              ? error.message
-              : 'Error during deletion process!',
+            response.data.errors?.error || 'Error during deletion process!',
           duration: 5,
           showProgress: true,
         });
+      }
+    } catch (error) {
+      console.error('Error deleting address:', error);
+      notification.error({
+        message: 'Error deleting address',
+        description: 'An unexpected error occurred. Please try again later.',
+        duration: 5,
+        showProgress: true,
       });
+    } finally {
+      setLoading(false);
+    }
   };
+
+  useEffect(() => {
+    fetchLocations('cities').then(setCities);
+  }, [fetchLocations]);
+
+  // Fetch states khi selectedCity thay đổi
+  useEffect(() => {
+    if (selectedCity) {
+      fetchLocations('states', selectedCity).then(setStates);
+      setSelectedState('');
+      setCommunes([]);
+    }
+  }, [selectedCity, fetchLocations]);
+
+  // Fetch communes khi selectedState thay đổi
+  useEffect(() => {
+    if (selectedState) {
+      fetchLocations('communes', selectedState).then(setCommunes);
+    }
+  }, [selectedState, fetchLocations]);
+
+  useEffect(() => {
+    if (editingAddressId) {
+      const addressToEdit = addresses.find(
+        (addr) => addr.id === editingAddressId
+      );
+      if (addressToEdit) {
+        handleEditClick(addressToEdit);
+      }
+    }
+  }, [editingAddressId, addresses, handleEditClick]);
+
+  console.log('currentAddress11', addresses);
 
   return (
     <div
@@ -154,12 +246,14 @@ const AddressAccount = () => {
               <AddressNew
                 onAddSuccess={handleAddSuccess}
                 setShowAddressNew={setShowAddressNew}
+                fetchLocations={fetchLocations}
               />
             ) : showAddressEdit && currentAddress ? (
               <AddressEdit
                 currentAddress={currentAddress}
                 onEditSuccess={handleEditSuccess}
                 setShowAddressEdit={setShowAddressEdit}
+                fetchLocations={fetchLocations}
               />
             ) : (
               <div className="fp_dashboard_existing_address mt-8">
@@ -192,12 +286,12 @@ const AddressAccount = () => {
                                       {address.street}
                                     </span>
                                   </div>
-                                  <div className="flex items-center mb-1">
+                                  <div className="flex items-center mb-1 ">
                                     <span className="font-semibold text-gray-700 mr-1">
-                                      City:
+                                      Commune:
                                     </span>
                                     <span className="text-gray-600">
-                                      {address.city}
+                                      {address.commune}
                                     </span>
                                   </div>
                                   <div className="flex items-center mb-1">
@@ -210,18 +304,18 @@ const AddressAccount = () => {
                                   </div>
                                   <div className="flex items-center mb-1">
                                     <span className="font-semibold text-gray-700 mr-1">
-                                      Country:
+                                      City:
                                     </span>
                                     <span className="text-gray-600">
-                                      {address.country}
+                                      {address.city}
                                     </span>
                                   </div>
                                   <div className="flex items-center mb-1">
                                     <span className="font-semibold text-gray-700 mr-1">
-                                      Postal Code:
+                                      Country:
                                     </span>
                                     <span className="text-gray-600">
-                                      {address.postalCode}
+                                      {address.country}
                                     </span>
                                   </div>
                                 </div>
@@ -254,7 +348,7 @@ const AddressAccount = () => {
               </div>
             )}
             {addresses.length > 0 && !showAddressNew && !showAddressEdit && (
-              <div className="absolute bottom-20 left-1/2 transform z-1000 bg-white p-2 ">
+              <div className="absolute left-[55%] transform z-1000 bg-white p-2 ">
                 <Pagination
                   align="center"
                   current={currentPage}

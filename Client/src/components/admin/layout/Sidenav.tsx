@@ -8,6 +8,7 @@ import { AiOutlineHome } from 'react-icons/ai';
 import { FaWarehouse } from 'react-icons/fa';
 import { UsergroupAddOutlined } from '@ant-design/icons';
 import { FaCalendarCheck } from 'react-icons/fa';
+import { FaTags } from 'react-icons/fa';
 function Sidenav({ color }: { color: string }) {
   const { pathname } = useLocation();
   const page = pathname.replace('/', '');
@@ -122,6 +123,20 @@ function Sidenav({ color }: { color: string }) {
     },
     {
       key: '9',
+      label: (
+        <NavLink to="/Coupon">
+          <span
+            className="icon"
+            style={{ background: page === 'Coupon' ? color : '' }}
+          >
+            <FaTags />
+          </span>
+          <span className="label">Coupon</span>
+        </NavLink>
+      ),
+    },
+    {
+      key: '10',
       label: (
         <NavLink to="/order">
           <span

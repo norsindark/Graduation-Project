@@ -204,7 +204,8 @@
 }
 
 .dash_edit_btn,
-.dash_del_icon {
+.dash_del_icon,
+.dash_check_icon {
   cursor: pointer;
 }
 
@@ -216,5 +217,32 @@
   color: #ff4d4f;
 }
 
+.dash_check_icon i {
+  color: #1890ff;
+}
+
+.dash_check_icon.selected i {
+  color: #fff; /* Màu xanh lá cây khi được chọn */
+}
+
+.dash_check_icon.selected {
+  background-color: #66bb6a;
+}
+
+.dash_check_icon i {
+  transition: color 0.3s;
+}
 .ant-table-cell {
+}
+
+.image-gallery-thumbnail.active,
+.image-gallery-thumbnail:focus {
+  border: 3px solid #66bb6a !important;
+}
+
+.image-gallery-icon:hover {
+  color: #66bb6a !important;
+}
+.image-gallery-thumbnail:hover {
+  border: 3px solid #66bb6a !important;
 }

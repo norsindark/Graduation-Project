@@ -1,4 +1,28 @@
-function TabsDescriptionAndReview() {
+import React, { useState } from 'react';
+import { Form, Input, Rate, Button } from 'antd';
+import 'react-quill/dist/quill.bubble.css';
+import ReactQuill from 'react-quill';
+
+const { TextArea } = Input;
+
+interface DishDetail {
+  longDescription: string;
+  // ... other properties
+}
+
+function TabsDescriptionAndReview({
+  dishDetail,
+}: {
+  dishDetail: DishDetail | null;
+}) {
+  const [form] = Form.useForm();
+  const [rating, setRating] = useState(0);
+
+  const onFinish = (values: any) => {
+    console.log('Received values of form: ', { ...values, rating });
+    // Here you would typically send the review to your backend
+  };
+
   return (
     <>
       <div className="fp__menu_description_area mt_100 xs_mt_70">
@@ -41,100 +65,12 @@ function TabsDescriptionAndReview() {
             tabIndex={0}
           >
             <div className="menu_det_description">
-              <p>
-                Ipsum dolor, sit amet consectetur adipisicing elit. Doloribus
-                consectetur ullam in? Beatae, dolorum ad ea deleniti ratione
-                voluptatum similique omnis voluptas tempora optio soluta vero
-                veritatis reiciendis blanditiis architecto. Debitis nesciunt
-                inventore voluptate tempora ea incidunt iste, corporis, quo
-                cumque facere doloribus possimus nostrum sed magni quasi,
-                assumenda autem! Repudiandae nihil magnam provident illo alias
-                vero odit repellendus, ipsa nemo itaque. Aperiam fuga, magnam
-                quia illum minima blanditiis tempore. vero veritatis reiciendis
-                blanditiis architecto. Debitis nesciunt inventore voluptate
-                tempora ea incidunt iste, corporis, quo cumque facere doloribus
-                possimus nostrum sed magni quasi
-              </p>
-              <ul>
-                <li>
-                  Lorem ipsum dolor, sit amet consectetur adipisicing elit.
-                  Doloribus consectetur ullam in
-                </li>
-                <li>
-                  Dolor sit amet consectetur adipisicing elit. Earum itaque
-                  nesciunt.
-                </li>
-                <li>
-                  Corporis, quo cumque facere doloribus possimus nostrum sed
-                  magni quasi.
-                </li>
-                <li>
-                  Reiciendis blanditiis architecto. Debitis nesciunt inventore
-                  voluptate tempora ea.
-                </li>
-                <li>
-                  Incidunt iste, corporis, quo cumque facere doloribus possimus
-                  nostrum sed magni quasi
-                </li>
-                <li>
-                  Architecto. Debitis nesciunt inventore voluptate tempora ea
-                  incidunt iste corporis.
-                </li>
-                <li>
-                  Earum itaque nesciunt dolor laudantium placeat sed velit
-                  aspernatur.
-                </li>
-                <li>
-                  Laudantium placeat sed velit aspernatur, nobis quos quibusdam
-                  distinctio voluptatum.
-                </li>
-              </ul>
-              <p>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Earum
-                itaque nesciunt dolor laudantium placeat sed velit aspernatur,
-                nobis quos quibusdam distinctio voluptatum officia vel sapiente
-                enim, reprehenderit impedit beatae molestias dolorum. A laborum
-                consectetur sed quis exercitationem optio consequatur, unde
-                neque est odit, pariatur quae incidunt quasi dolorem nihil
-                aliquid ut veritatis porro eaque cupiditate voluptatem vel ad!
-                Asperiores, praesentium. sit amet consectetur adipisicing elit.
-                Doloribus consectetur ullam in? Beatae, dolorum ad ea deleniti
-                ratione voluptatum similique omnis voluptas tempora optio soluta
-              </p>
-
-              <ul>
-                <li>
-                  Reiciendis blanditiis architecto. Debitis nesciunt inventore
-                  voluptate tempora ea.
-                </li>
-                <li>
-                  Incidunt iste, corporis, quo cumque facere doloribus possimus
-                  nostrum sed magni quasi
-                </li>
-                <li>
-                  Architecto. Debitis nesciunt inventore voluptate tempora ea
-                  incidunt iste corporis.
-                </li>
-                <li>
-                  Earum itaque nesciunt dolor laudantium placeat sed velit
-                  aspernatur.
-                </li>
-                <li>
-                  Laudantium placeat sed velit aspernatur, nobis quos quibusdam
-                  distinctio voluptatum.
-                </li>
-              </ul>
-              <p>
-                Lorem ipsum dolor, sit amet consectetur adipisicing elit.
-                Doloribus consectetur ullam in? Beatae, dolorum ad ea deleniti
-                ratione voluptatum similique omnis voluptas tempora optio soluta
-                vero veritatis reiciendis blanditiis architecto. Debitis
-                nesciunt inventore voluptate tempora ea incidunt iste, corporis,
-                quo cumque facere doloribus possimus nostrum sed magni quasi,
-                assumenda autem! Repudiandae nihil magnam provident illo alias
-                vero odit repellendus, ipsa nemo itaque. Aperiam fuga, magnam
-                quia illum minima blanditiis tempore.
-              </p>
+              <ReactQuill
+                value={dishDetail?.longDescription || ''}
+                readOnly={true}
+                theme="bubble"
+                modules={{ toolbar: false }}
+              />
             </div>
           </div>
           <div
@@ -257,35 +193,67 @@ function TabsDescriptionAndReview() {
                 <div className="col-lg-4">
                   <div className="fp__post_review">
                     <h4>write a Review</h4>
-                    <form>
-                      <p className="rating">
-                        <span>select your rating : </span>
-                        <i className="fas fa-star"></i>
-                        <i className="fas fa-star"></i>
-                        <i className="fas fa-star"></i>
-                        <i className="fas fa-star"></i>
-                        <i className="fas fa-star"></i>
-                      </p>
-                      <div className="row">
-                        <div className="col-xl-12">
-                          <input type="text" placeholder="Name" />
-                        </div>
-                        <div className="col-xl-12">
-                          <input type="email" placeholder="Email" />
-                        </div>
-                        <div className="col-xl-12">
-                          <textarea
-                            rows={3}
-                            placeholder="Write your review"
-                          ></textarea>
-                        </div>
-                        <div className="col-12">
-                          <button className="common_btn" type="submit">
-                            submit review
-                          </button>
-                        </div>
-                      </div>
-                    </form>
+                    <Form form={form} onFinish={onFinish} layout="vertical">
+                      <Form.Item
+                        label="Select your rating"
+                        className="font-medium"
+                      >
+                        <Rate onChange={setRating} value={rating} />
+                      </Form.Item>
+                      <Form.Item
+                        name="name"
+                        label="Name"
+                        className="font-medium"
+                        rules={[
+                          {
+                            required: true,
+                            message: 'Please input your name!',
+                          },
+                        ]}
+                      >
+                        <Input placeholder="Name" />
+                      </Form.Item>
+                      <Form.Item
+                        name="email"
+                        label="Email"
+                        className="font-medium"
+                        rules={[
+                          {
+                            required: true,
+                            message: 'Please input your email!',
+                          },
+                          {
+                            type: 'email',
+                            message: 'Please enter a valid email!',
+                          },
+                        ]}
+                      >
+                        <Input type="email" placeholder="Email" />
+                      </Form.Item>
+                      <Form.Item
+                        name="review"
+                        label="Review"
+                        className="font-medium"
+                        rules={[
+                          {
+                            required: true,
+                            message: 'Please write your review!',
+                          },
+                        ]}
+                      >
+                        <TextArea rows={3} placeholder="Write your review" />
+                      </Form.Item>
+                      <Form.Item>
+                        <Button
+                          type="primary"
+                          htmlType="submit"
+                          className="common_btn"
+                          icon={<i className="fas fa-paper-plane"></i>}
+                        >
+                          Submit Review
+                        </Button>
+                      </Form.Item>
+                    </Form>
                   </div>
                 </div>
               </div>

@@ -34,8 +34,8 @@ export const callResetPassword = (token: string, password: string) => {
   return axios.post('/api/v1/auth/reset-password', { token, password });
 };
 
-export const callResendVerifyEmail = (params: string) => {
-  return axios.get(`/api/v1/auth/resend-verification-email?email=${params}`);
+export const callResendVerifyEmail = (email: string) => {
+  return axios.get(`/api/v1/auth/resend-verification-email?email=${email}`);
 };
 
 export const callVerifyEmail = (token: string) => {
@@ -73,9 +73,9 @@ export const callAddAddress = (
   street: string,
   country: string,
   city: string,
-  postalCode: string,
   addressType: string,
   state: string,
+  commune: string,
   phoneNumber: string,
   userId: string
 ) => {
@@ -83,9 +83,9 @@ export const callAddAddress = (
     street,
     country,
     city,
-    postalCode,
     addressType,
     state,
+    commune,
     phoneNumber,
     userId,
   });
@@ -96,8 +96,8 @@ export const callUpdateAddress = (
   street: string,
   country: string,
   city: string,
-  postalCode: string,
   addressType: string,
+  commune: string,
   state: string,
   phoneNumber: string,
   userId: string
@@ -107,9 +107,9 @@ export const callUpdateAddress = (
     street,
     country,
     city,
-    postalCode,
     addressType,
     state,
+    commune,
     phoneNumber,
     userId,
   });
@@ -131,3 +131,21 @@ export const callChangePassword = (
     newPassword,
   });
 };
+
+// guest 
+export const callGetAllCategory = async () => {
+  return axios.get(`/api/v1/auth/guest/get-all-categories?sortBy=createdAt&sortDir=asc`);
+};
+
+export const callGetAllDishes = async (query: string) => {
+  return axios.get(`/api/v1/auth/guest/get-all-dishes?${query}`);
+};
+  
+export const callGetDishDetail = async (dishId: string) => {
+  return axios.get(`/api/v1/auth/guest/get-dish-by-id/${dishId}`);
+};
+
+export const callGetAllCoupon = async (query: string) => {
+  return axios.get(`/api/v1/auth/guest/get-all-coupons?${query}`);
+};
+

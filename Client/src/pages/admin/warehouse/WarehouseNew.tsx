@@ -51,7 +51,9 @@ const WarehouseNew: React.FC<WarehouseNewProps> = ({
   useEffect(() => {
     const fetchCategoryList = async () => {
       const responseCategory = await callGetAllCategoriesName();
-      setCategoryList(responseCategory.data);
+      setCategoryList(
+        Array.isArray(responseCategory.data) ? responseCategory.data : []
+      );
     };
     fetchCategoryList();
   }, []);
@@ -255,7 +257,12 @@ const WarehouseNew: React.FC<WarehouseNewProps> = ({
                 },
               ]}
             >
-              <InputNumber style={{ width: '100%' }} />
+              <InputNumber
+                style={{ width: '100%' }}
+                formatter={(value) =>
+                  `$ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+                }
+              />
             </Form.Item>
           </Col>
           <Col xs={24} sm={12}>
