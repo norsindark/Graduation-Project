@@ -1,7 +1,9 @@
 package com.restaurant_management.entites;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,24 +14,18 @@ import org.hibernate.annotations.UuidGenerator;
 
 import java.sql.Timestamp;
 
+@Entity
 @Data
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
-@Table(name = "addresses")
-public class Address {
+@Builder
+@Table(name = "location_restaurant")
+public class LocationRestaurant {
 
     @Id
     @UuidGenerator
-    @Column(name = "addresses_id", length = 36, nullable = false)
+    @Column(name = "location_restaurant_id", length = 36, nullable = false)
     private String id;
-
-    @Column(name = "phone_number", length = 15)
-    private String phoneNumber;
-
-    @Column(name = "state")
-    private String state;
 
     @Column(nullable = true)
     private String street;
@@ -41,16 +37,22 @@ public class Address {
     private String district;
 
     @Column(nullable = true)
+    private String city;
+
+    @Column(name = "state")
+    private String state;
+
+    @Column(nullable = true)
     private String country;
 
     @Column(nullable = true)
-    private String city;
+    private double latitude;
 
-    @Column(name = "postal_code")
-    private int postalCode;
+    @Column(nullable = true)
+    private double longitude;
 
-    @Column(name = "address_type")
-    private String addressType;
+    @Column(name = "fee_per_km")
+    private double feePerKm;
 
     @Column(name = "created_at")
     @CreationTimestamp
@@ -59,9 +61,4 @@ public class Address {
     @Column(name = "updated_at")
     @UpdateTimestamp
     private Timestamp updatedAt;
-
-    @ManyToOne
-    @JoinColumn(name = "user_id", referencedColumnName = "user_id")
-    @JsonBackReference
-    private User user;
 }

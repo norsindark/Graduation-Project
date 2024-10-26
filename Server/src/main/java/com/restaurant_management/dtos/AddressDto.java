@@ -2,8 +2,6 @@ package com.restaurant_management.dtos;
 
 import com.restaurant_management.entites.Address;
 import com.restaurant_management.entites.User;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -35,8 +33,6 @@ public class AddressDto {
     @Size(min = 3, max = 50, message = "City must be between 3 and 50 characters")
     private String city;
 
-    @Min(value = 10000, message = "Postal code must be 5 digits")
-    @Max(value = 99999, message = "Postal code must be 5 digits")
     private int postalCode;
 
     @Size(min = 3, max = 50, message = "Address type must be between 3 and 50 characters")
