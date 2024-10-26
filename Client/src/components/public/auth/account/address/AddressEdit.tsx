@@ -153,26 +153,23 @@ const AddressEdit: React.FC<AddressEditProps> = ({
         onFinish={onFinish}
       >
         <div className="row">
-          <div className="col-md-12">
-            <Form.Item
-              label="Street"
-              name="street"
-              rules={[{ required: true, message: 'Please input your Street!' }]}
-            >
-              <Input.TextArea
-                rows={2}
-                placeholder="Street"
-                autoComplete="street"
+        <div className="col-md-6">
+            <Form.Item label="Country" name="country" initialValue="Việt Nam">
+              <Input
+                type="text"
+                placeholder="Viet Nam"
+                autoComplete="country"
+                disabled
               />
             </Form.Item>
           </div>
           <div className="col-md-6">
             <Form.Item
-              label="City"
+              label="State/Province"
               name="city"
               rules={[{ required: true, message: 'Please input your City!' }]}
             >
-              <Select placeholder="City" onChange={handleCityChange}>
+              <Select placeholder="State/Province" onChange={handleCityChange}>
                 {cities.map((city: any) => (
                   <Option key={city.code} value={city.name}>
                     {city.name}
@@ -183,12 +180,12 @@ const AddressEdit: React.FC<AddressEditProps> = ({
           </div>
           <div className="col-md-6">
             <Form.Item
-              label="State"
+              label="City/Town"
               name="state"
               rules={[{ required: true, message: 'Please input your State!' }]}
             >
               <Select
-                placeholder="State"
+                placeholder="City/Town"
                 onChange={handleStateChange}
                 disabled={!selectedCity}
               >
@@ -200,17 +197,15 @@ const AddressEdit: React.FC<AddressEditProps> = ({
               </Select>
             </Form.Item>
           </div>
-        </div>
-        <div className="row">
           <div className="col-md-6">
             <Form.Item
-              label="Commune"
+              label="Commune/District"
               name="commune"
               rules={[
                 { required: true, message: 'Please input your Commune!' },
               ]}
             >
-              <Select placeholder="Commune" disabled={!selectedState}>
+              <Select placeholder="Commune/District" disabled={!selectedState}>
                 {communes.map((commune: any) => (
                   <Option key={commune.code} value={commune.name}>
                     {commune.name}
@@ -219,13 +214,18 @@ const AddressEdit: React.FC<AddressEditProps> = ({
               </Select>
             </Form.Item>
           </div>
-          <div className="col-md-6">
-            <Form.Item label="Country" name="country" initialValue="Việt Nam">
-              <Input
-                type="text"
-                placeholder="Viet Nam"
-                autoComplete="country"
-                disabled
+        </div>
+        <div className="row">         
+          <div className="col-md-12">
+            <Form.Item
+              label="Street"
+              name="street"
+              rules={[{ required: true, message: 'Please input your Street!' }]}
+            >
+              <Input.TextArea
+                rows={2}
+                placeholder="Street"
+                autoComplete="street"
               />
             </Form.Item>
           </div>
