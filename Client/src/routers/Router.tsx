@@ -89,7 +89,11 @@ export const router = createBrowserRouter([
       },
       {
         path: '/checkout',
-        element: <CheckoutPage />,
+        element: (
+          <ProtectedRoute>
+            <CheckoutPage />
+          </ProtectedRoute>
+        ),
       },
     ],
   },

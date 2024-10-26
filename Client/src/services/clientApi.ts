@@ -73,9 +73,9 @@ export const callAddAddress = (
   street: string,
   country: string,
   city: string,
-  postalCode: string,
   addressType: string,
   state: string,
+  commune: string,
   phoneNumber: string,
   userId: string
 ) => {
@@ -83,9 +83,9 @@ export const callAddAddress = (
     street,
     country,
     city,
-    postalCode,
     addressType,
     state,
+    commune,
     phoneNumber,
     userId,
   });
@@ -96,8 +96,8 @@ export const callUpdateAddress = (
   street: string,
   country: string,
   city: string,
-  postalCode: string,
   addressType: string,
+  commune: string,
   state: string,
   phoneNumber: string,
   userId: string
@@ -107,9 +107,9 @@ export const callUpdateAddress = (
     street,
     country,
     city,
-    postalCode,
     addressType,
     state,
+    commune,
     phoneNumber,
     userId,
   });
