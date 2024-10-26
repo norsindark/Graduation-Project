@@ -17,6 +17,7 @@ public class ReviewResponse {
     private String comment;
     private String dishId;
     private String userFullName;
+    private String userAvatar;
     private List<ReplyReviewResponse> replies;
     private String createdAt;
 
@@ -26,6 +27,7 @@ public class ReviewResponse {
         this.comment = review.getComment();
         this.dishId = review.getDish().getId();
         this.userFullName = review.getUser().getFullName();
+        this.userAvatar = review.getUser().getAvatar();
         this.createdAt = review.getCreatedAt().toString();
 
         this.replies = review.getReplies() != null ?
