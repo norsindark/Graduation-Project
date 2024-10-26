@@ -79,9 +79,9 @@ public class ReviewServiceImpl implements ReviewService {
         User user = userRepository.findById(reviewDto.getUserId())
                 .orElseThrow(() -> new DataExitsException("User not found"));
 
-        if (!hasUserPurchasedDish(user.getId(), dish.getId())) {
-            throw new DataExitsException("You must purchase the dish before reviewing");
-        }
+        // if (!hasUserPurchasedDish(user.getId(), dish.getId())) {
+        //     throw new DataExitsException("You must purchase the dish before reviewing");
+        // }
 
         if (reviewDto.getRating() > 5 || reviewDto.getRating() < 1) {
             throw new DataExitsException("Rating must be between 1 and 5");

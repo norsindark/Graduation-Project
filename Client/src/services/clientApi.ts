@@ -149,3 +149,22 @@ export const callGetAllCoupon = async (query: string) => {
   return axios.get(`/api/v1/auth/guest/get-all-coupons?${query}`);
 };
 
+
+// Review
+export const callCreateReview = async ( rating: number, review: string, dishId: string, userId: string) => {
+  return axios.post(`/api/v1/dashboard/review/create-review`, {  rating, review, dishId, userId });
+};
+
+export const callGetAllReviewForOneDish = async (dishId: string, query: string) => {
+  return axios.get(`/api/v1/auth/guest/get-all-reviews-by-dish/{dishId}?dishId=${dishId}&${query}`);
+};
+
+
+export const callCreateReplyReview = async (reviewId: string, review: string, rating: number, dishId: string, userId: string) => {
+  return axios.post(`/api/v1/dashboard/review/reply-review`, { reviewId, review, rating, dishId, userId });
+};
+
+
+export const callUpdateReview = async (reviewId: string, review: string, rating: number, dishId: string, userId: string) => {
+  return axios.put(`/api/v1/dashboard/review/update-review`, { reviewId, review, rating, dishId, userId });
+};

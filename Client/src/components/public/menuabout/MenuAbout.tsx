@@ -1,127 +1,142 @@
-import { Button, Form, Input, Select, Slider, Rate } from 'antd';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import {
+  callGetAllCategory,
+  callGetAllDishes,
+} from '../../../services/clientApi';
+import {
+  notification,
+  Pagination,
+  Form,
+  Input,
+  Select,
+  Slider,
+  Rate,
+  Button,
+} from 'antd';
+import { Link, useNavigate } from 'react-router-dom';
+import Loading from '../../../components/Loading/Loading';
+
+interface Product {
+  dishId: string;
+  dishName: string;
+  description: string;
+  thumbImage: string;
+  offerPrice: number;
+  price: number;
+  categoryName: string;
+  rating: number;
+  slug: string;
+}
+
+interface Category {
+  name: string;
+  subCategories: { name: string }[];
+}
 
 function MenuAbout() {
   const [showDropdown, setShowDropdown] = useState<number | null>(null);
   const [activeFilter, setActiveFilter] = useState('*');
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 100]);
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000000]);
   const [ratingFilter, setRatingFilter] = useState<number>(0);
+  const [menuItems, setMenuItems] = useState<any[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [current, setCurrent] = useState<number>(1);
+  const [pageSize, setPageSize] = useState<number>(8);
+  const [total, setTotal] = useState<number>(0);
+  const [categories, setCategories] = useState<Category[]>([]);
 
-  const handleFilter = (filter: string) => {
-    if (filter.startsWith('tất cả')) {
-      setActiveFilter(filter.replace('tất cả ', '').trim());
-    } else {
-      setActiveFilter(filter);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    fetchCategories();
+    fetchProducts();
+  }, [current, pageSize]);
+
+  const fetchCategories = async () => {
+    try {
+      const response = await callGetAllCategory();
+      const categoriesData = response.data._embedded.categoryResponseList;
+      setCategories(categoriesData);
+      const formattedMenuItems = categoriesData.map((category: Category) => ({
+        title: category.name,
+        items: [
+          `All ${category.name}`,
+          ...category.subCategories.map((subCategory) => subCategory.name),
+        ],
+      }));
+      setMenuItems(formattedMenuItems);
+    } catch (error) {
+      console.error('Error fetching categories:', error);
     }
-    setShowDropdown(null);
   };
 
-  const menuItems = [
-    {
-      title: 'Khai vị',
-      items: ['Tất cả khai vị', 'Salad', 'Súp'],
-    },
-    {
-      title: 'Món chính',
-      items: ['Tất cả món chính', 'Hải sản', 'Thịt', 'Cơm', 'Mì'],
-    },
-    {
-      title: 'Tráng miệng',
-      items: ['Tất cả tráng miệng', 'Bánh ngọt', 'Kem', 'Trái cây'],
-    },
-    {
-      title: 'Đồ uống',
-      items: ['Tất cả đồ uống', 'Cà phê', 'Trà', 'Nước ép', 'Cocktail'],
-    },
-  ];
+  const fetchProducts = async () => {
+    setLoading(true);
+    try {
+      const query = `pageNo=${current - 1}&pageSize=${pageSize}&sortBy=dishName&order=asc`;
+      const response = await callGetAllDishes(query);
+      console.log('responseProducts', response.data);
+      if (
+        response.status === 200 &&
+        response.data._embedded?.dishResponseList
+      ) {
+        setProducts(response.data._embedded.dishResponseList);
+        setTotal(response.data.page.totalElements);
+      } else {
+        setProducts([]);
+        setTotal(0);
+      }
+    } catch (error) {
+      notification.error({
+        message: 'Error loading list dishes',
+        description: 'Please try again later',
+        showProgress: true,
+        duration: 3,
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  const products = [
-    {
-      id: 1,
-      title: 'Cá hồi nướng',
-      category: 'Hải sản',
-      price: 45.0,
-      rating: 4.5,
-      image: 'images/menu2_img_3.jpg',
-    },
-    {
-      id: 2,
-      title: 'Salad gà',
-      category: 'Salad',
-      price: 25.0,
-      rating: 4.0,
-      image: 'images/menu2_img_1.jpg',
-    },
-    {
-      id: 3,
-      title: 'Bánh Tiramisu',
-      category: 'Bánh ngọt',
-      price: 30.0,
-      rating: 4.8,
-      image: 'images/menu2_img_2.jpg',
-    },
-    {
-      id: 4,
-      title: 'Risotto tôm hùm',
-      category: 'Hải sản',
-      price: 99.0,
-      rating: 4.9,
-      image: 'images/menu2_img_5.jpg',
-    },
-    {
-      id: 5,
-      title: 'Salad trái cây',
-      category: 'Trái cây',
-      price: 15.0,
-      rating: 4.7,
-      image: 'images/menu2_img_4.jpg',
-    },
-    {
-      id: 6,
-      title: 'Cà phê Espresso',
-      category: 'Cà phê',
-      price: 12.0,
-      rating: 4.6,
-      image: 'images/menu2_img_6.jpg',
-    },
-    {
-      id: 7,
-      title: 'Pizza Margarita',
-      category: 'Thịt',
-      price: 50.0,
-      rating: 4.3,
-      image: 'images/menu2_img_7.jpg',
-    },
-    {
-      id: 8,
-      title: 'Bánh táo',
-      category: 'Bánh ngọt',
-      price: 20.0,
-      rating: 4.2,
-      image: 'images/menu2_img_8.jpg',
-    },
-  ];
+  const handleFilter = (filter: string) => {
+    setActiveFilter(filter);
+    setShowDropdown(null);
+    setCurrent(1);
+  };
+
+  const handlePageChange = (page: number, pageSize?: number) => {
+    setCurrent(page);
+    if (pageSize) setPageSize(pageSize);
+  };
 
   const filteredProducts = products.filter((product) => {
-    const categoryFilter =
-      activeFilter === '*' ||
-      ['salad', 'súp'].includes(product.category.toLowerCase()) ||
-      ['hải sản', 'thịt', 'cơm', 'mì'].includes(
-        product.category.toLowerCase()
-      ) ||
-      ['bánh ngọt', 'kem', 'trái cây'].includes(
-        product.category.toLowerCase()
-      ) ||
-      ['cà phê', 'trà', 'nước ép', 'cocktail'].includes(
-        product.category.toLowerCase()
+    if (activeFilter === '*') return true;
+
+    const category = categories.find(
+      (cat) =>
+        cat.name === activeFilter.replace('All ', '') ||
+        cat.subCategories.some((subCat) => subCat.name === activeFilter)
+    );
+
+    if (!category) return false;
+
+    if (activeFilter.startsWith('All ')) {
+      return (
+        product.categoryName.toLowerCase() === category.name.toLowerCase() ||
+        category.subCategories.some(
+          (subCat) =>
+            product.categoryName.toLowerCase() === subCat.name.toLowerCase()
+        )
       );
-
-    const priceFilter =
-      product.price >= priceRange[0] && product.price <= priceRange[1];
-    const ratingFilterResult = product.rating >= ratingFilter;
-
-    return categoryFilter && priceFilter && ratingFilterResult;
+    } else {
+      return product.categoryName.toLowerCase() === activeFilter.toLowerCase();
+    }
   });
+
+  const handleProductClick = (slug: string) => {
+    navigate(`/product-detail/${slug}`);
+  };
 
   return (
     <section className="fp__menu mt_95 xs_mt_65">
@@ -180,8 +195,8 @@ function MenuAbout() {
                 <Slider
                   range
                   min={0}
-                  max={100}
-                  defaultValue={[0, 100]}
+                  max={1000000}
+                  defaultValue={[0, 1000000]}
                   onChange={(value) => setPriceRange(value as [number, number])}
                 />
               </Form.Item>
@@ -214,8 +229,7 @@ function MenuAbout() {
           <div className="col-12">
             <div className="menu_filter d-flex flex-wrap justify-content-center ">
               <button
-                className="active"
-                data-filter="*"
+                className={activeFilter === '*' ? 'active' : ''}
                 onClick={() => handleFilter('*')}
               >
                 All menu
@@ -235,10 +249,10 @@ function MenuAbout() {
                       onMouseEnter={() => setShowDropdown(index)}
                       onMouseLeave={() => setShowDropdown(null)}
                     >
-                      {menu.items.map((item, itemIndex) => (
+                      {menu.items.map((item: string, itemIndex: number) => (
                         <li key={`${menu.title}-${itemIndex}`}>
                           <button
-                            onClick={() => handleFilter(item.toLowerCase())}
+                            onClick={() => handleFilter(item)}
                             className="block bg-white text-xl font-medium px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-gray-900 w-full text-left transition-transform duration-200 ease-in-out transform hover:translate-x-1"
                           >
                             {item}
@@ -256,59 +270,91 @@ function MenuAbout() {
         <div className="row">
           {filteredProducts.map((product, index) => (
             <div
-              className={`col-xl-3 col-sm-6 col-lg-4 wow fadeInUp mb-10 ${index % 2 === 0 ? 'animate__animated animate__fadeInRight' : 'animate__animated animate__fadeInLeft'}`}
+              className={`col-xl-3 col-sm-6 col-lg-4 wow fadeInUp ${
+                index % 2 === 0
+                  ? 'animate__animated animate__fadeInRight'
+                  : 'animate__animated animate__fadeInLeft'
+              }`}
               data-wow-duration="1s"
-              key={product.id}
+              key={product.dishId}
               style={{ animationDelay: `${index * 0.2}s` }}
             >
               <div className="fp__menu_item">
                 <div className="fp__menu_item_img">
                   <img
-                    src={product.image}
-                    alt={product.title}
+                    src={product.thumbImage}
+                    alt={product.dishName}
                     className="img-fluid w-100"
                   />
                   <a className="category" href="#">
-                    {product.category}
+                    {product.categoryName}
                   </a>
                 </div>
                 <div className="fp__menu_item_text">
                   <p className="rating">
-                    {[...Array(5)].map((star, i) => (
+                    {[...Array(5)].map((_, i) => (
                       <i
                         key={i}
                         className={
-                          i < product.rating ? 'fas fa-star' : 'far fa-star'
+                          i < Math.round(product.rating)
+                            ? 'fas fa-star'
+                            : 'far fa-star'
                         }
                       ></i>
                     ))}
-                    <span>{Math.round(product.rating * 10) / 10}</span>
+                    <span> {Math.round(product.rating * 10) / 10 || 0}</span>
                   </p>
-                  <a className="title" href="#">
-                    {product.title}
+                  <a
+                    className="title"
+                    href={`/product-detail/${product.slug}`}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleProductClick(product.slug);
+                    }}
+                  >
+                    {product.dishName}
                   </a>
-                  <h5 className="price">${product.price.toFixed(2)}</h5>
+                  <h5 className="price">
+                    {product.offerPrice.toLocaleString()} VNĐ
+                    {product.offerPrice < product.price && (
+                      <del className="ml-2">
+                        {product.price.toLocaleString()} VNĐ
+                      </del>
+                    )}
+                  </h5>
                   <ul className="d-flex flex-wrap justify-content-center">
-                    <li>
-                      <a href="#">
-                        <i className="fas fa-shopping-basket"></i>
-                      </a>
-                    </li>
                     <li>
                       <a href="#">
                         <i className="fal fa-heart"></i>
                       </a>
                     </li>
                     <li>
-                      <a href="#">
+                      <Link
+                        to={`/product-detail/${product.slug}`}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handleProductClick(product.slug);
+                        }}
+                      >
                         <i className="far fa-eye"></i>
-                      </a>
+                      </Link>
                     </li>
                   </ul>
                 </div>
               </div>
             </div>
           ))}
+        </div>
+        <div className="row mt-4">
+          <div className="col-12 d-flex justify-content-center">
+            <Pagination
+              current={current}
+              total={total}
+              pageSize={pageSize}
+              onChange={handlePageChange}
+              showQuickJumper
+            />
+          </div>
         </div>
       </div>
     </section>
