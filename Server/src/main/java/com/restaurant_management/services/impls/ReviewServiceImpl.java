@@ -132,6 +132,7 @@ public class ReviewServiceImpl implements ReviewService {
         Review replyReview = Review.builder()
                 .comment(reviewDto.getReview())
                 .user(user)
+                .dish(parentReview.getDish())
                 .parentReview(parentReview)
                 .build();
 
