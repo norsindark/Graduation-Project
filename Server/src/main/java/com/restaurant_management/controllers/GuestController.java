@@ -27,7 +27,7 @@ public class GuestController {
     private final CouponService couponService;
     private final ReviewService reviewService;
 
-    @GetMapping("/get-all-reviews-by-dish}")
+    @GetMapping("/get-all-reviews-by-dish")
     public ResponseEntity<PagedModel<EntityModel<ReviewResponse>>> getAllReviewsByDishId(
             @RequestParam String dishId,
             @RequestParam(defaultValue = "0") int pageNo,
