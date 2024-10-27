@@ -5,7 +5,7 @@ import { NavLink, useLocation } from 'react-router-dom';
 import { BiSolidDashboard } from 'react-icons/bi';
 import { CgMenuLeftAlt } from 'react-icons/cg';
 import { AiOutlineHome } from 'react-icons/ai';
-import { FaReplyAll, FaWarehouse } from 'react-icons/fa';
+import { FaCog, FaReplyAll, FaWarehouse } from 'react-icons/fa';
 import { UsergroupAddOutlined } from '@ant-design/icons';
 import { FaCalendarCheck } from 'react-icons/fa';
 import { FaTags } from 'react-icons/fa';
@@ -160,6 +160,20 @@ function Sidenav({ color }: { color: string }) {
             <FaReplyAll />
           </span>
           <span className="label">Review</span>
+        </NavLink>
+      ),
+    },
+    {
+      key: '12',
+      label: (
+        <NavLink to="/setting">
+          <span
+            className="icon"
+            style={{ background: page === 'setting' ? color : '' }}
+          >
+            <FaCog />
+          </span>
+          <span className="label">Setting</span>
         </NavLink>
       ),
     },

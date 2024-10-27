@@ -155,12 +155,15 @@ function Review() {
           <Text strong>{text}</Text>
         </Space>
       ),
+      sorter: (a: Review, b: Review) =>
+        a.userFullName.localeCompare(b.userFullName),
     },
     {
       title: 'Rating',
       dataIndex: 'rating',
       key: 'rating',
       render: (rating) => <Rate disabled defaultValue={rating} />,
+      sorter: (a: Review, b: Review) => a.rating - b.rating,
     },
     {
       title: 'Comment',
@@ -172,12 +175,15 @@ function Review() {
       dataIndex: 'createdAt',
       key: 'createdAt',
       render: (date) => dayjs(date).format('DD/MM/YYYY HH:mm:ss'),
+      sorter: (a: Review, b: Review) =>
+        dayjs(a.createdAt).unix() - dayjs(b.createdAt).unix(),
     },
     {
       title: 'Replies',
       dataIndex: 'replies',
       key: 'replies',
       render: (replies) => replies.length,
+      sorter: (a: Review, b: Review) => a.replies.length - b.replies.length,
     },
     {
       title: 'Action',
