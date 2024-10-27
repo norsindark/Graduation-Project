@@ -16,6 +16,8 @@ public class ReviewResponse {
     private int rating;
     private String comment;
     private String dishId;
+    private String dishName;
+    private String userId;
     private String userFullName;
     private String userAvatar;
     private List<ReplyReviewResponse> replies;
@@ -26,6 +28,8 @@ public class ReviewResponse {
         this.rating = review.getRating();
         this.comment = review.getComment();
         this.dishId = review.getDish().getId();
+        this.dishName = review.getDish().getDishName();
+        this.userId = review.getUser().getId();
         this.userFullName = review.getUser().getFullName();
         this.userAvatar = review.getUser().getAvatar();
         this.createdAt = review.getCreatedAt().toString();
