@@ -29,6 +29,7 @@ import CheckoutPage from '../pages/public/CheckoutPage';
 import ProductOption from '../pages/admin/productoption/ProductOption';
 import Coupon from '../pages/admin/coupon/Coupon';
 import Review from '../pages/admin/review/Review';
+import Setting from '../pages/admin/setting/Setting';
 export const router = createBrowserRouter([
   {
     path: '/',
@@ -151,6 +152,10 @@ export const router = createBrowserRouter([
       {
         path: '/review',
         element: <Review />,
+      },
+      {
+        path: '/setting',
+        element: <Setting />,
       },
     ],
   },

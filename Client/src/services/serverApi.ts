@@ -378,3 +378,15 @@ export const callGetAllReview = async (query: string) => {
 export const callDeleteReview = async (reviewId: string) => {
   return axios.delete(`/api/v1/dashboard/review/delete-review/${reviewId}`);
 };
+
+
+// setting 
+
+export const callGetLocationRestaurant = async () => {
+  return axios.get(`/api/v1/dashboards/locations/get-location`);
+};
+
+export const callDeleteLocation = async (id: string) => {
+  return axios.delete(`/api/v1/dashboards/locations/delete-location/${id}`);
+};
+
