@@ -375,6 +375,10 @@ export const callGetAllReview = async (query: string) => {
   return axios.get(`/api/v1/dashboard/review/get-all-reviews?${query}`);
 };
 
+export const callGetAllReviewByDish = async (dishId: string) => {
+  return axios.get(`/api/v1/dashboard/review/get-all-reviews-by-dish?dishId=${dishId}`);
+};
+
 export const callDeleteReview = async (reviewId: string) => {
   return axios.delete(`/api/v1/dashboard/review/delete-review/${reviewId}`);
 };
@@ -390,3 +394,12 @@ export const callDeleteLocation = async (id: string) => {
   return axios.delete(`/api/v1/dashboards/locations/delete-location/${id}`);
 };
 
+
+// location
+export const callAddNewLocation = async (street: string, commune: string, city: string, state: string, country: string, feePerKm: number) => {
+  return axios.post(`/api/v1/dashboards/locations/create-location`, { street, commune, city, state, country, feePerKm });
+};
+
+export const callUpdateLocation = async (id: string, street: string, commune: string, city: string, state: string, country: string, feePerKm: number) => {
+  return axios.put(`/api/v1/dashboards/locations/update-location`, { id, street, commune, city, state, country, feePerKm });
+};

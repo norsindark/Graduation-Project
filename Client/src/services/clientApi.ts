@@ -168,3 +168,4 @@ export const callCreateReplyReview = async (reviewId: string, review: string, ra
 export const callUpdateReview = async (reviewId: string, review: string, rating: number, dishId: string, userId: string) => {
   return axios.put(`/api/v1/client/review/update-review`, { reviewId, review, rating, dishId, userId });
 };
+
