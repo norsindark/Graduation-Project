@@ -90,10 +90,8 @@ button {
   --headingFont: 'Jost', sans-serif;
   --cursiveFont: 'Lobster', cursive;
   --boxShadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
-  --gradiantBg: rgb(156, 3, 30)
-    linear-gradient(0deg, rgba(156, 3, 30, 1) 0%, rgba(235, 0, 41, 1) 100%);
-  --gradiantHoverBg: rgb(235, 0, 41)
-    linear-gradient(0deg, rgba(235, 0, 41, 1) 0%, rgba(156, 3, 30, 1) 100%);
+  --gradiantBg: rgb(156, 3, 30) linear-gradient(0deg, rgba(156, 3, 30, 1) 0%, rgba(235, 0, 41, 1) 100%);
+  --gradiantHoverBg: rgb(235, 0, 41) linear-gradient(0deg, rgba(235, 0, 41, 1) 0%, rgba(156, 3, 30, 1) 100%);
 }
 
 /*============================
@@ -429,8 +427,7 @@ button {
   right: -12px;
 }
 
-.main_menu .menu_icon li:last-child a {
-}
+.main_menu .menu_icon li:last-child a {}
 
 .main_menu .menu_icon li:last-child a::after,
 .main_menu .menu_icon li:last-child a::before {
@@ -1478,6 +1475,7 @@ button {
 .menu_filter button.active {
   color: var(--colorPrimary);
 }
+
 .fp__menu_item {
   margin-top: 25px;
   position: relative;
@@ -2195,12 +2193,10 @@ button {
 
 .fp__single_blog:hover .fp__single_blog_text {
   background: rgb(0, 0, 0);
-  background: linear-gradient(
-    0deg,
-    rgba(0, 0, 0, 0.8270658605238971) 0%,
-    rgba(0, 0, 0, 0.527345972568715) 67%,
-    rgba(0, 0, 0, 0) 100%
-  );
+  background: linear-gradient(0deg,
+      rgba(0, 0, 0, 0.8270658605238971) 0%,
+      rgba(0, 0, 0, 0.527345972568715) 67%,
+      rgba(0, 0, 0, 0) 100%);
 }
 
 .fp__single_blog:hover ul li,
@@ -3662,6 +3658,7 @@ footer {
   color: var(--colorBlack);
   margin-top: 20px;
 }
+
 .text-medium label {
   text-transform: capitalize;
   font-size: 15px;
@@ -4674,7 +4671,7 @@ CHECKOUT PAGE START
 }
 
 .fp__login_area ul li a {
-  width: 100px;
+  width: 220px;
   height: 35px;
   background: var(--colorPrimary);
   color: var(--colorWhite);
@@ -6710,16 +6707,18 @@ CHECKOUT PAGE START
 
 .fp__login_area ul li a {
   margin-right: 0;
-  margin-left: 5px;
+  /* margin-left: 5px; */
 }
 
-/*============================
+/*===
+\=========================
     SIGN IN END
 ============================*/
 
 .color-bg-client {
   background-color: var(--colorPrimary) !important;
 }
+
 .fade-in {
   opacity: 0;
   transform: translateY(20px);
