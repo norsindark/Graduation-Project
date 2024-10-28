@@ -99,9 +99,9 @@ const ProductDetail: React.FC = () => {
       }
     }
     if (type === 'PLUS') {
-      if (dishDetail?.quantity && currentQuantity < dishDetail.quantity) {
-        setCurrentQuantity(currentQuantity + 1);
-      }
+      setCurrentQuantity(currentQuantity + 1);
+      // if (dishDetail?.quantity && currentQuantity < dishDetail.quantity) {
+      // }
     }
   };
 
@@ -114,31 +114,36 @@ const ProductDetail: React.FC = () => {
   ) => {
     setSelectedOptions((prev) => {
       const newOptions = { ...prev };
-
+  
       if (isRadio) {
         newOptions[groupId] = [{ name: optionName, price: additionalPrice }];
       } else {
         const currentOptions = newOptions[groupId] || [];
-
+  
         if (isChecked) {
-          newOptions[groupId] = [
+          // Thêm option và sắp xếp theo tên
+          const updatedOptions = [
             ...currentOptions,
-            { name: optionName, price: additionalPrice },
-          ];
+            { name: optionName, price: additionalPrice }
+          ].sort((a, b) => a.name.localeCompare(b.name));
+  
+          newOptions[groupId] = updatedOptions;
         } else {
+          // Loại bỏ option nếu không được chọn
           newOptions[groupId] = currentOptions.filter(
             (option) => option.name !== optionName
           );
-
+  
           if (newOptions[groupId].length === 0) {
             delete newOptions[groupId];
           }
         }
       }
-
+  
       return newOptions;
     });
   };
+  
 
   const calculateTotalPrice = () => {
     const basePrice = dishDetail?.offerPrice ?? 0;
@@ -391,7 +396,7 @@ const ProductDetail: React.FC = () => {
                       onClick={handleAddToCart}
                     >
                       <i className="fas fa-shopping-basket mr-2"></i>
-                      add to cart
+                      ADD TO CART
                     </a>
                   </li>
                   <li>
