@@ -23,7 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.UnsupportedEncodingException;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -160,6 +160,25 @@ public class OrderServiceImpl implements OrderService {
         }
     }
 
+    private double totalOrderPrice(OrderDto request) throws DataExitsException {
+        double total = 0;
+        for (OrderItemDto orderItemDto : request.getItems()) {
+            Dish dish = dishRepository.findById(orderItemDto.getDishId())
+                    .orElseThrow(() -> new DataExitsException("Dish not found"));
+
+            double basePrice = dish.getPrice() * orderItemDto.getQuantity();
+            double totalAdditionalPrice = orderItemDto.getDishOptionSelectionIds().stream()
+                    .map(dishOptionSelectionId -> dishOptionSelectionRepository.findById(dishOptionSelectionId)
+                            .orElseThrow(() -> new RuntimeException("Dish option selection not found")))
+                    .mapToDouble(DishOptionSelection::getAdditionalPrice)
+                    .sum();
+
+            total += basePrice + totalAdditionalPrice;
+        }
+        return total;
+    }
+
+
     private void setCouponUsage(OrderDto request) throws DataExitsException {
         Coupon coupon = couponRepository.findById(request.getCouponId())
                 .orElseThrow(() -> new DataExitsException("Coupon not found"));
@@ -168,11 +187,11 @@ public class OrderServiceImpl implements OrderService {
             throw new IllegalStateException("Coupon has run out of stock");
         }
 
-        if (LocalDateTime.now().isBefore(LocalDateTime.parse(coupon.getStartDate()))) {
+        if (LocalDate.now().isBefore(LocalDate.parse(coupon.getStartDate()))) {
             throw new IllegalStateException("Coupon is not valid yet");
         }
 
-        if (LocalDateTime.now().isAfter(LocalDateTime.parse(coupon.getExpirationDate()))) {
+        if (LocalDate.now().isAfter(LocalDate.parse(coupon.getExpirationDate()))) {
             throw new IllegalStateException("Coupon has expired");
         }
 
@@ -182,7 +201,6 @@ public class OrderServiceImpl implements OrderService {
         CouponUsage couponUsage = CouponUsage.builder()
                 .couponId(request.getCouponId())
                 .userId(request.getUserId())
-                .usedAt(LocalDateTime.now().toString())
                 .build();
         couponUsageRepository.save(couponUsage);
     }
@@ -277,9 +295,9 @@ public class OrderServiceImpl implements OrderService {
                     .append("<td style=\"border: 1px solid #ddd; padding: 8px;\">")
                     .append("<img src=\"").append(dish.getThumbImage()).append("\" alt=\"").append(dish.getDishName()).append("\" style=\"width: 100px; height: auto;\"/>")
                     .append("</td>")
-                    .append("<td style=\"border: 1px solid #ddd; padding: 8px;\">$").append(dish.getPrice()).append("</td>")
+                    .append("<td style=\"border: 1px solid #ddd; padding: 8px;\">").append(dish.getPrice()).append(" VND</td>")
                     .append("<td style=\"border: 1px solid #ddd; padding: 8px;\">").append(item.getQuantity()).append("</td>")
-                    .append("<td style=\"border: 1px solid #ddd; padding: 8px;\">").append(options.toString()).append("</td>")
+                    .append("<td style=\"border: 1px solid #ddd; padding: 8px;\">").append(options.toString()).append(" VND</td>")
                     .append("</tr>");
         }
 
@@ -299,7 +317,6 @@ public class OrderServiceImpl implements OrderService {
                 .append("<p style=\"font-family: Arial, sans-serif; font-size: 14px; color: #333;\">")
                 .append("Thank you for choosing us!</p>")
                 .append("</body></html>");
-
 
         MimeMessage message = javaMailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true);

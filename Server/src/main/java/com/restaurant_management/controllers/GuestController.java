@@ -80,4 +80,11 @@ public class GuestController {
             @RequestParam(defaultValue = "asc") String sortDir) throws DataExitsException {
         return ResponseEntity.ok(couponService.getAllCoupons(pageNo, pageSize, sortBy, sortDir));
     }
+
+    @GetMapping("/check-coupon-usage")
+    public ResponseEntity<ApiResponse> checkCouponUsageByCodeAndUserId(
+            @RequestParam String code,
+            @RequestParam String userId) throws DataExitsException {
+        return ResponseEntity.ok(couponService.checkCouponUsageByCodeAndUserId(code, userId));
+    }
 }
