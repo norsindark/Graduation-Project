@@ -251,14 +251,7 @@ function TabsDescriptionAndReview({
             {reply.userFullName}{' '}
             <span>{new Date(reply.createdAt).toLocaleDateString()}</span>
           </h3>
-          <span className="rating">
-            {[...Array(5)].map((_, index) => (
-              <i
-                key={index}
-                className={`fas fa-star${index < reply.rating ? '' : '-empty'}`}
-              ></i>
-            ))}
-          </span>
+
           <p>{reply.comment}</p>
           {reply.replies && reply.replies.length > 0 && (
             <span
@@ -561,14 +554,6 @@ function TabsDescriptionAndReview({
         <Form form={replyForm} onFinish={handleReply} layout="vertical">
           <Form.Item
             className="font-medium"
-            name="rating"
-            label="Rating"
-            rules={[{ required: true, message: 'Please rate' }]}
-          >
-            <Rate allowHalf />
-          </Form.Item>
-          <Form.Item
-            className="font-medium"
             name="review"
             label="Your Reply"
             rules={[{ required: true, message: 'Please enter your reply' }]}
@@ -595,14 +580,6 @@ function TabsDescriptionAndReview({
         footer={null}
       >
         <Form form={editForm} onFinish={handleEdit} layout="vertical">
-          <Form.Item
-            className="font-medium"
-            name="rating"
-            label="Rating"
-            rules={[{ required: true, message: 'Please rate' }]}
-          >
-            <Rate allowHalf />
-          </Form.Item>
           <Form.Item
             className="font-medium"
             name="review"

@@ -1,27 +1,32 @@
 import React, { useEffect, useState } from 'react';
-import { Form, Input, Radio, Button, notification, Select } from 'antd';
-import { callAddAddress } from '../../../../../services/clientApi';
-import { useSelector } from 'react-redux';
-import { RootState } from '../../../../../redux/store';
-import { useNavigate } from 'react-router-dom';
+import { Form, Input, Button, notification, Select, InputNumber } from 'antd';
+import { callUpdateLocation } from '../../../../services/serverApi';
 
-interface AddressNewProps {
-  onAddSuccess: () => void;
-  setShowAddressNew: (show: boolean) => void;
+interface LocationEditProps {
+  currentLocation: {
+    id: string;
+    street: string;
+    commune: string;
+    city: string;
+    state: string;
+    country: string;
+    feePerKm: number;
+  };
+  onEditSuccess: () => void;
+  setShowLocationEdit: (show: boolean) => void;
   fetchLocations: (
     type: 'cities' | 'states' | 'communes',
     parentCode?: string
   ) => Promise<any[]>;
 }
 
-const AddressNew: React.FC<AddressNewProps> = ({
-  onAddSuccess,
-  setShowAddressNew,
+const LocationEdit: React.FC<LocationEditProps> = ({
+  currentLocation,
+  onEditSuccess,
+  setShowLocationEdit,
   fetchLocations,
 }) => {
   const [form] = Form.useForm();
-  const userId = useSelector((state: RootState) => state.account.user?.id);
-  const navigate = useNavigate();
   const [isSubmit, setIsSubmit] = useState(false);
   const { Option } = Select;
 
@@ -35,10 +40,39 @@ const AddressNew: React.FC<AddressNewProps> = ({
     const loadInitialData = async () => {
       const citiesData = await fetchLocations('cities');
       setCities(citiesData);
+
+      // Pre-select current values
+      const cityData = citiesData.find(
+        (city) => city.name === currentLocation.state
+      );
+      if (cityData) {
+        setSelectedCity(cityData.code);
+        const statesData = await fetchLocations('states', cityData.code);
+        setStates(statesData);
+
+        const stateData = statesData.find(
+          (state) => state.name === currentLocation.city
+        );
+        if (stateData) {
+          setSelectedState(stateData.code);
+          const communesData = await fetchLocations('communes', stateData.code);
+          setCommunes(communesData);
+        }
+      }
     };
 
     loadInitialData();
-  }, [fetchLocations]);
+
+    // Set initial form values
+    form.setFieldsValue({
+      street: currentLocation.street,
+      states: currentLocation.state,
+      city: currentLocation.city,
+      commune: currentLocation.commune,
+      country: currentLocation.country,
+      feePerKm: currentLocation.feePerKm,
+    });
+  }, [currentLocation, fetchLocations, form]);
 
   const handleCityChange = async (value: string, option: any) => {
     setSelectedCity(option.key);
@@ -60,67 +94,60 @@ const AddressNew: React.FC<AddressNewProps> = ({
 
   const onFinish = async (values: {
     street: string;
+    states: string;
     city: string;
-    state: string;
     commune: string;
     country: string;
-    phoneNumber: string;
-    addressType: string;
+    feePerKm: number;
   }) => {
-    const { street, city, country, state, commune, phoneNumber, addressType } =
-      values;
-
-    if (!userId) {
-      notification.error({
-        message: 'User not found',
-        description: 'Please login to create an address',
-        duration: 5,
-        showProgress: true,
-      });
-      setIsSubmit(false);
-      navigate('/login');
-      return;
-    }
     setIsSubmit(true);
+
     try {
-      const response = await callAddAddress(
-        street,
-        country,
-        city,
-        addressType,
-        state,
-        commune,
-        phoneNumber,
-        userId
+      const response = await callUpdateLocation(
+        currentLocation.id,
+        values.street,
+        values.commune,
+        values.city,
+        values.states,
+        values.country,
+        values.feePerKm
       );
+
       if (response?.status === 200) {
         notification.success({
-          message: 'Address created successfully!',
+          message: 'Address updated successfully!',
           duration: 5,
           showProgress: true,
         });
-        onAddSuccess();
+        onEditSuccess();
       } else {
         notification.error({
-          message: 'Address creation failed',
+          message: 'Address update failed',
           description: response.data.errors?.error || 'Something went wrong!',
           duration: 5,
           showProgress: true,
         });
       }
-    } catch (addressError) {
+    } catch (error) {
       notification.error({
-        message: 'Error creating address',
+        message: 'Error updating address',
         description:
-          addressError instanceof Error
-            ? addressError.message
-            : 'Error during creation process!',
+          error instanceof Error
+            ? error.message
+            : 'Error during update process!',
         duration: 5,
         showProgress: true,
       });
     } finally {
       setIsSubmit(false);
     }
+  };
+
+  const handleCancel = () => {
+    form.resetFields();
+    setSelectedCity('');
+    setSelectedState('');
+    setShowLocationEdit(false);
   };
 
   return (
@@ -143,7 +170,7 @@ const AddressNew: React.FC<AddressNewProps> = ({
           <div className="col-md-6">
             <Form.Item
               label="Province/State"
-              name="city"
+              name="states"
               rules={[{ required: true, message: 'Please input your City!' }]}
             >
               <Select placeholder="Province/State" onChange={handleCityChange}>
@@ -158,7 +185,7 @@ const AddressNew: React.FC<AddressNewProps> = ({
           <div className="col-md-6">
             <Form.Item
               label="City/Town"
-              name="state"
+              name="city"
               rules={[{ required: true, message: 'Please input your State!' }]}
             >
               <Select
@@ -208,38 +235,28 @@ const AddressNew: React.FC<AddressNewProps> = ({
           </div>
         </div>
         <div className="row">
-          <div className="col-md-6">
+          <div className="col-md-12">
             <Form.Item
-              label="Phone Number"
-              name="phoneNumber"
+              label="Fee Per Km"
+              name="feePerKm"
+              className="w-full"
               rules={[
-                { required: true, message: 'Please input your Phone Number!' },
+                { required: true, message: 'Please input your Fee Per Km!' },
                 {
                   pattern: /^\d+$/,
-                  message: 'Phone Number can only contain digits!',
+                  message: 'Fee Per Km can only contain digits!',
                 },
               ]}
             >
-              <Input
-                type="text"
-                placeholder="Phone Number"
-                autoComplete="phone-number"
+              <InputNumber
+                min={0}
+                placeholder="Fee Per Km"
+                autoComplete="fee-per-km"
+                style={{ width: '100%' }}
+                formatter={(value) =>
+                  `$ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+                }
               />
-            </Form.Item>
-          </div>
-          <div className="col-md-6">
-            <Form.Item
-              name="addressType"
-              label="Address Type"
-              rules={[
-                { required: true, message: 'Please input your Address Type!' },
-              ]}
-            >
-              <Radio.Group>
-                <Radio value="home">Home</Radio>
-                <Radio value="office">Office</Radio>
-                <Radio value="other">Other</Radio>
-              </Radio.Group>
             </Form.Item>
           </div>
         </div>
@@ -253,7 +270,7 @@ const AddressNew: React.FC<AddressNewProps> = ({
               size="large"
               loading={isSubmit}
             >
-              <div className=" text-[16px] font-medium text-center">
+              <div className="text-[16px] font-medium text-center">
                 <i className="fas fa-save mr-2"></i> Save Address
               </div>
             </Button>
@@ -265,9 +282,9 @@ const AddressNew: React.FC<AddressNewProps> = ({
               shape="round"
               type="primary"
               loading={isSubmit}
-              onClick={() => setShowAddressNew(false)}
+              onClick={handleCancel}
             >
-              <div className=" text-[16px] font-medium text-center">
+              <div className="text-[16px] font-medium text-center">
                 <i className="fas fa-times mr-2"></i> Cancel
               </div>
             </Button>
@@ -278,4 +295,4 @@ const AddressNew: React.FC<AddressNewProps> = ({
   );
 };
 
-export default AddressNew;
+export default LocationEdit;
