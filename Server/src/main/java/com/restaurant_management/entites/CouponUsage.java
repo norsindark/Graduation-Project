@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UuidGenerator;
 
 @Entity
@@ -30,5 +31,6 @@ public class CouponUsage {
     private String userId;
 
     @Column(name = "used_at")
+    @CreationTimestamp
     private String usedAt;
 }

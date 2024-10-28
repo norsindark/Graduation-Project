@@ -19,4 +19,5 @@ public interface CouponService {
 
     ApiResponse deleteCoupon(String id) throws DataExitsException;
 
+    ApiResponse checkCouponUsageByCodeAndUserId(String code, String userId) throws DataExitsException;
 }

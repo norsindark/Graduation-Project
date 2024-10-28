@@ -7,6 +7,7 @@ import com.restaurant_management.payloads.requests.CouponRequest;
 import com.restaurant_management.payloads.responses.ApiResponse;
 import com.restaurant_management.payloads.responses.CouponResponse;
 import com.restaurant_management.repositories.CouponRepository;
+import com.restaurant_management.repositories.CouponUsageRepository;
 import com.restaurant_management.services.interfaces.CouponService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -26,6 +27,7 @@ import java.time.format.DateTimeFormatter;
 @RequiredArgsConstructor
 public class CouponServiceImpl implements CouponService {
     private final CouponRepository couponRepository;
+    private final CouponUsageRepository couponUsageRepository;
     private final PagedResourcesAssembler<CouponResponse> pagedResourcesAssembler;
 
     @Override
@@ -89,6 +91,7 @@ public class CouponServiceImpl implements CouponService {
         coupon.setMaxDiscount(request.getMaxDiscount());
         coupon.setMinOrderValue(request.getMinOrderValue());
         coupon.setQuantity(request.getMaxUsage());
+        coupon.setStatus(request.getStatus().toUpperCase());
         coupon.setStartDate(request.getStartDate());
         coupon.setExpirationDate(request.getExpirationDate());
         couponRepository.save(coupon);
@@ -101,5 +104,20 @@ public class CouponServiceImpl implements CouponService {
                 .orElseThrow(() -> new DataExitsException("Coupon not found"));
         couponRepository.delete(coupon);
         return new ApiResponse("Coupon deleted successfully", HttpStatus.OK);
+    }
+
+    @Override
+    public ApiResponse checkCouponUsageByCodeAndUserId(String code, String userId) throws DataExitsException {
+        Coupon coupon = couponRepository.findByCode(code);
+        if (coupon == null) {
+            throw new DataExitsException("Coupon not found");
+        }
+
+        boolean isCouponUsed = couponUsageRepository.existsByCouponIdAndUserId(coupon.getId(), userId);
+
+        if (isCouponUsed) {
+            throw new DataExitsException("Coupon has already been used by this user");
+        }
+        return new ApiResponse("Coupon is available for use by this user", HttpStatus.OK);
     }
 }
