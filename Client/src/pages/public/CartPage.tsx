@@ -4,7 +4,10 @@ import { NavLink, useNavigate, useOutletContext } from 'react-router-dom';
 import { Popconfirm, notification } from 'antd';
 import { RootState } from '../../redux/store';
 import Coupon from '../../components/public/coupon/Coupon';
-import { callGetAllCoupon } from '../../services/clientApi';
+import {
+  callGetAllCoupon,
+  callCheckCouponUsageByCodeAndUserId
+} from '../../services/clientApi';
 import {
   doRemoveProductAction,
   doUpdateQuantityAction,
@@ -13,6 +16,7 @@ import {
   SelectedOption,
 } from '../../redux/order/orderSlice';
 import { LayoutContextType } from '../../components/public/layout/LayoutPublic';
+import User from '../admin/user/User';
 
 interface Coupon {
   couponId: string;
@@ -42,6 +46,8 @@ const CartPage: React.FC = () => {
   );
 
   const [couponCode, setCouponCode] = useState('');
+
+  const UserId = useSelector((state: RootState) => state.account.user?.id);
 
   const isAuthenticated = useSelector(
     (state: RootState) => state.account.isAuthenticated
@@ -159,7 +165,7 @@ const CartPage: React.FC = () => {
     }
   }, [cartItems]);
 
-  const applyCoupon = () => {
+  const applyCoupon = async () => {
     const coupon = coupons.find((c) => c.couponCode === couponCode);
     if (!coupon) {
       notification.error({
@@ -169,6 +175,23 @@ const CartPage: React.FC = () => {
       });
       setAppliedCoupon(null);
       return;
+    }
+
+    if (UserId) {
+      const response = await callCheckCouponUsageByCodeAndUserId(
+        coupon.couponCode,
+        UserId
+      );
+
+      if (response.data) {
+        notification.error({
+          message: 'Coupon has been used',
+          duration: 2,
+          showProgress: true,
+        });
+        setAppliedCoupon(null);
+        return;
+      }
     }
 
     const subtotal = calculateSubtotal();

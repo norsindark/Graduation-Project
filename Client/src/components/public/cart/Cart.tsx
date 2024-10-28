@@ -33,7 +33,6 @@ const Cart = ({
     value: string | SelectedOption
   ): React.ReactNode => {
     if (typeof value === 'string') {
-      // Split the string by comma, but not within parentheses
       const options = value.split(/,(?![^(]*\))/);
       return (
         <>
@@ -46,7 +45,6 @@ const Cart = ({
         </>
       );
     } else {
-      // Handle SelectedOption object
       return `${value.name} (+ ${formatPrice(value.price)} VNĐ)`;
     }
   };
@@ -91,7 +89,7 @@ const Cart = ({
                     )
                   )}
 
-                  <p className="price">{formatPrice(item.detail?.price)} VNĐ</p>
+                  <p className="price">{formatPrice(item.detail?.price * item.quantity)} VNĐ</p>
                 </div>
                 <span
                   className="del_icon"

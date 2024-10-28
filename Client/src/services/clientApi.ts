@@ -149,6 +149,16 @@ export const callGetAllCoupon = async (query: string) => {
   return axios.get(`/api/v1/auth/guest/get-all-coupons?${query}`);
 };
 
+export const callCheckCouponUsageByCodeAndUserId = async (code: string, userId: string) => {
+  return axios.get(`/api/v1/auth/guest/check-coupon-usage`, {
+    params: {
+      code,
+      userId,
+    },
+  });
+};
+
+
 
 // Review
 export const callCreateReview = async ( rating: number, review: string, dishId: string, userId: string) => {
