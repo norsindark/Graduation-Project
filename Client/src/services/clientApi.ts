@@ -10,7 +10,6 @@ export const callRegister = (
     password,
     fullName,
   });
-  console.log('data', data);
   return data;
 };
 
@@ -73,9 +72,9 @@ export const callAddAddress = (
   street: string,
   country: string,
   city: string,
-  postalCode: string,
   addressType: string,
   state: string,
+  commune: string,
   phoneNumber: string,
   userId: string
 ) => {
@@ -83,9 +82,9 @@ export const callAddAddress = (
     street,
     country,
     city,
-    postalCode,
     addressType,
     state,
+    commune,
     phoneNumber,
     userId,
   });
@@ -96,8 +95,8 @@ export const callUpdateAddress = (
   street: string,
   country: string,
   city: string,
-  postalCode: string,
   addressType: string,
+  commune: string,
   state: string,
   phoneNumber: string,
   userId: string
@@ -107,9 +106,9 @@ export const callUpdateAddress = (
     street,
     country,
     city,
-    postalCode,
     addressType,
     state,
+    commune,
     phoneNumber,
     userId,
   });
@@ -147,5 +146,39 @@ export const callGetDishDetail = async (dishId: string) => {
 
 export const callGetAllCoupon = async (query: string) => {
   return axios.get(`/api/v1/auth/guest/get-all-coupons?${query}`);
+};
+
+export const callGetAllCouponNotUsedByUserId = async (query: string) => {
+  return axios.get(`/api/v1/auth/guest/get-all-coupons-not-used-by-user?${query}`);
+};
+
+export const callCheckCouponUsageByCodeAndUserId = async (code: string, userId: string) => {
+  return axios.get(`/api/v1/auth/guest/check-coupon-usage`, {
+    params: {
+      code,
+      userId,
+    },
+  });
+};
+
+
+
+// Review
+export const callCreateReview = async ( rating: number, review: string, dishId: string, userId: string) => {
+  return axios.post(`/api/v1/client/review/create-review`, {  rating, review, dishId, userId });
+};
+
+export const callGetAllReviewForOneDish = async (dishId: string, query: string) => {
+  return axios.get(`/api/v1/auth/guest/get-all-reviews-by-dish?dishId=${dishId}&${query}`);
+};
+
+
+export const callCreateReplyReview = async (reviewId: string, review: string, rating: number, dishId: string, userId: string) => {
+  return axios.post(`/api/v1/client/review/reply-review`, { reviewId, review, rating, dishId, userId });
+};
+
+
+export const callUpdateReview = async (reviewId: string, review: string, rating: number, dishId: string, userId: string) => {
+  return axios.put(`/api/v1/client/review/update-review`, { reviewId, review, rating, dishId, userId });
 };
 

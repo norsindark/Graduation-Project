@@ -367,3 +367,39 @@ export const callDeleteCoupon = async (id: string) => {
 export const callUpdateCoupon = async (couponId: string, code: string, discountPercent: number, minOrderValue: number, maxDiscount: string, description: string, maxUsage: string, startDate: string, expirationDate: string, status: string) => {
   return axios.put(`/api/v1/dashboard/coupon/update-coupon?couponId=${couponId}`, { code, discountPercent, minOrderValue, maxDiscount, description, maxUsage, startDate, expirationDate, status });
 };
+
+
+// review
+
+export const callGetAllReview = async (query: string) => {
+  return axios.get(`/api/v1/dashboard/review/get-all-reviews?${query}`);
+};
+
+export const callGetAllReviewByDish = async (dishId: string) => {
+  return axios.get(`/api/v1/dashboard/review/get-all-reviews-by-dish?dishId=${dishId}`);
+};
+
+export const callDeleteReview = async (reviewId: string) => {
+  return axios.delete(`/api/v1/dashboard/review/delete-review/${reviewId}`);
+};
+
+
+// setting 
+
+export const callGetLocationRestaurant = async () => {
+  return axios.get(`/api/v1/dashboards/locations/get-location`);
+};
+
+export const callDeleteLocation = async (id: string) => {
+  return axios.delete(`/api/v1/dashboards/locations/delete-location/${id}`);
+};
+
+
+// location
+export const callAddNewLocation = async (street: string, commune: string, city: string, state: string, country: string, feePerKm: number) => {
+  return axios.post(`/api/v1/dashboards/locations/create-location`, { street, commune, city, state, country, feePerKm });
+};
+
+export const callUpdateLocation = async (id: string, street: string, commune: string, city: string, state: string, country: string, feePerKm: number) => {
+  return axios.put(`/api/v1/dashboards/locations/update-location`, { id, street, commune, city, state, country, feePerKm });
+};

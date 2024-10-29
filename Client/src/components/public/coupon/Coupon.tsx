@@ -3,9 +3,14 @@ import Slider from 'react-slick';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 import styled from 'styled-components';
-import { callGetAllCoupon } from '../../../services/clientApi';
+import {
+  callGetAllCouponNotUsedByUserId,
+  callGetAllCoupon
+} from '../../../services/clientApi';
 import { Button, message, notification } from 'antd';
 import { CopyOutlined } from '@ant-design/icons';
+import { RootState } from '../../../redux/store';
+import { useSelector } from 'react-redux';
 import dayjs from 'dayjs';
 const ArrowButton = styled.i`
   width: 30px;
@@ -44,6 +49,7 @@ const ArrowButton = styled.i`
 
 function Coupon({ cartItems }: { cartItems: any }) {
   const [coupons, setCoupons] = useState([]);
+  const userId = useSelector((state: RootState) => state.account.user?.id);
 
   const NextArrow = (props: any) => {
     const { onClick } = props;
@@ -100,13 +106,21 @@ function Coupon({ cartItems }: { cartItems: any }) {
   };
 
   useEffect(() => {
+    // return () => {
     fetchCoupons();
+    // };
   }, []);
 
   const fetchCoupons = async () => {
     try {
-      const query = `sortBy=startDate&order=desc`;
-      const response = await callGetAllCoupon(query);
+      if (!userId) {
+        const query = `&sortBy=startDate&sortDir=desc`;
+        const response = await callGetAllCoupon(query);
+        const couponsData = response.data._embedded.couponResponseList;
+        setCoupons(couponsData);
+      }
+      const query = `userId=${userId}&sortBy=startDate&sortDir=desc`;
+      const response = await callGetAllCouponNotUsedByUserId(query);
       const couponsData = response.data._embedded.couponResponseList;
       setCoupons(couponsData);
     } catch (error) {
@@ -148,7 +162,7 @@ function Coupon({ cartItems }: { cartItems: any }) {
 
       <Slider {...settings}>
         {coupons.filter(isValidCoupon).map((coupon: any) => (
-          <div key={coupon.id} className="px-2">
+          <div key={coupon.couponCode} className="px-2">
             <div
               className="coupon-card bg-orange-400 rounded overflow-hidden"
               style={{ maxWidth: '600px' }}
@@ -156,7 +170,7 @@ function Coupon({ cartItems }: { cartItems: any }) {
               <div className="d-flex">
                 <div className="coupon-image" style={{ width: '40%' }}>
                   <img
-                    src={cartItems[0].detail.thumbImage}
+                    src={cartItems[0]?.detail.thumbImage || '../../../../public/images/menu2_img_3.jpg'}
                     alt={coupon.title}
                     className="w-100 h-100 object-fit-cover rounded-[30px] ml-1"
                   />

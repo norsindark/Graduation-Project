@@ -1,7 +1,8 @@
 package com.restaurant_management.services.impls;
 
+import com.restaurant_management.entites.LocationRestaurant;
 import com.restaurant_management.payloads.responses.GeocodingResponse;
-import com.restaurant_management.repositories.UserRepository;
+import com.restaurant_management.repositories.LocationRestaurantRepository;
 import com.restaurant_management.services.interfaces.GeocodingService;
 import lombok.RequiredArgsConstructor;
 import org.json.JSONArray;
@@ -14,19 +15,21 @@ import org.springframework.web.client.RestTemplate;
 @Service
 @RequiredArgsConstructor
 public class GeocodingServiceImpl implements GeocodingService {
-    private final UserRepository userRepository;
+    private final LocationRestaurantRepository locationRestaurantRepository;
 
     @Value("${openCage.api.key}")
     private String API_KEY;
 
-    @Value("${fixedLat}")
-    private double fixedLat;
-
-    @Value("${fixedLng}")
-    private double fixedLng;
-
     @Override
     public GeocodingResponse getCoordinates(String address) {
+        LocationRestaurant locationRestaurant = locationRestaurantRepository.findAll().getFirst();
+        if (locationRestaurant == null) {
+            throw new RuntimeException("No restaurant location found");
+        }
+
+        double lat1 = locationRestaurant.getLatitude();
+        double lon1 = locationRestaurant.getLongitude();
+
         String url = String.format("https://api.opencagedata.com/geocode/v1/json?q=%s&key=%s", address, API_KEY);
         RestTemplate restTemplate = new RestTemplate();
         ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
@@ -44,14 +47,18 @@ public class GeocodingServiceImpl implements GeocodingService {
         }
 
         JSONObject geometry = results.getJSONObject(0).getJSONObject("geometry");
-        double lat = geometry.getDouble("lat");
-        double lng = geometry.getDouble("lng");
+        double lat2 = geometry.getDouble("lat");
+        double lon2 = geometry.getDouble("lng");
 
-        double distance = calculateDistance(lat, lng, fixedLat, fixedLng);
-        double fee = calculateFee(distance);
+        double distance = calculateDistance(lat1, lon1, lat2, lon2);
+        double fee = calculateFee(distance, locationRestaurant.getFeePerKm());
 
         return GeocodingResponse.builder()
-                .from("227/97 Hà Huy Tập, Buôn Ma Thuôt, Đắk Lắk, Việt Nam")
+                .from(locationRestaurant.getStreet() + ", " +
+                                locationRestaurant.getCommune() + ", " +
+                                locationRestaurant.getDistrict() + ", " +
+                                locationRestaurant.getCity() + ", " +
+                                locationRestaurant.getCountry())
                 .to(address)
                 .distance(String.format("%.2f km", distance))
                 .fee(String.format("%.2f VND", fee))
@@ -69,9 +76,8 @@ public class GeocodingServiceImpl implements GeocodingService {
         return R * c;
     }
 
-    private double calculateFee(double distance) {
+    private double calculateFee(double distance, double ratePerKm) {
         final double baseRate = 10000;
-        final double ratePerKm = 3000;
         return baseRate + (distance * ratePerKm);
     }
 }

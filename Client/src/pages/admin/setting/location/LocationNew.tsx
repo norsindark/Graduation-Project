@@ -1,41 +1,23 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Form, Input, notification, Select, Radio } from 'antd';
-import { useSelector } from 'react-redux';
-import { RootState } from '../../../../../redux/store';
-import { callUpdateAddress } from '../../../../../services/clientApi';
-import { useNavigate } from 'react-router-dom';
+import { Form, Input, Button, notification, Select, InputNumber } from 'antd';
+import { callAddNewLocation } from '../../../../services/serverApi';
 
-interface AddressEditProps {
-  currentAddress: {
-    id: string;
-    street: string;
-    city: string;
-    state: string;
-    country: string;
-    postalCode: number;
-    phoneNumber: string;
-    addressType: string;
-    userId: string;
-    commune: string;
-  };
-  onEditSuccess: () => void;
-  setShowAddressEdit: (show: boolean) => void;
+interface LocationNewProps {
+  onAddSuccess: () => void;
+  setShowAddressNew: (show: boolean) => void;
   fetchLocations: (
     type: 'cities' | 'states' | 'communes',
     parentCode?: string
   ) => Promise<any[]>;
 }
 
-const AddressEdit: React.FC<AddressEditProps> = ({
-  currentAddress,
-  onEditSuccess,
-  setShowAddressEdit,
+const LocationNew: React.FC<LocationNewProps> = ({
+  onAddSuccess,
+  setShowAddressNew,
   fetchLocations,
 }) => {
   const [form] = Form.useForm();
-  const [loading, setLoading] = useState(false);
-  const userId = useSelector((state: RootState) => state.account.user?.id);
-  const navigate = useNavigate();
+  const [isSubmit, setIsSubmit] = useState(false);
   const { Option } = Select;
 
   const [cities, setCities] = useState<any[]>([]);
@@ -48,16 +30,10 @@ const AddressEdit: React.FC<AddressEditProps> = ({
     const loadInitialData = async () => {
       const citiesData = await fetchLocations('cities');
       setCities(citiesData);
-      form.setFieldsValue({
-        street: currentAddress.street,
-        phoneNumber: currentAddress.phoneNumber,
-        addressType: currentAddress.addressType,
-        country: currentAddress.country,
-      });
     };
 
     loadInitialData();
-  }, [currentAddress, form, fetchLocations]);
+  }, [fetchLocations]);
 
   const handleCityChange = async (value: string, option: any) => {
     setSelectedCity(option.key);
@@ -79,49 +55,35 @@ const AddressEdit: React.FC<AddressEditProps> = ({
 
   const onFinish = async (values: {
     street: string;
+    states: string; // changed from state to states
     city: string;
-    country: string;
-    state: string;
     commune: string;
-    phoneNumber: string;
-    addressType: string;
+    country: string;
+    feePerKm: number;
   }) => {
-    const { street, city, country, state, commune, phoneNumber, addressType } =
-      values;
-    if (!userId) {
-      notification.error({
-        message: 'User not found',
-        description: 'Please login to edit your address',
-        duration: 5,
-        showProgress: true,
-      });
-      setLoading(false);
-      navigate('/login');
-      return;
-    }
-    setLoading(true);
+    const { street, states, city, commune, country, feePerKm } = values;
+
+    setIsSubmit(true);
+
     try {
-      const response = await callUpdateAddress(
-        currentAddress.id,
+      const response = await callAddNewLocation(
         street,
-        country,
-        city,
-        addressType,
-        state,
         commune,
-        phoneNumber,
-        userId
+        city,
+        states,
+        country,
+        feePerKm
       );
       if (response?.status === 200) {
         notification.success({
-          message: 'Address updated successfully!',
+          message: 'Address created successfully!',
           duration: 5,
           showProgress: true,
         });
-        onEditSuccess();
+        onAddSuccess();
       } else {
         notification.error({
-          message: 'Address update failed',
+          message: 'Address creation failed',
           description: response.data.errors?.error || 'Something went wrong!',
           duration: 5,
           showProgress: true,
@@ -129,31 +91,34 @@ const AddressEdit: React.FC<AddressEditProps> = ({
       }
     } catch (error) {
       notification.error({
-        message: 'Error updating address',
+        message: 'Error creating address',
         description:
           error instanceof Error
             ? error.message
-            : 'Error during update process!',
+            : 'Error during creation process!',
         duration: 5,
         showProgress: true,
       });
     } finally {
-      setLoading(false);
+      setIsSubmit(false);
     }
+  };
+
+  const handleCancel = () => {
+    form.resetFields();
+    setSelectedCity('');
+    setSelectedState('');
+    setShowAddressNew(false);
   };
 
   return (
     <div className="container text-medium">
       <h4 className="fp__dsahboard_overview_item text-center flex justify-center items-center p-3 font-[500] text-[18px]">
-        Edit Address
+        Create New Address
       </h4>
-      <Form
-        form={form}
-        layout="vertical"
-        onFinish={onFinish}
-      >
+      <Form layout="vertical" form={form} onFinish={onFinish}>
         <div className="row">
-        <div className="col-md-6">
+          <div className="col-md-6">
             <Form.Item label="Country" name="country" initialValue="Việt Nam">
               <Input
                 type="text"
@@ -165,11 +130,11 @@ const AddressEdit: React.FC<AddressEditProps> = ({
           </div>
           <div className="col-md-6">
             <Form.Item
-              label="State/Province"
-              name="city"
+              label="Province/State"
+              name="states"
               rules={[{ required: true, message: 'Please input your City!' }]}
             >
-              <Select placeholder="State/Province" onChange={handleCityChange}>
+              <Select placeholder="Province/State" onChange={handleCityChange}>
                 {cities.map((city: any) => (
                   <Option key={city.code} value={city.name}>
                     {city.name}
@@ -181,7 +146,7 @@ const AddressEdit: React.FC<AddressEditProps> = ({
           <div className="col-md-6">
             <Form.Item
               label="City/Town"
-              name="state"
+              name="city"
               rules={[{ required: true, message: 'Please input your State!' }]}
             >
               <Select
@@ -215,7 +180,7 @@ const AddressEdit: React.FC<AddressEditProps> = ({
             </Form.Item>
           </div>
         </div>
-        <div className="row">         
+        <div className="row">
           <div className="col-md-12">
             <Form.Item
               label="Street"
@@ -231,38 +196,28 @@ const AddressEdit: React.FC<AddressEditProps> = ({
           </div>
         </div>
         <div className="row">
-          <div className="col-md-6">
+          <div className="col-md-12">
             <Form.Item
-              label="Phone Number"
-              name="phoneNumber"
+              label="Fee Per Km"
+              name="feePerKm"
+              className="w-full"
               rules={[
-                { required: true, message: 'Please input your Phone Number!' },
+                { required: true, message: 'Please input your Fee Per Km!' },
                 {
                   pattern: /^\d+$/,
-                  message: 'Phone Number can only contain digits!',
+                  message: 'Fee Per Km can only contain digits!',
                 },
               ]}
             >
-              <Input
-                type="text"
-                placeholder="Phone Number"
-                autoComplete="phone-number"
+              <InputNumber
+                min={0}
+                placeholder="Fee Per Km"
+                autoComplete="fee-per-km"
+                style={{ width: '100%' }}
+                formatter={(value) =>
+                  `$ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+                }
               />
-            </Form.Item>
-          </div>
-          <div className="col-md-6">
-            <Form.Item
-              name="addressType"
-              label="Address Type"
-              rules={[
-                { required: true, message: 'Please input your Address Type!' },
-              ]}
-            >
-              <Radio.Group>
-                <Radio value="home">Home</Radio>
-                <Radio value="office">Office</Radio>
-                <Radio value="other">Other</Radio>
-              </Radio.Group>
             </Form.Item>
           </div>
         </div>
@@ -274,10 +229,9 @@ const AddressEdit: React.FC<AddressEditProps> = ({
               htmlType="submit"
               block
               size="large"
-              disabled={loading}
-              loading={loading}
+              loading={isSubmit}
             >
-              <div className=" text-[16px] font-medium text-center">
+              <div className="text-[16px] font-medium text-center">
                 <i className="fas fa-save mr-2"></i> Save Address
               </div>
             </Button>
@@ -288,11 +242,10 @@ const AddressEdit: React.FC<AddressEditProps> = ({
               size="large"
               shape="round"
               type="primary"
-              loading={loading}
-              disabled={loading}
-              onClick={() => setShowAddressEdit(false)}
+              loading={isSubmit}
+              onClick={handleCancel}
             >
-              <div className=" text-[16px] font-medium text-center">
+              <div className="text-[16px] font-medium text-center">
                 <i className="fas fa-times mr-2"></i> Cancel
               </div>
             </Button>
@@ -303,4 +256,4 @@ const AddressEdit: React.FC<AddressEditProps> = ({
   );
 };
 
-export default AddressEdit;
+export default LocationNew;

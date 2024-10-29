@@ -96,7 +96,7 @@ const EmployeeShiftEdit: React.FC<EmployeeShiftEditProps> = ({
   };
 
   const onFinish = async (values: any) => {
-    console.log(values);
+
     setIsSubmitting(true);
     try {
       const response = await callUpdateEmployeeShift(

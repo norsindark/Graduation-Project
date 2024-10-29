@@ -15,7 +15,10 @@ public class ReplyReviewResponse {
     private String reviewId;
     private int rating;
     private String comment;
-    private String userId;
+    private String dishId;
+    private String dishName;
+    private String userFullName;
+    private String userAvatar;
     private List<ReplyReviewResponse> replies;
     private String createdAt;
 
@@ -23,7 +26,10 @@ public class ReplyReviewResponse {
         this.reviewId = review.getId();
         this.rating = review.getRating();
         this.comment = review.getComment();
-        this.userId = review.getUser().getId();
+        this.dishId = review.getDish().getId();
+        this.dishName = review.getDish().getDishName();
+        this.userFullName = review.getUser().getFullName();
+        this.userAvatar = review.getUser().getAvatar();
         this.createdAt = review.getCreatedAt().toString();
 
         this.replies = review.getReplies() != null ?

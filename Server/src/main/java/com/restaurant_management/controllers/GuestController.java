@@ -27,13 +27,14 @@ public class GuestController {
     private final CouponService couponService;
     private final ReviewService reviewService;
 
-    @GetMapping("/get-all-reviews")
-    public ResponseEntity<PagedModel<EntityModel<ReviewResponse>>> getAllReviews(
+    @GetMapping("/get-all-reviews-by-dish")
+    public ResponseEntity<PagedModel<EntityModel<ReviewResponse>>> getAllReviewsByDishId(
+            @RequestParam String dishId,
             @RequestParam(defaultValue = "0") int pageNo,
             @RequestParam(defaultValue = "10") int pageSize,
             @RequestParam(defaultValue = "createdAt") String sortBy,
             @RequestParam(defaultValue = "desc") String sortDir) throws DataExitsException {
-        return ResponseEntity.ok(reviewService.getAllReviews(pageNo, pageSize, sortBy, sortDir));
+        return ResponseEntity.ok(reviewService.getAllReviewsByDishId(dishId, pageNo, pageSize, sortBy, sortDir));
     }
 
     @GetMapping("/get-dish-by-id/{dishId}")
@@ -78,5 +79,22 @@ public class GuestController {
             @RequestParam(defaultValue = "startDate") String sortBy,
             @RequestParam(defaultValue = "asc") String sortDir) throws DataExitsException {
         return ResponseEntity.ok(couponService.getAllCoupons(pageNo, pageSize, sortBy, sortDir));
+    }
+
+    @GetMapping("/check-coupon-usage")
+    public ResponseEntity<ApiResponse> checkCouponUsageByCodeAndUserId(
+            @RequestParam String code,
+            @RequestParam String userId) throws DataExitsException {
+        return ResponseEntity.ok(couponService.checkCouponUsageByCodeAndUserId(code, userId));
+    }
+
+    @GetMapping("/get-all-coupons-not-used-by-user")
+    public ResponseEntity<PagedModel<EntityModel<CouponResponse>>> getAllCouponsNotUsedByUserId(
+            @RequestParam String userId,
+            @RequestParam(defaultValue = "0") int pageNo,
+            @RequestParam(defaultValue = "10") int pageSize,
+            @RequestParam(defaultValue = "startDate") String sortBy,
+            @RequestParam(defaultValue = "asc") String sortDir) throws DataExitsException {
+        return ResponseEntity.ok(couponService.getAllCouponsNotUsedByUserId(userId, pageNo, pageSize, sortBy, sortDir));
     }
 }

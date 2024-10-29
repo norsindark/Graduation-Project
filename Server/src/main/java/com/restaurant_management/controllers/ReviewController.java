@@ -20,6 +20,16 @@ import org.springframework.web.bind.annotation.*;
 public class ReviewController {
     private final ReviewService reviewService;
 
+    @GetMapping("/get-all-reviews-by-dish")
+    public ResponseEntity<PagedModel<EntityModel<ReviewResponse>>> getAllReviewsByDishId(
+            @RequestParam String dishId,
+            @RequestParam(defaultValue = "0") int pageNo,
+            @RequestParam(defaultValue = "10") int pageSize,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String sortDir) throws DataExitsException {
+        return ResponseEntity.ok(reviewService.getAllReviewsByDishId(dishId, pageNo, pageSize, sortBy, sortDir));
+    }
+
     @GetMapping("/get-all-reviews")
     public ResponseEntity<PagedModel<EntityModel<ReviewResponse>>> getAllReviews(
             @RequestParam(defaultValue = "0") int pageNo,
@@ -35,11 +45,10 @@ public class ReviewController {
         return ResponseEntity.ok(reviewService.createReview(reviewDto));
     }
 
-    @PutMapping("/update-review/{reviewId}")
+    @PutMapping("/update-review")
     @PreAuthorize("hasRole('USER') || hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse> updateReview(@PathVariable String reviewId, @RequestBody ReviewDto reviewDto)
+    public ResponseEntity<ApiResponse> updateReview(@RequestBody ReviewDto reviewDto)
             throws DataExitsException {
-        reviewDto.setReviewId(reviewId);
         return ResponseEntity.ok(reviewService.updateReview(reviewDto));
     }
 
@@ -49,11 +58,10 @@ public class ReviewController {
         return ResponseEntity.ok(reviewService.deleteReview(reviewId));
     }
 
-    @PostMapping("/reply-review/{reviewId}")
+    @PostMapping("/reply-review")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse> replyReview(@PathVariable String reviewId, @RequestBody ReviewDto reviewDto)
+    public ResponseEntity<ApiResponse> replyReview(@RequestBody ReviewDto reviewDto)
             throws DataExitsException {
-        reviewDto.setReviewId(reviewId);
         return ResponseEntity.ok(reviewService.replyReview(reviewDto));
     }
 }

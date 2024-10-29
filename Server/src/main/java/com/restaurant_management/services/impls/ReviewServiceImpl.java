@@ -1,7 +1,9 @@
 package com.restaurant_management.services.impls;
 
 import com.restaurant_management.dtos.ReviewDto;
-import com.restaurant_management.entites.*;
+import com.restaurant_management.entites.Dish;
+import com.restaurant_management.entites.Review;
+import com.restaurant_management.entites.User;
 import com.restaurant_management.exceptions.DataExitsException;
 import com.restaurant_management.payloads.responses.ApiResponse;
 import com.restaurant_management.payloads.responses.ReviewResponse;
@@ -31,6 +33,28 @@ public class ReviewServiceImpl implements ReviewService {
     private final PagedResourcesAssembler<ReviewResponse> pagedResourcesAssembler;
 
     @Override
+    public PagedModel<EntityModel<ReviewResponse>> getAllReviewsByDishId(String dishId, int pageNo, int pageSize, String sortBy, String sortDir)
+            throws DataExitsException {
+        Dish dish = dishRepository.findById(dishId)
+                .orElseThrow(() -> new DataExitsException("Dish not found"));
+        Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.fromString(sortDir), sortBy));
+
+        Page<Review> pageResult = reviewRepository.findAllByDish(dish, pageable);
+
+        if (pageResult.isEmpty()) {
+            throw new DataExitsException("No reviews found");
+        }
+
+        List<ReviewResponse> reviewResponses = pageResult.stream()
+                .filter(review -> review.getParentReview() == null)
+                .map(ReviewResponse::new)
+                .collect(Collectors.toList());
+
+        return pagedResourcesAssembler.toModel(new PageImpl<>(reviewResponses, pageable, pageResult.getTotalElements()));
+    }
+
+
+    @Override
     public PagedModel<EntityModel<ReviewResponse>> getAllReviews(int pageNo, int pageSize, String sortBy, String sortDir) throws DataExitsException {
         Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.fromString(sortDir), sortBy));
         Page<Review> pageResult = reviewRepository.findAll(pageable);
@@ -55,12 +79,12 @@ public class ReviewServiceImpl implements ReviewService {
         User user = userRepository.findById(reviewDto.getUserId())
                 .orElseThrow(() -> new DataExitsException("User not found"));
 
-        if (!hasUserPurchasedDish(user.getId(), dish.getId())) {
-            return new ApiResponse("You must purchase the dish before reviewing", HttpStatus.FORBIDDEN);
-        }
+        // if (!hasUserPurchasedDish(user.getId(), dish.getId())) {
+        //     throw new DataExitsException("You must purchase the dish before reviewing");
+        // }
 
         if (reviewDto.getRating() > 5 || reviewDto.getRating() < 1) {
-            return new ApiResponse("Rating must be between 1 and 5", HttpStatus.BAD_REQUEST);
+            throw new DataExitsException("Rating must be between 1 and 5");
         }
 
         Review review = Review.builder()
@@ -108,6 +132,7 @@ public class ReviewServiceImpl implements ReviewService {
         Review replyReview = Review.builder()
                 .comment(reviewDto.getReview())
                 .user(user)
+                .dish(parentReview.getDish())
                 .parentReview(parentReview)
                 .build();
 
@@ -117,17 +142,6 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     private boolean hasUserPurchasedDish(String userId, String dishId) {
-        List<Order> orders = orderRepository.findByUserId(userId);
-
-        for (Order order : orders) {
-            for (OrderItem item : order.getItems()) {
-                if (item.getDish().getId().equals(dishId)) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
+        return orderRepository.existsByUserIdAndDishId(userId, dishId);
     }
-
 }

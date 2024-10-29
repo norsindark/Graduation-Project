@@ -54,7 +54,7 @@ const CouponEdit: React.FC<CouponEditProps> = ({
       status: currentItem.status,
     });
   }, [currentItem, form]);
-  console.log('currentItem');
+
 
   const onFinish = async (values: any) => {
     const {

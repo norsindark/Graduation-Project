@@ -80,7 +80,7 @@ const ProductDetail: React.FC<DishDetailProps> = ({
       setLoading(false);
     }
   };
-  console.log('dish', dish);
+
   const recipeColumns = [
     {
       title: 'Ingredient',

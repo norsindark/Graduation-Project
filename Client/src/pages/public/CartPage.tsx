@@ -4,7 +4,10 @@ import { NavLink, useNavigate, useOutletContext } from 'react-router-dom';
 import { Popconfirm, notification } from 'antd';
 import { RootState } from '../../redux/store';
 import Coupon from '../../components/public/coupon/Coupon';
-import { callGetAllCoupon } from '../../services/clientApi';
+import {
+  callGetAllCouponNotUsedByUserId,
+  callCheckCouponUsageByCodeAndUserId
+} from '../../services/clientApi';
 import {
   doRemoveProductAction,
   doUpdateQuantityAction,
@@ -43,6 +46,8 @@ const CartPage: React.FC = () => {
 
   const [couponCode, setCouponCode] = useState('');
 
+  const userId = useSelector((state: RootState) => state.account.user?.id);
+
   const isAuthenticated = useSelector(
     (state: RootState) => state.account.isAuthenticated
   );
@@ -53,8 +58,8 @@ const CartPage: React.FC = () => {
 
   const fetchCoupons = async () => {
     try {
-      const query = `sortBy=startDate&order=desc`;
-      const response = await callGetAllCoupon(query);
+      const query = `userId=${userId}&sortBy=startDate&sortDir=desc`;
+      const response = await callGetAllCouponNotUsedByUserId(query);
       const couponsData = response.data._embedded.couponResponseList;
       setCoupons(couponsData);
     } catch (error) {
@@ -159,7 +164,7 @@ const CartPage: React.FC = () => {
     }
   }, [cartItems]);
 
-  const applyCoupon = () => {
+  const applyCoupon = async () => {
     const coupon = coupons.find((c) => c.couponCode === couponCode);
     if (!coupon) {
       notification.error({
@@ -169,6 +174,22 @@ const CartPage: React.FC = () => {
       });
       setAppliedCoupon(null);
       return;
+    }
+
+    if (userId) {
+      const response = await callCheckCouponUsageByCodeAndUserId(
+        coupon.couponCode,
+        userId
+      );
+      if (response.status === 400) {
+        notification.error({
+          message: 'Coupon has already been used',
+          duration: 2,
+          showProgress: true,
+        });
+        setAppliedCoupon(null);
+        return;
+      }
     }
 
     const subtotal = calculateSubtotal();
@@ -208,8 +229,8 @@ const CartPage: React.FC = () => {
   const handleCheckout = () => {
     if (!isAuthenticated) {
       notification.warning({
-        message: 'Đăng nhập cần thiết',
-        description: 'Vui lòng đăng nhập để tiến hành thanh toán.',
+        message: 'Please log in before checkout !!',
+        description: 'Please log in to proceed with the checkout.',
         duration: 3,
         showProgress: true,
       });

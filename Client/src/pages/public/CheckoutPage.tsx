@@ -21,6 +21,7 @@ interface Address {
   createdAt: string;
   updatedAt: string | null;
   userId: string;
+  commune: string;
 }
 
 function CheckoutPage() {
@@ -33,9 +34,10 @@ function CheckoutPage() {
     null
   );
   const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
-  const [activeAccountTab, setActiveAccountTab] = useState<string | null>(null);
+  const [editingAddressId, setEditingAddressId] = useState<string | null>(null);
 
   const userId = useSelector((state: RootState) => state.account.user?.id);
+
   const fetchAddresses = async () => {
     if (userId) {
       try {
@@ -70,34 +72,48 @@ function CheckoutPage() {
     setCurrentPage(page);
   };
 
-  const handleDeleteClick = (id: string) => {
-    callDeleteAddress(id)
-      .then(() => {
+  const handleDeleteClick = async (id: string) => {
+    try {
+      setLoading(true);
+      const response = await callDeleteAddress(id);
+      if (response.status === 200) {
         notification.success({
-          message: 'Address deleted successfully!',
+          message: 'Deleted successfully!',
           duration: 5,
           showProgress: true,
         });
-
         setTotal((prevTotal) => prevTotal - 1);
-
         if (addresses.length === 1 && currentPage > 1) {
           setCurrentPage((prevPage) => prevPage - 1);
         } else {
-          fetchAddresses();
+          setAddresses((prevAddresses) =>
+            prevAddresses.filter((address) => address.id !== id)
+          );
         }
-      })
-      .catch((error) => {
+        if (total % pageSize === 1 && currentPage > 1) {
+          setCurrentPage((prevPage) => prevPage - 1);
+        }
+        fetchAddresses();
+      } else {
         notification.error({
           message: 'Error deleting address',
           description:
-            error instanceof Error
-              ? error.message
-              : 'Error during deletion process!',
+            response.data.errors?.error || 'Error during deletion process!',
           duration: 5,
           showProgress: true,
         });
+      }
+    } catch (error) {
+      console.error('Error deleting address:', error);
+      notification.error({
+        message: 'Error deleting address',
+        description: 'An unexpected error occurred. Please try again later.',
+        duration: 5,
+        showProgress: true,
       });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSelectAddress = (id: string) => {
@@ -107,7 +123,12 @@ function CheckoutPage() {
 
   const handleCreateNewAddress = () => {
     setIsAccountModalOpen(true);
-    setActiveAccountTab('address');
+    setEditingAddressId(null);
+  };
+
+  const handleEditClick = (address: Address) => {
+    setEditingAddressId(address.id);
+    setIsAccountModalOpen(true);
   };
 
   return (
@@ -189,12 +210,12 @@ function CheckoutPage() {
                                           {address.street}
                                         </span>
                                       </div>
-                                      <div className="flex items-center mb-1">
+                                      <div className="flex items-center mb-1 ">
                                         <span className="font-semibold text-gray-700 mr-1">
-                                          City:
+                                          Commune:
                                         </span>
                                         <span className="text-gray-600">
-                                          {address.city}
+                                          {address.commune}
                                         </span>
                                       </div>
                                       <div className="flex items-center mb-1">
@@ -207,18 +228,18 @@ function CheckoutPage() {
                                       </div>
                                       <div className="flex items-center mb-1">
                                         <span className="font-semibold text-gray-700 mr-1">
-                                          Country:
+                                          City:
                                         </span>
                                         <span className="text-gray-600">
-                                          {address.country}
+                                          {address.city}
                                         </span>
                                       </div>
                                       <div className="flex items-center mb-1">
                                         <span className="font-semibold text-gray-700 mr-1">
-                                          Postal Code:
+                                          Country:
                                         </span>
                                         <span className="text-gray-600">
-                                          {address.postalCode}
+                                          {address.country}
                                         </span>
                                       </div>
                                     </div>
@@ -240,7 +261,7 @@ function CheckoutPage() {
                               <li>
                                 <a
                                   className="dash_edit_btn"
-                                  // onClick={() => handleEditClick(address)}
+                                  onClick={() => handleEditClick(address)}
                                 >
                                   <i className="far fa-edit"></i>
                                 </a>
@@ -303,9 +324,12 @@ function CheckoutPage() {
       </section>
       {isAccountModalOpen && (
         <Account
-          onClose={() => setIsAccountModalOpen(false)}
-          setActiveModal={setActiveAccountTab}
-          initialActiveTab={activeAccountTab}
+          onClose={() => {
+            setIsAccountModalOpen(false);
+            setEditingAddressId(null);
+          }}
+          initialActiveTab="address"
+          editingAddressId={editingAddressId}
         />
       )}
     </>

@@ -72,6 +72,8 @@ public class AddressServiceImpl implements AddressService {
         _address.setCountry(addressDto.getCountry());
         _address.setPostalCode(addressDto.getPostalCode());
         _address.setStreet(addressDto.getStreet());
+        _address.setCommune(addressDto.getCommune());
+        _address.setDistrict(addressDto.getDistrict());
         _address.setAddressType(addressDto.getAddressType());
         _address.setState(addressDto.getState());
         _address.setPhoneNumber(addressDto.getPhoneNumber());

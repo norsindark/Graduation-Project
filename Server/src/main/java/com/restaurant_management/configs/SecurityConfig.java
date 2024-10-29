@@ -1,9 +1,6 @@
 package com.restaurant_management.configs;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -15,10 +12,6 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.core.AuthenticationException;
-
-
-import java.io.IOException;
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
@@ -71,7 +64,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(UN_SECRET_URLS).permitAll()
                         .requestMatchers(ADMIN_SECRET_URLS).hasAuthority("ADMIN")
-                        .requestMatchers(USER_SECRET_URLS).hasAnyAuthority("USER", "ADMIN")
+                        .requestMatchers(USER_SECRET_URLS).hasAnyAuthority("USER", "EMPLOYEE", "ADMIN")
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))

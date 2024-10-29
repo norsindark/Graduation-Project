@@ -28,6 +28,8 @@ import CartPage from '../pages/public/CartPage';
 import CheckoutPage from '../pages/public/CheckoutPage';
 import ProductOption from '../pages/admin/productoption/ProductOption';
 import Coupon from '../pages/admin/coupon/Coupon';
+import Review from '../pages/admin/review/Review';
+import Setting from '../pages/admin/setting/Setting';
 export const router = createBrowserRouter([
   {
     path: '/',
@@ -89,16 +91,20 @@ export const router = createBrowserRouter([
       },
       {
         path: '/checkout',
-        element: <CheckoutPage />,
+        element: (
+          // <ProtectedRoute>
+          <CheckoutPage />
+          // </ProtectedRoute>
+        ),
       },
     ],
   },
   {
     path: '/',
     element: (
-      //<ProtectedRoute>
+      // <ProtectedRoute>
       <Main />
-      //</ProtectedRoute>
+      // </ProtectedRoute>
     ),
     errorElement: <NotFound />,
     children: [
@@ -142,6 +148,14 @@ export const router = createBrowserRouter([
       {
         path: '/order',
         element: <Order />,
+      },
+      {
+        path: '/review',
+        element: <Review />,
+      },
+      {
+        path: '/setting',
+        element: <Setting />,
       },
     ],
   },
