@@ -202,6 +202,9 @@ public class OrderServiceImpl implements OrderService {
                 .couponId(request.getCouponId())
                 .userId(request.getUserId())
                 .build();
+
+        coupon.setQuantity(coupon.getQuantity() - 1);
+        couponRepository.save(coupon);
         couponUsageRepository.save(couponUsage);
     }
 

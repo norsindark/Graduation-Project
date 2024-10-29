@@ -18,6 +18,7 @@ public class DishResponse {
 
     private String dishId;
     private String dishName;
+    private int availableQuantity;
     private String slug;
     private String description;
     private String longDescription;
@@ -34,6 +35,7 @@ public class DishResponse {
     public DishResponse(Dish dish, List<Recipe> recipes, List<DishImage> images) {
         this.dishId = dish.getId();
         this.dishName = dish.getDishName();
+
         this.description = dish.getDescription();
         this.longDescription = dish.getLongDescription();
         this.status = dish.getStatus();
@@ -46,9 +48,10 @@ public class DishResponse {
         this.categoryName = dish.getCategory().getName();
     }
 
-    public DishResponse(Dish dish, List<Recipe> recipes, List<DishImage> images, List<DishOptionSelection> optionSelections) {
+    public DishResponse(Dish dish, List<Recipe> recipes, List<DishImage> images, List<DishOptionSelection> optionSelections, int availableQuantity) {
         this.dishId = dish.getId();
         this.dishName = dish.getDishName();
+        this.availableQuantity = availableQuantity;
         this.slug = dish.getSlug();
         this.description = dish.getDescription();
         this.longDescription = dish.getLongDescription();
