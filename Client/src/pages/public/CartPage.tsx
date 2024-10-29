@@ -183,7 +183,7 @@ const CartPage: React.FC = () => {
         UserId
       );
 
-      if (response.data) {
+      if (response.status !== 200) {
         notification.error({
           message: 'Coupon has been used',
           duration: 2,
