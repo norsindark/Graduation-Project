@@ -5,6 +5,7 @@ import com.restaurant_management.dtos.DishOptionSelectionDto;
 import com.restaurant_management.dtos.ImageDto;
 import com.restaurant_management.dtos.RecipeDto;
 import com.restaurant_management.entites.*;
+import com.restaurant_management.enums.UnitType;
 import com.restaurant_management.exceptions.DataExitsException;
 import com.restaurant_management.payloads.requests.DishOptionSelectionRequest;
 import com.restaurant_management.payloads.requests.DishRequest;
@@ -53,8 +54,9 @@ public class DishServiceImpl implements DishService {
         List<Recipe> recipes = recipeRepository.findByDish(dish);
         List<DishImage> images = dishImageRepository.findByDish(dish);
         List<DishOptionSelection> optionSelections = dishOptionSelectionRepository.findByDish(dish);
+        int maxAvailableQuantity = getMaxAvailableDishQuantity(dishId);
 
-        return new DishResponse(dish, recipes, images, optionSelections);
+        return new DishResponse(dish, recipes, images, optionSelections, maxAvailableQuantity);
     }
 
     @Override
@@ -75,10 +77,40 @@ public class DishServiceImpl implements DishService {
 
                     List<DishOptionSelection> optionSelections = dishOptionSelectionRepository.findByDish(dish);
 
-                    return new DishResponse(dish, recipes, images, optionSelections);
+                    int maxAvailableQuantity = getMaxAvailableDishQuantity(dish.getId());
+
+                    return new DishResponse(dish, recipes, images, optionSelections, maxAvailableQuantity);
                 })
                 .collect(Collectors.toList());
         return pagedResourcesAssembler.toModel(new PageImpl<>(dishResponses, pageable, dishes.getTotalElements()));
+    }
+
+    private int getMaxAvailableDishQuantity(String dishId) {
+        return dishRepository.findById(dishId)
+                .map(dish -> {
+                    List<Recipe> recipes = recipeRepository.findByDish(dish);
+
+                    return recipes.stream()
+                            .mapToInt(recipe -> {
+                                UnitType recipeUnit = UnitType.fromString(recipe.getUnit());
+                                String warehouseId = recipe.getWarehouse().getId();
+
+                                return warehouseRepository.findById(warehouseId)
+                                        .map(warehouse -> {
+                                            UnitType warehouseUnit = UnitType.fromString(warehouse.getUnit());
+
+                                            double availableInWarehouse = UnitType.convert(
+                                                    warehouse.getAvailableQuantity(), warehouseUnit, recipeUnit
+                                            );
+
+                                            return (int) (availableInWarehouse / recipe.getQuantityUsed());
+                                        })
+                                        .orElse(0);
+                            })
+                            .min()
+                            .orElse(0);
+                })
+                .orElse(0);
     }
 
     @Override
