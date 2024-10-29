@@ -87,4 +87,14 @@ public class GuestController {
             @RequestParam String userId) throws DataExitsException {
         return ResponseEntity.ok(couponService.checkCouponUsageByCodeAndUserId(code, userId));
     }
+
+    @GetMapping("/get-all-coupons-not-used-by-user")
+    public ResponseEntity<PagedModel<EntityModel<CouponResponse>>> getAllCouponsNotUsedByUserId(
+            @RequestParam String userId,
+            @RequestParam(defaultValue = "0") int pageNo,
+            @RequestParam(defaultValue = "10") int pageSize,
+            @RequestParam(defaultValue = "startDate") String sortBy,
+            @RequestParam(defaultValue = "asc") String sortDir) throws DataExitsException {
+        return ResponseEntity.ok(couponService.getAllCouponsNotUsedByUserId(userId, pageNo, pageSize, sortBy, sortDir));
+    }
 }

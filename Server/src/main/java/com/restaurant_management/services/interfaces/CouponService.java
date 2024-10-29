@@ -15,6 +15,9 @@ public interface CouponService {
     PagedModel<EntityModel<CouponResponse>> getAllCoupons(int pageNo, int pageSize, String sortBy, String sortDir)
             throws DataExitsException;
 
+    PagedModel<EntityModel<CouponResponse>> getAllCouponsNotUsedByUserId(String userId, int pageNo, int pageSize, String sortBy, String sortDir)
+            throws DataExitsException;
+
     ApiResponse updateCoupon(String id, CouponRequest request) throws DataExitsException;
 
     ApiResponse deleteCoupon(String id) throws DataExitsException;
