@@ -53,6 +53,19 @@ public class CouponServiceImpl implements CouponService {
     }
 
     @Override
+    public PagedModel<EntityModel<CouponResponse>> getAllCouponsNotUsedByUserId(String userId, int pageNo, int pageSize, String sortBy, String sortDir)
+            throws DataExitsException {
+        Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.fromString(sortDir), sortBy));
+        Page<Coupon> pageResult = couponRepository.findAllNotUsedByUserId(userId, pageable);
+
+        if (pageResult.hasContent()) {
+            return pagedResourcesAssembler.toModel(pageResult.map(CouponResponse::new));
+        } else {
+            throw new DataExitsException("No coupons found");
+        }
+    }
+
+    @Override
     public ApiResponse addNewCoupon(CouponDto request) {
         if (couponRepository.existsByCode(request.getCode())) {
             return new ApiResponse("Coupon already exists", HttpStatus.BAD_REQUEST);
