@@ -43,7 +43,7 @@ const CouponNew: React.FC<CouponNewProps> = ({
       status,
     } = values;
 
-    console.log('startDate', startDate);
+
 
     setLoading(true);
     try {
@@ -54,8 +54,8 @@ const CouponNew: React.FC<CouponNewProps> = ({
         maxDiscount,
         description,
         maxUsage,
-        startDate,
-        expirationDate,
+        startDate.format('YYYY-MM-DD'),
+        expirationDate.format('YYYY-MM-DD'),
         status
       );
 

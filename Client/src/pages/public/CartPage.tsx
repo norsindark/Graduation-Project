@@ -5,7 +5,7 @@ import { Popconfirm, notification } from 'antd';
 import { RootState } from '../../redux/store';
 import Coupon from '../../components/public/coupon/Coupon';
 import {
-  callGetAllCoupon,
+  callGetAllCouponNotUsedByUserId,
   callCheckCouponUsageByCodeAndUserId
 } from '../../services/clientApi';
 import {
@@ -16,7 +16,6 @@ import {
   SelectedOption,
 } from '../../redux/order/orderSlice';
 import { LayoutContextType } from '../../components/public/layout/LayoutPublic';
-import User from '../admin/user/User';
 
 interface Coupon {
   couponId: string;
@@ -47,7 +46,7 @@ const CartPage: React.FC = () => {
 
   const [couponCode, setCouponCode] = useState('');
 
-  const UserId = useSelector((state: RootState) => state.account.user?.id);
+  const userId = useSelector((state: RootState) => state.account.user?.id);
 
   const isAuthenticated = useSelector(
     (state: RootState) => state.account.isAuthenticated
@@ -59,8 +58,8 @@ const CartPage: React.FC = () => {
 
   const fetchCoupons = async () => {
     try {
-      const query = `sortBy=startDate&order=desc`;
-      const response = await callGetAllCoupon(query);
+      const query = `userId=${userId}&sortBy=startDate&sortDir=desc`;
+      const response = await callGetAllCouponNotUsedByUserId(query);
       const couponsData = response.data._embedded.couponResponseList;
       setCoupons(couponsData);
     } catch (error) {
@@ -177,15 +176,14 @@ const CartPage: React.FC = () => {
       return;
     }
 
-    if (UserId) {
+    if (userId) {
       const response = await callCheckCouponUsageByCodeAndUserId(
         coupon.couponCode,
-        UserId
+        userId
       );
-
-      if (response.status !== 200) {
+      if (response.status === 400) {
         notification.error({
-          message: 'Coupon has been used',
+          message: 'Coupon has already been used',
           duration: 2,
           showProgress: true,
         });

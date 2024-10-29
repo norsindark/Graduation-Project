@@ -23,7 +23,7 @@ const EmployeeManagementNew: React.FC<EmployeeNewProps> = ({
     const fetchEmployers = async () => {
       try {
         const responseAllUser = await callGetAllUser();
-        console.log('responseAllEmployers', responseAllUser);
+
         if (responseAllUser?.status === 200) {
           setUsers(responseAllUser.data);
         }
@@ -37,7 +37,7 @@ const EmployeeManagementNew: React.FC<EmployeeNewProps> = ({
 
   const onFinish = async (values: any) => {
     const { emails, salary, jobTitle } = values;
-    console.log('values', values);
+
     setIsSubmitting(true);
     try {
       const response = await callAddNewEmployee(emails, salary, jobTitle);

@@ -120,7 +120,7 @@ const ProductOption: React.FC = () => {
   const handleDeleteClick = async (id: string) => {
     try {
       const res = await callDeleteDishOptionGroup(id);
-      console.log('res', res);
+
       if (res?.status === 200) {
         notification.success({
           message: 'Group option product deleted successfully!',

@@ -93,7 +93,7 @@ function TabsDescriptionAndReview({
 
   const onFinish = async (values: { rating: number; review: string }) => {
     const { rating, review } = values;
-    console.log(' values', rating, review);
+
 
     setLoading(true);
     try {
@@ -148,7 +148,6 @@ function TabsDescriptionAndReview({
           dishDetail.dishId,
           query
         );
-        console.log(response.data);
 
         setListReview(response.data._embedded.reviewResponseList);
         setTotal(response.data.page.totalElements);
@@ -333,9 +332,6 @@ function TabsDescriptionAndReview({
       setEditLoading(false);
     }
   };
-
-  console.log('user', user);
-  console.log('review.userId', listReview);
 
   const renderReviewActions = (review: Review) => {
     return (

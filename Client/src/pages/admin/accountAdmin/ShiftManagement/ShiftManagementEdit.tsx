@@ -46,7 +46,7 @@ const ShiftManagementEdit: React.FC<ShiftEditProps> = ({
         startTime.format('HH:mm'),
         endTime.format('HH:mm')
       );
-      console.log(response, 'response');
+
 
       if (response?.status === 200) {
         notification.success({
