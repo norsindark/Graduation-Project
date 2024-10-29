@@ -3,7 +3,10 @@ import Slider from 'react-slick';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 import styled from 'styled-components';
-import { callGetAllCouponNotUsedByUserId } from '../../../services/clientApi';
+import {
+  callGetAllCouponNotUsedByUserId,
+  callGetAllCoupon
+} from '../../../services/clientApi';
 import { Button, message, notification } from 'antd';
 import { CopyOutlined } from '@ant-design/icons';
 import { RootState } from '../../../redux/store';
@@ -110,6 +113,12 @@ function Coupon({ cartItems }: { cartItems: any }) {
 
   const fetchCoupons = async () => {
     try {
+      if (!userId) {
+        const query = `&sortBy=startDate&sortDir=desc`;
+        const response = await callGetAllCoupon(query);
+        const couponsData = response.data._embedded.couponResponseList;
+        setCoupons(couponsData);
+      }
       const query = `userId=${userId}&sortBy=startDate&sortDir=desc`;
       const response = await callGetAllCouponNotUsedByUserId(query);
       const couponsData = response.data._embedded.couponResponseList;
