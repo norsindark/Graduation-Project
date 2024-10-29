@@ -158,7 +158,7 @@ function Coupon({ cartItems }: { cartItems: any }) {
               <div className="d-flex">
                 <div className="coupon-image" style={{ width: '40%' }}>
                   <img
-                    src={cartItems[0].detail.thumbImage}
+                    src={cartItems[0]?.detail.thumbImage || '../../../../public/images/menu2_img_3.jpg'}
                     alt={coupon.title}
                     className="w-100 h-100 object-fit-cover rounded-[30px] ml-1"
                   />
