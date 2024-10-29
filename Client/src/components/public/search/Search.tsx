@@ -28,7 +28,7 @@ const Search = () => {
 
   const handleOk = () => {
     // Xử lý tìm kiếm khi bấm OK
-    console.log('Searching for:', searchText);
+
     setIsModalVisible(false);
   };
 

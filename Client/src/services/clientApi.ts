@@ -10,7 +10,6 @@ export const callRegister = (
     password,
     fullName,
   });
-  console.log('data', data);
   return data;
 };
 
@@ -147,6 +146,10 @@ export const callGetDishDetail = async (dishId: string) => {
 
 export const callGetAllCoupon = async (query: string) => {
   return axios.get(`/api/v1/auth/guest/get-all-coupons?${query}`);
+};
+
+export const callGetAllCouponNotUsedByUserId = async (query: string) => {
+  return axios.get(`/api/v1/auth/guest/get-all-coupons-not-used-by-user?${query}`);
 };
 
 export const callCheckCouponUsageByCodeAndUserId = async (code: string, userId: string) => {

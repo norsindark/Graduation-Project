@@ -62,7 +62,7 @@ const EmployeeShiftNew: React.FC<EmployeeShiftNewProps> = ({
   };
 
   const onFinish = async (values: any) => {
-    console.log(values);
+
     setIsSubmitting(true);
     try {
       const response = await callAddNewEmployeeShift(

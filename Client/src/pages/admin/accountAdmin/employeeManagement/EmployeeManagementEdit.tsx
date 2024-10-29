@@ -24,7 +24,7 @@ const EmployeeManagementEdit: React.FC<EmployeeEditProps> = ({
 
   const onFinish = async (values: any) => {
     const { employeeName, salary, jobTitle } = values;
-    console.log(values, 'values');
+
 
     setLoading(true);
     try {

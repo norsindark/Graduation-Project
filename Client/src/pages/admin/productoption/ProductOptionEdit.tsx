@@ -55,7 +55,7 @@ const ProductOptionEdit: React.FC<ProductOptionEditProps> = ({
         description,
         formattedOptions
       );
-      console.log('response', response);
+
       if (response?.status === 200) {
         notification.success({
           message: 'Product option group updated successfully!',

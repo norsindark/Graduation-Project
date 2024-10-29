@@ -50,7 +50,7 @@ const ShiftManagement: React.FC = () => {
         query += `&sortBy=createdAt&sortDir=desc`;
       }
       const response = await callGetAllShift(query);
-      console.log('responseGetAllShift', response.data);
+
 
       if (response?.status === 200) {
         if (

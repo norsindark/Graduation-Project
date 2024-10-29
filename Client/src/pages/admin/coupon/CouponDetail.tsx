@@ -35,7 +35,6 @@ const CouponDetail: React.FC<CouponDetailProps> = ({
       try {
         // Lấy chi tiết coupon từ API
         const response = await callGetCouponByCode(couponCode || '');
-        console.log('response', response);
 
         if (response.status === 200) {
           setCoupon(response.data);

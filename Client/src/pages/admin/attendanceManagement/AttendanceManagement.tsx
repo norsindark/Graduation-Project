@@ -134,7 +134,7 @@ const AttendanceManagement = () => {
         setEditingKey('');
       }
     } catch (errInfo) {
-      console.log('Error when saving:', errInfo);
+
     }
   };
 

@@ -3,9 +3,11 @@ import Slider from 'react-slick';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 import styled from 'styled-components';
-import { callGetAllCoupon } from '../../../services/clientApi';
+import { callGetAllCouponNotUsedByUserId } from '../../../services/clientApi';
 import { Button, message, notification } from 'antd';
 import { CopyOutlined } from '@ant-design/icons';
+import { RootState } from '../../../redux/store';
+import { useSelector } from 'react-redux';
 import dayjs from 'dayjs';
 const ArrowButton = styled.i`
   width: 30px;
@@ -44,6 +46,7 @@ const ArrowButton = styled.i`
 
 function Coupon({ cartItems }: { cartItems: any }) {
   const [coupons, setCoupons] = useState([]);
+  const userId = useSelector((state: RootState) => state.account.user?.id);
 
   const NextArrow = (props: any) => {
     const { onClick } = props;
@@ -107,8 +110,8 @@ function Coupon({ cartItems }: { cartItems: any }) {
 
   const fetchCoupons = async () => {
     try {
-      const query = `sortBy=startDate&order=desc`;
-      const response = await callGetAllCoupon(query);
+      const query = `userId=${userId}&sortBy=startDate&sortDir=desc`;
+      const response = await callGetAllCouponNotUsedByUserId(query);
       const couponsData = response.data._embedded.couponResponseList;
       setCoupons(couponsData);
     } catch (error) {
