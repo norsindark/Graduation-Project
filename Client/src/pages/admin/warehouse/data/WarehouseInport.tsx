@@ -106,7 +106,7 @@ const WarehouseImport = (props: WarehouseImportProps) => {
       }
     },
     onDrop(e: any) {
-      console.log('Dropped files', e.dataTransfer.files);
+      
     },
   };
 

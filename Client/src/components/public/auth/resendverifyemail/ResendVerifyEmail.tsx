@@ -22,7 +22,7 @@ const ResendVerifyEmail: React.FC<ResendVerifyEmailProps> = ({
     setIsSubmit(true);
     try {
       const response = await callResendVerifyEmail(email);
-      console.log('responseResendVerifyEmail', response);
+
       if (response.status === 200) {
         notification.success({
           message: 'Verification email sent successfully!',

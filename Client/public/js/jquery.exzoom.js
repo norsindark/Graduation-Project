@@ -124,7 +124,6 @@
 
     for (let i = 0; i < imgNum; i++) {
       imgArr[i] = copute_image_prop(images.eq(i));
-      console.log(imgArr[i]);
       let li = exzoom_img_ul.find('li').eq(i);
       li.css('width', boxWidth);
       li.find('img').css({
@@ -262,7 +261,6 @@
     });
 
     exzoom_img_ul.on('touchend', function (event) {
-      console.log(endX < startX);
       if (endX < startX) {
         moveRight();
       } else if (endX > startX) {

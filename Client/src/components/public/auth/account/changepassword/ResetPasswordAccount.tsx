@@ -36,7 +36,6 @@ const ResetPasswordAccount = () => {
           oldPassword,
           newPassword
         );
-        console.log('response', response);
 
         if (response?.status === 200) {
           notification.success({
