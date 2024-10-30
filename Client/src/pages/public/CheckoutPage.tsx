@@ -1,5 +1,5 @@
 import { Button, Form, Radio, Select } from 'antd';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../redux/store';
@@ -24,6 +24,19 @@ interface Address {
   commune: string;
 }
 
+interface OrderSummary {
+  subtotal: number;
+  delivery: number;
+  discount: number;
+  total: number;
+  appliedCoupon: {
+    couponId: string;
+    couponCode: string;
+    discountAmount: number;
+    // ... other coupon properties
+  } | null;
+}
+
 function CheckoutPage() {
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [total, setTotal] = useState(0);
@@ -37,6 +50,13 @@ function CheckoutPage() {
   const [editingAddressId, setEditingAddressId] = useState<string | null>(null);
 
   const userId = useSelector((state: RootState) => state.account.user?.id);
+
+  const location = useLocation();
+  const orderSummary = location.state?.orderSummary as OrderSummary;
+
+  const formatPrice = (price: number) => {
+    return price.toLocaleString('vi-VN');
+  };
 
   const fetchAddresses = async () => {
     if (userId) {
@@ -129,6 +149,10 @@ function CheckoutPage() {
   const handleEditClick = (address: Address) => {
     setEditingAddressId(address.id);
     setIsAccountModalOpen(true);
+  };
+
+  const handleAddressUpdate = () => {
+    fetchAddresses(); // Refresh addresses when changes occur in AddressAccount
   };
 
   return (
@@ -299,23 +323,41 @@ function CheckoutPage() {
               <div id="sticky_sidebar" className="fp__cart_list_footer_button">
                 <h6>total cart</h6>
                 <p>
-                  subtotal: <span>$124.00</span>
+                  subtotal:{' '}
+                  <span>{formatPrice(orderSummary?.subtotal || 0)} VNĐ</span>
                 </p>
                 <p>
-                  delivery: <span>$00.00</span>
+                  delivery:{' '}
+                  <span>{formatPrice(orderSummary?.delivery || 0)} VNĐ</span>
                 </p>
                 <p>
-                  discount: <span>$10.00</span>
+                  discount:{' '}
+                  <span>{formatPrice(orderSummary?.discount || 0)} VNĐ</span>
                 </p>
                 <p className="total">
-                  <span>total:</span> <span>$134.00</span>
+                  <span>total:</span>{' '}
+                  <span>{formatPrice(orderSummary?.total || 0)} VNĐ</span>
                 </p>
+
                 <form>
-                  <input type="text" placeholder="Coupon Code" />
-                  <button type="submit">apply</button>
+                  {orderSummary?.appliedCoupon && (
+                    <>
+                      <div className="flex items-center ">
+                        <span className=" w-[181px] ml-4">
+                          Applied Coupon:{' '}
+                        </span>
+                        <input
+                          type="text"
+                          value={orderSummary.appliedCoupon.couponCode}
+                          disabled
+                          className="applied-coupon-input"
+                        />
+                      </div>
+                    </>
+                  )}
                 </form>
-                <a className="common_btn" href=" #">
-                  checkout
+                <a className="common_btn" href="#">
+                  place order
                 </a>
               </div>
             </div>
@@ -327,9 +369,11 @@ function CheckoutPage() {
           onClose={() => {
             setIsAccountModalOpen(false);
             setEditingAddressId(null);
+            fetchAddresses(); // Refresh addresses when modal is closed
           }}
           initialActiveTab="address"
           editingAddressId={editingAddressId}
+          onAddressUpdate={handleAddressUpdate} // Pass the callback
         />
       )}
     </>

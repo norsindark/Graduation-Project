@@ -99,8 +99,18 @@ const ProductDetail: React.FC = () => {
       }
     }
     if (type === 'PLUS') {
-      if (dishDetail?.availableQuantity && currentQuantity < dishDetail.availableQuantity) {
+      if (
+        dishDetail?.availableQuantity &&
+        currentQuantity < dishDetail.availableQuantity
+      ) {
         setCurrentQuantity(currentQuantity + 1);
+      } else {
+        notification.error({
+          message: `Maximum quantity available is ${dishDetail?.availableQuantity}!`,
+          description: 'Cannot add more items',
+          showProgress: true,
+          duration: 3,
+        });
       }
     }
   };
@@ -124,7 +134,7 @@ const ProductDetail: React.FC = () => {
           // Thêm option và sắp xếp theo tên
           const updatedOptions = [
             ...currentOptions,
-            { name: optionName, price: additionalPrice }
+            { name: optionName, price: additionalPrice },
           ].sort((a, b) => a.name.localeCompare(b.name));
 
           newOptions[groupId] = updatedOptions;
@@ -143,7 +153,6 @@ const ProductDetail: React.FC = () => {
       return newOptions;
     });
   };
-
 
   const calculateTotalPrice = () => {
     const basePrice = dishDetail?.offerPrice ?? 0;
@@ -300,12 +309,13 @@ const ProductDetail: React.FC = () => {
                   {Array.from({ length: 5 }, (_, index) => (
                     <i
                       key={index}
-                      className={`${index < Math.floor(dishDetail?.rating || 0)
-                        ? 'fas fa-star'
-                        : index < (dishDetail?.rating || 0)
-                          ? 'fas fa-star-half-alt'
-                          : 'far fa-star'
-                        }`}
+                      className={`${
+                        index < Math.floor(dishDetail?.rating || 0)
+                          ? 'fas fa-star'
+                          : index < (dishDetail?.rating || 0)
+                            ? 'fas fa-star-half-alt'
+                            : 'far fa-star'
+                      }`}
                     ></i>
                   ))}
                   <span>({dishDetail?.rating})</span>
@@ -345,7 +355,7 @@ const ProductDetail: React.FC = () => {
                               Number(option.additionalPrice),
                               e.target.checked,
                               optionGroup.optionGroupName.toLowerCase() ===
-                              'size'
+                                'size'
                             )
                           }
                         />
@@ -365,7 +375,10 @@ const ProductDetail: React.FC = () => {
                 ))}
 
                 <div className="details_quentity">
-                  <h5>select quantity (Available : {dishDetail?.availableQuantity})</h5>
+                  <h5>
+                    select quantity (Available : {dishDetail?.availableQuantity}
+                    )
+                  </h5>
                   <div className="quentity_btn_area flex-wrap align-items-center justify-start">
                     <div className="quentity_btn">
                       <button
