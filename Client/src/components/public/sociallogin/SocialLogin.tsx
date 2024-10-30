@@ -9,9 +9,10 @@ const SocialLogin = () => {
   };
   return (
     <>
-      <ul className="d-flex">
-        <li>
-          <Link
+    <div className="container px-0">
+      <ul className="row mx-0">
+      <li className="col-sm-6 mb-3 d-flex justify-content-center align-items-center">
+          <Link 
             to={`${import.meta.env.VITE_BACKEND_URL}/oauth2/authorization/google`}
             onClick={handleClick}
           >
@@ -22,13 +23,15 @@ const SocialLogin = () => {
             )}
           </Link>
         </li>
-        <li>
-          <a href="#">
+        <li className="col-sm-6 mb-3 d-flex justify-content-center align-items-center">
+          <a href="#"  >
             <i className="fab fa-facebook-f"></i>
           </a>
         </li>
       </ul>
+      </div>
     </>
+    
   );
 };
 
