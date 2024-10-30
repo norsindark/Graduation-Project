@@ -5,7 +5,7 @@ import 'slick-carousel/slick/slick-theme.css';
 import styled from 'styled-components';
 import {
   callGetAllCouponNotUsedByUserId,
-  callGetAllCoupon
+  callGetAllCoupon,
 } from '../../../services/clientApi';
 import { Button, message, notification } from 'antd';
 import { CopyOutlined } from '@ant-design/icons';
@@ -33,7 +33,7 @@ const ArrowButton = styled.i`
   }
 
   &.nextArrow {
-    right: -7px;
+    right: 4px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -170,7 +170,10 @@ function Coupon({ cartItems }: { cartItems: any }) {
               <div className="d-flex">
                 <div className="coupon-image" style={{ width: '40%' }}>
                   <img
-                    src={cartItems[0]?.detail.thumbImage || '../../../../public/images/menu2_img_3.jpg'}
+                    src={
+                      cartItems[0]?.detail.thumbImage ||
+                      '../../../../public/images/menu2_img_3.jpg'
+                    }
                     alt={coupon.title}
                     className="w-100 h-100 object-fit-cover rounded-[30px] ml-1"
                   />

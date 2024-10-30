@@ -3365,8 +3365,8 @@ footer {
 }
 
 .fp__single_comment img {
-  width: 100px !important;
-  height: 100px !important;
+  width: 80px !important;
+  height: 80px !important;
   border-radius: 50%;
   box-shadow: var(--boxShadow);
   border: 5px solid var(--colorWhite);
