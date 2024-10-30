@@ -12,12 +12,14 @@ interface AccountProps {
   onClose: () => void;
   initialActiveTab: string | null;
   editingAddressId: string | null;
+  onAddressUpdate?: () => void;
 }
 
 const Account: React.FC<AccountProps> = ({
   onClose,
   initialActiveTab,
   editingAddressId,
+  onAddressUpdate,
 }) => {
   return (
     <Modal
@@ -52,7 +54,10 @@ const Account: React.FC<AccountProps> = ({
                 <div className="fp__dashboard_content">
                   <div className="tab-content" id="v-pills-tabContent">
                     <DashboardAccount />
-                    <AddressAccount editingAddressId={editingAddressId} />
+                    <AddressAccount
+                      editingAddressId={editingAddressId}
+                      onAddressUpdate={onAddressUpdate}
+                    />
                     <OrderAccount />
                     <WishListAccount />
                     <ReviewAccount />

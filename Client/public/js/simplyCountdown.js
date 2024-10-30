@@ -162,8 +162,6 @@
     let seconds;
     let cd;
 
-    // console.log(typeof elt);
-    //
     if (eltProto === String.prototype) {
       cd = document.querySelectorAll(elt);
     } else {
