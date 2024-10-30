@@ -15,6 +15,7 @@ import axios from 'axios';
 // Định nghĩa interface cho props
 interface AddressAccountProps {
   editingAddressId: string | null;
+  onAddressUpdate?: () => void;
 }
 
 // Định nghĩa interface cho Address (nếu chưa có)
@@ -36,6 +37,7 @@ interface Address {
 
 const AddressAccount: React.FC<AddressAccountProps> = ({
   editingAddressId,
+  onAddressUpdate,
 }) => {
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [total, setTotal] = useState(0); // Total addresses
@@ -111,13 +113,15 @@ const AddressAccount: React.FC<AddressAccountProps> = ({
 
   const handleAddSuccess = () => {
     setShowAddressNew(false);
-    fetchAddresses(); // Refresh addresses after adding a new one
+    fetchAddresses();
+    onAddressUpdate?.();
   };
 
   const handleEditSuccess = () => {
     setShowAddressEdit(false);
     setCurrentAddress(null);
-    fetchAddresses(); // Refresh addresses after editing
+    fetchAddresses();
+    onAddressUpdate?.();
   };
 
   const handleEditClick = useCallback(

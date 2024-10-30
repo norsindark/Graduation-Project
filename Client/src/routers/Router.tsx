@@ -30,6 +30,7 @@ import ProductOption from '../pages/admin/productoption/ProductOption';
 import Coupon from '../pages/admin/coupon/Coupon';
 import Review from '../pages/admin/review/Review';
 import Setting from '../pages/admin/setting/Setting';
+import PaymentPage from '../pages/public/PaymentPage';
 export const router = createBrowserRouter([
   {
     path: '/',
@@ -96,6 +97,10 @@ export const router = createBrowserRouter([
           <CheckoutPage />
           // </ProtectedRoute>
         ),
+      },
+      {
+        path: '/payment',
+        element: <PaymentPage />,
       },
     ],
   },

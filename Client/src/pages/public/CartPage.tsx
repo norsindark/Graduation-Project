@@ -6,7 +6,7 @@ import { RootState } from '../../redux/store';
 import Coupon from '../../components/public/coupon/Coupon';
 import {
   callGetAllCouponNotUsedByUserId,
-  callCheckCouponUsageByCodeAndUserId
+  callCheckCouponUsageByCodeAndUserId,
 } from '../../services/clientApi';
 import {
   doRemoveProductAction,
@@ -32,6 +32,14 @@ interface Coupon {
 
 interface AppliedCoupon extends Coupon {
   discountAmount: number;
+}
+
+interface OrderSummary {
+  subtotal: number;
+  delivery: number;
+  discount: number;
+  total: number;
+  appliedCoupon: AppliedCoupon | null;
 }
 
 const CartPage: React.FC = () => {
@@ -236,7 +244,17 @@ const CartPage: React.FC = () => {
       });
       openModal('login');
     } else {
-      navigate('/checkout');
+      const orderSummary: OrderSummary = {
+        subtotal: calculateSubtotal(),
+        delivery: 0,
+        discount: appliedCoupon ? appliedCoupon.discountAmount : 0,
+        total: calculateTotal(),
+        appliedCoupon: appliedCoupon,
+      };
+
+      navigate('/checkout', {
+        state: { orderSummary },
+      });
     }
   };
 

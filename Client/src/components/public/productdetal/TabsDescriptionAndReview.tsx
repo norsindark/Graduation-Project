@@ -94,7 +94,6 @@ function TabsDescriptionAndReview({
   const onFinish = async (values: { rating: number; review: string }) => {
     const { rating, review } = values;
 
-
     setLoading(true);
     try {
       const response = await callCreateReview(
@@ -263,15 +262,17 @@ function TabsDescriptionAndReview({
               ></i>
             </span>
           )}
-          <Button
-            type="text"
-            className="text-blue-500 ml-2"
-            size="small"
-            icon={<i className="fas fa-reply"></i>}
-            onClick={() => showReplyModal(reply.reviewId)}
-          >
-            Reply
-          </Button>
+          {user?.role.name === 'ADMIN' && (
+            <Button
+              type="text"
+              className="text-blue-500 ml-2"
+              size="small"
+              icon={<i className="fas fa-reply"></i>}
+              onClick={() => showReplyModal(reply.reviewId)}
+            >
+              Reply
+            </Button>
+          )}
           {renderReplies(reply.replies || [], depth + 1, reply.reviewId)}
         </div>
       </div>
@@ -336,15 +337,17 @@ function TabsDescriptionAndReview({
   const renderReviewActions = (review: Review) => {
     return (
       <>
-        <Button
-          type="text"
-          className="text-blue-500 ml-2"
-          size="small"
-          icon={<i className="fas fa-reply"></i>}
-          onClick={() => showReplyModal(review.reviewId)}
-        >
-          Reply
-        </Button>
+        {user?.role.name == 'ADMIN' && (
+          <Button
+            type="text"
+            className="text-blue-500 ml-2"
+            size="small"
+            icon={<i className="fas fa-reply"></i>}
+            onClick={() => showReplyModal(review.reviewId)}
+          >
+            Reply
+          </Button>
+        )}
         {user && user.id === review.userId && (
           <Button
             type="text"
