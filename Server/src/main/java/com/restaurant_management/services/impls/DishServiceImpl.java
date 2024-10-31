@@ -217,7 +217,6 @@ public class DishServiceImpl implements DishService {
         }
     }
 
-
     private void uploadImages(List<ImageDto> imageDtos, Dish dish) throws IOException {
         for (ImageDto imageDto : imageDtos) {
             String[] uploadResult = uploadThumbnail(imageDto.getImageFile());

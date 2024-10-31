@@ -28,6 +28,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
+import java.text.NumberFormat;
+import java.util.Locale;
 
 @Service
 @RequiredArgsConstructor
@@ -44,6 +46,7 @@ public class OrderServiceImpl implements OrderService {
     private final CouponUsageRepository couponUsageRepository;
     private final JavaMailSender javaMailSender;
     private final OrderItemOptionRepository orderItemOptionRepository;
+    private final OfferRepository offerRepository;
     private final PagedResourcesAssembler<OrderResponse> pagedResourcesAssembler;
 
 
@@ -78,16 +81,21 @@ public class OrderServiceImpl implements OrderService {
 
         updateWarehouse(request);
         Order order = createNewOrder(request, user);
+        order.setTotalPrice(totalOrderPrice(request));
+        orderRepository.save(order);
         addOrderItem(order, request);
 
         if (request.getCouponId() != null && !request.getCouponId().isEmpty()) {
             setCouponUsage(request);
+            order.setTotalPrice(applyCoupon(request));
+            orderRepository.save(order);
         }
 
         sendEmailListOrderItems(
                 user.getEmail(), request.getItems(),
                 request.getCouponId(), order.getTotalPrice(),
-                request.getPaymentMethod(), order.getStatus());
+                request.getPaymentMethod(), order.getStatus(),
+                request.getShippingFee());
 
         return new ApiResponse("Order created successfully", HttpStatus.CREATED);
     }
@@ -160,24 +168,61 @@ public class OrderServiceImpl implements OrderService {
         }
     }
 
+    private double calculatePriceWithOffer(Dish dish, double basePrice) throws DataExitsException {
+        List<Offer> offers = offerRepository.findAllByDish(dish);
+        LocalDate today = LocalDate.now();
+
+        Offer activeOffer = offers.stream()
+                .filter(offer -> !offer.getStartDate().isAfter(today) && !offer.getEndDate().isBefore(today))
+                .findFirst()
+                .orElse(null);
+
+        if (activeOffer != null) {
+            double discountAmount = (basePrice * activeOffer.getDiscountPercentage()) / 100;
+            return basePrice - discountAmount;
+        }
+        return basePrice;
+    }
+
     private double totalOrderPrice(OrderDto request) throws DataExitsException {
         double total = 0;
+
         for (OrderItemDto orderItemDto : request.getItems()) {
             Dish dish = dishRepository.findById(orderItemDto.getDishId())
                     .orElseThrow(() -> new DataExitsException("Dish not found"));
 
-            double basePrice = dish.getPrice() * orderItemDto.getQuantity();
+            double basePrice = calculatePriceWithOffer(dish, dish.getOfferPrice() != null ? dish.getOfferPrice() : dish.getPrice());
+
             double totalAdditionalPrice = orderItemDto.getDishOptionSelectionIds().stream()
                     .map(dishOptionSelectionId -> dishOptionSelectionRepository.findById(dishOptionSelectionId)
                             .orElseThrow(() -> new RuntimeException("Dish option selection not found")))
                     .mapToDouble(DishOptionSelection::getAdditionalPrice)
                     .sum();
 
-            total += basePrice + totalAdditionalPrice;
+            total += (basePrice + totalAdditionalPrice) * orderItemDto.getQuantity();
         }
-        return total;
+        return total + request.getShippingFee();
     }
 
+    private double applyCoupon(OrderDto request) throws DataExitsException {
+        Coupon coupon = couponRepository.findById(request.getCouponId())
+                .orElseThrow(() -> new DataExitsException("Coupon not found"));
+
+        double totalPrice = totalOrderPrice(request);
+
+        if (coupon.getMinOrderValue() != null && totalPrice < coupon.getMinOrderValue()) {
+            throw new IllegalStateException("Order value does not meet the minimum requirement for the coupon");
+        }
+
+        double discount = 0;
+        if (coupon.getDiscountPercent() != null) {
+            discount = totalPrice * (coupon.getDiscountPercent() / 100);
+            if (coupon.getMaxDiscount() != null && discount > coupon.getMaxDiscount()) {
+                discount = coupon.getMaxDiscount();
+            }
+        }
+        return totalPrice - discount;
+    }
 
     private void setCouponUsage(OrderDto request) throws DataExitsException {
         Coupon coupon = couponRepository.findById(request.getCouponId())
@@ -247,25 +292,27 @@ public class OrderServiceImpl implements OrderService {
         }
     }
 
-    private void sendEmailListOrderItems(String email, List<OrderItemDto> items, String couponId, Double totalPrice, String paymentMethod, String status)
+    private void sendEmailListOrderItems(String email, List<OrderItemDto> items, String couponId, Double totalPrice, String paymentMethod, String status, Double shippingFee)
             throws MessagingException, UnsupportedEncodingException, DataExitsException {
         String fromAddress = "dvan78281@gmail.com";
         String senderName = "Sync Food";
         String subject = "Your Order has been Placed Successfully";
 
-        StringBuilder content = new StringBuilder("<html><body>")
-                .append("<h2 style=\"color: #81c784; font-family: Arial, sans-serif; font-size: 18px;\">")
-                .append("Your order has been placed successfully!</h2>")
-                .append("<p style=\"font-family: Arial, sans-serif; font-size: 14px; color: #333;\">")
-                .append("Here is the list of items you have ordered:</p>")
-                .append("<table style=\"border-collapse: collapse; width: 100%;\">")
+        NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
+
+        StringBuilder content = new StringBuilder("<html><body style=\"font-family: Arial, sans-serif; color: #333;\">")
+                .append("<div class=\"layout-content\" style=\"padding: 20px;\">")
+                .append("<h2 style=\"color: #5C8E5F; font-size: 18px;\">Your order has been placed successfully!</h2>")
+                .append("<p style=\"color: #5C8E5F; font-size: 14px;\">Here is the list of items you have ordered:</p>")
+                .append("<table style=\"border-collapse: collapse; width: 100%; margin-top: 20px; border-radius: 8px; overflow: hidden;\">")
                 .append("<thead>")
-                .append("<tr style=\"background-color: #f2f2f2;\">")
-                .append("<th style=\"border: 1px solid #ddd; padding: 8px;\">Dish Name</th>")
-                .append("<th style=\"border: 1px solid #ddd; padding: 8px;\">Thumb Image</th>")
-                .append("<th style=\"border: 1px solid #ddd; padding: 8px;\">Price</th>")
-                .append("<th style=\"border: 1px solid #ddd; padding: 8px;\">Quantity</th>")
-                .append("<th style=\"border: 1px solid #ddd; padding: 8px;\">Selected Options</th>")
+                .append("<tr style=\"background-color: #81c784;\">")
+                .append("<th style=\"border: 1px solid #FFFFFF; padding: 8px; color: #FFFFFF;\">Dish Name</th>") // Màu chữ trắng
+                .append("<th style=\"border: 1px solid #FFFFFF; padding: 8px; color: #FFFFFF;\">Thumb Image</th>") // Màu chữ trắng
+                .append("<th style=\"border: 1px solid #FFFFFF; padding: 8px; color: #FFFFFF;\">Price</th>") // Màu chữ trắng
+                .append("<th style=\"border: 1px solid #FFFFFF; padding: 8px; color: #FFFFFF;\">Selected Options</th>") // Màu chữ trắng
+                .append("<th style=\"border: 1px solid #FFFFFF; padding: 8px; color: #FFFFFF;\">Quantity</th>") // Màu chữ trắng
+                .append("<th style=\"border: 1px solid #FFFFFF; padding: 8px; color: #FFFFFF;\">Total Price</th>") // Màu chữ trắng
                 .append("</tr>")
                 .append("</thead>")
                 .append("<tbody>");
@@ -276,50 +323,69 @@ public class OrderServiceImpl implements OrderService {
                     .orElseThrow(() -> new DataExitsException("Coupon not found"));
         }
 
+
+        int indexRow = 0;
+
         for (OrderItemDto item : items) {
             Dish dish = dishRepository.findById(item.getDishId())
                     .orElseThrow(() -> new DataExitsException("Dish not found"));
+
+            double priceItem = (dish.getOfferPrice() != null) ? dish.getOfferPrice() : dish.getPrice();
+            double totalOptionsPrice = 0.0;
+
+            Offer offer = offerRepository.findByDishId(dish.getId())
+                    .orElse(null);
+
+            String priceItemDisplay = currencyFormat.format(priceItem);
+            if (offer != null) {
+                int discountPercentage = offer.getDiscountPercentage();
+                priceItemDisplay += " (" + discountPercentage + "% off daily offer)";
+                priceItem = priceItem * (1 - (discountPercentage / 100.0));
+            }
 
             List<DishOptionSelection> selectedOptions = new ArrayList<>();
             for (String optionId : item.getDishOptionSelectionIds()) {
                 DishOptionSelection option = dishOptionSelectionRepository.findById(optionId)
                         .orElseThrow(() -> new DataExitsException("Dish option selection not found"));
                 selectedOptions.add(option);
+                totalOptionsPrice += option.getAdditionalPrice();
             }
 
             StringBuilder options = new StringBuilder();
             for (DishOptionSelection option : selectedOptions) {
                 options.append(option.getDishOption().getOptionName())
-                        .append(" (").append(option.getAdditionalPrice()).append(")").append("<br>");
+                        .append(" (").append(currencyFormat.format(option.getAdditionalPrice())).append(")").append("<br>");
             }
 
-            content.append("<tr>")
-                    .append("<td style=\"border: 1px solid #ddd; padding: 8px;\">").append(dish.getDishName()).append("</td>")
-                    .append("<td style=\"border: 1px solid #ddd; padding: 8px;\">")
+            double totalItemPrice = (priceItem + totalOptionsPrice) * item.getQuantity();
+
+            String backgroundColor = (indexRow % 2 == 0) ? "#f0f4e8" : "#fff0e0";
+
+            content.append("<tr style=\"background-color: " + backgroundColor + ";\">")
+                    .append("<td style=\"border: none; padding: 8px; color: #000000E0;\">").append(dish.getDishName()).append("</td>")
+                    .append("<td style=\"border: none; padding: 8px; color: #000000E0;\">")
                     .append("<img src=\"").append(dish.getThumbImage()).append("\" alt=\"").append(dish.getDishName()).append("\" style=\"width: 100px; height: auto;\"/>")
                     .append("</td>")
-                    .append("<td style=\"border: 1px solid #ddd; padding: 8px;\">").append(dish.getPrice()).append(" VND</td>")
-                    .append("<td style=\"border: 1px solid #ddd; padding: 8px;\">").append(item.getQuantity()).append("</td>")
-                    .append("<td style=\"border: 1px solid #ddd; padding: 8px;\">").append(options.toString()).append(" VND</td>")
+                    .append("<td style=\"border: none; padding: 8px; color: #000000E0;\">").append(priceItemDisplay).append("</td>")
+                    .append("<td style=\"border: none; padding: 8px; color: #000000E0;\">").append(options.toString()).append("</td>")
+                    .append("<td style=\"border: none; padding: 8px; color: #000000E0;\">").append(item.getQuantity()).append("</td>")
+                    .append("<td style=\"border: none; padding: 8px; color: #000000E0;\">").append(currencyFormat.format(totalItemPrice)).append("</td>")
                     .append("</tr>");
-        }
 
+            indexRow++;
+        }
 
         content.append("</tbody>")
                 .append("</table>")
-                .append("<p style=\"font-family: Arial, sans-serif; font-size: 14px; color: #333;\">")
-                .append("Coupon Code: ").append(coupon != null ? coupon.getCode() : "N/A").append("</p>")
-                .append("<p style=\"font-family: Arial, sans-serif; font-size: 14px; color: #333;\">")
-                .append("Payment Method: ").append(paymentMethod).append("</p>")
-                .append("<p style=\"font-family: Arial, sans-serif; font-size: 14px; color: #333;\">")
-                .append("Order Status: ").append(status).append("</p>")
-                .append("<p style=\"font-family: Arial, sans-serif; font-size: 16px; font-weight: bold; color: #333;\">")
-                .append("Total Price: $").append(totalPrice).append("</p>")
-                .append("<p style=\"font-family: Arial, sans-serif; font-size: 14px; color: #333;\">")
-                .append("We will notify you when your order is on its way.</p>")
-                .append("<p style=\"font-family: Arial, sans-serif; font-size: 14px; color: #333;\">")
-                .append("Thank you for choosing us!</p>")
-                .append("</body></html>");
+                .append("<p style=\"color: #5C8E5F;\">Coupon Code: <strong>").append(coupon != null ? coupon.getCode() : "N/A").append("</strong></p>")
+                .append("<p style=\"color: #5C8E5F;\">Payment Method: <strong>").append(paymentMethod).append("</strong></p>")
+                .append("<p style=\"color: #5C8E5F;\">Order Status: <strong>").append(status).append("</strong></p>")
+                .append("<p style=\"color: #5C8E5F;\">Shipping Fee: <strong>").append(currencyFormat.format(shippingFee)).append("</strong></p>")
+                .append("<p style=\"color: #5C8E5F; font-size: 16px;\">Total Price: <strong>").append(currencyFormat.format(totalPrice)).append("</strong></p>")
+                .append("<p style=\"color: #5C8E5F;\">Your order will be processed soon.</p>")
+                .append("<p style=\"color: #5C8E5F;\">We will notify you when your order is on its way.</p>")
+                .append("<p style=\"color: #5C8E5F;\">Thank you for choosing us!</p>")
+                .append("</div></body></html>");
 
         MimeMessage message = javaMailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true);
