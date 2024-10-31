@@ -14,6 +14,7 @@ import {
   doClearCartAction,
   CartItem,
   SelectedOption,
+  resetStatus,
 } from '../../redux/order/orderSlice';
 import { LayoutContextType } from '../../components/public/layout/LayoutPublic';
 
@@ -47,6 +48,7 @@ const CartPage: React.FC = () => {
   const navigate = useNavigate();
   const { openModal } = useOutletContext<LayoutContextType>();
   const cartItems = useSelector((state: RootState) => state.order.carts);
+  const orderState = useSelector((state: RootState) => state.order);
   const [coupons, setCoupons] = useState<Coupon[]>([]);
   const [appliedCoupon, setAppliedCoupon] = useState<AppliedCoupon | null>(
     null
@@ -87,8 +89,44 @@ const CartPage: React.FC = () => {
     selectedOptions: CartItem['selectedOptions'],
     newQuantity: number
   ) => {
+    const cartItem = cartItems.find(
+      (item) =>
+        item.dishId === dishId &&
+        JSON.stringify(item.selectedOptions) === JSON.stringify(selectedOptions)
+    );
+
+    if (!cartItem) return;
+
+    const totalQuantityInCart = cartItems.reduce((total, item) => {
+      if (item.dishId === dishId) {
+        return (
+          total +
+          (item.dishId === cartItem.dishId &&
+          JSON.stringify(item.selectedOptions) ===
+            JSON.stringify(cartItem.selectedOptions)
+            ? 0
+            : item.quantity)
+        );
+      }
+      return total;
+    }, 0);
+
+    if (totalQuantityInCart + newQuantity > cartItem.availableQuantity) {
+      notification.error({
+        message: 'Cannot update quantity',
+        description: `The total quantity of products in the cart (${totalQuantityInCart}) and the quantity to add (${newQuantity}) exceeds the available quantity (${cartItem.availableQuantity}).`,
+        showProgress: true,
+        duration: 3,
+      });
+      return;
+    }
+
     dispatch(
-      doUpdateQuantityAction({ dishId, selectedOptions, quantity: newQuantity })
+      doUpdateQuantityAction({
+        dishId,
+        selectedOptions,
+        quantity: newQuantity,
+      })
     );
   };
 
@@ -258,6 +296,25 @@ const CartPage: React.FC = () => {
     }
   };
 
+  useEffect(() => {
+    if (orderState.status === 'success') {
+      notification.success({
+        message: 'Update cart successfully!',
+        showProgress: true,
+        duration: 3,
+      });
+      dispatch(resetStatus());
+    } else if (orderState.status === 'error' && orderState.error) {
+      notification.error({
+        message: 'Cannot update cart',
+        description: orderState.error,
+        showProgress: true,
+        duration: 3,
+      });
+      dispatch(resetStatus());
+    }
+  }, [orderState.status, orderState.error, dispatch]);
+
   return (
     <>
       <section
@@ -281,13 +338,13 @@ const CartPage: React.FC = () => {
         </div>
       </section>
 
-      <section className="fp__cart_view mt_50 xs_mt_95 mb_50 xs_mb_70">
+      <section className="fp__cart_view mt_125 xs_mt_95 mb_100 xs_mb_70">
         <div className="container">
           <div className="row">
             <div className="col-lg-8 wow fadeInUp" data-wow-duration="1s">
               <div className="fp__cart_list">
                 <div className="table-responsive">
-                  <table>
+                  <table className="table">
                     <tbody>
                       <tr>
                         <th className="fp__pro_img">Image</th>
@@ -310,7 +367,9 @@ const CartPage: React.FC = () => {
                         </th>
                       </tr>
                       {cartItems.map((item) => (
-                        <tr key={item.dishId}>
+                        <tr
+                          key={`${item.dishId}-${JSON.stringify(item.selectedOptions)}`}
+                        >
                           <td className="fp__pro_img">
                             <img
                               src={item.detail.thumbImage}
@@ -346,8 +405,8 @@ const CartPage: React.FC = () => {
                                 </button>
                               ) : (
                                 <Popconfirm
-                                  title="Remove product"
-                                  description="Are you sure you want to remove this product from the cart?"
+                                  title="Xóa sản phẩm"
+                                  description="Bạn có chắc muốn xóa sản phẩm này khỏi giỏ hàng?"
                                   onConfirm={() =>
                                     handleRemoveItem(
                                       item.dishId,
@@ -364,7 +423,7 @@ const CartPage: React.FC = () => {
                               )}
                               <input
                                 type="text"
-                                placeholder={item.quantity.toString()}
+                                value={item.quantity}
                                 readOnly
                               />
                               <button

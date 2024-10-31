@@ -31,6 +31,7 @@ import Coupon from '../pages/admin/coupon/Coupon';
 import Review from '../pages/admin/review/Review';
 import Setting from '../pages/admin/setting/Setting';
 import PaymentPage from '../pages/public/PaymentPage';
+import OrderSuccess from '../pages/public/OrderSuccess';
 export const router = createBrowserRouter([
   {
     path: '/',
@@ -101,6 +102,10 @@ export const router = createBrowserRouter([
       {
         path: '/payment',
         element: <PaymentPage />,
+      },
+      {
+        path: '/order-success',
+        element: <OrderSuccess />,
       },
     ],
   },

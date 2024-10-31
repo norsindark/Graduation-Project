@@ -5,11 +5,12 @@ import TabsDescriptionAndReview from '../../components/public/productdetal/TabsD
 import ImageGallery from 'react-image-gallery';
 import 'react-image-gallery/styles/css/image-gallery.css';
 import { callGetAllDishes, callGetDishDetail } from '../../services/clientApi';
-import { useDispatch } from 'react-redux';
-import { doAddProductAction } from '../../redux/order/orderSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import { doAddProductAction, OrderState } from '../../redux/order/orderSlice';
 import { notification } from 'antd';
 // Dữ liệu giả cho hình ảnh
 import FullPageLoading from '../../components/Loading/FullPageLoading';
+import { RootState } from '../../redux/store';
 interface imageOption {
   imageId: string;
   imageUrl: string;
@@ -51,6 +52,31 @@ const ProductDetail: React.FC = () => {
     [key: string]: { name: string; price: number }[];
   }>({});
   const dispatch = useDispatch();
+  const orderState = useSelector((state: RootState) => state.order);
+  const [hasAddedToCart, setHasAddedToCart] = useState(false);
+
+  useEffect(() => {
+    if (hasAddedToCart) {
+      if (orderState.status === 'success') {
+        notification.success({
+          message: 'Add to cart successfully!!!',
+          showProgress: true,
+          duration: 3,
+        });
+        setHasAddedToCart(false);
+        dispatch({ type: 'order/resetStatus' });
+      } else if (orderState.status === 'error' && orderState.error) {
+        notification.error({
+          message: 'Cannot add to cart',
+          description: orderState.error,
+          showProgress: true,
+          duration: 3,
+        });
+        setHasAddedToCart(false);
+        dispatch({ type: 'order/resetStatus' });
+      }
+    }
+  }, [orderState.status, orderState.error, hasAddedToCart, dispatch]);
 
   useEffect(() => {
     const fetchDishDetail = async () => {
@@ -115,6 +141,46 @@ const ProductDetail: React.FC = () => {
     }
   };
 
+  const getExistingQuantityInCart = (
+    dishId: string,
+    selectedOpts: { [key: string]: string }
+  ) => {
+    return orderState.carts.reduce((total, item) => {
+      if (
+        item.dishId === dishId &&
+        JSON.stringify(item.selectedOptions) === JSON.stringify(selectedOpts)
+      ) {
+        return total + item.quantity;
+      }
+      return total;
+    }, 0);
+  };
+
+  const formatSelectedOptions = (options: typeof selectedOptions) => {
+    return Object.entries(options).reduce(
+      (acc, [key, value]) => {
+        if (value.length > 0) {
+          const formattedOpts = value.map(
+            (option) =>
+              `${option.name} (+ ${option.price.toLocaleString('vi-VN')} VNĐ)`
+          );
+          acc[key] = formattedOpts.join(', ');
+        }
+        return acc;
+      },
+      {} as { [key: string]: string }
+    );
+  };
+
+  const getTotalQuantityInCart = (dishId: string) => {
+    return orderState.carts.reduce((total, item) => {
+      if (item.dishId === dishId) {
+        return total + item.quantity;
+      }
+      return total;
+    }, 0);
+  };
+
   const handleOptionChange = (
     groupId: string,
     optionName: string,
@@ -122,6 +188,19 @@ const ProductDetail: React.FC = () => {
     isChecked: boolean,
     isRadio?: boolean
   ) => {
+    if (dishDetail) {
+      const totalQuantityInCart = getTotalQuantityInCart(dishDetail.dishId);
+      if (totalQuantityInCart >= dishDetail.availableQuantity) {
+        notification.error({
+          message: 'Không thể thay đổi tùy chọn',
+          description: `Bạn đã có tổng ${totalQuantityInCart} sản phẩm trong giỏ hàng. Không thể thêm sản phẩm mới vì đã đạt số lượng tối đa (${dishDetail.availableQuantity}).`,
+          showProgress: true,
+          duration: 3,
+        });
+        return;
+      }
+    }
+
     setSelectedOptions((prev) => {
       const newOptions = { ...prev };
 
@@ -131,7 +210,6 @@ const ProductDetail: React.FC = () => {
         const currentOptions = newOptions[groupId] || [];
 
         if (isChecked) {
-          // Thêm option và sắp xếp theo tên
           const updatedOptions = [
             ...currentOptions,
             { name: optionName, price: additionalPrice },
@@ -139,7 +217,6 @@ const ProductDetail: React.FC = () => {
 
           newOptions[groupId] = updatedOptions;
         } else {
-          // Loại bỏ option nếu không được chọn
           newOptions[groupId] = currentOptions.filter(
             (option) => option.name !== optionName
           );
@@ -147,6 +224,22 @@ const ProductDetail: React.FC = () => {
           if (newOptions[groupId].length === 0) {
             delete newOptions[groupId];
           }
+        }
+      }
+
+      if (dishDetail) {
+        const formattedOptions = formatSelectedOptions(newOptions);
+        const existingQuantity = getExistingQuantityInCart(
+          dishDetail.dishId,
+          formattedOptions
+        );
+        if (existingQuantity >= dishDetail.availableQuantity) {
+          notification.warning({
+            message: 'Cảnh báo',
+            description: `Bạn đã có ${existingQuantity} sản phẩm với tùy chọn này trong giỏ hàng. Không thể thêm số lượng nữa.`,
+            showProgress: true,
+            duration: 3,
+          });
         }
       }
 
@@ -192,6 +285,19 @@ const ProductDetail: React.FC = () => {
         return;
       }
 
+      const totalQuantityInCart = getTotalQuantityInCart(dishDetail.dishId);
+      const newTotalQuantity = totalQuantityInCart + currentQuantity;
+
+      if (newTotalQuantity > dishDetail.availableQuantity) {
+        notification.error({
+          message: 'Cannot add to cart',
+          description: `You have ${totalQuantityInCart} products in your cart. Cannot add ${currentQuantity} more products because it exceeds the available quantity (${dishDetail.availableQuantity}).`,
+          showProgress: true,
+          duration: 3,
+        });
+        return;
+      }
+
       const cartItem = {
         quantity: currentQuantity,
         dishId: dishDetail.dishId,
@@ -200,26 +306,12 @@ const ProductDetail: React.FC = () => {
           price: calculateTotalPrice(),
           thumbImage: dishDetail.thumbImage,
         },
-        selectedOptions: Object.entries(selectedOptions).reduce(
-          (acc, [key, value]) => {
-            if (value.length > 0) {
-              const formattedOptions = value.map(
-                (option) =>
-                  `${option.name} (+ ${option.price.toLocaleString('vi-VN')} VNĐ)`
-              );
-              acc[key] = formattedOptions.join(', ');
-            }
-            return acc;
-          },
-          {} as { [key: string]: string }
-        ),
+        availableQuantity: dishDetail.availableQuantity,
+        selectedOptions: formatSelectedOptions(selectedOptions),
       };
+
       dispatch(doAddProductAction(cartItem));
-      notification.success({
-        message: 'Add to cart successfully!!!',
-        showProgress: true,
-        duration: 3,
-      });
+      setHasAddedToCart(true);
     }
   };
 
