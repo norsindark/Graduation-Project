@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.sql.Timestamp;
 import java.time.LocalDate;
 
 @Data
@@ -14,18 +13,19 @@ import java.time.LocalDate;
 public class OfferResponse {
     private String id;
     private String offerType;
-    private DishResponse dish;
-    private String dishName;
+    private int discountPercentage;
+    private int availableQuantityOffer;
     private LocalDate startDate;
     private LocalDate endDate;
-    private int discountPercentage;
+    private DishResponse dish;
 
     public OfferResponse(Offer offer) {
         this.id = offer.getId();
         this.offerType = offer.getOfferType();
-        this.dish = new DishResponse(offer.getDish());
+        this.discountPercentage = offer.getDiscountPercentage();
+        this.availableQuantityOffer = offer.getAvailableQuantityOffer();
         this.startDate = offer.getStartDate();
         this.endDate = offer.getEndDate();
-        this.discountPercentage = offer.getDiscountPercentage();
+        this.dish = new DishResponse(offer.getDish());
     }
 }

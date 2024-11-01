@@ -23,13 +23,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.UnsupportedEncodingException;
+import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
-import java.text.NumberFormat;
-import java.util.Locale;
 
 @Service
 @RequiredArgsConstructor
@@ -134,11 +133,13 @@ public class OrderServiceImpl implements OrderService {
             Dish dish = dishRepository.findById(orderItemDto.getDishId())
                     .orElseThrow(() -> new DataExitsException("Dish not found"));
 
-            double totalAdditionalPrice = orderItemDto.getDishOptionSelectionIds().stream()
+            double totalAdditionalPrice = orderItemDto.getDishOptionSelectionIds() != null && !orderItemDto.getDishOptionSelectionIds().isEmpty()
+                    ? orderItemDto.getDishOptionSelectionIds().stream()
                     .map(dishOptionSelectionId -> dishOptionSelectionRepository.findById(dishOptionSelectionId)
                             .orElseThrow(() -> new RuntimeException("Dish option selection not found")))
                     .mapToDouble(DishOptionSelection::getAdditionalPrice)
-                    .sum();
+                    .sum()
+                    : 0;
 
             double totalPrice = (dish.getPrice() * orderItemDto.getQuantity()) + totalAdditionalPrice;
 
@@ -153,33 +154,41 @@ public class OrderServiceImpl implements OrderService {
 
             orderItem = orderItemRepository.save(orderItem);
 
-            for (String optionId : orderItemDto.getDishOptionSelectionIds()) {
-                DishOptionSelection dishOptionSelection = dishOptionSelectionRepository.findById(optionId)
-                        .orElseThrow(() -> new DataExitsException("Dish option selection not found"));
-                OrderItemOption orderItemOption = OrderItemOption.builder()
-                        .orderItem(orderItem)
-                        .additionalPrice(dishOptionSelection.getAdditionalPrice())
-                        .dishOptionSelection(dishOptionSelection)
-                        .build();
+            if (orderItemDto.getDishOptionSelectionIds() != null && !orderItemDto.getDishOptionSelectionIds().isEmpty()) {
+                for (String optionId : orderItemDto.getDishOptionSelectionIds()) {
+                    DishOptionSelection dishOptionSelection = dishOptionSelectionRepository.findById(optionId)
+                            .orElseThrow(() -> new DataExitsException("Dish option selection not found"));
+                    OrderItemOption orderItemOption = OrderItemOption.builder()
+                            .orderItem(orderItem)
+                            .additionalPrice(dishOptionSelection.getAdditionalPrice())
+                            .dishOptionSelection(dishOptionSelection)
+                            .build();
 
-                orderItemOptionRepository.save(orderItemOption);
-                orderItem.getOptions().add(orderItemOption);
+                    orderItemOptionRepository.save(orderItemOption);
+                    orderItem.getOptions().add(orderItemOption);
+                }
             }
         }
     }
 
-    private double calculatePriceWithOffer(Dish dish, double basePrice) throws DataExitsException {
+    private double calculatePriceWithOffer(Dish dish, double basePrice, int quantity) throws DataExitsException {
         List<Offer> offers = offerRepository.findAllByDish(dish);
         LocalDate today = LocalDate.now();
 
         Offer activeOffer = offers.stream()
-                .filter(offer -> !offer.getStartDate().isAfter(today) && !offer.getEndDate().isBefore(today))
+                .filter(offer -> !offer.getStartDate().isAfter(today) && !offer.getEndDate().isBefore(today)
+                        && offer.getAvailableQuantityOffer() >= quantity)
                 .findFirst()
                 .orElse(null);
 
         if (activeOffer != null) {
             double discountAmount = (basePrice * activeOffer.getDiscountPercentage()) / 100;
-            return basePrice - discountAmount;
+            double discountedPrice = basePrice - discountAmount;
+
+            activeOffer.setAvailableQuantityOffer(activeOffer.getAvailableQuantityOffer() - quantity);
+            offerRepository.save(activeOffer);
+
+            return discountedPrice;
         }
         return basePrice;
     }
@@ -191,17 +200,21 @@ public class OrderServiceImpl implements OrderService {
             Dish dish = dishRepository.findById(orderItemDto.getDishId())
                     .orElseThrow(() -> new DataExitsException("Dish not found"));
 
-            double basePrice = calculatePriceWithOffer(dish, dish.getOfferPrice() != null ? dish.getOfferPrice() : dish.getPrice());
+            double basePrice = calculatePriceWithOffer(dish,
+                    dish.getOfferPrice() != null ? dish.getOfferPrice() : dish.getPrice(),
+                    orderItemDto.getQuantity());
 
-            double totalAdditionalPrice = orderItemDto.getDishOptionSelectionIds().stream()
+            double totalAdditionalPrice = orderItemDto.getDishOptionSelectionIds() != null && !orderItemDto.getDishOptionSelectionIds().isEmpty()
+                    ? orderItemDto.getDishOptionSelectionIds().stream()
                     .map(dishOptionSelectionId -> dishOptionSelectionRepository.findById(dishOptionSelectionId)
                             .orElseThrow(() -> new RuntimeException("Dish option selection not found")))
                     .mapToDouble(DishOptionSelection::getAdditionalPrice)
-                    .sum();
+                    .sum()
+                    : 0;
 
             total += (basePrice + totalAdditionalPrice) * orderItemDto.getQuantity();
         }
-        return total + request.getShippingFee();
+        return total + (request.getShippingFee() != null ? request.getShippingFee() : 0.0);
     }
 
     private double applyCoupon(OrderDto request) throws DataExitsException {
@@ -307,12 +320,12 @@ public class OrderServiceImpl implements OrderService {
                 .append("<table style=\"border-collapse: collapse; width: 100%; margin-top: 20px; border-radius: 8px; overflow: hidden;\">")
                 .append("<thead>")
                 .append("<tr style=\"background-color: #81c784;\">")
-                .append("<th style=\"border: 1px solid #FFFFFF; padding: 8px; color: #FFFFFF;\">Dish Name</th>") // Màu chữ trắng
-                .append("<th style=\"border: 1px solid #FFFFFF; padding: 8px; color: #FFFFFF;\">Thumb Image</th>") // Màu chữ trắng
-                .append("<th style=\"border: 1px solid #FFFFFF; padding: 8px; color: #FFFFFF;\">Price</th>") // Màu chữ trắng
-                .append("<th style=\"border: 1px solid #FFFFFF; padding: 8px; color: #FFFFFF;\">Selected Options</th>") // Màu chữ trắng
-                .append("<th style=\"border: 1px solid #FFFFFF; padding: 8px; color: #FFFFFF;\">Quantity</th>") // Màu chữ trắng
-                .append("<th style=\"border: 1px solid #FFFFFF; padding: 8px; color: #FFFFFF;\">Total Price</th>") // Màu chữ trắng
+                .append("<th style=\"border: 1px solid #FFFFFF; padding: 8px; color: #FFFFFF;\">Dish Name</th>")
+                .append("<th style=\"border: 1px solid #FFFFFF; padding: 8px; color: #FFFFFF;\">Thumb Image</th>")
+                .append("<th style=\"border: 1px solid #FFFFFF; padding: 8px; color: #FFFFFF;\">Price</th>")
+                .append("<th style=\"border: 1px solid #FFFFFF; padding: 8px; color: #FFFFFF;\">Selected Options</th>")
+                .append("<th style=\"border: 1px solid #FFFFFF; padding: 8px; color: #FFFFFF;\">Quantity</th>")
+                .append("<th style=\"border: 1px solid #FFFFFF; padding: 8px; color: #FFFFFF;\">Total Price</th>")
                 .append("</tr>")
                 .append("</thead>")
                 .append("<tbody>");
@@ -322,7 +335,6 @@ public class OrderServiceImpl implements OrderService {
             coupon = couponRepository.findById(couponId)
                     .orElseThrow(() -> new DataExitsException("Coupon not found"));
         }
-
 
         int indexRow = 0;
 
@@ -337,18 +349,23 @@ public class OrderServiceImpl implements OrderService {
                     .orElse(null);
 
             String priceItemDisplay = currencyFormat.format(priceItem);
-            if (offer != null) {
+
+            if (offer != null && offer.getAvailableQuantityOffer() >= item.getQuantity()) {
                 int discountPercentage = offer.getDiscountPercentage();
                 priceItemDisplay += " (" + discountPercentage + "% off daily offer)";
                 priceItem = priceItem * (1 - (discountPercentage / 100.0));
+            } else {
+                priceItem = dish.getPrice();
             }
 
             List<DishOptionSelection> selectedOptions = new ArrayList<>();
-            for (String optionId : item.getDishOptionSelectionIds()) {
-                DishOptionSelection option = dishOptionSelectionRepository.findById(optionId)
-                        .orElseThrow(() -> new DataExitsException("Dish option selection not found"));
-                selectedOptions.add(option);
-                totalOptionsPrice += option.getAdditionalPrice();
+            if (item.getDishOptionSelectionIds() != null) {
+                for (String optionId : item.getDishOptionSelectionIds()) {
+                    DishOptionSelection option = dishOptionSelectionRepository.findById(optionId)
+                            .orElseThrow(() -> new DataExitsException("Dish option selection not found"));
+                    selectedOptions.add(option);
+                    totalOptionsPrice += option.getAdditionalPrice();
+                }
             }
 
             StringBuilder options = new StringBuilder();
@@ -380,7 +397,7 @@ public class OrderServiceImpl implements OrderService {
                 .append("<p style=\"color: #5C8E5F;\">Coupon Code: <strong>").append(coupon != null ? coupon.getCode() : "N/A").append("</strong></p>")
                 .append("<p style=\"color: #5C8E5F;\">Payment Method: <strong>").append(paymentMethod).append("</strong></p>")
                 .append("<p style=\"color: #5C8E5F;\">Order Status: <strong>").append(status).append("</strong></p>")
-                .append("<p style=\"color: #5C8E5F;\">Shipping Fee: <strong>").append(currencyFormat.format(shippingFee)).append("</strong></p>")
+                .append("<p style=\"color: #5C8E5F;\">Shipping Fee: <strong>").append(currencyFormat.format(shippingFee != null ? shippingFee : 0.0)).append("</strong></p>")
                 .append("<p style=\"color: #5C8E5F; font-size: 16px;\">Total Price: <strong>").append(currencyFormat.format(totalPrice)).append("</strong></p>")
                 .append("<p style=\"color: #5C8E5F;\">Your order will be processed soon.</p>")
                 .append("<p style=\"color: #5C8E5F;\">We will notify you when your order is on its way.</p>")

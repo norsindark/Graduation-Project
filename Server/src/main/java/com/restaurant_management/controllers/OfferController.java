@@ -7,7 +7,8 @@ import com.restaurant_management.payloads.responses.OfferResponse;
 import com.restaurant_management.services.interfaces.OfferService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.hateoas.*;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -38,14 +39,14 @@ public class OfferController {
 
     @PostMapping("/create-offer")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse> createOffer(@RequestBody OfferDto request) throws DataExitsException {
-        return ResponseEntity.ok(offerService.createOffer(request));
+    public ResponseEntity<ApiResponse> createOffer(@RequestBody List<OfferDto> requests) throws DataExitsException {
+        return ResponseEntity.ok(offerService.createOffers(requests));
     }
 
     @PutMapping("/update-offer")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse> updateOffer(@RequestBody OfferDto request) throws DataExitsException {
-        return ResponseEntity.ok(offerService.updateOffer(request));
+    public ResponseEntity<ApiResponse> updateOffer(@RequestBody List<OfferDto> requests) throws DataExitsException {
+        return ResponseEntity.ok(offerService.updateOffers(requests));
     }
 
     @DeleteMapping("/delete-offer")

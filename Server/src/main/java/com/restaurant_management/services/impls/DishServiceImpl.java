@@ -85,7 +85,7 @@ public class DishServiceImpl implements DishService {
         return pagedResourcesAssembler.toModel(new PageImpl<>(dishResponses, pageable, dishes.getTotalElements()));
     }
 
-    private int getMaxAvailableDishQuantity(String dishId) {
+    private int getMaxAvailableDishQuantity(String dishId)  {
         return dishRepository.findById(dishId)
                 .map(dish -> {
                     List<Recipe> recipes = recipeRepository.findByDish(dish);
