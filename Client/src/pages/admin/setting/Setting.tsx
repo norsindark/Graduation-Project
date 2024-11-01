@@ -91,7 +91,7 @@ function Setting() {
     setLoading(true);
     try {
       const response = await callGetLocationRestaurant();
-      console.log('response', response);
+      
       if (response.status === 200) {
         setLocation(response.data);
       } else if (response.status === 400) {
@@ -112,7 +112,7 @@ function Setting() {
   };
 
   const handleEditClick = (record: Location) => {
-    console.log(record);
+    
   };
 
   const handleDeleteClick = async (id: string) => {

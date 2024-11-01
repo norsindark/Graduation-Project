@@ -72,7 +72,7 @@ function MenuHome() {
     try {
       const query = `pageNo=${current - 1}&pageSize=${pageSize}&sortBy=dishName&order=asc`;
       const response = await callGetAllDishes(query);
-      console.log('responseProducts', response.data);
+      
       if (
         response.status === 200 &&
         response.data._embedded?.dishResponseList

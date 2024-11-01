@@ -212,8 +212,6 @@ const AddressAccount: React.FC<AddressAccountProps> = ({
     }
   }, [editingAddressId, addresses, handleEditClick]);
 
-  // console.log('currentAddress11', addresses);
-
   return (
     <div
       className="tab-pane fade"

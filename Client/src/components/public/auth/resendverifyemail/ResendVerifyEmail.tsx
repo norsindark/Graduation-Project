@@ -22,7 +22,7 @@ const ResendVerifyEmail: React.FC<ResendVerifyEmailProps> = ({
     setIsSubmit(true);
     try {
       const response = await callResendVerifyEmail(email);
-      console.log('responseResendVerifyEmail', response);
+
       if (response.status === 200) {
         notification.success({
           message: 'Verification email sent successfully!',
@@ -82,8 +82,7 @@ const ResendVerifyEmail: React.FC<ResendVerifyEmailProps> = ({
         className="fp__signin"
         style={{ backgroundImage: 'url(images/login_bg.jpg)' }}
       >
-        <div className="fp__signup_overlay pt_45 xs_pt_45 pb_45 xs_pb_45">
-          <div className="container">
+        <div className="fp__signup_overlay pt_5 xs_pt_5 pb_5 xs_pb_5">
             <div className="row wow fadeInUp" data-wow-duration="1s">
               <div className="col-xxl-12 col-xl-12 col-md-12 col-lg-12 m-auto">
                 <div className="fp__login_area">
@@ -129,7 +128,6 @@ const ResendVerifyEmail: React.FC<ResendVerifyEmailProps> = ({
                 </div>
               </div>
             </div>
-          </div>
         </div>
       </section>
     </Modal>

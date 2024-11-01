@@ -32,18 +32,16 @@ public class DishResponse {
     private List<RecipeResponse> recipes;
     private List<ListOptionOfDishResponse> listOptions;
 
-    public DishResponse(Dish dish, List<Recipe> recipes, List<DishImage> images) {
+    public DishResponse(Dish dish) {
         this.dishId = dish.getId();
         this.dishName = dish.getDishName();
-
+        this.slug = dish.getSlug();
         this.description = dish.getDescription();
         this.longDescription = dish.getLongDescription();
         this.status = dish.getStatus();
         this.thumbImage = dish.getThumbImage();
         this.offerPrice = dish.getOfferPrice();
         this.price = dish.getPrice();
-        this.images = images.stream().map(DishImageResponse::new).toList();
-        this.recipes = recipes.stream().map(RecipeResponse::new).toList();
         this.categoryId = dish.getCategory().getId();
         this.categoryName = dish.getCategory().getName();
     }

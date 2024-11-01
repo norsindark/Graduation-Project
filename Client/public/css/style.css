@@ -90,10 +90,8 @@ button {
   --headingFont: 'Jost', sans-serif;
   --cursiveFont: 'Lobster', cursive;
   --boxShadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
-  --gradiantBg: rgb(156, 3, 30)
-    linear-gradient(0deg, rgba(156, 3, 30, 1) 0%, rgba(235, 0, 41, 1) 100%);
-  --gradiantHoverBg: rgb(235, 0, 41)
-    linear-gradient(0deg, rgba(235, 0, 41, 1) 0%, rgba(156, 3, 30, 1) 100%);
+  --gradiantBg: rgb(156, 3, 30) linear-gradient(0deg, rgba(156, 3, 30, 1) 0%, rgba(235, 0, 41, 1) 100%);
+  --gradiantHoverBg: rgb(235, 0, 41) linear-gradient(0deg, rgba(235, 0, 41, 1) 0%, rgba(156, 3, 30, 1) 100%);
 }
 
 /*============================
@@ -429,8 +427,7 @@ button {
   right: -12px;
 }
 
-.main_menu .menu_icon li:last-child a {
-}
+.main_menu .menu_icon li:last-child a {}
 
 .main_menu .menu_icon li:last-child a::after,
 .main_menu .menu_icon li:last-child a::before {
@@ -586,8 +583,8 @@ button {
   text-align: center;
   background: var(--colorPrimary);
   color: var(--colorWhite);
-  top: -4px;
-  right: 0;
+  top: -5px;
+  right: -15px;
   border-radius: 50%;
   font-size: 16px;
   transition: all linear 0.3s;
@@ -1478,6 +1475,7 @@ button {
 .menu_filter button.active {
   color: var(--colorPrimary);
 }
+
 .fp__menu_item {
   margin-top: 25px;
   position: relative;
@@ -2195,12 +2193,10 @@ button {
 
 .fp__single_blog:hover .fp__single_blog_text {
   background: rgb(0, 0, 0);
-  background: linear-gradient(
-    0deg,
-    rgba(0, 0, 0, 0.8270658605238971) 0%,
-    rgba(0, 0, 0, 0.527345972568715) 67%,
-    rgba(0, 0, 0, 0) 100%
-  );
+  background: linear-gradient(0deg,
+      rgba(0, 0, 0, 0.8270658605238971) 0%,
+      rgba(0, 0, 0, 0.527345972568715) 67%,
+      rgba(0, 0, 0, 0) 100%);
 }
 
 .fp__single_blog:hover ul li,
@@ -3662,6 +3658,7 @@ footer {
   color: var(--colorBlack);
   margin-top: 20px;
 }
+
 .text-medium label {
   text-transform: capitalize;
   font-size: 15px;
@@ -4552,11 +4549,13 @@ CHECKOUT PAGE START
 
 .fp__login_area {
   background: #faf6f3fa;
-  padding: 50px;
+  padding: 30px;
+  width: 432px;
   overflow: hidden;
   border-radius: 5px;
   border: 1px solid #ddd;
 }
+
 
 .fp__login_area h2 {
   font-weight: 700;
@@ -4674,7 +4673,7 @@ CHECKOUT PAGE START
 }
 
 .fp__login_area ul li a {
-  width: 100px;
+  width: 220px;
   height: 35px;
   background: var(--colorPrimary);
   color: var(--colorWhite);
@@ -4696,7 +4695,7 @@ CHECKOUT PAGE START
 }
 
 .fp__login_area .create_account {
-  margin-top: 30px;
+  margin-top: 8px;
   color: var(--paraColor);
   margin-bottom: 0px;
 }
@@ -4709,6 +4708,114 @@ CHECKOUT PAGE START
 
 /* ==================================
     SIGNIN END
+=================================== */
+
+/* ==================================
+    SIGNIN START
+=================================== */
+.fp__register_area {
+  background: #faf6f3fa;
+  padding: 20px;
+  width: 432px;
+  overflow: hidden;
+  border-radius: 5px;
+  border: 1px solid #ddd;
+}
+
+.fp__register_area h2 {
+  font-weight: 700;
+  font-size: 35px;
+  color: var(--colorBlack);
+  text-transform: capitalize;
+  margin-bottom: 5px;
+}
+
+.fp__register_area p {
+  color: var(--colorBlack);
+  text-transform: capitalize;
+  margin-bottom: 25px;
+}
+
+.fp__register_area form label {
+  text-transform: capitalize;
+  font-size: 15px;
+  font-weight: 500;
+  margin-bottom: 5px;
+}
+
+
+
+.fp__register_area ul li a {
+  width: 220px;
+  height: 35px;
+  background: var(--colorPrimary);
+  color: var(--colorWhite);
+  text-align: center;
+  line-height: 35px;
+  border-radius: 20px;
+  margin-right: 5px !important;
+  font-size: 18px;
+  border: 1px solid transparent;
+  transition: all 0.3s linear 0s;
+  -webkit-transition: all 0.3s linear 0s;
+  -moz-transition: all 0.3s linear 0s;
+  -ms-transition: all 0.3s linear 0s;
+  -o-transition: all 0.3s linear 0s;
+}
+
+.fp__register_area ul li a:hover {
+  background: var(--colorBlack);
+}
+
+.fp__register_area .create_account {
+  margin-top: 8px;
+  color: var(--paraColor);
+  margin-bottom: 0px;
+}
+
+.fp__register_area .create_account a {
+  color: var(--colorPrimary);
+  text-transform: capitalize;
+  font-weight: 500;
+}
+
+.fp__register_area .or {
+  position: relative;
+  margin: 20px 0px 20px;
+}
+
+.fp__register_area .or span {
+  text-transform: uppercase;
+  width: 25px;
+  height: 25px;
+  display: inline-block;
+  background: var(--colorBlack);
+  font-size: 12px;
+  text-align: center;
+  line-height: 25px;
+  color: var(--colorWhite);
+  border-radius: 50%;
+  position: relative;
+  z-index: 1;
+}
+
+.fp__register_area .or::after {
+  position: absolute;
+  content: '';
+  background: var(--colorBlack);
+  width: 98%;
+  height: 1px;
+  top: 50%;
+  right: 0px;
+  transform: translateY(-50%);
+  -webkit-transform: translateY(-50%);
+  -moz-transform: translateY(-50%);
+  -ms-transform: translateY(-50%);
+  -o-transform: translateY(-50%);
+}
+
+/* ==================================
+    Register END
 =================================== */
 
 /*============================
@@ -6710,16 +6817,18 @@ CHECKOUT PAGE START
 
 .fp__login_area ul li a {
   margin-right: 0;
-  margin-left: 5px;
+  /* margin-left: 5px; */
 }
 
-/*============================
+/*===
+\=========================
     SIGN IN END
 ============================*/
 
 .color-bg-client {
   background-color: var(--colorPrimary) !important;
 }
+
 .fade-in {
   opacity: 0;
   transform: translateY(20px);
