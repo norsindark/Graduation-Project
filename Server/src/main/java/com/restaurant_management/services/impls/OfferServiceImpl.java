@@ -10,13 +10,18 @@ import com.restaurant_management.repositories.DishRepository;
 import com.restaurant_management.repositories.OfferRepository;
 import com.restaurant_management.services.interfaces.OfferService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PagedResourcesAssembler;
-import org.springframework.hateoas.*;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -49,56 +54,72 @@ public class OfferServiceImpl implements OfferService {
     }
 
     @Override
-    public ApiResponse createOffer(OfferDto offerDto) throws DataExitsException {
-        Dish dish = dishRepository.findById(offerDto.getDishId())
-                .orElseThrow(() -> new DataExitsException("Dish not found"));
-        if (offerRepository.existsByDish(dish)) {
-            throw new DataExitsException("Offer already exists for this dish");
+    public ApiResponse createOffers(List<OfferDto> offerDtos) throws DataExitsException {
+        List<String> responseMessages = new ArrayList<>();
+
+        for (OfferDto offerDto : offerDtos) {
+            Dish dish = dishRepository.findById(offerDto.getDishId())
+                    .orElseThrow(() -> new DataExitsException("Dish not found for dish ID: " + offerDto.getDishId()));
+
+            if (offerRepository.existsByDish(dish)) {
+                throw new DataExitsException("Offer already exists for dish ID: " + offerDto.getDishId());
+            }
+
+            if (offerDto.getStartDate().isAfter(offerDto.getEndDate())) {
+                throw new DataExitsException("Start date must be before end date for dish ID: " + offerDto.getDishId());
+            }
+
+            if (offerDto.getDiscountPercentage() > 100 || offerDto.getDiscountPercentage() <= 0) {
+                throw new DataExitsException("Discount percentage must be between 1 and 100 for dish ID: " + offerDto.getDishId());
+            }
+
+            Offer offer = new Offer();
+            offer.setDish(dish);
+            offer.setOfferType(offerDto.getOfferType().toUpperCase());
+            offer.setStartDate(offerDto.getStartDate());
+            offer.setEndDate(offerDto.getEndDate());
+            offer.setDiscountPercentage(offerDto.getDiscountPercentage());
+            offer.setAvailableQuantityOffer(offerDto.getAvailableQuantityOffer());
+
+            offerRepository.save(offer);
+            responseMessages.add("Offer created successfully for dish ID: " + offerDto.getDishId());
         }
 
-        if (offerDto.getStartDate().isAfter(offerDto.getEndDate())) {
-            throw new DataExitsException("Start date must be before end date");
-        }
-
-        if (offerDto.getDiscountPercentage() > 100 || offerDto.getDiscountPercentage() <= 0) {
-            throw new DataExitsException("Discount percentage must be less than or equal to 100 and greater than 0");
-        }
-
-        Offer offer = new Offer();
-        offer.setDish(dish);
-        offer.setOfferType(offerDto.getOfferType().toUpperCase());
-        offer.setStartDate(offerDto.getStartDate());
-        offer.setEndDate(offerDto.getEndDate());
-        offer.setDiscountPercentage(offerDto.getDiscountPercentage());
-
-        offerRepository.save(offer);
-        return new ApiResponse("Offer created successfully", HttpStatus.CREATED);
+        return new ApiResponse(String.join("; ", responseMessages), HttpStatus.CREATED);
     }
 
     @Override
-    public ApiResponse updateOffer(OfferDto offerDto) throws DataExitsException {
-        Offer offer = offerRepository.findById(offerDto.getId())
-                .orElseThrow(() -> new DataExitsException("Offer not found"));
+    public ApiResponse updateOffers(List<OfferDto> offerDtos) throws DataExitsException {
+        List<String> responseMessages = new ArrayList<>();
 
-        if (!offer.getDish().getId().equals(offerDto.getDishId()) &&
-                offerRepository.existsByDish(offer.getDish())) {
-            throw new DataExitsException("Offer already exists for this dish");
+        for (OfferDto offerDto : offerDtos) {
+            Offer offer = offerRepository.findById(offerDto.getId())
+                    .orElseThrow(() -> new DataExitsException("Offer not found for offer ID: " + offerDto.getId()));
+
+            if (!offer.getDish().getId().equals(offerDto.getDishId()) &&
+                    offerRepository.existsByDish(offer.getDish())) {
+                throw new DataExitsException("Offer already exists for dish ID: " + offerDto.getDishId());
+            }
+
+            if (offerDto.getStartDate().isAfter(offerDto.getEndDate())) {
+                throw new DataExitsException("Start date must be before end date for offer ID: " + offerDto.getId());
+            }
+
+            if (offerDto.getDiscountPercentage() > 100 || offerDto.getDiscountPercentage() <= 0) {
+                throw new DataExitsException("Discount percentage must be between 1 and 100 for offer ID: " + offerDto.getId());
+            }
+
+            offer.setOfferType(offerDto.getOfferType().toUpperCase());
+            offer.setStartDate(offerDto.getStartDate());
+            offer.setEndDate(offerDto.getEndDate());
+            offer.setDiscountPercentage(offerDto.getDiscountPercentage());
+            offer.setAvailableQuantityOffer(offerDto.getAvailableQuantityOffer());
+
+            offerRepository.save(offer);
+            responseMessages.add("Offer updated successfully for offer ID: " + offerDto.getId());
         }
 
-        if (offerDto.getStartDate().isAfter(offerDto.getEndDate())) {
-            throw new DataExitsException("Start date must be before end date");
-        }
-        if (offerDto.getDiscountPercentage() > 100 || offerDto.getDiscountPercentage() <= 0) {
-            throw new DataExitsException("Discount percentage must be less than or equal to 100 and greater than 0");
-        }
-
-        offer.setOfferType(offerDto.getOfferType().toUpperCase());
-        offer.setStartDate(offerDto.getStartDate());
-        offer.setEndDate(offerDto.getEndDate());
-        offer.setDiscountPercentage(offerDto.getDiscountPercentage());
-
-        offerRepository.save(offer);
-        return new ApiResponse("Offer updated successfully", HttpStatus.OK);
+        return new ApiResponse(String.join("; ", responseMessages), HttpStatus.OK);
     }
 
     @Override

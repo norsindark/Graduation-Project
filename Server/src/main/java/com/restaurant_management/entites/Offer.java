@@ -38,6 +38,9 @@ public class Offer {
     @Column(name = "end_date", nullable = false)
     private LocalDate endDate;
 
+    @Column(name = "available_quantity_offer")
+    private int availableQuantityOffer;
+
     @Column(name = "discount_percentage")
     private int discountPercentage;
 

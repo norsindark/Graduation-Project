@@ -7,7 +7,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.annotations.UuidGenerator;
 
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -53,9 +53,9 @@ public class Order {
 
     @Column(name = "created_at")
     @CreationTimestamp
-    private Timestamp createdAt;
+    private LocalDateTime createdAt;
 
     @Column(name = "updated_at")
     @UpdateTimestamp
-    private Timestamp updatedAt;
+    private LocalDateTime updatedAt;
 }

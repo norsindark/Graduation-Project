@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -18,7 +19,7 @@ public class OrderResponse {
     private String userEmail;
     private String orderStatus;
     private double totalPrice;
-    private String createdAt;
+    private LocalDateTime createdAt;
     private AddressResponse address;
     private List<OrderItemResponse> orderItems;
 
@@ -28,7 +29,7 @@ public class OrderResponse {
         this.userEmail = order.getUser().getEmail();
         this.orderStatus = order.getStatus();
         this.totalPrice = order.getTotalPrice();
-        this.createdAt = order.getCreatedAt().toString();
+        this.createdAt = order.getCreatedAt();
         this.address = AddressResponse.toAddress(address);
         this.orderItems = orderItems.stream().map(OrderItemResponse::new).toList();
     }
