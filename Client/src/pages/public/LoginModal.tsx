@@ -105,6 +105,21 @@ const LoginModal: React.FC<LoginModalProps> = ({ onClose, setActiveModal }) => {
                           type: 'email',
                           message: 'Please enter a valid email!',
                         },
+                        {
+                          pattern: /^[a-zA-Z0-9._%+-]+@gmail\.com$/,
+                          message:
+                            'Please use a valid Gmail address (example@gmail.com)!',
+                        },
+                        {
+                          validator: (_, value) => {
+                            if (value && value.split('@')[0].length < 2) {
+                              return Promise.reject(
+                                'Email username must be at least 2 characters!'
+                              );
+                            }
+                            return Promise.resolve();
+                          },
+                        },
                       ]}
                     >
                       <Input

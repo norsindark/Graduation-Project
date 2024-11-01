@@ -88,7 +88,7 @@ function Sidenav({ color }: { color: string }) {
             {' '}
             <BiSolidDashboard />
           </span>
-          <span className="label">Product Option</span>
+          <span className="label">Dish Option</span>
         </NavLink>
       ),
     },
@@ -103,7 +103,7 @@ function Sidenav({ color }: { color: string }) {
             {' '}
             <BiSolidDashboard />
           </span>
-          <span className="label">Product</span>
+          <span className="label">Dish</span>
         </NavLink>
       ),
     },

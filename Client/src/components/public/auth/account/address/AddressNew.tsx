@@ -86,9 +86,9 @@ const AddressNew: React.FC<AddressNewProps> = ({
       const response = await callAddAddress(
         street,
         country,
-        city,
-        addressType,
         state,
+        addressType,
+        city,
         commune,
         phoneNumber,
         userId
@@ -144,7 +144,7 @@ const AddressNew: React.FC<AddressNewProps> = ({
             <Form.Item
               label="Province/State"
               name="city"
-              rules={[{ required: true, message: 'Please input your City!' }]}
+              rules={[{ required: true, message: 'Please input your State!' }]}
             >
               <Select placeholder="Province/State" onChange={handleCityChange}>
                 {cities.map((city: any) => (
@@ -159,7 +159,7 @@ const AddressNew: React.FC<AddressNewProps> = ({
             <Form.Item
               label="City/Town"
               name="state"
-              rules={[{ required: true, message: 'Please input your State!' }]}
+              rules={[{ required: true, message: 'Please input your City!' }]}
             >
               <Select
                 placeholder="City/Town"

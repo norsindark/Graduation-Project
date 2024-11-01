@@ -1,9 +1,13 @@
 import { Button, Form, Radio, Select } from 'antd';
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../redux/store';
-import { callBulkAddress, callDeleteAddress } from '../../services/clientApi';
+import {
+  callBulkAddress,
+  callDeleteAddress,
+  callGeocoding,
+} from '../../services/clientApi';
 import { Input, notification, Pagination } from 'antd';
 import Loading from '../../components/Loading/Loading';
 import Account from '../../components/public/auth/account/Account';
@@ -22,6 +26,7 @@ interface Address {
   updatedAt: string | null;
   userId: string;
   commune: string;
+  district: string;
 }
 
 interface OrderSummary {
@@ -37,6 +42,13 @@ interface OrderSummary {
   } | null;
 }
 
+interface DeliveryResponse {
+  from: string;
+  to: string;
+  distance: string;
+  fee: string;
+}
+
 function CheckoutPage() {
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [total, setTotal] = useState(0);
@@ -48,6 +60,8 @@ function CheckoutPage() {
   );
   const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
   const [editingAddressId, setEditingAddressId] = useState<string | null>(null);
+  const [updatedOrderSummary, setUpdatedOrderSummary] =
+    useState<OrderSummary | null>(null);
 
   const userId = useSelector((state: RootState) => state.account.user?.id);
 
@@ -55,7 +69,7 @@ function CheckoutPage() {
   const orderSummary = location.state?.orderSummary as OrderSummary;
 
   const formatPrice = (price: number) => {
-    return price.toLocaleString('vi-VN');
+    return Math.round(price).toLocaleString('vi-VN');
   };
 
   const fetchAddresses = async () => {
@@ -84,6 +98,7 @@ function CheckoutPage() {
       }
     }
   };
+
   useEffect(() => {
     fetchAddresses();
   }, [userId, currentPage, pageSize]);
@@ -136,9 +151,44 @@ function CheckoutPage() {
     }
   };
 
-  const handleSelectAddress = (id: string) => {
-    setSelectedAddressId(id);
-    // Thêm logic khác nếu cần
+  const handleSelectAddress = async (id: string) => {
+    const address = addresses.find((address) => address.id === id);
+
+    if (!address) {
+      console.error('Address not found');
+      return;
+    }
+
+    const { street, commune, district, city, state, country } = address;
+    const addressString = [street, commune, district, city, state, country]
+      .filter(Boolean)
+      .join(', ');
+
+    try {
+      const response = await callGeocoding(addressString);
+      setSelectedAddressId(id);
+
+      const feeString = response.data.fee;
+      const feeAmount = Math.round(
+        parseFloat(feeString.replace(' VND', '').replace(',', ''))
+      );
+
+      const newOrderSummary = {
+        ...orderSummary,
+        delivery: feeAmount,
+        total: Math.round(
+          orderSummary.subtotal + feeAmount - (orderSummary.discount || 0)
+        ),
+      };
+      setUpdatedOrderSummary(newOrderSummary);
+    } catch (error) {
+      console.error('Error calling geocoding API', error);
+      notification.error({
+        message: 'Error calculating delivery fee',
+        description: 'Unable to calculate delivery fee. Please try again.',
+        duration: 5,
+      });
+    }
   };
 
   const handleCreateNewAddress = () => {
@@ -153,6 +203,27 @@ function CheckoutPage() {
 
   const handleAddressUpdate = () => {
     fetchAddresses(); // Refresh addresses when changes occur in AddressAccount
+  };
+
+  const navigate = useNavigate();
+
+  const handlePlaceOrder = () => {
+    if (!selectedAddressId) {
+      notification.warning({
+        message: 'Please select delivery address',
+        description: 'You need to select a delivery address before proceeding',
+        duration: 5,
+        showProgress: true,
+      });
+      return;
+    }
+
+    navigate('/payment', {
+      state: {
+        orderSummary: updatedOrderSummary || orderSummary,
+        selectedAddressId,
+      },
+    });
   };
 
   return (
@@ -324,19 +395,39 @@ function CheckoutPage() {
                 <h6>total cart</h6>
                 <p>
                   subtotal:{' '}
-                  <span>{formatPrice(orderSummary?.subtotal || 0)} VNĐ</span>
+                  <span>
+                    {formatPrice(
+                      (updatedOrderSummary || orderSummary)?.subtotal || 0
+                    )}{' '}
+                    VNĐ
+                  </span>
                 </p>
                 <p>
                   delivery:{' '}
-                  <span>{formatPrice(orderSummary?.delivery || 0)} VNĐ</span>
+                  <span>
+                    {formatPrice(
+                      (updatedOrderSummary || orderSummary)?.delivery || 0
+                    )}{' '}
+                    VNĐ
+                  </span>
                 </p>
                 <p>
                   discount:{' '}
-                  <span>{formatPrice(orderSummary?.discount || 0)} VNĐ</span>
+                  <span>
+                    {formatPrice(
+                      (updatedOrderSummary || orderSummary)?.discount || 0
+                    )}{' '}
+                    VNĐ
+                  </span>
                 </p>
                 <p className="total">
                   <span>total:</span>{' '}
-                  <span>{formatPrice(orderSummary?.total || 0)} VNĐ</span>
+                  <span>
+                    {formatPrice(
+                      (updatedOrderSummary || orderSummary)?.total || 0
+                    )}{' '}
+                    VNĐ
+                  </span>
                 </p>
 
                 <form>
@@ -356,7 +447,11 @@ function CheckoutPage() {
                     </>
                   )}
                 </form>
-                <a className="common_btn" href="#">
+                <a
+                  className="common_btn"
+                  onClick={handlePlaceOrder}
+                  style={{ cursor: 'pointer' }}
+                >
                   place order
                 </a>
               </div>

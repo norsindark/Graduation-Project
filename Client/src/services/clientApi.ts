@@ -182,3 +182,15 @@ export const callUpdateReview = async (reviewId: string, review: string, rating:
   return axios.put(`/api/v1/client/review/update-review`, { reviewId, review, rating, dishId, userId });
 };
 
+
+///
+export const callGeocoding = async (address: string) => {
+  return axios.get(`/api/v1/client/geocoding/coordinates?address=${address}`);
+};
+
+
+export const callCreateOrder = async (userId: string, addressId: string, couponId:string, paymentMethod: string, items: [{
+  dishId: string, quantity: number, dishOptionSelectionIds: [string]
+}], note: string, shippingFee: number, totalPrice: number) => {
+  return axios.post(`/api/v1/client/order/create-order`, { userId, addressId, couponId, paymentMethod, items, note, shippingFee, totalPrice });
+};

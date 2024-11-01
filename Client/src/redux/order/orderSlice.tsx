@@ -18,14 +18,24 @@ export interface CartItem {
   };
   isRadio?: boolean;
   isSize?: boolean;
+  availableQuantity: number;
 }
 
-interface OrderState {
+export interface OrderState {
   carts: CartItem[];
+  status: 'success' | 'error' | null;
+  error: string | null;
+}
+
+export interface AddToCartResponse {
+  status: 'success' | 'error';
+  error?: string;
 }
 
 const initialState: OrderState = {
   carts: [],
+  status: null,
+  error: null,
 };
 
 export const orderSlice = createSlice({
@@ -34,6 +44,20 @@ export const orderSlice = createSlice({
   reducers: {
     doAddProductAction: (state, action: PayloadAction<CartItem>) => {
       const item = action.payload;
+
+      const totalQuantity = state.carts.reduce((total, cartItem) => {
+        if (cartItem.dishId === item.dishId) {
+          return total + cartItem.quantity;
+        }
+        return total;
+      }, 0);
+
+      if (totalQuantity + item.quantity > item.availableQuantity) {
+        state.status = 'error';
+        state.error = `Total number of products in cart (${totalQuantity}) and the quantity you want to add (${item.quantity}) vượt quá số lượng có sẵn (${item.availableQuantity}).`;
+        return;
+      }
+
       const existingItemIndex = state.carts.findIndex(
         (c) =>
           c.dishId === item.dishId &&
@@ -46,6 +70,9 @@ export const orderSlice = createSlice({
       } else {
         state.carts.push(item);
       }
+
+      state.status = 'success';
+      state.error = null;
     },
 
     doRemoveProductAction: (
@@ -81,17 +108,35 @@ export const orderSlice = createSlice({
           JSON.stringify(item.selectedOptions) ===
             JSON.stringify(selectedOptions)
       );
+
       if (itemIndex !== -1) {
-        if (quantity > 0) {
-          state.carts[itemIndex].quantity = quantity;
+        const item = state.carts[itemIndex];
+        if (quantity <= item.availableQuantity) {
+          if (quantity > 0) {
+            state.carts[itemIndex].quantity = quantity;
+            state.status = 'success';
+            state.error = null;
+          } else {
+            state.carts.splice(itemIndex, 1);
+            state.status = 'success';
+            state.error = null;
+          }
         } else {
-          state.carts.splice(itemIndex, 1);
+          state.status = 'error';
+          state.error = `Cannot update quantity. The maximum available quantity is ${item.availableQuantity}`;
         }
       }
     },
 
     doClearCartAction: (state) => {
       state.carts = [];
+      state.status = null;
+      state.error = null;
+    },
+
+    resetStatus: (state) => {
+      state.status = null;
+      state.error = null;
     },
   },
 });
@@ -101,6 +146,7 @@ export const {
   doRemoveProductAction,
   doUpdateQuantityAction,
   doClearCartAction,
+  resetStatus,
 } = orderSlice.actions;
 
 export default orderSlice.reducer;
