@@ -76,6 +76,12 @@ public class User implements UserDetails {
     @ToString.Exclude
     private List<Order> orders;
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    @ToString.Exclude
+    private List<Wishlist> wishlists;
+
+
     @Column(name = "created_at")
     @CreationTimestamp
     private Timestamp createdAt;
