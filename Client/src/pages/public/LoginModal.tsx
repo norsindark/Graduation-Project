@@ -74,7 +74,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ onClose, setActiveModal }) => {
       width={modalWidth}
       centered
       closeIcon={
-        <div className="fp__menu_cart_header" > 
+        <div className="fp__menu_cart_header">
           <span className="close_cart-client" onClick={onClose}>
             <i className="fal fa-times"></i>
           </span>
@@ -83,8 +83,10 @@ const LoginModal: React.FC<LoginModalProps> = ({ onClose, setActiveModal }) => {
     >
       <section
         className="fp__signup" 
+        style={{ backgroundImage: 'url(images/login_bg.jpg)' }}
       >
-        <div className="fp__signup_overlay pt_5 xs_pt_5 pb_5 xs_pb_5 ">
+         <div className="fp__signup_overlay pt_45 xs_pt_45 pb_45 xs_pb_45">
+          <div className="container">
             <div className="row wow fadeInUp" data-wow-duration="1s">
               <div className="col-xxl-12 col-xl-12 col-md-12 col-lg-12 m-auto">
                 <div className="fp__login_area" >
@@ -183,6 +185,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ onClose, setActiveModal }) => {
                 </div>
               </div>
           </div>
+        </div>
         </div>
       </section>
     </Modal>

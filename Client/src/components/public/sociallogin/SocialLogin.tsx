@@ -9,12 +9,11 @@ const SocialLogin = () => {
   };
   return (
     <>
-    <div className="container px-0">
-      <ul className="row mx-0">
-      <li className="col-sm-6 mb-3 d-flex justify-content-center align-items-center">
-          <Link 
+   <ul>
+        <li>
+          <Link
             to={`${import.meta.env.VITE_BACKEND_URL}/oauth2/authorization/google`}
-            onClick={handleClick}
+            onClick={handleClick} 
           >
             {loading ? (
               <i className="fas fa-spinner fa-spin"></i>
@@ -23,13 +22,7 @@ const SocialLogin = () => {
             )}
           </Link>
         </li>
-        <li className="col-sm-6 mb-3 d-flex justify-content-center align-items-center">
-          <a href="#"  >
-            <i className="fab fa-facebook-f"></i>
-          </a>
-        </li>
       </ul>
-      </div>
     </>
     
   );
