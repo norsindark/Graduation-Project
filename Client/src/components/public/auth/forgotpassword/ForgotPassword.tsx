@@ -80,12 +80,13 @@ const ForgotPassword: React.FC<ForgotPasswordProps> = ({
         className="fp__signin"
         style={{ backgroundImage: 'url(images/login_bg.jpg)' }}
       >
-        <div className="fp__signup_overlay pt_5 xs_pt_5 pb_5 xs_pb_5">
+         <div className="fp__signup_overlay pt_45 xs_pt_45 pb_45 xs_pb_45">
+         <div className="container">
             <div className="row wow fadeInUp" data-wow-duration="1s">
               <div className="col-xxl-12 col-xl-12 col-md-12 col-lg-12 m-auto">
                 <div className="fp__login_area">
-                  <h2>Welcome back!</h2>
-                  <p className="text-lg">forgot password</p>
+                  <h2>Forgot password</h2>
+                  <p className="text-lg">Please enter your account email here</p>
                   <Form
                     layout="vertical"
                     onFinish={onFinish}
@@ -124,6 +125,7 @@ const ForgotPassword: React.FC<ForgotPasswordProps> = ({
                     <Link to="/register">Create Account</Link>
                   </p>
                 </div>
+              </div>
               </div>
             </div>
         </div>

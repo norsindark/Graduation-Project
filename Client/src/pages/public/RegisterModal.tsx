@@ -87,12 +87,14 @@ const RegisterModal: React.FC<RegisterModalProps> = ({
     >
       <section
         className="fp__signup"
-      >
-        <div className="fp__signup_overlay pt_2 xs_pt_2 pb_2 xs_pb_2 " >
+        style={{ backgroundImage: 'url(images/login_bg.jpg)' }}
+        >
+          <div className="fp__signup_overlay pt_45 xs_pt_45 pb_45 xs_pb_45">
+            <div className="container">
           <div className="row wow fadeInUp" data-wow-duration="1s">
             <div className="col-xxl-12 col-xl-12 col-md-12 col-lg-12 m-auto" >
-              <div className="fp__register_area">
-                <h2>Welcome back!</h2>
+              <div className="fp__login_area">
+                <h2>Welcome to!</h2>
                 <p className="text-lg">Sign up to continue</p>
                 <Form
                   layout="vertical"
@@ -221,6 +223,7 @@ const RegisterModal: React.FC<RegisterModalProps> = ({
                   </Link>
                 </p>
               </div>
+            </div>
             </div>
           </div>
         </div>

@@ -15,7 +15,7 @@ const useResponsiveModalWidth = (defaultWidth: number = 650) => {
       } else if (width >= 500 && width < 1000) {
         setModalWidth(480);
       } else {
-        setModalWidth(480);
+        setModalWidth(680);
       }
     };
 
