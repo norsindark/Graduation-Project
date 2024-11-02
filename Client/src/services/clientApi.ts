@@ -188,9 +188,56 @@ export const callGeocoding = async (address: string) => {
   return axios.get(`/api/v1/client/geocoding/coordinates?address=${address}`);
 };
 
+interface OrderItem {
+  dishId: string;
+  quantity: number;
+  dishOptionSelectionIds: string[];
+}
 
-export const callCreateOrder = async (userId: string, addressId: string, couponId:string, paymentMethod: string, items: [{
-  dishId: string, quantity: number, dishOptionSelectionIds: [string]
-}], note: string, shippingFee: number, totalPrice: number) => {
-  return axios.post(`/api/v1/client/order/create-order`, { userId, addressId, couponId, paymentMethod, items, note, shippingFee, totalPrice });
+export const callCreateOrder = async (
+  userId: string,
+  addressId: string,
+  couponId: string,
+  paymentMethod: string,
+  items: OrderItem[],
+  note: string,
+  shippingFee: number,
+) => {
+  return axios.post(`/api/v1/client/order/add-new-order`, {
+    userId,
+    addressId,
+    couponId,
+    paymentMethod,
+    items,
+    note,
+    shippingFee,
+  });
 };
+
+export const callGetAllOrder = async () => {
+  return axios.get(`/api/v1/client/order/get-all-orders`);
+};
+
+export const callCreatePaymentUrl = async (orderId: string) => {
+  return axios.get(`/api/v1/client/payment/create-payment-url?orderId=${orderId}`);
+};
+
+export const callProcessPayment = async (orderId: string) => {
+  try {
+    const paymentUrlResponse = await callCreatePaymentUrl(orderId);
+    if (paymentUrlResponse.status === 200 && paymentUrlResponse.data) {
+      window.location.href = paymentUrlResponse.data;
+    } else {
+      throw new Error('Failed to get payment URL');
+    }
+  } catch (error) {
+    console.error('Payment processing error:', error);
+    throw error;
+  }
+};
+
+export const callPaymentReturn = async (params: Map<string, string>) => { 
+  return axios.get(`api/v1/client/payment/return?`, {
+    params,
+  });
+}

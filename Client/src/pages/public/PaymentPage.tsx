@@ -3,11 +3,13 @@ import cod from '../../../public/images/cod.png';
 import vnpay from '../../../public/images/vnpay.png';
 import { Image } from 'antd';
 import { notification } from 'antd';
-import { callCreateOrder } from '../../services/clientApi';
-import { CartItem } from '../../redux/order/orderSlice';
+import { callCreateOrder, callProcessPayment } from '../../services/clientApi';
+import { doClearCartAction } from '../../redux/order/orderSlice';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../redux/store';
-
+import { useDispatch } from 'react-redux';
+import Loading from '../../components/Loading/Loading';
+import { useState } from 'react';
 // Add formatPrice function
 const formatPrice = (price: number) => {
   return Math.round(price).toLocaleString('vi-VN');
@@ -16,66 +18,78 @@ const formatPrice = (price: number) => {
 function PaymentPage() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { orderSummary, selectedAddressId, cartItems } = location.state || {};
-
+  const dispatch = useDispatch();
+  const { orderSummary, selectedAddressId } = location.state || {};
+  const cartItems = useSelector((state: RootState) => state.order.carts);
   const userId = useSelector((state: RootState) => state.account.user?.id);
-  console.log(orderSummary);
-
+  const [loading, setLoading] = useState(false);
   const handlePayment = async (paymentMethod: 'COD' | 'BANKING') => {
+    setLoading(true);
     try {
-      if (!userId || !selectedAddressId || !cartItems) {
+      if (!userId || !selectedAddressId || !cartItems?.length) {
         notification.error({
-          message: 'Payment Error',
+          message: 'Error',
           description: 'Missing order information',
         });
         return;
       }
 
-      const orderData = {
-        userId,
-        addressId: selectedAddressId,
-        couponId: orderSummary?.couponId || '',
-        paymentMethod,
-        items: cartItems.map((item: CartItem) => ({
+      const orderItems = cartItems.map((item) => {
+        const dishOptionSelectionIds = Object.values(item.selectedOptions || {})
+          .map((option) => option.optionSelectionId)
+          .filter((id) => id && id.trim() !== '');
+        return {
           dishId: item.dishId,
           quantity: item.quantity,
-          dishOptionSelectionIds: item.selectedOptions || [],
-        })),
-        note: '',
-        shippingFee: orderSummary?.delivery || 0,
-        totalPrice: orderSummary?.total || 0,
-      };
+          dishOptionSelectionIds,
+        };
+      });
 
       const response = await callCreateOrder(
-        orderData.userId,
-        orderData.addressId,
-        orderData.couponId,
-        orderData.paymentMethod,
-        orderData.items,
-        orderData.note,
-        orderData.shippingFee,
-        orderData.totalPrice
+        userId,
+        selectedAddressId,
+        orderSummary?.appliedCoupon?.couponId || null,
+        paymentMethod,
+        orderItems,
+        '',
+        orderSummary?.delivery || 0
       );
-
-      if (paymentMethod === 'BANKING') {
-        if (response.data?.paymentUrl) {
-          window.location.href = response.data.paymentUrl;
+      if (response.status === 200) {
+        if (paymentMethod === 'COD') {
+          notification.success({
+            message: 'Order success',
+            description: 'Thank you for your order',
+          });
+          navigate('/order-success', {
+            state: { orderId: response.data?.message },
+          });
+          dispatch(doClearCartAction());
+        } else if (paymentMethod === 'BANKING') {
+          await callProcessPayment(response.data?.message);
+        } else {
+          notification.success({
+            message: 'Order success',
+            description: 'Thank you for your order',
+          });
+          navigate('/order-success', {
+            state: { orderId: response.data?.message },
+          });
+          dispatch(doClearCartAction());
         }
       } else {
-        notification.success({
-          message: 'Order Placed Successfully',
-          description: 'Thank you for your order',
-        });
-        navigate('/order-success', {
-          state: { orderId: response.data?.orderId },
+        notification.error({
+          message: 'Payment error',
+          description: 'An error occurred during the payment process',
         });
       }
     } catch (error) {
       notification.error({
-        message: 'Payment Error',
-        description: 'An error occurred during payment processing',
+        message: 'Payment error',
+        description: 'An error occurred during the payment process',
       });
       console.error('Payment error:', error);
+    } finally {
+      setLoading(false);
     }
   };
 

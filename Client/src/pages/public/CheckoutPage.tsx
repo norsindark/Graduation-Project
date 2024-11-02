@@ -210,8 +210,8 @@ function CheckoutPage() {
   const handlePlaceOrder = () => {
     if (!selectedAddressId) {
       notification.warning({
-        message: 'Please select delivery address',
-        description: 'You need to select a delivery address before proceeding',
+        message: 'Vui lòng chọn địa chỉ giao hàng',
+        description: 'Bạn cần chọn địa chỉ giao hàng trước khi tiếp tục',
         duration: 5,
         showProgress: true,
       });
