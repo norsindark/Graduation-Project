@@ -24,4 +24,9 @@ public interface WarehouseService {
     PagedModel<EntityModel<WarehouseResponse>> getAllWarehouses(int pageNo, int pageSize, String sortBy, String sortDir) throws DataExitsException;
 
     ApiResponse deleteWarehouse(String id) throws DataExitsException;
+
+    PagedModel<EntityModel<WarehouseResponse>> getNearlyExpiredIngredients(
+            int daysUntilExpiry, int pageNo, int pageSize, String sortBy, String sortDir)
+            throws DataExitsException;
+    List<WarehouseResponse> getLowStockIngredients(double threshold) throws DataExitsException;
 }

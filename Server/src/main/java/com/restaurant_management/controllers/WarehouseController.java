@@ -66,4 +66,28 @@ public class WarehouseController {
     public ResponseEntity<ApiResponse> deleteWarehouse(@PathVariable String id) throws DataExitsException {
         return ResponseEntity.ok(warehouseService.deleteWarehouse(id));
     }
+
+    @GetMapping("/nearly-expired")
+    public ResponseEntity<PagedModel<EntityModel<WarehouseResponse>>> getNearlyExpiredIngredients(
+            @RequestParam(defaultValue = "7") int daysUntilExpiry,
+            @RequestParam(defaultValue = "0") int pageNo,
+            @RequestParam(defaultValue = "10") int pageSize,
+            @RequestParam(defaultValue = "expiredDate") String sortBy,
+            @RequestParam(defaultValue = "asc") String sortDir)
+            throws DataExitsException {
+
+        PagedModel<EntityModel<WarehouseResponse>> response = warehouseService.getNearlyExpiredIngredients(
+                daysUntilExpiry, pageNo, pageSize, sortBy, sortDir);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/low-stock")
+    public ResponseEntity<List<WarehouseResponse>> getLowStockIngredients(
+            @RequestParam double threshold) throws DataExitsException {
+
+        List<WarehouseResponse> response = warehouseService.getLowStockIngredients(threshold);
+
+        return ResponseEntity.ok(response);
+    }
 }

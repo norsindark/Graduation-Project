@@ -30,7 +30,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -108,13 +110,13 @@ public class WarehouseServiceImpl implements WarehouseService {
             }
             return new ApiResponse(successCount + " ingredient imported successfully", HttpStatus.CREATED);
         } catch (IOException e) {
-            return new ApiResponse("Failed to import warehouses: ", ApiUtil.createErrorDetails(e.getMessage()) , HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ApiResponse("Failed to import warehouses: ", ApiUtil.createErrorDetails(e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
 
     @Override
-    public ApiResponse updateWarehouse( WarehouseRequest request) throws DataExitsException {
+    public ApiResponse updateWarehouse(WarehouseRequest request) throws DataExitsException {
         Optional<Warehouse> warehouseOpt = warehouseRepository.findById(request.getWarehouseId());
         if (warehouseOpt.isEmpty()) {
             throw new DataExitsException("Warehouse not found!");
@@ -158,7 +160,7 @@ public class WarehouseServiceImpl implements WarehouseService {
     public PagedModel<EntityModel<WarehouseResponse>> getAllWarehouses(int pageNo, int pageSize, String sortBy, String sortDir) throws DataExitsException {
         Pageable paging = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.fromString(sortDir), sortBy));
         Page<Warehouse> pageResult = warehouseRepository.findAll(paging);
-        if(pageResult.hasContent()){
+        if (pageResult.hasContent()) {
             return pagedResourcesAssembler.toModel(pageResult.map(WarehouseResponse::new));
         } else {
             throw new DataExitsException("No ingredient found!");
@@ -173,5 +175,35 @@ public class WarehouseServiceImpl implements WarehouseService {
         }
         warehouseRepository.deleteById(id);
         return new ApiResponse("ingredient deleted successfully", HttpStatus.OK);
+    }
+
+    @Override
+    public PagedModel<EntityModel<WarehouseResponse>> getNearlyExpiredIngredients(
+            int daysUntilExpiry, int pageNo, int pageSize, String sortBy, String sortDir) throws DataExitsException {
+
+        Timestamp upcomingDate = Timestamp.from(Instant.now().plus(daysUntilExpiry, ChronoUnit.DAYS));
+
+        Pageable paging = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.fromString(sortDir), sortBy));
+
+        Page<Warehouse> nearlyExpiredIngredientsPage = warehouseRepository.findNearlyExpiredIngredients(upcomingDate, paging);
+
+        if (nearlyExpiredIngredientsPage.isEmpty()) {
+            throw new DataExitsException("No nearly expired ingredients found within " + daysUntilExpiry + " days!");
+        }
+
+        return pagedResourcesAssembler.toModel(nearlyExpiredIngredientsPage.map(WarehouseResponse::new));
+    }
+
+    @Override
+    public List<WarehouseResponse> getLowStockIngredients(double threshold) throws DataExitsException {
+        List<Warehouse> lowStockIngredients = warehouseRepository.findLowStockIngredients(threshold);
+
+        if (lowStockIngredients.isEmpty()) {
+            throw new DataExitsException("No low stock ingredients found below threshold: " + threshold);
+        }
+
+        return lowStockIngredients.stream()
+                .map(WarehouseResponse::new)
+                .toList();
     }
 }
