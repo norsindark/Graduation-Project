@@ -66,15 +66,6 @@ function PaymentPage() {
           dispatch(doClearCartAction());
         } else if (paymentMethod === 'BANKING') {
           await callProcessPayment(response.data?.message);
-        } else {
-          notification.success({
-            message: 'Order success',
-            description: 'Thank you for your order',
-          });
-          navigate('/order-success', {
-            state: { orderId: response.data?.message },
-          });
-          dispatch(doClearCartAction());
         }
       } else {
         notification.error({
