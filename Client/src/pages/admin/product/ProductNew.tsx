@@ -146,13 +146,19 @@ const ProductNew: React.FC<ProductNewProps> = ({
       formData.append(`recipes[${index}].unit`, recipe.unit);
     });
 
-    optionSelections.forEach((option, index) => {
-      formData.append(`optionSelections[${index}].optionId`, option.optionId);
-      formData.append(
-        `optionSelections[${index}].additionalPrice`,
-        option.additionalPrice.toString()
-      );
-    });
+    if (
+      optionSelections &&
+      Array.isArray(optionSelections) &&
+      optionSelections.length > 0
+    ) {
+      optionSelections.forEach((option, index) => {
+        formData.append(`optionSelections[${index}].optionId`, option.optionId);
+        formData.append(
+          `optionSelections[${index}].additionalPrice`,
+          option.additionalPrice.toString()
+        );
+      });
+    }
 
     try {
       const response = await callAddNewDish(formData);

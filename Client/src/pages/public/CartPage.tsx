@@ -76,7 +76,7 @@ const CartPage: React.FC = () => {
       console.error('Error fetching categories:', error);
     }
   };
-
+  console.log('cartItems', cartItems);
   const handleRemoveItem = (
     dishId: string,
     selectedOptions: CartItem['selectedOptions']

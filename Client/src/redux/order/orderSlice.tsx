@@ -3,6 +3,7 @@ import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 export interface SelectedOption {
   name: string;
   price: number;
+  optionSelectionId: string;
 }
 
 export interface CartItem {
@@ -14,10 +15,12 @@ export interface CartItem {
     thumbImage: string;
   };
   selectedOptions: {
-    [key: string]: SelectedOption | string;
+    [groupId: string]: {
+      optionSelectionId: string;
+      name: string;
+      price: number;
+    };
   };
-  isRadio?: boolean;
-  isSize?: boolean;
   availableQuantity: number;
 }
 
@@ -54,7 +57,7 @@ export const orderSlice = createSlice({
 
       if (totalQuantity + item.quantity > item.availableQuantity) {
         state.status = 'error';
-        state.error = `Total number of products in cart (${totalQuantity}) and the quantity you want to add (${item.quantity}) vượt quá số lượng có sẵn (${item.availableQuantity}).`;
+        state.error = `Total number of products in cart (${totalQuantity}) and the quantity you want to add (${item.quantity}) exceed the available quantity (${item.availableQuantity}).`;
         return;
       }
 

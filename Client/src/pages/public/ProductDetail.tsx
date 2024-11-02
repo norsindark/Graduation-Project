@@ -11,6 +11,7 @@ import { notification } from 'antd';
 // Dữ liệu giả cho hình ảnh
 import FullPageLoading from '../../components/Loading/FullPageLoading';
 import { RootState } from '../../redux/store';
+import { CartItem } from '../../redux/order/orderSlice';
 interface imageOption {
   imageId: string;
   imageUrl: string;
@@ -49,7 +50,7 @@ const ProductDetail: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [currentQuantity, setCurrentQuantity] = useState(1);
   const [selectedOptions, setSelectedOptions] = useState<{
-    [key: string]: { name: string; price: number }[];
+    [key: string]: { name: string; price: number; optionSelectionId: string }[];
   }>({});
   const dispatch = useDispatch();
   const orderState = useSelector((state: RootState) => state.order);
@@ -90,6 +91,7 @@ const ProductDetail: React.FC = () => {
         );
         if (matchingDish) {
           const detailResponse = await callGetDishDetail(matchingDish.dishId);
+          console.log('detailResponse', detailResponse.data);
           setDishDetail(detailResponse.data);
         } else {
           console.error('Dish not found');
@@ -186,14 +188,15 @@ const ProductDetail: React.FC = () => {
     optionName: string,
     additionalPrice: number,
     isChecked: boolean,
+    optionSelectionId: string,
     isRadio?: boolean
   ) => {
     if (dishDetail) {
       const totalQuantityInCart = getTotalQuantityInCart(dishDetail.dishId);
       if (totalQuantityInCart >= dishDetail.availableQuantity) {
         notification.error({
-          message: 'Không thể thay đổi tùy chọn',
-          description: `Bạn đã có tổng ${totalQuantityInCart} sản phẩm trong giỏ hàng. Không thể thêm sản phẩm mới vì đã đạt số lượng tối đa (${dishDetail.availableQuantity}).`,
+          message: 'Cannot change option',
+          description: `You have ${totalQuantityInCart} products in your cart. Cannot add more products because it exceeds the available quantity (${dishDetail.availableQuantity}).`,
           showProgress: true,
           duration: 3,
         });
@@ -205,20 +208,30 @@ const ProductDetail: React.FC = () => {
       const newOptions = { ...prev };
 
       if (isRadio) {
-        newOptions[groupId] = [{ name: optionName, price: additionalPrice }];
+        newOptions[groupId] = [
+          {
+            name: optionName,
+            price: additionalPrice,
+            optionSelectionId: optionSelectionId,
+          },
+        ];
       } else {
         const currentOptions = newOptions[groupId] || [];
 
         if (isChecked) {
           const updatedOptions = [
             ...currentOptions,
-            { name: optionName, price: additionalPrice },
+            {
+              name: optionName,
+              price: additionalPrice,
+              optionSelectionId: optionSelectionId,
+            },
           ].sort((a, b) => a.name.localeCompare(b.name));
 
           newOptions[groupId] = updatedOptions;
         } else {
           newOptions[groupId] = currentOptions.filter(
-            (option) => option.name !== optionName
+            (option) => option.optionSelectionId !== optionSelectionId
           );
 
           if (newOptions[groupId].length === 0) {
@@ -235,8 +248,8 @@ const ProductDetail: React.FC = () => {
         );
         if (existingQuantity >= dishDetail.availableQuantity) {
           notification.warning({
-            message: 'Cảnh báo',
-            description: `Bạn đã có ${existingQuantity} sản phẩm với tùy chọn này trong giỏ hàng. Không thể thêm số lượng nữa.`,
+            message: 'Warning',
+            description: `You already have ${existingQuantity} products with this option in your cart. Cannot add more products.`,
             showProgress: true,
             duration: 3,
           });
@@ -298,6 +311,19 @@ const ProductDetail: React.FC = () => {
         return;
       }
 
+      const formattedOptions = Object.entries(selectedOptions).reduce(
+        (acc, [groupId, options]) => {
+          const option = options[0];
+          acc[groupId] = {
+            optionSelectionId: option.optionSelectionId,
+            name: option.name,
+            price: option.price,
+          };
+          return acc;
+        },
+        {} as CartItem['selectedOptions']
+      );
+
       const cartItem = {
         quantity: currentQuantity,
         dishId: dishDetail.dishId,
@@ -307,7 +333,7 @@ const ProductDetail: React.FC = () => {
           thumbImage: dishDetail.thumbImage,
         },
         availableQuantity: dishDetail.availableQuantity,
-        selectedOptions: formatSelectedOptions(selectedOptions),
+        selectedOptions: formattedOptions,
       };
 
       dispatch(doAddProductAction(cartItem));
@@ -446,6 +472,7 @@ const ProductDetail: React.FC = () => {
                               option.optionName,
                               Number(option.additionalPrice),
                               e.target.checked,
+                              option.optionSelectionId,
                               optionGroup.optionGroupName.toLowerCase() ===
                                 'size'
                             )

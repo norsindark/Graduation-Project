@@ -8,7 +8,6 @@ import {
   SelectedOption,
   doUpdateQuantityAction,
 } from '../../../redux/order/orderSlice';
-import { notification } from 'antd';
 
 const Cart = ({
   showCart,
@@ -55,24 +54,6 @@ const Cart = ({
     return cartItems.reduce((total, item) => {
       return total + item.detail?.price * item.quantity;
     }, 0);
-  };
-
-  const handleUpdateQuantity = (
-    dishId: string,
-    selectedOptions: CartItem['selectedOptions'],
-    quantity: number,
-    availableQuantity: number
-  ) => {
-    if (quantity <= availableQuantity) {
-      dispatch(doUpdateQuantityAction({ dishId, selectedOptions, quantity }));
-    } else {
-      notification.error({
-        message: 'Cannot update quantity',
-        description: `The maximum available quantity is ${availableQuantity}`,
-        showProgress: true,
-        duration: 3,
-      });
-    }
   };
 
   return (
