@@ -96,7 +96,7 @@ public class OrderServiceImpl implements OrderService {
                 request.getPaymentMethod(), order.getStatus(),
                 request.getShippingFee());
 
-        return new ApiResponse("Order created successfully", HttpStatus.CREATED);
+        return new ApiResponse(order.getId(), HttpStatus.CREATED);
     }
 
     @Override
