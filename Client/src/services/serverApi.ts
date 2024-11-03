@@ -403,3 +403,12 @@ export const callAddNewLocation = async (street: string, commune: string, city: 
 export const callUpdateLocation = async (id: string, street: string, commune: string, city: string, state: string, country: string, feePerKm: number) => {
   return axios.put(`/api/v1/dashboards/locations/update-location`, { id, street, commune, city, state, country, feePerKm });
 };
+
+// nofitication
+export const callGetAllIngredientWhenLowStock = async (percentage : number) => {
+  return axios.get(`/api/v1/dashboard/warehouses/low-stock?percentage=${percentage}`);
+}
+
+export const callGetAllIngredientWhenNearlyExpired = async (query: any) => {
+  return axios.get(`/api/v1/dashboard/warehouses/nearly-expired?${query}`);
+}
