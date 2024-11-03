@@ -18,6 +18,9 @@ public interface WarehouseRepository extends JpaRepository<Warehouse, String> {
     @Query("SELECT w FROM Warehouse w WHERE w.expiredDate BETWEEN CURRENT_TIMESTAMP AND :upcomingDate")
     Page<Warehouse> findNearlyExpiredIngredients(@Param("upcomingDate") Timestamp upcomingDate, Pageable pageable);
 
+    @Query("SELECT w FROM Warehouse w WHERE w.expiredDate BETWEEN CURRENT_TIMESTAMP AND :upcomingDate OR w.expiredDate < CURRENT_TIMESTAMP")
+    Page<Warehouse> findExpiredAndNearlyExpiredIngredients(@Param("upcomingDate") Timestamp upcomingDate, Pageable pageable);
+
     @Query("SELECT w FROM Warehouse w WHERE w.availableQuantity < :threshold")
     List<Warehouse> findLowStockIngredients(@Param("threshold") double threshold);
 }

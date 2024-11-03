@@ -36,6 +36,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Component
@@ -185,25 +186,33 @@ public class WarehouseServiceImpl implements WarehouseService {
 
         Pageable paging = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.fromString(sortDir), sortBy));
 
-        Page<Warehouse> nearlyExpiredIngredientsPage = warehouseRepository.findNearlyExpiredIngredients(upcomingDate, paging);
+        Page<Warehouse> expiredAndNearlyExpiredIngredientsPage = warehouseRepository.findExpiredAndNearlyExpiredIngredients(upcomingDate, paging);
 
-        if (nearlyExpiredIngredientsPage.isEmpty()) {
-            throw new DataExitsException("No nearly expired ingredients found within " + daysUntilExpiry + " days!");
+        if (expiredAndNearlyExpiredIngredientsPage.isEmpty()) {
+            throw new DataExitsException("No ingredients found that are either nearly expired or expired!");
         }
 
-        return pagedResourcesAssembler.toModel(nearlyExpiredIngredientsPage.map(WarehouseResponse::new));
+        return pagedResourcesAssembler.toModel(expiredAndNearlyExpiredIngredientsPage.map(WarehouseResponse::new));
     }
 
-    @Override
-    public List<WarehouseResponse> getLowStockIngredients(double threshold) throws DataExitsException {
-        List<Warehouse> lowStockIngredients = warehouseRepository.findLowStockIngredients(threshold);
 
-        if (lowStockIngredients.isEmpty()) {
-            throw new DataExitsException("No low stock ingredients found below threshold: " + threshold);
+    @Override
+    public List<WarehouseResponse> getLowStockIngredients(double percentage) throws DataExitsException {
+        List<Warehouse> allIngredients = warehouseRepository.findAll();
+
+        if (allIngredients.isEmpty()) {
+            throw new DataExitsException("No ingredients found in the warehouse.");
         }
 
-        return lowStockIngredients.stream()
+        List<WarehouseResponse> lowStockIngredients = allIngredients.stream()
+                .filter(ingredient -> ingredient.getAvailableQuantity() < (percentage / 100) * ingredient.getImportedQuantity())
                 .map(WarehouseResponse::new)
-                .toList();
+                .collect(Collectors.toList());
+
+        if (lowStockIngredients.isEmpty()) {
+            throw new DataExitsException("No low stock ingredients found below " + percentage + "% of imported quantity.");
+        }
+
+        return lowStockIngredients;
     }
 }

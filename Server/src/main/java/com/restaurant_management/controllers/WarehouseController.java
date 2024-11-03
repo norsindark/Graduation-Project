@@ -84,9 +84,9 @@ public class WarehouseController {
 
     @GetMapping("/low-stock")
     public ResponseEntity<List<WarehouseResponse>> getLowStockIngredients(
-            @RequestParam double threshold) throws DataExitsException {
+            @RequestParam double percentage) throws DataExitsException {
 
-        List<WarehouseResponse> response = warehouseService.getLowStockIngredients(threshold);
+        List<WarehouseResponse> response = warehouseService.getLowStockIngredients(percentage);
 
         return ResponseEntity.ok(response);
     }
