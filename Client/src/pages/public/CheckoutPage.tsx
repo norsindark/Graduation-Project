@@ -1,4 +1,4 @@
-import { Button, Form, Radio, Select } from 'antd';
+import { Button, Form, Radio, Select, Popconfirm } from 'antd';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
@@ -47,6 +47,7 @@ interface DeliveryResponse {
   to: string;
   distance: string;
   fee: string;
+  duration: string;
 }
 
 function CheckoutPage() {
@@ -64,6 +65,10 @@ function CheckoutPage() {
     useState<OrderSummary | null>(null);
 
   const userId = useSelector((state: RootState) => state.account.user?.id);
+
+  const [deliveryInfo, setDeliveryInfo] = useState<DeliveryResponse | null>(
+    null
+  );
 
   const location = useLocation();
   const orderSummary = location.state?.orderSummary as OrderSummary;
@@ -167,7 +172,8 @@ function CheckoutPage() {
     try {
       const response = await callGeocoding(addressString);
       setSelectedAddressId(id);
-
+      const deliveryData: DeliveryResponse = response.data;
+      setDeliveryInfo(deliveryData);
       const feeString = response.data.fee;
       const feeAmount = Math.round(
         parseFloat(feeString.replace(' VND', '').replace(',', ''))
@@ -210,8 +216,8 @@ function CheckoutPage() {
   const handlePlaceOrder = () => {
     if (!selectedAddressId) {
       notification.warning({
-        message: 'Vui lòng chọn địa chỉ giao hàng',
-        description: 'Bạn cần chọn địa chỉ giao hàng trước khi tiếp tục',
+        message: 'Please select a delivery address',
+        description: 'You need to select a delivery address before proceeding',
         duration: 5,
         showProgress: true,
       });
@@ -344,15 +350,20 @@ function CheckoutPage() {
                             </div>
                             <ul>
                               <li>
-                                <a
-                                  className={`dash_check_icon ${selectedAddressId === address.id ? 'selected' : ''}`}
-                                  onClick={() =>
-                                    handleSelectAddress(address.id)
-                                  }
+                                <Popconfirm
+                                  title="Are you sure you want to select this address?"
+                                  onConfirm={() => handleSelectAddress(address.id)}
+                                  okText="Yes"
+                                  cancelText="No"
                                 >
-                                  <i className="far fa-check"></i>
-                                </a>
+                                  <a
+                                    className={`dash_check_icon ${selectedAddressId === address.id ? 'selected' : ''}`}
+                                  >
+                                    <i className="far fa-check"></i>
+                                  </a>
+                                </Popconfirm>
                               </li>
+
                               <li>
                                 <a
                                   className="dash_edit_btn"
@@ -403,6 +414,22 @@ function CheckoutPage() {
                   </span>
                 </p>
                 <p>
+                  distance:{' '}
+                  <span>
+                    {deliveryInfo?.distance || 'N/A'}
+                    {' '}
+                  </span>
+                </p>
+
+                <p>
+                  duration (about):{' '}
+                  <span>
+                    {deliveryInfo?.duration || 'N/A'}
+                    {' '}
+                  </span>
+                </p>
+
+                <p>
                   delivery:{' '}
                   <span>
                     {formatPrice(
@@ -429,6 +456,7 @@ function CheckoutPage() {
                     VNĐ
                   </span>
                 </p>
+
 
                 <form>
                   {orderSummary?.appliedCoupon && (

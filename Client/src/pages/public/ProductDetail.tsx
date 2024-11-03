@@ -91,7 +91,6 @@ const ProductDetail: React.FC = () => {
         );
         if (matchingDish) {
           const detailResponse = await callGetDishDetail(matchingDish.dishId);
-          console.log('detailResponse', detailResponse.data);
           setDishDetail(detailResponse.data);
         } else {
           console.error('Dish not found');
