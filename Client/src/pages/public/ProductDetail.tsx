@@ -1,57 +1,248 @@
-import React, { useState, useEffect } from 'react';
-import { NavLink } from 'react-router-dom';
+import React, { useState, useEffect, useMemo } from 'react';
+import { NavLink, useParams, useNavigate } from 'react-router-dom';
 import ReLatedItem from '../../components/public/productdetal/ReLatedItem';
 import TabsDescriptionAndReview from '../../components/public/productdetal/TabsDescriptionAndReview';
-
+import ImageGallery from 'react-image-gallery';
+import 'react-image-gallery/styles/css/image-gallery.css';
+import { callGetAllDishes, callGetDishDetail } from '../../services/clientApi';
+import { useDispatch } from 'react-redux';
+import { doAddProductAction } from '../../redux/order/orderSlice';
+import { notification } from 'antd';
 // Dữ liệu giả cho hình ảnh
-const images = [
-  {
-    id: 1,
-    src: '../../../public/images/menu1.png',
-  },
-  {
-    id: 2,
-    src: '../../../public/images/menu2.png',
-  },
-  {
-    id: 3,
-    src: '../../../public/images/menu3.png',
-  },
-  {
-    id: 4,
-    src: '../../../public/images/menu4.png',
-  },
-];
+import FullPageLoading from '../../components/Loading/FullPageLoading';
+interface imageOption {
+  imageId: string;
+  imageUrl: string;
+}
 
-const product = {
-  name: 'Maxican Pizza Test Better',
-  rating: 4.5,
-  reviewsCount: 201,
-  price: 320.0,
-  originalPrice: 350.0,
-  description: `Pizza is a savory dish of Italian origin consisting of a usually round, flattened base of leavened wheat-based dough topped with tomatoes, cheese, and often various other ingredients, which is then baked at a high temperature, traditionally in a wood-fired oven. A small pizza is sometimes called a pizzetta.`,
-};
+interface DishDetail {
+  categoryId: string;
+  categoryName: string;
+  description: string;
+  dishId: string;
+  dishName: string;
+  images: imageOption[];
+  listOptions: {
+    optionGroupId: string;
+    optionGroupName: string;
+    options: {
+      additionalPrice: string;
+      optionName: string;
+      optionSelectionId: string;
+    }[];
+  }[];
+  longDescription: string;
+  offerPrice: number;
+  price: number;
+  status: string;
+  thumbImage: string;
+  rating: number;
+  slug: string;
+  quantity: number;
+}
 
 const ProductDetail: React.FC = () => {
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const { slug } = useParams();
+  const navigate = useNavigate();
+  const [dishDetail, setDishDetail] = useState<DishDetail | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [currentQuantity, setCurrentQuantity] = useState(1);
+  const [selectedOptions, setSelectedOptions] = useState<{
+    [key: string]: { name: string; price: number }[];
+  }>({});
+  const dispatch = useDispatch();
 
-  const handlePrev = () => {
-    setCurrentIndex((prevIndex) =>
-      prevIndex === 0 ? images.length - 1 : prevIndex - 1
-    );
+  useEffect(() => {
+    const fetchDishDetail = async () => {
+      setLoading(true);
+      try {
+        const allDishesResponse = await callGetAllDishes('');
+        const allDishes = allDishesResponse.data._embedded?.dishResponseList;
+
+        const matchingDish = allDishes.find(
+          (dish: DishDetail) => dish.slug === slug
+        );
+        if (matchingDish) {
+          const detailResponse = await callGetDishDetail(matchingDish.dishId);
+          setDishDetail(detailResponse.data);
+        } else {
+          console.error('Dish not found');
+          notification.error({
+            message: 'Dish not found',
+            description: 'The requested dish could not be found.',
+            showProgress: true,
+            duration: 3,
+          });
+          navigate('/menu');
+        }
+      } catch (error) {
+        console.error('Error fetching dish detail:', error);
+        notification.error({
+          message: 'Error loading dish details',
+          description: 'Please try again later.',
+          showProgress: true,
+          duration: 3,
+        });
+        navigate('/menu');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDishDetail();
+  }, [slug, navigate]);
+
+  const handleChangeButton = (type: string) => {
+    if (type === 'MINUS') {
+      if (currentQuantity > 1) {
+        setCurrentQuantity(currentQuantity - 1);
+      }
+    }
+    if (type === 'PLUS') {
+      if (dishDetail?.quantity && currentQuantity < dishDetail.quantity) {
+        setCurrentQuantity(currentQuantity + 1);
+      }
+    }
   };
 
-  const handleNext = () => {
-    setCurrentIndex((prevIndex) =>
-      prevIndex === images.length - 1 ? 0 : prevIndex + 1
-    );
+  const handleOptionChange = (
+    groupId: string,
+    optionName: string,
+    additionalPrice: number,
+    isChecked: boolean,
+    isRadio?: boolean
+  ) => {
+    setSelectedOptions((prev) => {
+      const newOptions = { ...prev };
+
+      if (isRadio) {
+        newOptions[groupId] = [{ name: optionName, price: additionalPrice }];
+      } else {
+        const currentOptions = newOptions[groupId] || [];
+
+        if (isChecked) {
+          newOptions[groupId] = [
+            ...currentOptions,
+            { name: optionName, price: additionalPrice },
+          ];
+        } else {
+          newOptions[groupId] = currentOptions.filter(
+            (option) => option.name !== optionName
+          );
+
+          if (newOptions[groupId].length === 0) {
+            delete newOptions[groupId];
+          }
+        }
+      }
+
+      return newOptions;
+    });
   };
+
+  const calculateTotalPrice = () => {
+    const basePrice = dishDetail?.offerPrice ?? 0;
+
+    const optionsPrice = Object.values(selectedOptions).reduce(
+      (total, optionGroup) =>
+        total +
+        optionGroup.reduce(
+          (groupTotal, option) => groupTotal + option.price,
+          0
+        ),
+      0
+    );
+
+    return (basePrice + optionsPrice) * currentQuantity;
+  };
+
+  const handleAddToCart = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    if (dishDetail) {
+      const radioGroups = sortedOptions.filter(
+        (group) => group.optionGroupName.toLowerCase() === 'size'
+      );
+
+      const isRadioSelected = radioGroups.every(
+        (group) =>
+          selectedOptions[group.optionGroupId] &&
+          selectedOptions[group.optionGroupId].length > 0
+      );
+
+      if (!isRadioSelected) {
+        notification.error({
+          message: 'Please select size before adding to cart!',
+          showProgress: true,
+          duration: 3,
+        });
+        return;
+      }
+
+      const cartItem = {
+        quantity: currentQuantity,
+        dishId: dishDetail.dishId,
+        detail: {
+          dishName: dishDetail.dishName,
+          price: calculateTotalPrice(),
+          thumbImage: dishDetail.thumbImage,
+        },
+        selectedOptions: Object.entries(selectedOptions).reduce(
+          (acc, [key, value]) => {
+            if (value.length > 0) {
+              const formattedOptions = value.map(
+                (option) =>
+                  `${option.name} (+ ${option.price.toLocaleString('vi-VN')} VNĐ)`
+              );
+              acc[key] = formattedOptions.join(', ');
+            }
+            return acc;
+          },
+          {} as { [key: string]: string }
+        ),
+      };
+      dispatch(doAddProductAction(cartItem));
+      notification.success({
+        message: 'Add to cart successfully!!!',
+        showProgress: true,
+        duration: 3,
+      });
+    }
+  };
+
+  const sortedOptions = useMemo(() => {
+    const options = dishDetail?.listOptions || [];
+    return [...options].sort((a, b) => {
+      if (a.optionGroupName.toLowerCase() === 'size') return -1;
+      if (b.optionGroupName.toLowerCase() === 'size') return 1;
+      return 0;
+    });
+  }, [dishDetail?.listOptions]);
+
+  if (loading) {
+    return <FullPageLoading />;
+  }
+
+  if (!dishDetail) {
+    return null;
+  }
+
+  const images = [
+    {
+      id: 'thumb',
+      original: dishDetail.thumbImage,
+    },
+    ...dishDetail.images.map((image) => ({
+      id: image.imageId,
+      original: image.imageUrl,
+      thumbnail: image.imageUrl,
+    })),
+  ];
 
   return (
     <>
       <section
         className="fp__breadcrumb"
-        style={{ background: 'url(images/counter_bg.jpg)' }}
+        style={{ background: 'url(../../../public/images/counter_bg.jpg)' }}
       >
         <div className="fp__breadcrumb_overlay">
           <div className="container">
@@ -85,135 +276,121 @@ const ProductDetail: React.FC = () => {
               className="col-lg-5 col-md-9 wow fadeInUp"
               data-wow-duration="1s"
             >
-              <div className="exzoom " id="exzoom">
-                <div className="exzoom_img_box fp__menu_details_images">
-                  <ul className="exzoom_img_ul">
-                    {images.map((image, index) => (
-                      <li
-                        key={index}
-                        className={index === currentIndex ? 'active' : ''}
-                      >
-                        <img
-                          className="zoom img-fluid w-100"
-                          src={image.src}
-                          alt="product"
-                        />
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                <div className="exzoom_nav"></div>
-                <p className="exzoom_btn">
-                  <a
-                    href="#"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      handlePrev();
-                    }}
-                    className="exzoom_prev_btn"
-                  >
-                    <i className="far fa-chevron-left"></i>
-                  </a>
-                  <a
-                    href="#"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      handleNext();
-                    }}
-                    className="exzoom_next_btn"
-                  >
-                    <i className="far fa-chevron-right"></i>
-                  </a>
-                </p>
-              </div>
+              <ImageGallery
+                items={images || []}
+                showBullets={true}
+                showThumbnails={true}
+                autoPlay={true}
+                infinite={true}
+                slideDuration={500}
+                showNav={false}
+                thumbnailPosition="bottom"
+                additionalClass="uniform-gallery"
+              />
             </div>
             <div className="col-lg-7 wow fadeInUp" data-wow-duration="1s">
               <div className="fp__menu_details_text">
-                <h2>{product.name}</h2>
+                <h2>{dishDetail?.dishName}</h2>
                 <p className="rating">
                   {Array.from({ length: 5 }, (_, index) => (
                     <i
                       key={index}
                       className={`${
-                        index < Math.floor(product.rating)
+                        index < Math.floor(dishDetail?.rating || 0)
                           ? 'fas fa-star'
-                          : index < product.rating
+                          : index < (dishDetail?.rating || 0)
                             ? 'fas fa-star-half-alt'
                             : 'far fa-star'
                       }`}
                     ></i>
                   ))}
-                  <span>({product.reviewsCount})</span>
+                  <span>({dishDetail?.rating})</span>
                 </p>
                 <h3 className="price">
-                  ${product.price.toFixed(2)}{' '}
-                  <del>${product.originalPrice.toFixed(2)}</del>
+                  {dishDetail?.offerPrice.toLocaleString('vi-VN')} VNĐ
+                  <del>{dishDetail?.price.toLocaleString('vi-VN')} VNĐ</del>
                 </h3>
-                <p className="short_description">{product.description}</p>
+                <p className="short_description">{dishDetail?.description}</p>
 
-                <div className="details_size">
-                  <h5>select size</h5>
-                  {['large', 'medium', 'small'].map((size, index) => (
-                    <div className="form-check" key={index}>
-                      <input
-                        className="form-check-input"
-                        type="radio"
-                        name="flexRadioDefault"
-                        id={size}
-                        defaultChecked={size === 'large'}
-                      />
-                      <label className="form-check-label" htmlFor={size}>
-                        {size}{' '}
-                        <span>
-                          + $
-                          {size === 'large'
-                            ? 350
-                            : size === 'medium'
-                              ? 250
-                              : 150}
-                        </span>
-                      </label>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="details_extra_item">
-                  <h5>
-                    select option <span>(optional)</span>
-                  </h5>
-                  {['coca-cola', '7up'].map((option, index) => (
-                    <div className="form-check" key={index}>
-                      <input
-                        className="form-check-input"
-                        type="checkbox"
-                        id={option}
-                      />
-                      <label className="form-check-label" htmlFor={option}>
-                        {option}{' '}
-                        <span>+ ${option === 'coca-cola' ? 10 : 15}</span>
-                      </label>
-                    </div>
-                  ))}
-                </div>
+                {sortedOptions.map((optionGroup, groupIndex) => (
+                  <div className="details_extra_item" key={groupIndex}>
+                    <h5>
+                      Select{' '}
+                      {optionGroup.optionGroupName.toLowerCase() === 'size'
+                        ? 'size'
+                        : optionGroup.optionGroupName}
+                      {optionGroup.optionGroupName.toLowerCase() !== 'size' && (
+                        <span> (optional)</span>
+                      )}
+                    </h5>
+                    {optionGroup.options.map((option, optionIndex) => (
+                      <div className="form-check" key={optionIndex}>
+                        <input
+                          className="form-check-input"
+                          type={
+                            optionGroup.optionGroupName.toLowerCase() === 'size'
+                              ? 'radio'
+                              : 'checkbox'
+                          }
+                          name={`optionGroup${groupIndex}`}
+                          id={`${optionGroup.optionGroupName}-${option.optionName}`}
+                          onChange={(e) =>
+                            handleOptionChange(
+                              optionGroup.optionGroupId,
+                              option.optionName,
+                              Number(option.additionalPrice),
+                              e.target.checked,
+                              optionGroup.optionGroupName.toLowerCase() ===
+                                'size'
+                            )
+                          }
+                        />
+                        <label
+                          className="form-check-label"
+                          htmlFor={`${optionGroup.optionGroupName}-${option.optionName}`}
+                        >
+                          {option.optionName}{' '}
+                          <span>
+                            + {Number(option.additionalPrice).toLocaleString()}{' '}
+                            VNĐ
+                          </span>
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                ))}
 
                 <div className="details_quentity">
-                  <h5>select quentity</h5>
-                  <div className="quentity_btn_area d-flex flex-wrap align-items-center">
+                  <h5>select quantity</h5>
+                  <div className="quentity_btn_area flex-wrap align-items-center justify-start">
                     <div className="quentity_btn">
-                      <button className="btn btn-danger">
+                      <button
+                        className="btn btn-danger"
+                        onClick={() => handleChangeButton('MINUS')}
+                      >
                         <i className="fal fa-minus"></i>
                       </button>
-                      <input type="text" placeholder="1" />
-                      <button className="btn btn-success">
+                      <input type="text" value={currentQuantity} readOnly />
+                      <button
+                        className="btn btn-success"
+                        onClick={() => handleChangeButton('PLUS')}
+                      >
                         <i className="fal fa-plus"></i>
                       </button>
                     </div>
-                    <h3>${product.price.toFixed(2)}</h3>
+                    <h3 className="mt-4">
+                      {calculateTotalPrice().toLocaleString('vi-VN')} VNĐ
+                    </h3>
                   </div>
                 </div>
                 <ul className="details_button_area d-flex flex-wrap justify-content-start">
                   <li>
-                    <a className="common_btn" href="#">
+                    <a
+                      className="common_btn"
+                      href="#"
+                      onClick={handleAddToCart}
+                    >
+                      <i className="fas fa-shopping-basket mr-2"></i>
                       add to cart
                     </a>
                   </li>
@@ -226,7 +403,7 @@ const ProductDetail: React.FC = () => {
               </div>
             </div>
             <div className="col-12 wow fadeInUp" data-wow-duration="1s">
-              <TabsDescriptionAndReview />
+              <TabsDescriptionAndReview dishDetail={dishDetail} />
             </div>
           </div>
           <ReLatedItem />

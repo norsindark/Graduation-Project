@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, Descriptions, Image, Carousel, Table, Spin } from 'antd';
+import { Modal, Descriptions, Image, Carousel, Table, Spin, Tag } from 'antd';
 import { callGetDishById } from '../../../services/serverApi';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.bubble.css'; // Đảm bảo import CSS cho Quill
 
 interface DishDetailProps {
   dishId: string;
@@ -26,7 +28,7 @@ interface Option {
   additionalPrice: number;
 }
 
-interface listOptions {
+interface OptionGroup {
   optionGroupId: string;
   optionGroupName: string;
   options: Option[];
@@ -36,6 +38,7 @@ interface Dish {
   dishId: string;
   dishName: string;
   description: string;
+  longDescription: string;
   status: string;
   thumbImage: string;
   offerPrice: number;
@@ -44,7 +47,7 @@ interface Dish {
   categoryName: string;
   images: DishImage[];
   recipes: Recipe[];
-  listOptions: listOptions[];
+  listOptions: OptionGroup[];
 }
 
 const ProductDetail: React.FC<DishDetailProps> = ({
@@ -70,7 +73,6 @@ const ProductDetail: React.FC<DishDetailProps> = ({
       const response = await callGetDishById(dishId);
       if (response.status === 200) {
         setDish(response.data);
-        console.log(response.data);
       }
     } catch (error) {
       console.error('Error fetching dish details:', error);
@@ -78,7 +80,7 @@ const ProductDetail: React.FC<DishDetailProps> = ({
       setLoading(false);
     }
   };
-
+  console.log('dish', dish);
   const recipeColumns = [
     {
       title: 'Ingredient',
@@ -118,35 +120,83 @@ const ProductDetail: React.FC<DishDetailProps> = ({
       dataIndex: 'images',
       key: 'images',
       className: 'flex justify-center items-center ',
-      render: (dishImages: DishImage[]) => (
-        <div className="flex justify-center items-center flex-row gap-4">
-          {dishImages.map((image, index) => (
-            <Image key={index} src={image.imageUrl} width={100} height={100} />
-          ))}
-        </div>
-      ),
+      render: (dishImages: DishImage[]) =>
+        dishImages.length > 0 ? (
+          <div className="flex justify-center items-center flex-row gap-4">
+            {dishImages.map((image, index) => (
+              <Image
+                key={index}
+                src={image.imageUrl}
+                width={100}
+                height={100}
+              />
+            ))}
+          </div>
+        ) : (
+          <span className="text-center mt-8 bg-gray-200 p-2 rounded-md">
+            No image
+          </span>
+        ),
     },
     {
-      title: 'listOptions',
+      title: 'List Options',
       dataIndex: 'listOptions',
       key: 'listOptions',
-      render: (listOptions: listOptions) => (
-        <div className="flex justify-center items-center flex-row gap-2">
-          {listOptions.options.map((option: Option, index: number) => (
-            <div key={index}>
-              {option.optionName} - {option.additionalPrice}
+      render: (listOptions: OptionGroup[]) => (
+        <div className="flex flex-col gap-2">
+          {listOptions.map((group, groupIndex) => (
+            <div key={group.optionGroupId}>
+              <strong className="text-base">{group.optionGroupName}:</strong>
+              <div className="ml-4 ">
+                {group.options.map((option, optionIndex) => (
+                  <div key={option.optionSelectionId}>
+                    <Tag color="blue">
+                      {option.optionName} :{' '}
+                      {option.additionalPrice.toLocaleString()} đ
+                    </Tag>
+                  </div>
+                ))}
+              </div>
             </div>
           ))}
         </div>
       ),
     },
   ];
+
+  const renderLongDescriptionColumn = [
+    {
+      title: 'Description',
+      dataIndex: 'description',
+      key: 'description',
+      render: (description: string) => (
+        <div style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+          {description}
+        </div>
+      ),
+    },
+    {
+      title: 'Long Description',
+      dataIndex: 'longDescription',
+      key: 'longDescription',
+      render: (longDescription: string) => (
+        <ReactQuill
+          value={longDescription}
+          readOnly={true}
+          theme="bubble"
+          modules={{ toolbar: false }}
+          style={{ maxHeight: '300px', overflowY: 'auto' }}
+        />
+      ),
+    },
+  ];
+
   return (
     <Modal
       title="Dish Detail"
       open={visible}
       onCancel={onClose}
-      width={1000}
+      width={1200}
       footer={null}
       centered
     >
@@ -169,9 +219,35 @@ const ProductDetail: React.FC<DishDetailProps> = ({
               bordered
             />
           ) : (
-            <p>No image.</p>
+            <Table
+              dataSource={[dish]}
+              columns={descriptionColumns}
+              rowKey="dishId"
+              pagination={false}
+              rowClassName={(record, index) =>
+                index % 2 === 0 ? 'table-row-light' : 'table-row-dark'
+              }
+              bordered
+            />
           )}
-          <h4 className="text-center text-xl font-semibold mb-4">Recipe</h4>
+          <h4 className="text-center text-xl font-semibold mb-4 mt-2">
+            Description
+          </h4>
+          {dish.description && (
+            <Table
+              dataSource={[dish]}
+              columns={renderLongDescriptionColumn}
+              rowKey="dishId"
+              pagination={false}
+              rowClassName={(record, index) =>
+                index % 2 === 0 ? 'table-row-light' : 'table-row-dark'
+              }
+              bordered
+            />
+          )}
+          <h4 className="text-center text-xl font-semibold mb-4 mt-2">
+            Recipe
+          </h4>
           {dish.recipes.length > 0 ? (
             <Table
               dataSource={dish.recipes}

@@ -132,6 +132,8 @@ const Warehouse: React.FC = () => {
       title: 'Imported Price',
       dataIndex: 'importedPrice',
       key: 'importedPrice',
+      render: (importedPrice: number) =>
+        `${importedPrice.toLocaleString()} VND`,
       sorter: (a: WarehouseItem, b: WarehouseItem) =>
         a.importedPrice - b.importedPrice, // Add sorting functionality
     },

@@ -237,7 +237,7 @@ const ProductOption: React.FC = () => {
           <Popconfirm
             title={
               !record.children
-                ? 'Delete this sub group option product?'
+                ? 'Delete this option product?'
                 : 'Delete this group option product?'
             }
             onConfirm={() =>
@@ -252,7 +252,7 @@ const ProductOption: React.FC = () => {
               shape="round"
               icon={<DeleteOutlined />}
             >
-              {!record.children ? 'Delete Sub Group' : 'Delete'}
+              {!record.children ? 'Delete Option' : 'Delete'}
             </Button>
           </Popconfirm>
         </Space>

@@ -84,3 +84,35 @@
     width: auto;
   }
 }
+/* .fixed-size-gallery .image-gallery-slide img {
+  width: 500px;
+  height: 300px;
+  object-fit: cover;
+}
+
+.fixed-size-gallery .image-gallery-thumbnail img {
+  width: 100px;
+  height: 60px;
+  object-fit: cover;
+} */
+.uniform-gallery .image-gallery-slide {
+  height: 550px; /* Điều chỉnh chiều cao theo nhu cầu */
+}
+
+.uniform-gallery .image-gallery-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background-color: #f0f0f0;
+}
+
+.uniform-gallery .image-gallery-thumbnail {
+  width: 100px; /* Điều chỉnh chiều rộng thumbnail */
+  height: 100px; /* Điều chỉnh chiều cao thumbnail */
+}
+
+.uniform-gallery .image-gallery-thumbnail-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}

@@ -19,45 +19,8 @@ import { callDeleteDish, callGetAllDishes } from '../../../services/serverApi';
 import ProductNew from './ProductNew';
 import ProductEdit from './ProductEdit';
 import ProductDetail from './ProductDetail';
-interface DishImage {
-  imageId: string;
-  imageUrl: string;
-}
 
-interface Recipe {
-  warehouseId: string;
-  ingredientName: string;
-  quantityUsed: number;
-  unit: string;
-  recipeId: string;
-}
-
-interface Option {
-  optionSelectionId: string;
-  optionName: string;
-  additionalPrice: number;
-}
-
-interface OptionGroup {
-  optionGroupId: string;
-  optionGroupName: string;
-  options: Option[];
-}
-
-interface Dish {
-  dishId: string;
-  dishName: string;
-  description: string;
-  status: string;
-  thumbImage: string;
-  offerPrice: number;
-  price: number;
-  categoryId: string;
-  categoryName: string;
-  images: DishImage[];
-  recipes: Recipe[];
-  listOptions: OptionGroup[];
-}
+import { Dish } from './TypeProduct';
 
 const Product: React.FC = () => {
   const [dataSource, setDataSource] = useState<Dish[]>([]);
@@ -89,7 +52,6 @@ const Product: React.FC = () => {
         query += `&sortBy=dishName&order=asc`;
       }
       const response = await callGetAllDishes(query);
-      console.log('response', response);
       if (
         response.status === 200 &&
         response.data._embedded?.dishResponseList
@@ -119,6 +81,11 @@ const Product: React.FC = () => {
   const handleEditClick = (record: Dish) => {
     setCurrentDish(record);
     setShowProductEdit(true);
+  };
+
+  const handleEditSuccess = () => {
+    fetchDishes();
+    setShowProductEdit(false);
   };
 
   const handleDelete = async (id: string) => {
@@ -172,41 +139,41 @@ const Product: React.FC = () => {
 
   const columns = [
     {
-      title: 'Tên món',
+      title: 'Dish name',
       dataIndex: 'dishName',
       key: 'dishName',
       sorter: (a: Dish, b: Dish) => a.dishName.localeCompare(b.dishName),
     },
     {
-      title: 'Hình ảnh',
+      title: 'Thumbnail',
       dataIndex: 'thumbImage',
       key: 'thumbImage',
       render: (thumbImage: string) => <Image src={thumbImage} width={70} />,
     },
     {
-      title: 'Giá',
+      title: 'Original price',
       dataIndex: 'price',
       key: 'price',
-      render: (price: number) => `${price.toLocaleString()} VND`,
+      render: (price: number) => `${price.toLocaleString()} VNĐ`,
       sorter: (a: Dish, b: Dish) => a.price - b.price,
     },
     {
-      title: 'Giá khuyến mãi',
+      title: 'Offer price',
       dataIndex: 'offerPrice',
       key: 'offerPrice',
       render: (offerPrice: number) =>
-        offerPrice ? `${offerPrice.toLocaleString()} VND` : 'N/A',
+        offerPrice ? `${offerPrice.toLocaleString()} VNĐ` : 'N/A',
       sorter: (a: Dish, b: Dish) => a.offerPrice - b.offerPrice,
     },
     {
-      title: 'Danh mục',
+      title: 'Category',
       dataIndex: 'categoryName',
       key: 'categoryName',
       sorter: (a: Dish, b: Dish) =>
         a.categoryName.localeCompare(b.categoryName),
     },
     {
-      title: 'Trạng thái',
+      title: 'Status',
       dataIndex: 'status',
       key: 'status',
       render: (status: string) => (
@@ -214,7 +181,7 @@ const Product: React.FC = () => {
       ),
     },
     {
-      title: 'Thao tác',
+      title: 'Action',
       key: 'action',
       render: (_: any, record: Dish) => (
         <Space size="small">
@@ -224,7 +191,7 @@ const Product: React.FC = () => {
             shape="round"
             onClick={() => handleViewDetail(record)}
           >
-            Xem
+            View
           </Button>
           <Button
             type="primary"
@@ -232,13 +199,13 @@ const Product: React.FC = () => {
             shape="round"
             onClick={() => handleEditClick(record)}
           >
-            Sửa
+            Edit
           </Button>
           <Popconfirm
-            title="Bạn có chắc chắn muốn xóa món ăn này?"
+            title="Are you sure you want to delete this dish?"
             onConfirm={() => handleDelete(record.dishId)}
-            okText="Có"
-            cancelText="Không"
+            okText="Yes"
+            cancelText="No"
           >
             <Button
               type="primary"
@@ -246,7 +213,7 @@ const Product: React.FC = () => {
               icon={<DeleteOutlined />}
               shape="round"
             >
-              Xóa
+              Delete
             </Button>
           </Popconfirm>
         </Space>
@@ -280,7 +247,7 @@ const Product: React.FC = () => {
         ) : showProductEdit && currentDish ? (
           <ProductEdit
             currentDish={currentDish}
-            onEditSuccess={() => fetchDishes()}
+            onEditSuccess={handleEditSuccess}
             setShowProductEdit={setShowProductEdit}
           />
         ) : isDishDetailVisible && selectedDishId ? (

@@ -1,5 +1,5 @@
 import { Form, Modal, Input, Button, Checkbox, notification } from 'antd';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useState } from 'react';
 import { callLogin, callProfile } from '../../services/clientApi';
 import useResponsiveModalWidth from '../../hooks/useResponsiveModalWidth';
@@ -7,16 +7,15 @@ import { useDispatch } from 'react-redux';
 import { doLoginAction } from '../../redux/account/accountSlice';
 import SocialLogin from '../../components/public/sociallogin/SocialLogin';
 
-const LoginModal = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
+interface LoginModalProps {
+  onClose: () => void;
+  setActiveModal: (modal: string | null) => void;
+}
+
+const LoginModal: React.FC<LoginModalProps> = ({ onClose, setActiveModal }) => {
   const [isSubmit, setIsSubmit] = useState(false);
   const modalWidth = useResponsiveModalWidth();
   const dispatch = useDispatch();
-
-  const handleCancel = () => {
-    navigate('/');
-  };
 
   const onFinish = async (values: { email: string; password: string }) => {
     const { email, password } = values;
@@ -33,7 +32,7 @@ const LoginModal = () => {
             duration: 5,
             showProgress: true,
           });
-          navigate('/');
+          onClose();
         }
       } else {
         notification.error({
@@ -55,16 +54,28 @@ const LoginModal = () => {
     }
   };
 
+  const handleRegisterClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    onClose();
+    setActiveModal('register');
+  };
+
+  const handleForgotPasswordClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    onClose();
+    setActiveModal('forgotPassword');
+  };
+
   return (
     <Modal
-      open={location.pathname === '/login'}
-      onCancel={handleCancel}
+      open={true}
+      onCancel={onClose}
       footer={null}
       width={modalWidth}
       centered
       closeIcon={
         <div className="fp__menu_cart_header">
-          <span className="close_cart-client" onClick={handleCancel}>
+          <span className="close_cart-client" onClick={onClose}>
             <i className="fal fa-times"></i>
           </span>
         </div>
@@ -122,7 +133,11 @@ const LoginModal = () => {
                     <Form.Item name="remember" valuePropName="checked">
                       <div>
                         <Checkbox>Remember Me</Checkbox>
-                        <Link to="/forgot-password" style={{ float: 'right' }}>
+                        <Link
+                          to="/forgot-password"
+                          onClick={handleForgotPasswordClick}
+                          style={{ float: 'right' }}
+                        >
                           Forgot Password?
                         </Link>
                       </div>
@@ -147,7 +162,10 @@ const LoginModal = () => {
                   </p>
                   <SocialLogin />
                   <p className="create_account">
-                    Don’t have an account? <Link to="/register">Register</Link>
+                    Don't have an account?{' '}
+                    <Link to="/register" onClick={handleRegisterClick}>
+                      Register
+                    </Link>
                   </p>
                 </div>
               </div>

@@ -1,35 +1,35 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { notification } from 'antd';
 import { callVerifyEmail } from '../../../../services/clientApi';
-import { useNavigate } from 'react-router-dom';
 
-const VerifyEmail = () => {
+interface VerifyEmailProps {
+  onClose: () => void;
+  setActiveModal: (modal: string | null) => void;
+}
+
+const VerifyEmail: React.FC<VerifyEmailProps> = ({
+  onClose,
+  setActiveModal,
+}) => {
   const [searchParams] = useSearchParams();
   const token = searchParams.get('token');
-  const navigate = useNavigate();
+  const [isVerified, setIsVerified] = useState(false);
 
   useEffect(() => {
     const verifyEmail = async () => {
-      if (token) {
+      if (token && !isVerified) {
         try {
           const response = await callVerifyEmail(token);
-          console.log(response);
           if (response.status === 200) {
+            setIsVerified(true);
             notification.success({
               message: 'Email verified successfully!',
               duration: 5,
               showProgress: true,
             });
-            navigate('/login');
-          } else {
-            notification.error({
-              message: 'Email verification failed!',
-              description:
-                response.data.errors?.error || 'Something went wrong!',
-              duration: 5,
-              showProgress: true,
-            });
+            onClose();
+            setActiveModal('login');
           }
         } catch (error) {
           notification.error({
@@ -43,7 +43,7 @@ const VerifyEmail = () => {
     };
 
     verifyEmail();
-  }, [token, navigate]);
+  }, [token, onClose, setActiveModal, isVerified]);
 
   return <></>;
 };

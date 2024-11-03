@@ -1,10 +1,46 @@
+import Slider from 'react-slick';
+import 'slick-carousel/slick/slick.css';
+import 'slick-carousel/slick/slick-theme.css';
 function ReLatedItem() {
+  const NextArrow = (props: any) => {
+    const { onClick } = props;
+    return (
+      <i
+        className="far fa-long-arrow-left prevArrow slick-arrow"
+        onClick={onClick}
+        aria-hidden="true"
+      ></i>
+    );
+  };
+
+  const PrevArrow = (props: any) => {
+    const { onClick } = props;
+    return (
+      <i
+        className="far fa-long-arrow-right nextArrow slick-arrow"
+        onClick={onClick}
+        aria-hidden="true"
+      ></i>
+    );
+  };
+
+  const settings = {
+    dots: true,
+    infinite: true,
+    speed: 1000,
+    slidesToShow: 4,
+    slidesToScroll: 1,
+    autoplay: true,
+    autoplaySpeed: 2500,
+    nextArrow: <NextArrow />,
+    prevArrow: <PrevArrow />,
+  };
   return (
     <>
       {' '}
       <div className="fp__related_menu mt_90 xs_mt_60">
         <h2>related item</h2>
-        <div className="row related_product_slider">
+        <Slider {...settings}>
           <div className="col-xl-3 wow fadeInUp" data-wow-duration="1s">
             <div className="fp__menu_item">
               <div className="fp__menu_item_img">
@@ -256,7 +292,7 @@ function ReLatedItem() {
               </div>
             </div>
           </div>
-        </div>
+        </Slider>
       </div>
     </>
   );

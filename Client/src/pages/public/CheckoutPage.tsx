@@ -6,6 +6,8 @@ import { RootState } from '../../redux/store';
 import { callBulkAddress, callDeleteAddress } from '../../services/clientApi';
 import { Input, notification, Pagination } from 'antd';
 import Loading from '../../components/Loading/Loading';
+import Account from '../../components/public/auth/account/Account';
+
 interface Address {
   id: string;
   street: string;
@@ -19,13 +21,20 @@ interface Address {
   createdAt: string;
   updatedAt: string | null;
   userId: string;
+  commune: string;
 }
+
 function CheckoutPage() {
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [total, setTotal] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(2);
   const [loading, setLoading] = useState(false);
+  const [selectedAddressId, setSelectedAddressId] = useState<string | null>(
+    null
+  );
+  const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
+  const [editingAddressId, setEditingAddressId] = useState<string | null>(null);
 
   const userId = useSelector((state: RootState) => state.account.user?.id);
   const fetchAddresses = async () => {
@@ -92,16 +101,19 @@ function CheckoutPage() {
       });
   };
 
-  const countries = [
-    { code: 'VN', name: 'Vietnam' },
-    { code: 'KR', name: 'Korea' },
-    { code: 'JP', name: 'Japan' },
-    { code: 'TH', name: 'Thailand' },
-    { code: 'CN', name: 'China' },
-    // Add more countries as needed
-  ];
-  const onFinish = (values: any) => {
-    console.log(values);
+  const handleSelectAddress = (id: string) => {
+    setSelectedAddressId(id);
+    // Thêm logic khác nếu cần
+  };
+
+  const handleCreateNewAddress = () => {
+    setIsAccountModalOpen(true);
+    setEditingAddressId(null);
+  };
+
+  const handleEditClick = (address: Address) => {
+    setEditingAddressId(address.id);
+    setIsAccountModalOpen(true);
   };
 
   return (
@@ -149,261 +161,10 @@ function CheckoutPage() {
                   <div className="fp__check_form">
                     <h5>
                       select address{' '}
-                      <a
-                        href="#"
-                        data-bs-toggle="modal"
-                        data-bs-target="#address_modal"
-                      >
+                      <a href="#" onClick={handleCreateNewAddress}>
                         <i className="far fa-plus"></i> Create new address
                       </a>
                     </h5>
-
-                    <div className="fp__address_modal">
-                      <div
-                        className="modal fade"
-                        id="address_modal"
-                        data-bs-backdrop="static"
-                        data-bs-keyboard="false"
-                        tabIndex={-1}
-                        aria-labelledby="address_modalLabel"
-                        aria-hidden="true"
-                      >
-                        <div className="modal-dialog modal-dialog-centered">
-                          <div className="modal-content">
-                            <div className="modal-header">
-                              <h1
-                                className="modal-title fs-5"
-                                id="address_modalLabel"
-                              >
-                                Create new address
-                              </h1>
-                              <button
-                                type="button"
-                                className="btn-close"
-                                data-bs-dismiss="modal"
-                                aria-label="Close"
-                              ></button>
-                            </div>
-                            <div className="modal-body">
-                              <Form layout="vertical" onFinish={onFinish}>
-                                <div className="row">
-                                  <div className="col-md-6 col-lg-12 col-xl-12">
-                                    <div className="fp__check_single_form">
-                                      <Form.Item
-                                        label="Street"
-                                        name="street"
-                                        className="font-medium"
-                                        rules={[
-                                          {
-                                            required: true,
-                                            message:
-                                              'Please input your Street!',
-                                          },
-                                        ]}
-                                      >
-                                        <Input.TextArea
-                                          rows={2}
-                                          placeholder="Street"
-                                          autoComplete="street"
-                                        />
-                                      </Form.Item>
-                                    </div>
-                                  </div>
-                                  <div className="col-md-6 col-lg-12 col-xl-6">
-                                    <div className="fp__check_single_form">
-                                      <Form.Item
-                                        label="City"
-                                        name="city"
-                                        className="font-medium"
-                                        rules={[
-                                          {
-                                            required: true,
-                                            message: 'Please input your City!',
-                                          },
-                                        ]}
-                                      >
-                                        <Input
-                                          placeholder="City"
-                                          autoComplete="city"
-                                        />
-                                      </Form.Item>
-                                    </div>
-                                  </div>
-                                  <div className="col-md-12 col-lg-12 col-xl-6">
-                                    <div className="fp__check_single_form">
-                                      <Form.Item
-                                        label="State"
-                                        name="state"
-                                        className="font-medium"
-                                        rules={[
-                                          {
-                                            required: true,
-                                            message: 'Please input your State!',
-                                          },
-                                        ]}
-                                      >
-                                        <Input
-                                          type="text"
-                                          placeholder="State"
-                                          autoComplete="state"
-                                        />
-                                      </Form.Item>
-                                    </div>
-                                  </div>
-                                  <div className="col-md-6 col-lg-12 col-xl-6">
-                                    <div className="fp__check_single_form ">
-                                      <Form.Item
-                                        label="Country"
-                                        name="country"
-                                        className="font-medium"
-                                        rules={[
-                                          {
-                                            required: true,
-                                            message:
-                                              'Please select your Country!',
-                                          },
-                                        ]}
-                                      >
-                                        <Select
-                                          placeholder="Select a country"
-                                          showSearch
-                                          optionFilterProp="children"
-                                          filterOption={(input, option) =>
-                                            option?.children
-                                              ?.toString()
-                                              .toLowerCase()
-                                              .includes(input.toLowerCase()) ||
-                                            false
-                                          }
-                                        >
-                                          {countries.map((country) => (
-                                            <Select.Option
-                                              key={country.code}
-                                              value={country.code}
-                                            >
-                                              {country.name}
-                                            </Select.Option>
-                                          ))}
-                                        </Select>
-                                      </Form.Item>
-                                    </div>
-                                  </div>
-                                  <div className="col-md-6 col-lg-12 col-xl-6">
-                                    <div className="fp__check_single_form">
-                                      <Form.Item
-                                        label="Postal Code"
-                                        name="postalCode"
-                                        className="font-medium"
-                                        rules={[
-                                          {
-                                            required: true,
-                                            message:
-                                              'Please input your Postal Code!',
-                                          },
-                                          {
-                                            pattern: /^\d{5}$/,
-                                            message:
-                                              'Postal Code must be exactly 5 digits!',
-                                          },
-                                        ]}
-                                      >
-                                        <Input
-                                          type="text"
-                                          placeholder="Postal Code"
-                                          autoComplete="postal-code"
-                                        />
-                                      </Form.Item>
-                                    </div>
-                                  </div>
-                                  <div className="col-md-6 col-lg-12 col-xl-6">
-                                    <div className="fp__check_single_form">
-                                      <Form.Item
-                                        label="Phone Number"
-                                        name="phoneNumber"
-                                        className="font-medium"
-                                        rules={[
-                                          {
-                                            required: true,
-                                            message:
-                                              'Please input your Phone Number!',
-                                          },
-                                          {
-                                            pattern: /^\d+$/,
-                                            message:
-                                              'Phone Number can only contain digits!',
-                                          },
-                                        ]}
-                                      >
-                                        <Input
-                                          type="text"
-                                          placeholder="Phone Number"
-                                          autoComplete="phone-number"
-                                        />
-                                      </Form.Item>
-                                    </div>
-                                  </div>
-                                  <div className="col-md-6 col-lg-12 col-xl-6">
-                                    <div className="fp__check_single_form">
-                                      <Form.Item
-                                        name="addressType"
-                                        label="Address Type"
-                                        className="font-medium"
-                                        rules={[
-                                          {
-                                            required: true,
-                                            message:
-                                              'Please select your Address Type!',
-                                          },
-                                        ]}
-                                      >
-                                        <Radio.Group>
-                                          <Radio value="home">Home</Radio>
-                                          <Radio value="office">Office</Radio>
-                                          <Radio value="other">Other</Radio>
-                                        </Radio.Group>
-                                      </Form.Item>
-                                    </div>
-                                  </div>
-
-                                  <div className="row">
-                                    <div className="col-md-3">
-                                      <Button
-                                        type="primary"
-                                        shape="round"
-                                        htmlType="submit"
-                                        block
-                                        size="large"
-                                        // loading={isSubmit}
-                                      >
-                                        <div className=" text-[16px] font-medium text-center">
-                                          <i className="fas fa-save mr-2"></i>{' '}
-                                          Save Address
-                                        </div>
-                                      </Button>
-                                    </div>
-                                    <div className="col-md-3">
-                                      <Button
-                                        danger
-                                        size="large"
-                                        shape="round"
-                                        type="primary"
-                                        // loading={isSubmit}
-                                        // onClick={() => setShowAddressNew(false)}
-                                      >
-                                        <div className=" text-[16px] font-medium text-center">
-                                          <i className="fas fa-times mr-2"></i>{' '}
-                                          Cancel
-                                        </div>
-                                      </Button>
-                                    </div>
-                                  </div>
-                                </div>
-                              </Form>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
 
                     <div className="row">
                       {addresses?.map((address: Address, index: number) => (
@@ -434,12 +195,12 @@ function CheckoutPage() {
                                           {address.street}
                                         </span>
                                       </div>
-                                      <div className="flex items-center mb-1">
+                                      <div className="flex items-center mb-1 ">
                                         <span className="font-semibold text-gray-700 mr-1">
-                                          City:
+                                          Commune:
                                         </span>
                                         <span className="text-gray-600">
-                                          {address.city}
+                                          {address.commune}
                                         </span>
                                       </div>
                                       <div className="flex items-center mb-1">
@@ -452,18 +213,18 @@ function CheckoutPage() {
                                       </div>
                                       <div className="flex items-center mb-1">
                                         <span className="font-semibold text-gray-700 mr-1">
-                                          Country:
+                                          City:
                                         </span>
                                         <span className="text-gray-600">
-                                          {address.country}
+                                          {address.city}
                                         </span>
                                       </div>
                                       <div className="flex items-center mb-1">
                                         <span className="font-semibold text-gray-700 mr-1">
-                                          Postal Code:
+                                          Country:
                                         </span>
                                         <span className="text-gray-600">
-                                          {address.postalCode}
+                                          {address.country}
                                         </span>
                                       </div>
                                     </div>
@@ -474,8 +235,18 @@ function CheckoutPage() {
                             <ul>
                               <li>
                                 <a
+                                  className={`dash_check_icon ${selectedAddressId === address.id ? 'selected' : ''}`}
+                                  onClick={() =>
+                                    handleSelectAddress(address.id)
+                                  }
+                                >
+                                  <i className="far fa-check"></i>
+                                </a>
+                              </li>
+                              <li>
+                                <a
                                   className="dash_edit_btn"
-                                  // onClick={() => handleEditClick(address)}
+                                  onClick={() => handleEditClick(address)}
                                 >
                                   <i className="far fa-edit"></i>
                                 </a>
@@ -536,6 +307,16 @@ function CheckoutPage() {
           </div>
         </div>
       </section>
+      {isAccountModalOpen && (
+        <Account
+          onClose={() => {
+            setIsAccountModalOpen(false);
+            setEditingAddressId(null);
+          }}
+          initialActiveTab="address"
+          editingAddressId={editingAddressId}
+        />
+      )}
     </>
   );
 }

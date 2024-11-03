@@ -309,3 +309,61 @@ export const callGetDishById = async (id: string) => {
 };
 
 
+export const callAddNewDish = async (formData: FormData) => {
+  try {
+    const response = await axios.post(`/api/v1/dashboard/dish/add-new-dish`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response;
+  } catch (error) {
+    console.error('Error in callAddNewDish:', error);
+    throw error;
+  }
+};
+
+export const callGetAllIngredients = async () => {
+  return axios.get(`/api/v1/dashboard/warehouses/get-all-ingredients-name`);
+}
+
+export const callGetAllOptionSelections = async () => {
+  return axios.get(`/api/v1/dashboard/dish-option-group/get-all-option-name`);
+}
+
+export const callUpdateDish = async (formData: FormData) => {
+  try {
+    const response = await axios.put(`/api/v1/dashboard/dish/update-dish`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response;
+  } catch (error) {
+    console.error('Error in callAddNewDish:', error);
+    throw error;
+  }};
+
+export const callDeleteDishImageOther = async (dishImageId: string) => {
+  return axios.delete(`/api/v1/dashboard/dish/image/${dishImageId}`);
+};
+
+export const callGetAllCoupon = async (query: string) => {
+  return axios.get(`/api/v1/dashboard/coupon/get-all-coupons?${query}`);
+};
+
+export const callAddNewCoupon = async (code: string, discountPercent: number, minOrderValue: number, maxDiscount: string, description: string, maxUsage: string, startDate: string, expirationDate: string, status: string) => {
+  return axios.post(`/api/v1/dashboard/coupon/add-new-coupon`, { code, discountPercent, minOrderValue, maxDiscount, description, maxUsage, startDate, expirationDate, status });
+};
+
+export const callGetCouponByCode = async (code: string) => {
+  return axios.get(`/api/v1/dashboard/coupon/get-coupon?code=${code}`);
+};
+
+export const callDeleteCoupon = async (id: string) => {
+  return axios.delete(`/api/v1/dashboard/coupon/delete-coupon/${id}`);
+};
+
+export const callUpdateCoupon = async (couponId: string, code: string, discountPercent: number, minOrderValue: number, maxDiscount: string, description: string, maxUsage: string, startDate: string, expirationDate: string, status: string) => {
+  return axios.put(`/api/v1/dashboard/coupon/update-coupon?couponId=${couponId}`, { code, discountPercent, minOrderValue, maxDiscount, description, maxUsage, startDate, expirationDate, status });
+};

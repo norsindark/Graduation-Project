@@ -1,14 +1,11 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button, Form, Input, notification, Select, Radio } from 'antd';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../../../redux/store';
 import { callUpdateAddress } from '../../../../../services/clientApi';
 import { useNavigate } from 'react-router-dom';
-const AddressEdit = ({
-  currentAddress,
-  onEditSuccess,
-  setShowAddressEdit,
-}: {
+
+interface AddressEditProps {
   currentAddress: {
     id: string;
     street: string;
@@ -19,41 +16,78 @@ const AddressEdit = ({
     phoneNumber: string;
     addressType: string;
     userId: string;
+    commune: string;
   };
   onEditSuccess: () => void;
   setShowAddressEdit: (show: boolean) => void;
+  fetchLocations: (
+    type: 'cities' | 'states' | 'communes',
+    parentCode?: string
+  ) => Promise<any[]>;
+}
+
+const AddressEdit: React.FC<AddressEditProps> = ({
+  currentAddress,
+  onEditSuccess,
+  setShowAddressEdit,
+  fetchLocations,
 }) => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const userId = useSelector((state: RootState) => state.account.user?.id);
   const navigate = useNavigate();
   const { Option } = Select;
-  const countries = [
-    { code: 'VN', name: 'Vietnam' },
-    { code: 'KR', name: 'Korea' },
-    { code: 'JP', name: 'Japan' },
-    { code: 'TH', name: 'Thailand' },
-    { code: 'CN', name: 'China' },
-  ];
+
+  const [cities, setCities] = useState<any[]>([]);
+  const [states, setStates] = useState<any[]>([]);
+  const [communes, setCommunes] = useState<any[]>([]);
+  const [selectedCity, setSelectedCity] = useState('');
+  const [selectedState, setSelectedState] = useState('');
+
+  useEffect(() => {
+    const loadInitialData = async () => {
+      const citiesData = await fetchLocations('cities');
+      setCities(citiesData);
+      form.setFieldsValue({
+        street: currentAddress.street,
+        phoneNumber: currentAddress.phoneNumber,
+        addressType: currentAddress.addressType,
+        country: currentAddress.country,
+      });
+    };
+
+    loadInitialData();
+  }, [currentAddress, form, fetchLocations]);
+
+  const handleCityChange = async (value: string, option: any) => {
+    setSelectedCity(option.key);
+    form.setFieldsValue({ state: undefined, commune: undefined });
+    setSelectedState('');
+    setCommunes([]);
+
+    const newStates = await fetchLocations('states', option.key);
+    setStates(newStates);
+  };
+
+  const handleStateChange = async (value: string, option: any) => {
+    setSelectedState(option.key);
+    form.setFieldsValue({ commune: undefined });
+
+    const newCommunes = await fetchLocations('communes', option.key);
+    setCommunes(newCommunes);
+  };
 
   const onFinish = async (values: {
     street: string;
     city: string;
-    state: string;
     country: string;
-    postalCode: number;
+    state: string;
+    commune: string;
     phoneNumber: string;
     addressType: string;
   }) => {
-    const {
-      street,
-      city,
-      state,
-      country,
-      postalCode,
-      phoneNumber,
-      addressType,
-    } = values;
+    const { street, city, country, state, commune, phoneNumber, addressType } =
+      values;
     if (!userId) {
       notification.error({
         message: 'User not found',
@@ -72,9 +106,9 @@ const AddressEdit = ({
         street,
         country,
         city,
-        postalCode.toString(),
         addressType,
         state,
+        commune,
         phoneNumber,
         userId
       );
@@ -87,7 +121,7 @@ const AddressEdit = ({
         onEditSuccess();
       } else {
         notification.error({
-          message: 'Address updated failed',
+          message: 'Address update failed',
           description: response.data.errors?.error || 'Something went wrong!',
           duration: 5,
           showProgress: true,
@@ -99,7 +133,7 @@ const AddressEdit = ({
         description:
           error instanceof Error
             ? error.message
-            : 'Error during registration process!',
+            : 'Error during update process!',
         duration: 5,
         showProgress: true,
       });
@@ -116,10 +150,72 @@ const AddressEdit = ({
       <Form
         form={form}
         layout="vertical"
-        initialValues={currentAddress}
         onFinish={onFinish}
       >
         <div className="row">
+        <div className="col-md-6">
+            <Form.Item label="Country" name="country" initialValue="Việt Nam">
+              <Input
+                type="text"
+                placeholder="Viet Nam"
+                autoComplete="country"
+                disabled
+              />
+            </Form.Item>
+          </div>
+          <div className="col-md-6">
+            <Form.Item
+              label="State/Province"
+              name="city"
+              rules={[{ required: true, message: 'Please input your City!' }]}
+            >
+              <Select placeholder="State/Province" onChange={handleCityChange}>
+                {cities.map((city: any) => (
+                  <Option key={city.code} value={city.name}>
+                    {city.name}
+                  </Option>
+                ))}
+              </Select>
+            </Form.Item>
+          </div>
+          <div className="col-md-6">
+            <Form.Item
+              label="City/Town"
+              name="state"
+              rules={[{ required: true, message: 'Please input your State!' }]}
+            >
+              <Select
+                placeholder="City/Town"
+                onChange={handleStateChange}
+                disabled={!selectedCity}
+              >
+                {states.map((state: any) => (
+                  <Option key={state.code} value={state.name}>
+                    {state.name}
+                  </Option>
+                ))}
+              </Select>
+            </Form.Item>
+          </div>
+          <div className="col-md-6">
+            <Form.Item
+              label="Commune/District"
+              name="commune"
+              rules={[
+                { required: true, message: 'Please input your Commune!' },
+              ]}
+            >
+              <Select placeholder="Commune/District" disabled={!selectedState}>
+                {communes.map((commune: any) => (
+                  <Option key={commune.code} value={commune.name}>
+                    {commune.name}
+                  </Option>
+                ))}
+              </Select>
+            </Form.Item>
+          </div>
+        </div>
+        <div className="row">         
           <div className="col-md-12">
             <Form.Item
               label="Street"
@@ -130,71 +226,6 @@ const AddressEdit = ({
                 rows={2}
                 placeholder="Street"
                 autoComplete="street"
-              />
-            </Form.Item>
-          </div>
-          <div className="col-md-6">
-            <Form.Item
-              label="City"
-              name="city"
-              rules={[{ required: true, message: 'Please input your City!' }]}
-            >
-              <Input placeholder="City" autoComplete="city" />
-            </Form.Item>
-          </div>
-          <div className="col-md-6">
-            <Form.Item
-              label="State"
-              name="state"
-              rules={[{ required: true, message: 'Please input your State!' }]}
-            >
-              <Input type="text" placeholder="State" autoComplete="state" />
-            </Form.Item>
-          </div>
-        </div>
-        <div className="row">
-          <div className="col-md-6">
-            <Form.Item
-              label="Country"
-              name="country"
-              rules={[
-                { required: true, message: 'Please select your Country!' },
-              ]}
-            >
-              <Select
-                placeholder="Select a country"
-                showSearch
-                optionFilterProp="children"
-                filterOption={(input, option) =>
-                  (option?.children as unknown as string)
-                    .toLowerCase()
-                    .includes(input.toLowerCase())
-                }
-              >
-                {countries.map((country) => (
-                  <Option key={country.code} value={country.name}>
-                    {country.name}
-                  </Option>
-                ))}
-              </Select>
-            </Form.Item>
-          </div>
-          <div className="col-md-6">
-            <Form.Item
-              label="Postal Code"
-              name="postalCode"
-              rules={[
-                { required: true, message: 'Please input your Postal Code!' },
-                {
-                  pattern: /^\d{5}$/,
-                  message: 'Postal Code must be exactly 5 digits!',
-                },
-              ]}
-            >
-              <Input
-                type="text"
-                placeholder="Postal Code"
-                autoComplete="postal-code"
               />
             </Form.Item>
           </div>
