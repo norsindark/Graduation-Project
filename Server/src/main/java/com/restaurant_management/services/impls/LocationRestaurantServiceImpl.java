@@ -18,15 +18,14 @@ import org.springframework.web.client.RestTemplate;
 import java.util.HashMap;
 import java.util.Map;
 
-
 @Service
 @RequiredArgsConstructor
 public class LocationRestaurantServiceImpl implements LocationRestaurantService {
 
     private final LocationRestaurantRepository locationRestaurantRepository;
 
-    @Value("${openCage.api.key}")
-    private String API_KEY;
+    @Value("${geocoding.api.key}")
+    private String geocodingApiKey;
 
     @Override
     public LocationRestaurant getLocation() throws DataExitsException {
@@ -46,7 +45,6 @@ public class LocationRestaurantServiceImpl implements LocationRestaurantService 
         );
 
         Map<String, Double> coordinates = getCoordinatesFromAddress(address);
-
         LocationRestaurant location = LocationRestaurant.builder()
                 .street(locationRestaurantDto.getStreet())
                 .commune(locationRestaurantDto.getCommune())
@@ -104,7 +102,8 @@ public class LocationRestaurantServiceImpl implements LocationRestaurantService 
     }
 
     private Map<String, Double> getCoordinatesFromAddress(String address) {
-        String url = String.format("https://api.opencagedata.com/geocode/v1/json?q=%s&key=%s", address, API_KEY);
+        String url = String.format("https://api.distancematrix.ai/maps/api/geocode/json?address=%s&key=%s",
+                address.replace(" ", "+"), geocodingApiKey);
         RestTemplate restTemplate = new RestTemplate();
         ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
 
@@ -114,20 +113,24 @@ public class LocationRestaurantServiceImpl implements LocationRestaurantService 
 
         String responseBody = response.getBody();
         JSONObject jsonResponse = new JSONObject(responseBody);
-        JSONArray results = jsonResponse.getJSONArray("results");
 
-        if (results.isEmpty()) {
-            throw new RuntimeException("No results found");
+        if (jsonResponse.getString("status").equals("OK")) {
+            JSONArray results = jsonResponse.getJSONArray("result");
+
+            if (results.isEmpty()) {
+                throw new RuntimeException("No results found");
+            }
+
+            JSONObject geometry = results.getJSONObject(0).getJSONObject("geometry");
+            double latitude = geometry.getJSONObject("location").getDouble("lat");
+            double longitude = geometry.getJSONObject("location").getDouble("lng");
+
+            Map<String, Double> coordinates = new HashMap<>();
+            coordinates.put("latitude", latitude);
+            coordinates.put("longitude", longitude);
+            return coordinates;
+        } else {
+            throw new RuntimeException("Geocoding failed: " + jsonResponse.getString("status"));
         }
-
-        JSONObject geometry = results.getJSONObject(0).getJSONObject("geometry");
-        double latitude = geometry.getDouble("lat");
-        double longitude = geometry.getDouble("lng");
-
-        Map<String, Double> coordinates = new HashMap<>();
-        coordinates.put("latitude", latitude);
-        coordinates.put("longitude", longitude);
-
-        return coordinates;
     }
 }
