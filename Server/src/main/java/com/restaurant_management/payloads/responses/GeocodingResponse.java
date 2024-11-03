@@ -14,4 +14,5 @@ public class GeocodingResponse {
     private String to;
     private String distance;
     private String fee;
+    private String duration;
 }

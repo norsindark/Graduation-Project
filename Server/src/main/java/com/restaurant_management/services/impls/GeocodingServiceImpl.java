@@ -17,8 +17,11 @@ import org.springframework.web.client.RestTemplate;
 public class GeocodingServiceImpl implements GeocodingService {
     private final LocationRestaurantRepository locationRestaurantRepository;
 
-    @Value("${openCage.api.key}")
-    private String API_KEY;
+    @Value("${distancematrix.api.key}")
+    private String distanceMatrixApiKey;
+
+    @Value("${geocoding.api.key}")
+    private String geocodingApiKey;
 
     @Override
     public GeocodingResponse getCoordinates(String address) {
@@ -27,53 +30,71 @@ public class GeocodingServiceImpl implements GeocodingService {
             throw new RuntimeException("No restaurant location found");
         }
 
-        double lat1 = locationRestaurant.getLatitude();
-        double lon1 = locationRestaurant.getLongitude();
-
-        String url = String.format("https://api.opencagedata.com/geocode/v1/json?q=%s&key=%s", address, API_KEY);
+        String geocodeUrl = String.format("https://api.distancematrix.ai/maps/api/geocode/json?address=%s&key=%s",
+                address.replace(" ", "+"), geocodingApiKey);
         RestTemplate restTemplate = new RestTemplate();
-        ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
+        ResponseEntity<String> geocodeResponse = restTemplate.getForEntity(geocodeUrl, String.class);
 
-        if (!response.getStatusCode().is2xxSuccessful()) {
-            throw new RuntimeException("Geocoding failed");
+        if (!geocodeResponse.getStatusCode().is2xxSuccessful()) {
+            throw new RuntimeException("Geocoding failed: " + geocodeResponse.getStatusCode());
         }
 
-        String responseBody = response.getBody();
-        JSONObject jsonResponse = new JSONObject(responseBody);
-        JSONArray results = jsonResponse.getJSONArray("results");
+        String geocodeResponseBody = geocodeResponse.getBody();
+        JSONObject geocodeJsonResponse = new JSONObject(geocodeResponseBody);
 
-        if (results.isEmpty()) {
-            throw new RuntimeException("No results found");
+        if (!geocodeJsonResponse.getString("status").equals("OK")) {
+            throw new RuntimeException("Geocoding failed: " + geocodeJsonResponse.getString("status"));
         }
 
-        JSONObject geometry = results.getJSONObject(0).getJSONObject("geometry");
-        double lat2 = geometry.getDouble("lat");
-        double lon2 = geometry.getDouble("lng");
+        JSONArray geocodeResults = geocodeJsonResponse.getJSONArray("result");
 
-        double distance = calculateDistance(lat1, lon1, lat2, lon2);
-        double fee = calculateFee(distance, locationRestaurant.getFeePerKm());
+        if (geocodeResults.isEmpty()) {
+            throw new RuntimeException("No results found for address");
+        }
+
+        JSONObject geometry = geocodeResults.getJSONObject(0).getJSONObject("geometry");
+        double lat2 = geometry.getJSONObject("location").getDouble("lat");
+        double lon2 = geometry.getJSONObject("location").getDouble("lng");
+
+        String distanceUrl = String.format("https://api.distancematrix.ai/maps/api/distancematrix/json?origins=%f,%f&destinations=%f,%f&key=%s",
+                locationRestaurant.getLatitude(), locationRestaurant.getLongitude(), lat2, lon2, distanceMatrixApiKey);
+
+        ResponseEntity<String> distanceResponse = restTemplate.getForEntity(distanceUrl, String.class);
+
+        if (!distanceResponse.getStatusCode().is2xxSuccessful()) {
+            throw new RuntimeException("Distance Matrix API call failed: " + distanceResponse.getStatusCode());
+        }
+
+        String distanceResponseBody = distanceResponse.getBody();
+        JSONObject distanceJsonResponse = new JSONObject(distanceResponseBody);
+        JSONArray distanceResults = distanceJsonResponse.getJSONArray("rows");
+
+        if (distanceResults.isEmpty()) {
+            throw new RuntimeException("No distance results found");
+        }
+
+        JSONObject elements = distanceResults.getJSONObject(0).getJSONArray("elements").getJSONObject(0);
+        if (!elements.getString("status").equals("OK")) {
+            throw new RuntimeException("Distance Matrix API returned an error: " + elements.getString("status"));
+        }
+
+        String distanceText = elements.getJSONObject("distance").getString("text");
+        double distanceValue = elements.getJSONObject("distance").getDouble("value");
+        String durationText = elements.getJSONObject("duration").getString("text");
+
+        double fee = calculateFee(distanceValue / 1000, locationRestaurant.getFeePerKm());
 
         return GeocodingResponse.builder()
                 .from(locationRestaurant.getStreet() + ", " +
-                                locationRestaurant.getCommune() + ", " +
-                                locationRestaurant.getDistrict() + ", " +
-                                locationRestaurant.getCity() + ", " +
-                                locationRestaurant.getCountry())
+                        locationRestaurant.getCommune() + ", " +
+                        locationRestaurant.getDistrict() + ", " +
+                        locationRestaurant.getCity() + ", " +
+                        locationRestaurant.getCountry())
                 .to(address)
-                .distance(String.format("%.2f km", distance))
+                .distance(distanceText)
                 .fee(String.format("%.2f VND", fee))
+                .duration(durationText)
                 .build();
-    }
-
-    private double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
-        final int R = 6371;
-        double latDistance = Math.toRadians(lat2 - lat1);
-        double lonDistance = Math.toRadians(lon2 - lon1);
-        double a = Math.sin(latDistance / 2) * Math.sin(latDistance / 2) +
-                Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) *
-                        Math.sin(lonDistance / 2) * Math.sin(lonDistance / 2);
-        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        return R * c;
     }
 
     private double calculateFee(double distance, double ratePerKm) {
