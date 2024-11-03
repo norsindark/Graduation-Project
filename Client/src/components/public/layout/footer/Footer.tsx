@@ -16,12 +16,12 @@ const Footer = () => {
                   majority have suffered.
                 </span>
                 <p className="info">
-                  <i className="far fa-map-marker-alt"></i> 307 Hà Huy Tập,
+                  <i className="far fa-map-marker-alt"></i> 227 Hà Huy Tập,
                   Thành phố Buôn Ma Thuột, Đắk Lắk
                 </p>
                 <a className="info" href="callto:0966666666">
                   <i className="fas fa-phone-alt"></i>
-                  +84 966 666 666
+                  +84 376 985 395
                 </a>
                 <a className="info" href="mailto:websolutionus1@gmail.com">
                   <i className="fas fa-envelope"></i>
