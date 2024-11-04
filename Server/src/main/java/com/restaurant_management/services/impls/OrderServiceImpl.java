@@ -305,6 +305,57 @@ public class OrderServiceImpl implements OrderService {
         }
     }
 
+    @Override
+    @Transactional
+    public ApiResponse cancelOrder(String orderId) throws
+            DataExitsException, MessagingException, UnsupportedEncodingException  {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new DataExitsException("Order not found"));
+
+        if (!"PENDING".equalsIgnoreCase(order.getStatus())) {
+            throw new IllegalStateException("Order can only be canceled if it is in PENDING status");
+        }
+
+        returnIngredientsToWarehouse(order);
+
+        order.setStatus("CANCELED");
+        orderRepository.save(order);
+
+        sendMailWhenUpdateOrderStatus(order.getUser().getEmail(), orderId, "CANCELED");
+
+        return new ApiResponse("Order has been successfully canceled", HttpStatus.OK);
+    }
+
+    private void returnIngredientsToWarehouse(Order order) throws DataExitsException {
+        List<OrderItem> orderItems = orderItemRepository.findByOrder(order);
+
+        for (OrderItem orderItem : orderItems) {
+            Dish dish = orderItem.getDish();
+            List<Recipe> recipes = recipeRepository.findByDish(dish);
+
+            for (Recipe recipe : recipes) {
+                warehouseRepository.findById(recipe.getWarehouse().getId())
+                        .ifPresentOrElse(warehouse -> {
+                            UnitType recipeUnit = UnitType.fromString(recipe.getUnit());
+                            UnitType warehouseUnit = UnitType.fromString(warehouse.getUnit());
+
+                            double quantityToReturn = UnitType.convert(
+                                    recipe.getQuantityUsed() * orderItem.getQuantity(),
+                                    recipeUnit, warehouseUnit
+                            );
+
+                            warehouse.setAvailableQuantity(warehouse.getAvailableQuantity() + quantityToReturn);
+                            warehouse.setQuantityUsed(warehouse.getQuantityUsed() - quantityToReturn);
+
+                            warehouseRepository.save(warehouse);
+                        }, () -> {
+                            throw new IllegalStateException("Warehouse not found for recipe: " + recipe.getId());
+                        });
+            }
+        }
+    }
+
+
     private void sendEmailListOrderItems(String email, List<OrderItemDto> items, String couponId, Double totalPrice, String paymentMethod, String status, Double shippingFee)
             throws MessagingException, UnsupportedEncodingException, DataExitsException {
         String fromAddress = "dvan78281@gmail.com";
@@ -415,7 +466,8 @@ public class OrderServiceImpl implements OrderService {
         javaMailSender.send(message);
     }
 
-    private void sendMailWhenUpdateOrderStatus(String email, String orderId, String status) throws MessagingException, UnsupportedEncodingException {
+    private void sendMailWhenUpdateOrderStatus(String email, String orderId, String status)
+            throws MessagingException, UnsupportedEncodingException {
         String fromAddress = "dvan78281@gmail.com";
         String senderName = "Sync Food";
         String subject = "Order Status Update";

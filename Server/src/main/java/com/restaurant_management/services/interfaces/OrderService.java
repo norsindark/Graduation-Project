@@ -13,8 +13,13 @@ import java.io.UnsupportedEncodingException;
 public interface OrderService {
     PagedModel<EntityModel<OrderResponse>> getAllOrders(int pageNo, int pageSize, String sortBy, String sortDir)
             throws DataExitsException;
+
     ApiResponse addNewOrder(OrderDto request)
             throws DataExitsException, MessagingException, UnsupportedEncodingException;
 
-    ApiResponse updateOrderStatus(String orderId, String status) throws DataExitsException, MessagingException, UnsupportedEncodingException;
+    ApiResponse updateOrderStatus(String orderId, String status)
+            throws DataExitsException, MessagingException, UnsupportedEncodingException;
+
+    ApiResponse cancelOrder(String orderId)
+            throws DataExitsException, MessagingException, UnsupportedEncodingException;
 }
