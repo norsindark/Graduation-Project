@@ -138,7 +138,7 @@ public class PaymentServiceImpl implements PaymentService {
         String orderInfo = params.get("vnp_TxnRef");
         if (orderInfo != null) {
             updateOrderStatusToPaid(orderInfo);
-            return new ApiResponse("Payment success", HttpStatus.OK);
+            return new ApiResponse(orderInfo, HttpStatus.OK);
         }
         return new ApiResponse("Payment Failed", HttpStatus.OK);
     }

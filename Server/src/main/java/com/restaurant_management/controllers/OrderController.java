@@ -32,15 +32,6 @@ public class OrderController {
         return ResponseEntity.ok(orderService.getAllOrdersByUserId(userId, pageNo, pageSize, sortBy, sortDir));
     }
 
-    @GetMapping("/get-all-orders")
-    public ResponseEntity<PagedModel<EntityModel<OrderResponse>>> getAllOrders(
-            @RequestParam(defaultValue = "0") int pageNo,
-            @RequestParam(defaultValue = "10") int pageSize,
-            @RequestParam(defaultValue = "createdAt") String sortBy,
-            @RequestParam(defaultValue = "asc") String sortDir) throws DataExitsException {
-        return ResponseEntity.ok(orderService.getAllOrders(pageNo, pageSize, sortBy, sortDir));
-    }
-
     @PostMapping("/add-new-order")
     public ResponseEntity<ApiResponse> addNewOrder(@RequestBody OrderDto request)
             throws DataExitsException, MessagingException, UnsupportedEncodingException {
