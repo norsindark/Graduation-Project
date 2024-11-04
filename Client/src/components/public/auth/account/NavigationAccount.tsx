@@ -107,12 +107,12 @@ const NavigationAccount: React.FC<NavigationAccountProps> = ({
 
           <button
             className="nav-link"
-            id="v-pills-profile-tab"
+            id="v-pills-order-tab"
             data-bs-toggle="pill"
-            data-bs-target="#v-pills-profile"
+            data-bs-target="#v-pills-order"
             type="button"
             role="tab"
-            aria-controls="v-pills-profile"
+            aria-controls="v-pills-order"
             aria-selected="false"
           >
             <span>

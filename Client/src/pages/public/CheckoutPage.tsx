@@ -228,6 +228,7 @@ function CheckoutPage() {
       state: {
         orderSummary: updatedOrderSummary || orderSummary,
         selectedAddressId,
+        deliveryInfo,
       },
     });
   };
@@ -352,7 +353,9 @@ function CheckoutPage() {
                               <li>
                                 <Popconfirm
                                   title="Are you sure you want to select this address?"
-                                  onConfirm={() => handleSelectAddress(address.id)}
+                                  onConfirm={() =>
+                                    handleSelectAddress(address.id)
+                                  }
                                   okText="Yes"
                                   cancelText="No"
                                 >
@@ -414,19 +417,12 @@ function CheckoutPage() {
                   </span>
                 </p>
                 <p>
-                  distance:{' '}
-                  <span>
-                    {deliveryInfo?.distance || 'N/A'}
-                    {' '}
-                  </span>
+                  distance: <span>{deliveryInfo?.distance || '0 VNĐ'} </span>
                 </p>
 
                 <p>
                   duration (about):{' '}
-                  <span>
-                    {deliveryInfo?.duration || 'N/A'}
-                    {' '}
-                  </span>
+                  <span>{deliveryInfo?.duration || '0 VNĐ'} </span>
                 </p>
 
                 <p>
@@ -456,7 +452,6 @@ function CheckoutPage() {
                     VNĐ
                   </span>
                 </p>
-
 
                 <form>
                   {orderSummary?.appliedCoupon && (

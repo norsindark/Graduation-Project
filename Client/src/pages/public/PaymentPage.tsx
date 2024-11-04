@@ -1,14 +1,14 @@
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import cod from '../../../public/images/cod.png';
 import vnpay from '../../../public/images/vnpay.png';
-import { Image } from 'antd';
+import { Image, Popconfirm } from 'antd';
 import { notification } from 'antd';
 import { callCreateOrder, callProcessPayment } from '../../services/clientApi';
 import { doClearCartAction } from '../../redux/order/orderSlice';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../redux/store';
 import { useDispatch } from 'react-redux';
-import Loading from '../../components/Loading/Loading';
+
 import { useState } from 'react';
 // Add formatPrice function
 const formatPrice = (price: number) => {
@@ -19,7 +19,8 @@ function PaymentPage() {
   const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { orderSummary, selectedAddressId } = location.state || {};
+  const { orderSummary, selectedAddressId, deliveryInfo } =
+    location.state || {};
   const cartItems = useSelector((state: RootState) => state.order.carts);
   const userId = useSelector((state: RootState) => state.account.user?.id);
   const [loading, setLoading] = useState(false);
@@ -58,10 +59,20 @@ function PaymentPage() {
         if (paymentMethod === 'COD') {
           notification.success({
             message: 'Order success',
-            description: 'Thank you for your order',
+            description: (
+              <div>
+                <p>Thank you for your order!</p>
+                <p>Please check your email for order details.</p>
+              </div>
+            ),
+            duration: 5,
+            placement: 'top',
           });
           navigate('/order-success', {
-            state: { orderId: response.data?.message },
+            state: {
+              orderId: response.data?.message,
+              paymentMethod: 'COD',
+            },
           });
           dispatch(doClearCartAction());
         } else if (paymentMethod === 'BANKING') {
@@ -133,40 +144,54 @@ function PaymentPage() {
                   <div className="grid grid-cols-2 gap-6">
                     {/* Cash on Delivery */}
                     <div className="transform transition-all hover:scale-105">
-                      <button
-                        className="w-full p-4 border-2 rounded-lg hover:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
-                        onClick={() => handlePayment('COD')}
+                      <Popconfirm
+                        title="Are you sure you want to pay by cash on delivery?"
+                        onConfirm={() => handlePayment('COD')}
+                        okButtonProps={{ loading: loading }}
                       >
-                        <div className="flex flex-col items-center space-y-3">
-                          <Image
-                            src={cod}
-                            alt="Cash on Delivery"
-                            className="w-16 h-16 object-contain"
-                            preview={false}
-                          />
-                          <span className="font-bold text-gray-700">
-                            Cash on Delivery
-                          </span>
-                        </div>
-                      </button>
+                        <button
+                          className="w-full p-4 border-2 rounded-lg hover:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                          disabled={loading}
+                        >
+                          <div className="flex flex-col items-center space-y-3">
+                            <Image
+                              src={cod}
+                              alt="Cash on Delivery"
+                              className="w-16 h-16 object-contain"
+                              preview={false}
+                            />
+                            <span className="font-bold text-gray-700">
+                              Cash on Delivery
+                            </span>
+                          </div>
+                        </button>
+                      </Popconfirm>
                     </div>
 
                     {/* VNPay */}
                     <div className="transform transition-all hover:scale-105">
-                      <button
-                        className="w-full p-4 border-2 rounded-lg hover:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
-                        onClick={() => handlePayment('BANKING')}
+                      <Popconfirm
+                        title="Are you sure you want to pay by banking?"
+                        onConfirm={() => handlePayment('BANKING')}
+                        okButtonProps={{ loading: loading }}
                       >
-                        <div className="flex flex-col items-center space-y-3">
-                          <Image
-                            src={vnpay}
-                            alt="VNPay"
-                            className="w-16 h-16 object-contain"
-                            preview={false}
-                          />
-                          <span className="font-bold text-gray-700">VNPay</span>
-                        </div>
-                      </button>
+                        <button
+                          className="w-full p-4 border-2 rounded-lg hover:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                          disabled={loading}
+                        >
+                          <div className="flex flex-col items-center space-y-3">
+                            <Image
+                              src={vnpay}
+                              alt="VNPay"
+                              className="w-16 h-16 object-contain"
+                              preview={false}
+                            />
+                            <span className="font-bold text-gray-700">
+                              Banking
+                            </span>
+                          </div>
+                        </button>
+                      </Popconfirm>
                     </div>
                   </div>
                 </div>
@@ -179,6 +204,14 @@ function PaymentPage() {
                 <p>
                   subtotal:{' '}
                   <span>{formatPrice(orderSummary?.subtotal || 0)} VNĐ</span>
+                </p>
+                <p>
+                  distance: <span>{deliveryInfo?.distance || '0 VNĐ'} </span>
+                </p>
+
+                <p>
+                  duration (about):{' '}
+                  <span>{deliveryInfo?.duration || '0 VNĐ'} </span>
                 </p>
                 <p>
                   delivery:{' '}
