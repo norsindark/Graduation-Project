@@ -5,6 +5,7 @@ import com.restaurant_management.payloads.requests.SignUpRequest;
 import com.restaurant_management.payloads.requests.UserRequest;
 import com.restaurant_management.payloads.responses.ApiResponse;
 import com.restaurant_management.payloads.responses.GetUserResponse;
+import com.restaurant_management.payloads.responses.OrderResponse;
 import com.restaurant_management.payloads.responses.UserResponse;
 import com.restaurant_management.services.interfaces.AdminService;
 import com.restaurant_management.services.interfaces.OrderService;
@@ -77,6 +78,18 @@ public class AdminController {
                 @RequestParam(defaultValue = "email") String sortBy,
                 @RequestParam(defaultValue = "asc") String sortDir) throws DataExitsException, ParseException {
         return ResponseEntity.ok(adminService.searchUsers(type, keyword, pageNo, pageSize, sortBy, sortDir));
+    }
+
+
+    // orders
+    @GetMapping("/get-all-orders")
+    @Operation(summary = "get all orders", tags = {"Order"})
+    public ResponseEntity<PagedModel<EntityModel<OrderResponse>>> getAllOrders(
+            @RequestParam(defaultValue = "0") int pageNo,
+            @RequestParam(defaultValue = "10") int pageSize,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "asc") String sortDir) throws DataExitsException {
+        return ResponseEntity.ok(orderService.getAllOrders(pageNo, pageSize, sortBy, sortDir));
     }
 
     @PutMapping("/order/update-order-status")
