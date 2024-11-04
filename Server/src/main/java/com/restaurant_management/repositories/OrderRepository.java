@@ -1,6 +1,9 @@
 package com.restaurant_management.repositories;
 
 import com.restaurant_management.entites.Order;
+import com.restaurant_management.entites.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -10,4 +13,7 @@ public interface OrderRepository extends JpaRepository<Order, String> {
 
     @Query("SELECT COUNT(i) > 0 FROM Order o JOIN o.items i WHERE o.user.id = ?1 AND i.dish.id = ?2")
     boolean existsByUserIdAndDishId(String userId, String dishId);
+
+
+    Page<Order> findByUser(User user, Pageable pageable);
 }

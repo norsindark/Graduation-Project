@@ -48,6 +48,29 @@ public class OrderServiceImpl implements OrderService {
     private final OfferRepository offerRepository;
     private final PagedResourcesAssembler<OrderResponse> pagedResourcesAssembler;
 
+    @Override
+    @Transactional
+    public PagedModel<EntityModel<OrderResponse>> getAllOrdersByUserId(
+            String userId, int pageNo, int pageSize, String sortBy, String sortDir)
+            throws DataExitsException {
+        Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.fromString(sortDir), sortBy));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new DataExitsException("User not found"));
+        Page<Order> orders = orderRepository.findByUser(user, pageable);
+        if (orders.isEmpty()) {
+            throw new DataExitsException("No orders found");
+        }
+        List<OrderResponse> orderResponses = orders.stream()
+                .map(order -> {
+                    Address address = addressRepository.findById(order.getAddressId())
+                            .orElseThrow(() -> new RuntimeException("Address not found"));
+                    List<OrderItem> orderItems = orderItemRepository.findByOrder(order);
+                    return new OrderResponse(order, address, orderItems);
+                })
+                .collect(Collectors.toList());
+        return pagedResourcesAssembler.toModel(new PageImpl<>(orderResponses, pageable, orders.getTotalElements()));
+    }
+
 
     @Override
     @Transactional

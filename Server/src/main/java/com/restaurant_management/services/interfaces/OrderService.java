@@ -11,6 +11,10 @@ import org.springframework.hateoas.PagedModel;
 import java.io.UnsupportedEncodingException;
 
 public interface OrderService {
+    PagedModel<EntityModel<OrderResponse>> getAllOrdersByUserId(
+            String userId, int pageNo, int pageSize, String sortBy, String sortDir)
+            throws DataExitsException;
+
     PagedModel<EntityModel<OrderResponse>> getAllOrders(int pageNo, int pageSize, String sortBy, String sortDir)
             throws DataExitsException;
 
