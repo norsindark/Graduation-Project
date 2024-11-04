@@ -25,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.UnsupportedEncodingException;
 import java.text.NumberFormat;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -142,6 +143,7 @@ public class OrderServiceImpl implements OrderService {
                 .paymentMethod(request.getPaymentMethod())
                 .shippingFee(request.getShippingFee())
                 .totalPrice(request.getTotalPrice())
+                .createdAt(LocalDateTime.now())
                 .build();
         orderRepository.save(order);
         return order;
