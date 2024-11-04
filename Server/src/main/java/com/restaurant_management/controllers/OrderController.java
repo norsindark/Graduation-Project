@@ -37,12 +37,6 @@ public class OrderController {
         return ResponseEntity.ok(orderService.addNewOrder(request));
     }
 
-    @PutMapping("/update-order-status")
-    public ResponseEntity<ApiResponse> updateOrderStatus(@RequestParam String orderId, @RequestParam String status)
-            throws DataExitsException, MessagingException, UnsupportedEncodingException {
-        return ResponseEntity.ok(orderService.updateOrderStatus(orderId, status));
-    }
-
     @PutMapping("cancel-order")
     public ResponseEntity<ApiResponse> cancelOrder(@RequestParam String orderId)
             throws DataExitsException, MessagingException, UnsupportedEncodingException {
