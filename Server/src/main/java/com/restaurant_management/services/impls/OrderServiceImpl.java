@@ -470,16 +470,16 @@ public class OrderServiceImpl implements OrderService {
             throws MessagingException, UnsupportedEncodingException {
         String fromAddress = "dvan78281@gmail.com";
         String senderName = "Sync Food";
-        String subject = "Order Status Update";
-        String content = "<html><body>" +
-                "<h2 style=\"color: #13b3e6; font-family: Arial, sans-serif; font-size: 18px;\">" +
-                "Your Order Status has been Updated!</h2>" +
-                "<p style=\"font-family: Arial, sans-serif; font-size: 14px; color: #333;\">" +
-                "Order ID: " + orderId + "</p>" +
-                "<p style=\"font-family: Arial, sans-serif; font-size: 14px; color: #333;\">" +
-                "New Status: " + status + "</p>" +
-                "<p style=\"font-family: Arial, sans-serif; font-size: 14px; color: #333;\">" +
-                "Thank you for your patience!</p>" +
+        String subject = "Update Order Status";
+        String content = "<html><body style=\"font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f9f9f9;\">" +
+                "<div style=\"max-width: 600px; margin: 20px auto; padding: 20px; background-color: #ffffff; border-radius: 8px; box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);\">" +
+                "<h2 style=\"color: #388e3c; font-size: 24px; font-weight: bold; text-align: center;\">YOUR ORDER STATUS HAS BEEN UPDATED!</h2>" +
+                "<p style=\"font-size: 16px; color: #333; text-align: center;\">Order ID: <strong>" + orderId + "</strong></p>" +
+                "<p style=\"font-size: 16px; color: #333; text-align: center;\">New Status: <strong>" + status + "</strong></p>" +
+                "<p style=\"font-size: 14px; color: #555; text-align: center;\">Thank you for your patience and for choosing Sync Food!</p>" +
+                "<hr style=\"border: none; border-top: 1px solid #e0e0e0; margin: 20px 0;\">" +
+                "<p style=\"font-size: 12px; color: #888; text-align: center;\">This is an automated message, please do not reply.</p>" +
+                "</div>" +
                 "</body></html>";
 
         MimeMessage message = javaMailSender.createMimeMessage();
@@ -492,5 +492,4 @@ public class OrderServiceImpl implements OrderService {
 
         javaMailSender.send(message);
     }
-
 }

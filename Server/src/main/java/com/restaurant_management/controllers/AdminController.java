@@ -7,7 +7,10 @@ import com.restaurant_management.payloads.responses.ApiResponse;
 import com.restaurant_management.payloads.responses.GetUserResponse;
 import com.restaurant_management.payloads.responses.UserResponse;
 import com.restaurant_management.services.interfaces.AdminService;
+import com.restaurant_management.services.interfaces.OrderService;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.hateoas.EntityModel;
@@ -16,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
 import java.util.Optional;
 
@@ -27,6 +31,7 @@ import java.util.Optional;
 public class AdminController {
 
     private final AdminService adminService;
+    private final OrderService orderService;
 
     @PostMapping("/user/add-user")
     @PreAuthorize("hasRole('ADMIN')")
@@ -72,5 +77,13 @@ public class AdminController {
                 @RequestParam(defaultValue = "email") String sortBy,
                 @RequestParam(defaultValue = "asc") String sortDir) throws DataExitsException, ParseException {
         return ResponseEntity.ok(adminService.searchUsers(type, keyword, pageNo, pageSize, sortBy, sortDir));
+    }
+
+    @PutMapping("/order/update-order-status")
+    @Operation(summary = "update order status", tags = {"Order"})
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse> updateOrderStatus(@RequestParam String orderId, @RequestParam String status)
+            throws DataExitsException, MessagingException, UnsupportedEncodingException {
+        return ResponseEntity.ok(orderService.updateOrderStatus(orderId, status));
     }
 }
