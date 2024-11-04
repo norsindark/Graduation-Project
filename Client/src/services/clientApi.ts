@@ -252,3 +252,9 @@ export const callPaymentReturn = async (
 ) => { 
   return axios.get(`/api/v1/client/payment/return?vnp_Amount=${vnp_Amount}&vnp_BankCode=${vnp_BankCode}&vnp_BankTranNo=${vnp_BankTranNo}&vnp_CardType=${vnp_CardType}&vnp_OrderInfo=${vnp_OrderInfo}&vnp_PayDate=${vnp_PayDate}&vnp_ResponseCode=${vnp_ResponseCode}&vnp_TmnCode=${vnp_TmnCode}&vnp_TransactionNo=${vnp_TransactionNo}&vnp_TransactionStatus=${vnp_TransactionStatus}&vnp_TxnRef=${vnp_TxnRef}&vnp_SecureHash=${vnp_SecureHash}`);
 }
+
+
+export const callGetOrderById = async (userId: string, query: string) => {
+  return axios.get(`/api/v1/client/order/get-order-by-user-id?userId=${userId}&${query}`);
+};
+

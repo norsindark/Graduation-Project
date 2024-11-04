@@ -45,10 +45,19 @@ function PaymentReturn() {
           if (response.status === 200) {
             notification.success({
               message: 'Order success',
-              description: 'Thank you for your order',
+              description: (
+                <div>
+                  <p>Thank you for your order!</p>
+                  <p>Please check your email for order details.</p>
+                </div>
+              ),
+              duration: 5,
             });
             navigate('/order-success', {
-              state: { orderId: response.data?.message },
+              state: {
+                orderId: response.data?.message,
+                paymentMethod: 'VNPAY',
+              },
             });
             dispatch(doClearCartAction());
           }
