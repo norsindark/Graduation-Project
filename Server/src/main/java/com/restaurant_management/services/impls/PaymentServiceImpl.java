@@ -116,6 +116,7 @@ public class PaymentServiceImpl implements PaymentService {
 
         params.remove("vnp_SecureHash");
         params.remove("vnp_SecureHashType");
+
         Map<String, String> fields = new TreeMap<>();
         for (Map.Entry<String, String> entry : params.entrySet()) {
             String fieldName = URLEncoder.encode(entry.getKey(), StandardCharsets.US_ASCII);
@@ -131,25 +132,28 @@ public class PaymentServiceImpl implements PaymentService {
         if (!signValue.equals(vnp_SecureHash)) {
             return new ApiResponse("Invalid signature", HttpStatus.BAD_REQUEST);
         }
-        if (!"00".equals(params.get("vnp_TransactionStatus"))) {
-            return new ApiResponse("Transaction failed", HttpStatus.BAD_REQUEST);
 
-        }
         String orderInfo = params.get("vnp_TxnRef");
-        if (orderInfo != null) {
-            updateOrderStatusToPaid(orderInfo);
-            return new ApiResponse(orderInfo, HttpStatus.OK);
+        if (orderInfo == null) {
+            return new ApiResponse("Missing transaction reference", HttpStatus.BAD_REQUEST);
         }
-        return new ApiResponse("Payment Failed", HttpStatus.OK);
+
+        if (!"00".equals(params.get("vnp_TransactionStatus"))) {
+            updateOrderStatusToPaid(orderInfo, "FAILED");
+            return new ApiResponse(orderInfo , HttpStatus.BAD_REQUEST);
+        }
+
+        updateOrderStatusToPaid(orderInfo, "PAID");
+        return new ApiResponse(orderInfo, HttpStatus.OK);
     }
 
-    private void updateOrderStatusToPaid(String orderId) {
+    private void updateOrderStatusToPaid(String orderId, String status) {
         Optional<Order> orderOptional = orderRepository.findById(orderId);
         if (orderOptional.isEmpty()) {
             throw new RuntimeException("Order not found");
         }
         Order order = orderOptional.get();
-        order.setStatus("PAID");
+        order.setStatus(status);
         orderRepository.save(order);
     }
 }
