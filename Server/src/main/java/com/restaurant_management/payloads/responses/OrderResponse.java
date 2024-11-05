@@ -18,8 +18,10 @@ public class OrderResponse {
     private String userId;
     private String userEmail;
     private String orderStatus;
+    private String paymentMethod;
     private double totalPrice;
     private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
     private AddressResponse address;
     private List<OrderItemResponse> orderItems;
 
@@ -28,8 +30,10 @@ public class OrderResponse {
         this.userId = order.getUser().getId();
         this.userEmail = order.getUser().getEmail();
         this.orderStatus = order.getStatus();
+        this.paymentMethod = order.getPaymentMethod();
         this.totalPrice = order.getTotalPrice();
         this.createdAt = order.getCreatedAt();
+        this.updatedAt = order.getUpdatedAt();
         this.address = AddressResponse.toAddress(address);
         this.orderItems = orderItems.stream().map(OrderItemResponse::new).toList();
     }
