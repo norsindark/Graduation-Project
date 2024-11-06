@@ -33,6 +33,7 @@ import Setting from '../pages/admin/setting/Setting';
 import PaymentPage from '../pages/public/PaymentPage';
 import OrderSuccess from '../pages/public/OrderSuccess';
 import PaymentReturn from '../pages/public/PaymentReturn';
+import ProductOfferDaily from '../pages/admin/productofferdaily/ProductOfferDaily';
 export const router = createBrowserRouter([
   {
     path: '/',
@@ -147,6 +148,10 @@ export const router = createBrowserRouter([
       {
         path: '/warehouse',
         element: <Warehouse />,
+      },
+      {
+        path: '/product-daily-offer',
+        element: <ProductOfferDaily />,
       },
       {
         path: '/product',
