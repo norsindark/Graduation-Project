@@ -26,9 +26,7 @@ import java.io.UnsupportedEncodingException;
 import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -378,6 +376,19 @@ public class OrderServiceImpl implements OrderService {
                         });
             }
         }
+    }
+
+
+    @Override
+    public Map<String, Long> getDishSalesStatistics() {
+        List<Map<String, Long>> results = orderItemRepository.getDishSalesStatistics();
+
+        Map<String, Long> dishSalesStatistics = new HashMap<>();
+        for (Map<String, Long> result : results) {
+            dishSalesStatistics.put(String.valueOf(result.get("dishName")), result.get("totalQuantity"));
+        }
+
+        return dishSalesStatistics;
     }
 
 

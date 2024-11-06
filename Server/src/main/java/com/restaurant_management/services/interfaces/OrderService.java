@@ -9,6 +9,7 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
 
 import java.io.UnsupportedEncodingException;
+import java.util.Map;
 
 public interface OrderService {
     PagedModel<EntityModel<OrderResponse>> getAllOrdersByUserId(
@@ -26,4 +27,6 @@ public interface OrderService {
 
     ApiResponse cancelOrder(String orderId)
             throws DataExitsException, MessagingException, UnsupportedEncodingException;
+
+    public Map<String, Long> getDishSalesStatistics() throws DataExitsException;
 }
