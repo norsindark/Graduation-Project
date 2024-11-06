@@ -412,3 +412,17 @@ export const callGetAllIngredientWhenLowStock = async (percentage : number) => {
 export const callGetAllIngredientWhenNearlyExpired = async (query: any) => {
   return axios.get(`/api/v1/dashboard/warehouses/nearly-expired?${query}`);
 }
+
+// order
+
+export const callGetAllOrder = async (query: string) => {
+  return axios.get(`/api/v1/dashboard/order/get-all-orders?${query}`);
+}
+
+export const callUpdateStatusOrder = async (orderId: string, status: string) => {
+  return axios.put(`/api/v1/dashboard/order/update-order-status?orderId=${orderId}&status=${status}`);
+}
+
+export const callCancelOrder = async (orderId: string) => {
+  return axios.put(`/api/v1/client/order/cancel-order?orderId=${orderId}`);
+}

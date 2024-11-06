@@ -1,33 +1,88 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Button, notification, Row, Col } from 'antd';
-import OrderNew from './OrderNew';
-import OrderEdit from './OrderEdit';
-import axios from 'axios';
-import VNPayPayment from '../payment/VNPayPayment';
+import {
+  Table,
+  Button,
+  notification,
+  Row,
+  Col,
+  Select,
+  Modal,
+  Space,
+  Tag,
+} from 'antd';
+
+import {
+  callGetAllOrder,
+  callUpdateStatusOrder,
+  callCancelOrder,
+} from '../../../services/serverApi';
+import { ColumnType } from 'antd/es/table';
+import {
+  DeleteOutlined,
+  EditOutlined,
+  ExclamationCircleOutlined,
+  EyeOutlined,
+} from '@ant-design/icons';
+const { confirm } = Modal;
 
 interface OrderItem {
-  id: number;
-  customerName: string;
-  orderDate: string;
-  totalAmount: number;
-  status: string;
+  orderId: string;
+  userId: string;
+  userEmail: string;
+  orderStatus: string;
   paymentMethod: string;
-  paymentStatus: string;
-  shippingAddress: string;
-  products: {
-    id: number;
-    name: string;
-    quantity: number;
+  totalPrice: number;
+  createdAt: string;
+  updatedAt: string;
+  address: {
+    id: string;
+    street: string;
+    commune: string;
+    district: string | null;
+    city: string;
+    country: string;
+    state: string;
+    phoneNumber: string;
+  };
+  orderItems: {
+    itemId: string;
+    dishId: string;
+    dishName: string;
     price: number;
+    quantity: number;
+    totalPrice: number;
+    thumbImage: string;
+    options: {
+      optionId: string;
+      optionName: string;
+      additionalPrice: number;
+    }[];
   }[];
+}
+
+enum OrderStatus {
+  PENDING = 'PENDING',
+  CONFIRMED = 'CONFIRMED',
+  SHIPPING = 'SHIPPING',
+  DELIVERED = 'DELIVERED',
+  CANCELLED = 'CANCELLED',
+  PAID = 'PAID',
 }
 
 const Order: React.FC = () => {
   const [dataSource, setDataSource] = useState<OrderItem[]>([]);
-  const [showOrderNew, setShowOrderNew] = useState<boolean>(false);
-  const [showOrderEdit, setShowOrderEdit] = useState<boolean>(false);
-  const [currentItem, setCurrentItem] = useState<OrderItem | null>(null);
+
   const [loading, setLoading] = useState(false);
+
+  const [total, setTotal] = useState(0);
+  const [current, setCurrent] = useState(1);
+  const [pageSize, setPageSize] = useState(5);
+  const [sortQuery, setSortQuery] = useState('');
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const [isStatusModalVisible, setIsStatusModalVisible] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState<string>('');
+  const [newStatus, setNewStatus] = useState<OrderStatus>();
 
   useEffect(() => {
     fetchOrders();
@@ -36,17 +91,23 @@ const Order: React.FC = () => {
   const fetchOrders = async () => {
     setLoading(true);
     try {
-      const response = await axios.get('/api/orders');
-      if (Array.isArray(response.data.orders)) {
-        setDataSource(response.data.orders);
+      let query = `pageNo=${current - 1}&pageSize=${pageSize}`;
+      if (sortQuery) {
+        query += `&sortBy=${sortQuery}`;
       } else {
-        console.error('Dữ liệu nhận được không phải là mảng:', response.data);
+        query += `&sortBy=createdAt&sortDir=desc`;
+      }
+      const response = await callGetAllOrder(query);
+      if (response.data._embedded?.orderResponseList) {
+        setDataSource(response.data._embedded.orderResponseList);
+        setTotal(response.data.page.totalElements);
+      } else {
         setDataSource([]);
+        setTotal(0);
       }
     } catch (error) {
-      console.error('Lỗi khi tải danh sách đơn hàng:', error);
       notification.error({
-        message: 'Không thể tải danh sách đơn hàng',
+        message: 'Error during get process!',
         duration: 5,
         showProgress: true,
       });
@@ -55,220 +116,388 @@ const Order: React.FC = () => {
     setLoading(false);
   };
 
-  const handleAddSuccess = () => {
-    setShowOrderNew(false);
-    notification.success({
-      message: 'Đơn hàng đã được thêm thành công!',
-      duration: 5,
-      showProgress: true,
-    });
-    fetchOrders();
-  };
-
-  const handleEditSuccess = () => {
-    setShowOrderEdit(false);
-    setCurrentItem(null);
-    notification.success({
-      message: 'Đơn hàng đã được cập nhật thành công!',
-      duration: 5,
-      showProgress: true,
-    });
-    fetchOrders();
-  };
-
-  const handleEditClick = (item: OrderItem) => {
-    setCurrentItem(item);
-    setShowOrderEdit(true);
-  };
-
-  const handleDeleteClick = async (id: number) => {
-    try {
-      await axios.delete(`/api/orders/${id}`);
-      notification.success({
-        message: 'Đơn hàng đã được xóa thành công!',
-        duration: 5,
-        showProgress: true,
-      });
-      fetchOrders();
-    } catch (error) {
-      notification.error({
-        message: 'Không thể xóa đơn hàng',
-        duration: 5,
-        showProgress: true,
-      });
+  const onChange = (pagination: any, sortDir: any) => {
+    setCurrent(pagination.current);
+    setPageSize(pagination.pageSize);
+    if (sortDir && sortDir.field) {
+      const order = sortDir.order === 'ascend' ? 'asc' : 'desc';
+      setSortQuery(`${sortDir.field},${order}`);
+    } else {
+      setSortQuery('');
     }
   };
 
-  const handleShipOrder = async (id: number) => {
-    try {
-      await axios.put(`/api/orders/${id}/ship`);
-      notification.success({
-        message: 'Đơn hàng đã được chuyển sang trạng thái giao hàng!',
-        duration: 5,
-        showProgress: true,
-      });
-      fetchOrders();
-    } catch (error) {
-      notification.error({
-        message: 'Không thể cập nhật trạng thái giao hàng',
-        duration: 5,
-        showProgress: true,
-      });
-    }
+  const handleCancelOrder = async (orderId: string) => {
+    confirm({
+      title: 'Confirm cancel order',
+      icon: <ExclamationCircleOutlined />,
+      content: 'Are you sure you want to cancel this order?',
+      okText: 'Confirm',
+      cancelText: 'Cancel',
+      onOk: async () => {
+        try {
+          setLoading(true);
+          const cancelResponse = await callCancelOrder(orderId);
+
+          if (cancelResponse.status === 200) {
+            const updateResponse = await callUpdateStatusOrder(
+              orderId,
+              OrderStatus.CANCELLED
+            );
+
+            if (updateResponse.status === 200) {
+              notification.success({
+                message: 'Cancel order successfully',
+                duration: 5,
+                showProgress: true,
+              });
+              fetchOrders();
+            }
+          } else {
+            notification.error({
+              message: 'Unable to cancel order',
+              description:
+                cancelResponse.data.errors?.error ||
+                'Error during cancel process!',
+              duration: 5,
+              showProgress: true,
+            });
+          }
+        } catch (error) {
+          notification.error({
+            message: 'Unable to cancel order',
+            description: 'Error during cancel process!',
+            duration: 5,
+            showProgress: true,
+          });
+        } finally {
+          setLoading(false);
+        }
+      },
+    });
   };
 
-  const handleCompleteOrder = async (id: number) => {
+  const renderOrderStatus = (status: string, record: OrderItem) => {
+    const statusColor = {
+      PENDING: '#faad14',
+      CONFIRMED: '#1890ff',
+      SHIPPING: '#722ed1',
+      DELIVERED: '#52c41a',
+      CANCELLED: '#ff4d4f',
+      PAID: '#52c41a',
+    };
+
+    const statusText = {
+      PENDING: 'Pending',
+      CONFIRMED: 'Confirmed',
+      SHIPPING: 'Shipping',
+      DELIVERED: 'Delivered',
+      CANCELLED: 'Cancelled',
+      PAID: 'Paid',
+    };
+
+    return (
+      <Tag
+        className="font-bold text-base"
+        color={statusColor[status as keyof typeof statusColor]}
+      >
+        {statusText[status as keyof typeof statusText]}
+      </Tag>
+    );
+  };
+
+  const handleUpdateStatusOrder = async (orderId: string) => {
+    setSelectedOrder(orderId);
+    setIsStatusModalVisible(true);
+  };
+
+  const handleStatusUpdate = async () => {
+    if (!newStatus || !selectedOrder) return;
+
     try {
-      await axios.put(`/api/orders/${id}/complete`);
-      notification.success({
-        message: 'Đơn hàng đã được hoàn thành!',
-        duration: 5,
-        showProgress: true,
-      });
-      fetchOrders();
+      setLoading(true);
+      const response = await callUpdateStatusOrder(selectedOrder, newStatus);
+      if (response.status === 200) {
+        notification.success({
+          message: 'Update status successfully',
+          duration: 5,
+          showProgress: true,
+        });
+        setIsStatusModalVisible(false);
+        fetchOrders();
+      } else {
+        notification.error({
+          message: 'Unable to update status',
+          description:
+            response.data.errors?.error || 'Error during update process!',
+          duration: 5,
+          showProgress: true,
+        });
+      }
     } catch (error) {
       notification.error({
-        message: 'Không thể hoàn thành đơn hàng',
+        message: 'Unable to update status',
+        description: 'Error during update process!',
         duration: 5,
         showProgress: true,
       });
+    } finally {
+      setLoading(false);
     }
   };
 
   const columns = [
-    { title: 'Mã đơn hàng', dataIndex: 'id', key: 'id' },
-    { title: 'Tên khách hàng', dataIndex: 'customerName', key: 'customerName' },
-    { title: 'Ngày đặt hàng', dataIndex: 'orderDate', key: 'orderDate' },
     {
-      title: 'Tổng tiền',
-      dataIndex: 'totalAmount',
-      key: 'totalAmount',
-      render: (amount: number) => `${amount.toLocaleString()} VNĐ`,
+      title: 'Order ID',
+      dataIndex: 'orderId',
+      key: 'orderId',
+      width: 180,
+      render: (orderId: string) => {
+        return (
+          <div
+            style={{
+              cursor: 'pointer',
+              whiteSpace: isExpanded ? 'normal' : 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+            }}
+            onClick={() => setIsExpanded(!isExpanded)}
+            title={orderId}
+          >
+            {orderId}
+          </div>
+        );
+      },
     },
-    { title: 'Trạng thái', dataIndex: 'status', key: 'status' },
     {
-      title: 'Hành động',
-      key: 'actions',
+      title: 'User Email',
+      dataIndex: 'userEmail',
+      key: 'userEmail',
+      sorter: (a: any, b: any) => a.userEmail.localeCompare(b.userEmail),
+    },
+    {
+      title: 'Order Date',
+      dataIndex: 'createdAt',
+      key: 'createdAt',
+      width: 150,
+      render: (date: string) => new Date(date).toLocaleString('vi-VN'),
+      sorter: (a: any, b: any) =>
+        new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+    },
+    {
+      title: 'Total Price',
+      dataIndex: 'totalPrice',
+      key: 'totalPrice',
+      width: 150,
+      render: (amount: number) => `${amount.toLocaleString()} VNĐ`,
+      sorter: (a: any, b: any) => a.totalPrice - b.totalPrice,
+    },
+    {
+      title: 'Status',
+      dataIndex: 'orderStatus',
+      key: 'orderStatus',
+      width: 150,
+      render: (status: string, record: OrderItem) =>
+        renderOrderStatus(status, record),
+      sorter: (a: any, b: any) => a.orderStatus.localeCompare(b.orderStatus),
+    },
+    {
+      title: 'Payment Method',
+      dataIndex: 'paymentMethod',
+      key: 'paymentMethod',
+      width: 150,
+      render: (method: string) => {
+        const paymentMethods = {
+          COD: 'Cash',
+          BANKING: 'Banking',
+        };
+        return paymentMethods[method as keyof typeof paymentMethods] || method;
+      },
+      sorter: (a: any, b: any) =>
+        a.paymentMethod.localeCompare(b.paymentMethod),
+    },
+    {
+      title: 'Delivery Address',
+      dataIndex: 'address',
+      key: 'address',
+      width: 300,
+      render: (address: any) => (
+        <div>
+          <div>{address.street}</div>
+          <div>{`${address.commune}, ${address.city}`}</div>
+          <div>{`${address.state}, ${address.country}`}</div>
+          <div>SĐT: {address.phoneNumber}</div>
+        </div>
+      ),
+      sorter: (a: any, b: any) =>
+        a.address.phoneNumber.localeCompare(b.address.phoneNumber),
+    },
+    {
+      title: 'Order Detail',
+      key: 'orderItems',
+      fixed: 'right',
+      width: 120,
       render: (_: any, record: OrderItem) => (
-        <Row gutter={[8, 8]}>
-          <Col xs={24} sm={12} md={12} lg={8} xl={6} xxl={6}>
-            <Button
-              type="primary"
-              shape="round"
-              block
-              onClick={() => handleEditClick(record)}
-            >
-              Sửa
-            </Button>
-          </Col>
-          <Col xs={24} sm={12} md={12} lg={8} xl={6} xxl={6}>
-            <Button
-              type="primary"
-              shape="round"
-              danger
-              block
-              onClick={() => handleDeleteClick(record.id)}
-            >
-              Xóa
-            </Button>
-          </Col>
-          {record.status === 'Đã xác nhận' && (
-            <Col xs={24} sm={12} md={12} lg={8} xl={6} xxl={6}>
-              <Button
-                type="primary"
-                shape="round"
-                block
-                onClick={() => handleShipOrder(record.id)}
-              >
-                Giao hàng
-              </Button>
-            </Col>
-          )}
-          {record.status === 'Đang giao hàng' && (
-            <Col xs={24} sm={12} md={12} lg={8} xl={6} xxl={6}>
-              <Button
-                type="primary"
-                shape="round"
-                block
-                onClick={() => handleCompleteOrder(record.id)}
-              >
-                Hoàn thành
-              </Button>
-            </Col>
-          )}
-          {record.paymentMethod === 'VNPay' &&
-            record.paymentStatus === 'Chưa thanh toán' && (
-              <Col xs={24} sm={12} md={12} lg={8} xl={6} xxl={6}>
-                <VNPayPayment orderId={record.id} amount={record.totalAmount} />
-              </Col>
-            )}
-        </Row>
+        <Button
+          type="primary"
+          shape="round"
+          icon={<EyeOutlined />}
+          onClick={() => {
+            Modal.info({
+              title: 'Order Detail',
+              width: 800,
+              content: (
+                <div>
+                  {record.orderItems.map((item, index) => (
+                    <div
+                      key={item.itemId}
+                      style={{
+                        marginBottom: 15,
+                        borderBottom:
+                          index !== record.orderItems.length - 1
+                            ? '1px solid #f0f0f0'
+                            : 'none',
+                        paddingBottom: 10,
+                      }}
+                    >
+                      <Row gutter={[16, 8]} align="middle">
+                        <Col span={6}>
+                          <img
+                            src={item.thumbImage}
+                            alt={item.dishName}
+                            style={{ width: '100%', borderRadius: 8 }}
+                          />
+                        </Col>
+                        <Col span={18}>
+                          <h4 style={{ margin: '0 0 8px 0' }}>
+                            {item.dishName}
+                          </h4>
+                          <p>Quantity: {item.quantity}</p>
+                          <p>
+                            Original Price: {item.price.toLocaleString()} VNĐ
+                          </p>
+                          {item.options && item.options.length > 0 && (
+                            <div>
+                              <p>Options:</p>
+                              {item.options.map((opt) => (
+                                <p key={opt.optionId}>
+                                  - {opt.optionName}: +
+                                  {opt.additionalPrice.toLocaleString()} VNĐ
+                                </p>
+                              ))}
+                            </div>
+                          )}
+                          <p>
+                            <strong>
+                              Total: {item.totalPrice.toLocaleString()} VNĐ
+                            </strong>
+                          </p>
+                        </Col>
+                      </Row>
+                    </div>
+                  ))}
+                  <div
+                    style={{
+                      marginTop: 15,
+                      textAlign: 'right',
+                      borderTop: '2px solid #f0f0f0',
+                      paddingTop: 15,
+                    }}
+                  >
+                    <h3>Total: {record.totalPrice.toLocaleString()} VNĐ</h3>
+                  </div>
+                </div>
+              ),
+            });
+          }}
+        >
+          View
+        </Button>
       ),
     },
     {
-      title: 'Phương thức thanh toán',
-      dataIndex: 'paymentMethod',
-      key: 'paymentMethod',
-    },
-    {
-      title: 'Trạng thái thanh toán',
-      dataIndex: 'paymentStatus',
-      key: 'paymentStatus',
-    },
-    {
-      title: 'Địa chỉ giao hàng',
-      dataIndex: 'shippingAddress',
-      key: 'shippingAddress',
+      title: 'Action',
+      key: 'action',
+      fixed: 'right',
+      width: 280,
+      render: (_: any, record: OrderItem) => {
+        const canCancel =
+          record.orderStatus === 'PENDING' ||
+          record.orderStatus === 'CONFIRMED';
+
+        return (
+          <Space>
+            <Button
+              type="primary"
+              onClick={() => handleUpdateStatusOrder(record.orderId)}
+              shape="round"
+              icon={<EditOutlined />}
+            >
+              Edit Status
+            </Button>
+            <Button
+              type="primary"
+              danger
+              shape="round"
+              disabled={!canCancel}
+              icon={<DeleteOutlined />}
+              onClick={() => handleCancelOrder(record.orderId)}
+            >
+              Cancel
+            </Button>
+          </Space>
+        );
+      },
     },
   ];
 
   return (
     <div className="layout-content">
-      <Row>
-        <Col xs={24} sm={12} md={12} lg={8} xl={4} xxl={4}>
-          {!showOrderNew && !showOrderEdit && (
-            <Button
-              type="primary"
-              className="mb-3"
-              onClick={() => setShowOrderNew(true)}
-              size="large"
-              shape="round"
-              block
-            >
-              Thêm đơn hàng mới
-            </Button>
-          )}
-        </Col>
-      </Row>
+      <Table
+        dataSource={dataSource}
+        columns={columns as ColumnType<OrderItem>[]}
+        rowKey="orderId"
+        loading={loading}
+        onChange={onChange}
+        pagination={{
+          current: current,
+          pageSize: pageSize,
+          total: total,
+          showSizeChanger: true,
+          showQuickJumper: true,
+          pageSizeOptions: ['5', '10', '20', '50'],
+          onShowSizeChange: (current, size) => {
+            setCurrent(1);
+            setPageSize(size);
+          },
+        }}
+        scroll={{ x: 'max-content' }}
+        bordered
+        rowClassName={(record, index) =>
+          index % 2 === 0 ? 'table-row-light' : 'table-row-dark'
+        }
+      />
 
-      <Row>
-        <Col xs={24} sm={24} md={24} lg={24} xl={24} xxl={24}>
-          {showOrderNew ? (
-            <OrderNew
-              onAddSuccess={handleAddSuccess}
-              setShowOrderNew={setShowOrderNew}
-            />
-          ) : showOrderEdit && currentItem ? (
-            <OrderEdit
-              currentItem={currentItem}
-              onEditSuccess={handleEditSuccess}
-              setShowOrderEdit={setShowOrderEdit}
-            />
-          ) : (
-            <Table
-              dataSource={dataSource}
-              columns={columns}
-              rowKey="id"
-              loading={loading}
-              pagination={{
-                pageSize: 10,
-                showSizeChanger: true,
-                total: dataSource.length,
-              }}
-            />
-          )}
-        </Col>
-      </Row>
+      <Modal
+        title="Update order status"
+        open={isStatusModalVisible}
+        onOk={handleStatusUpdate}
+        onCancel={() => setIsStatusModalVisible(false)}
+        okText="Update"
+        cancelText="Cancel"
+      >
+        <Select
+          style={{ width: '100%' }}
+          placeholder="Select new status"
+          onChange={(value) => setNewStatus(value as OrderStatus)}
+        >
+          {Object.values(OrderStatus).map((status) => (
+            <Select.Option key={status} value={status}>
+              {status}
+            </Select.Option>
+          ))}
+        </Select>
+      </Modal>
     </div>
   );
 };

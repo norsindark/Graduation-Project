@@ -55,8 +55,8 @@ const OrderAccount = () => {
 
   if (!userId) {
     notification.error({
-      message: 'Không thể tải danh sách đơn hàng',
-      description: 'Vui lòng đăng nhập để tiếp tục!',
+      message: 'Can not fetch order list',
+      description: 'Please login to continue!',
       duration: 5,
       showProgress: true,
     });
@@ -86,17 +86,16 @@ const OrderAccount = () => {
         }
       } else {
         notification.error({
-          message: 'Không thể tải danh sách đơn hàng',
-          description:
-            response.data.errors?.error || 'Lỗi trong quá trình tải dữ liệu!',
+          message: 'Can not fetch order list',
+          description: response.data.errors?.error || 'Error in loading data!',
           duration: 5,
           showProgress: true,
         });
       }
     } catch {
       notification.error({
-        message: 'Không thể tải danh sách đơn hàng',
-        description: 'Lỗi trong quá trình tải dữ liệu!',
+        message: 'Can not fetch order list',
+        description: 'Error in loading data!',
         duration: 5,
         showProgress: true,
       });
@@ -130,17 +129,17 @@ const OrderAccount = () => {
       <div className="fp_dashboard_body">
         {!isInvoiceModalOpen ? (
           <>
-            <h3>Danh sách đơn hàng</h3>
+            <h3>Order list</h3>
             <div className="fp_dashboard_order">
               <div className="table-responsive">
                 <table className="table">
                   <tbody>
                     <tr className="t_header">
-                      <th>Mã đơn hàng</th>
-                      <th>Ngày đặt</th>
-                      <th>Trạng thái</th>
-                      <th>Tổng tiền</th>
-                      <th>Thao tác</th>
+                      <th>Order ID</th>
+                      <th>Order date</th>
+                      <th>Status</th>
+                      <th>Total price</th>
+                      <th>Action</th>
                     </tr>
                     {listOrder.map((order) => (
                       <tr key={order.orderId}>
@@ -164,14 +163,14 @@ const OrderAccount = () => {
                           </span>
                         </td>
                         <td>
-                          <h5>{order.totalPrice.toLocaleString()}đ</h5>
+                          <h5>{order.totalPrice.toLocaleString()} VNĐ</h5>
                         </td>
                         <td>
                           <a
                             className="view_invoice"
                             onClick={() => handleViewInvoice(order)}
                           >
-                            Xem chi tiết
+                            View detail
                           </a>
                         </td>
                       </tr>
@@ -189,61 +188,73 @@ const OrderAccount = () => {
               className="go_back"
               onClick={handleGoBack}
             >
-              <i className="fas fa-long-arrow-alt-left"></i> Quay lại
+              <i className="fas fa-long-arrow-alt-left"></i> Go back
             </Button>
             <div className="fp__track_order">
               <ul>
                 <li
                   className={
-                    selectedOrder?.orderStatus === 'PENDING' ? 'active' : ''
+                    selectedOrder?.orderStatus === 'PENDING' ||
+                    selectedOrder?.orderStatus === 'PAID' ||
+                    selectedOrder?.orderStatus === 'PROCESSING' ||
+                    selectedOrder?.orderStatus === 'SHIPPING' ||
+                    selectedOrder?.orderStatus === 'COMPLETED'
+                      ? 'active'
+                      : ''
                   }
                 >
-                  Chờ xác nhận
+                  Pending
                 </li>
                 <li
                   className={
-                    selectedOrder?.orderStatus === 'ACCEPTED' ? 'active' : ''
+                    selectedOrder?.orderStatus === 'ACCEPTED' ||
+                    selectedOrder?.orderStatus === 'PAID'
+                      ? 'active'
+                      : ''
                   }
                 >
-                  Đã xác nhận
+                  Accepted
                 </li>
                 <li
                   className={
                     selectedOrder?.orderStatus === 'PROCESSING' ? 'active' : ''
                   }
                 >
-                  Đang xử lý
+                  Processing
                 </li>
                 <li
                   className={
                     selectedOrder?.orderStatus === 'SHIPPING' ? 'active' : ''
                   }
                 >
-                  Đang giao
+                  Shipping
                 </li>
                 <li
                   className={
                     selectedOrder?.orderStatus === 'COMPLETED' ? 'active' : ''
                   }
                 >
-                  Hoàn thành
+                  Completed
                 </li>
               </ul>
             </div>
             <div className="fp__invoice_header">
               <div className="header_address">
-                <h4>Địa chỉ giao hàng</h4>
+                <h4>Delivery address</h4>
                 <p>
                   {selectedOrder?.address.street},{' '}
                   {selectedOrder?.address.commune}
                   <br />
                   {selectedOrder?.address.city}, {selectedOrder?.address.state}
                 </p>
-                <p>{selectedOrder?.address.phoneNumber}</p>
+                <p>
+                  <b>Phone:</b>{' '}
+                  <span>{selectedOrder?.address.phoneNumber}</span>
+                </p>
               </div>
               <div className="header_address">
                 <p>
-                  <b>Mã hóa đơn: </b>
+                  <b>Invoice code: </b>
                   <span>
                     #{selectedOrder?.orderId.substring(0, 8).toUpperCase()}
                   </span>
@@ -252,7 +263,7 @@ const OrderAccount = () => {
                   <b>Email:</b> <span>{selectedOrder?.userEmail}</span>
                 </p>
                 <p>
-                  <b>Ngày đặt:</b>{' '}
+                  <b>Order date:</b>{' '}
                   <span>
                     {selectedOrder?.createdAt
                       ? new Date(selectedOrder.createdAt).toLocaleDateString(
@@ -269,31 +280,34 @@ const OrderAccount = () => {
                   <tbody>
                     <tr className="border_none">
                       <th className="sl_no">STT</th>
-                      <th className="package">Tên món</th>
-                      <th className="price">Đơn giá</th>
-                      <th className="qnty">Số lượng</th>
-                      <th className="total">Thành tiền</th>
+                      <th className="package">Dish name</th>
+                      <th className="option">Options</th>
+                      <th className="price">Price</th>
+                      <th className="qnty">Quantity</th>
+                      <th className="total">Total price option</th>
                     </tr>
                     {selectedOrder?.orderItems.map((item, index) => (
                       <tr key={item.itemId}>
                         <td className="sl_no">{index + 1}</td>
                         <td className="package">
                           <p>{item.dishName}</p>
+                        </td>
+                        <td className="option flex flex-col  gap-2">
                           {item.options.map((option) => (
                             <span key={option.optionId} className="size">
                               {option.optionName} (+
-                              {option.additionalPrice.toLocaleString()}đ)
+                              {option.additionalPrice.toLocaleString()} VNĐ)
                             </span>
                           ))}
                         </td>
                         <td className="price">
-                          <b>{item.price.toLocaleString()}đ</b>
+                          <b>{item.price.toLocaleString()} VNĐ</b>
                         </td>
                         <td className="qnty">
                           <b>{item.quantity}</b>
                         </td>
                         <td className="total">
-                          <b>{item.totalPrice.toLocaleString()}đ</b>
+                          <b>{item.totalPrice.toLocaleString()} VNĐ</b>
                         </td>
                       </tr>
                     ))}
@@ -301,13 +315,13 @@ const OrderAccount = () => {
                   <tfoot>
                     <tr>
                       <td className="package" colSpan={3}>
-                        <b>Tổng tiền</b>
+                        <b>Total price</b>
                       </td>
                       <td className="qnty">
                         <b></b>
                       </td>
                       <td className="total">
-                        <b>{selectedOrder?.totalPrice.toLocaleString()}đ</b>
+                        <b>{selectedOrder?.totalPrice.toLocaleString()} VNĐ</b>
                       </td>
                     </tr>
                   </tfoot>
@@ -315,7 +329,7 @@ const OrderAccount = () => {
               </div>
             </div>
             <a className="print_btn common_btn" href="#">
-              <i className="far fa-print"></i> In hóa đơn
+              <i className="far fa-print"></i> Print invoice
             </a>
           </div>
         )}

@@ -95,6 +95,21 @@ function Sidenav({ color }: { color: string }) {
     {
       key: '7',
       label: (
+        <NavLink to="/product-daily-offer">
+          <span
+            className="icon"
+            style={{ background: page === 'product-daily-offer' ? color : '' }}
+          >
+            {' '}
+            <FaTags />
+          </span>
+          <span className="label">Daily Offer</span>
+        </NavLink>
+      ),
+    },
+    {
+      key: '8',
+      label: (
         <NavLink to="/product">
           <span
             className="icon"
@@ -122,7 +137,7 @@ function Sidenav({ color }: { color: string }) {
       ),
     },
     {
-      key: '9',
+      key: '10',
       label: (
         <NavLink to="/Coupon">
           <span
@@ -136,7 +151,7 @@ function Sidenav({ color }: { color: string }) {
       ),
     },
     {
-      key: '10',
+      key: '11',
       label: (
         <NavLink to="/order">
           <span
@@ -150,7 +165,7 @@ function Sidenav({ color }: { color: string }) {
       ),
     },
     {
-      key: '11',
+      key: '12',
       label: (
         <NavLink to="/review">
           <span
@@ -164,7 +179,7 @@ function Sidenav({ color }: { color: string }) {
       ),
     },
     {
-      key: '12',
+      key: '13',
       label: (
         <NavLink to="/setting">
           <span
