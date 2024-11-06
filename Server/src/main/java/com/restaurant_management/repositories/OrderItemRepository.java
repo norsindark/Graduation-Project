@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
+import java.util.Map;
 
 public interface OrderItemRepository extends JpaRepository<OrderItem, String> {
 
@@ -14,4 +15,10 @@ public interface OrderItemRepository extends JpaRepository<OrderItem, String> {
 
     @Query("SELECT oi FROM OrderItem oi WHERE oi.order.id = ?1")
     List<OrderItem> findByOrderId(String orderId);
+
+    @Query("SELECT new map(i.dish.dishName as dishName, SUM(i.quantity) as totalQuantity) " +
+            "FROM OrderItem i JOIN i.order o " +
+            "WHERE o.status = 'COMPLETED' " +
+            "GROUP BY i.dish.dishName")
+    List<Map<String, Long>> getDishSalesStatistics();
 }

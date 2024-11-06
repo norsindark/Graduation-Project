@@ -82,7 +82,7 @@ public class AdminController {
 
 
     // orders
-    @GetMapping("/get-all-orders")
+    @GetMapping("order/get-all-orders")
     @Operation(summary = "get all orders", tags = {"Order"})
     public ResponseEntity<PagedModel<EntityModel<OrderResponse>>> getAllOrders(
             @RequestParam(defaultValue = "0") int pageNo,
@@ -98,5 +98,11 @@ public class AdminController {
     public ResponseEntity<ApiResponse> updateOrderStatus(@RequestParam String orderId, @RequestParam String status)
             throws DataExitsException, MessagingException, UnsupportedEncodingException {
         return ResponseEntity.ok(orderService.updateOrderStatus(orderId, status));
+    }
+
+    @GetMapping("order/get-dish-sales-statistics")
+    @Operation(summary = "get dish sales statistics", tags = {"Order"})
+    public ResponseEntity<?> getDishSalesStatistics() throws DataExitsException {
+        return ResponseEntity.ok(orderService.getDishSalesStatistics());
     }
 }

@@ -34,6 +34,7 @@ public class Dish {
 
     @Lob
     @Column(name = "long_description", columnDefinition = "TEXT")
+    @JsonIgnore
     private String longDescription;
 
     @Column(name = "status", length = 20)
