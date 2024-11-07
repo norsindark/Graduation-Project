@@ -46,11 +46,21 @@ public class OfferServiceImpl implements OfferService {
             throws DataExitsException {
         Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.fromString(sortDir), sortBy));
         Page<Offer> offers = offerRepository.findAll(pageable);
+        offers.forEach(this::checkValidOffer);
 
         if (offers.isEmpty()) {
             throw new DataExitsException("No offers found");
         }
         return pagedResourcesAssembler.toModel(offers.map(OfferResponse::new));
+    }
+
+    private void checkValidOffer(Offer offer) {
+        if (offer.getAvailableQuantityOffer() == 0) {
+            offerRepository.delete(offer);
+        }
+        if (offer.getEndDate().isBefore(java.time.LocalDate.now())) {
+            offerRepository.delete(offer);
+        }
     }
 
     @Override
