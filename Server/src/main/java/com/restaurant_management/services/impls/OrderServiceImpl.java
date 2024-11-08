@@ -391,6 +391,54 @@ public class OrderServiceImpl implements OrderService {
         return dishSalesStatistics;
     }
 
+    @Override
+    public Map<String, Map<String, Double>> getDishSalesRevenueAndProfit() {
+        List<Recipe> recipes = recipeRepository.findAll();
+
+        Map<String, Double> dishTotalRevenue = new HashMap<>();
+        Map<String, Double> dishTotalCost = new HashMap<>();
+
+        for (Recipe recipe : recipes) {
+            Dish dish = recipe.getDish();
+            Warehouse warehouse = recipe.getWarehouse();
+            Double quantityUsed = recipe.getQuantityUsed();
+            String recipeUnit = recipe.getUnit();
+            String warehouseUnit = warehouse.getUnit();
+
+            double convertedQuantityUsed = UnitType.convert(quantityUsed, UnitType.fromString(recipeUnit), UnitType.fromString(warehouseUnit));
+
+            double costPerUnit = warehouse.getImportedPrice();
+
+            double cost = costPerUnit * (convertedQuantityUsed / warehouse.getImportedQuantity());
+
+            List<Map<String, Double>> revenueResults = orderItemRepository.getDishSalesRevenue();
+            for (Map<String, Double> result : revenueResults) {
+                String dishName = String.valueOf(result.get("dishName"));
+                if (dishName.equals(dish.getDishName())) {
+                    double revenue = (Double) result.get("totalRevenue");
+                    dishTotalRevenue.put(dishName, revenue);
+                }
+            }
+
+            dishTotalCost.put(dish.getDishName(), cost);
+        }
+
+        Map<String, Map<String, Double>> dishStatistics = new HashMap<>();
+        for (String dishName : dishTotalRevenue.keySet()) {
+            double revenue = dishTotalRevenue.get(dishName);
+            double cost = dishTotalCost.getOrDefault(dishName, 0.0);
+            double profit = revenue - cost;
+
+            Map<String, Double> stats = new HashMap<>();
+            stats.put("totalRevenue", revenue);
+            stats.put("totalCost", cost);
+            stats.put("profit", profit);
+
+            dishStatistics.put(dishName, stats);
+        }
+
+        return dishStatistics;
+    }
 
     private void sendEmailListOrderItems(String email, List<OrderItemDto> items, String couponId, Double totalPrice, String paymentMethod, String status, Double shippingFee)
             throws MessagingException, UnsupportedEncodingException, DataExitsException {

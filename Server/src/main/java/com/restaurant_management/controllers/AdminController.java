@@ -105,4 +105,10 @@ public class AdminController {
     public ResponseEntity<?> getDishSalesStatistics() throws DataExitsException {
         return ResponseEntity.ok(orderService.getDishSalesStatistics());
     }
+
+    @GetMapping("order/get-dish-sales-revenue-profit")
+    @Operation(summary = "get dish sales revenue and profit", tags = {"Order"})
+    public ResponseEntity<?> getDishSalesRevenueAndProfit() {
+        return ResponseEntity.ok(orderService.getDishSalesRevenueAndProfit());
+    }
 }

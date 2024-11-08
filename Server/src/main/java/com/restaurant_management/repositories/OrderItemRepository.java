@@ -21,4 +21,22 @@ public interface OrderItemRepository extends JpaRepository<OrderItem, String> {
             "WHERE o.status = 'COMPLETED' " +
             "GROUP BY i.dish.dishName")
     List<Map<String, Long>> getDishSalesStatistics();
+
+    @Query("SELECT new map(i.dish.dishName as dishName, " +
+            "SUM(i.quantity * i.price) as totalRevenue) " +
+            "FROM OrderItem i " +
+            "JOIN i.order o " +
+            "WHERE o.status = 'COMPLETED' " +
+            "GROUP BY i.dish.dishName")
+    List<Map<String, Double>> getDishSalesRevenue();
+
+    @Query("SELECT new map(i.dish.dishName as dishName, " +
+            "SUM(i.quantity * (r.warehouse.importedPrice * r.quantityUsed / r.warehouse.importedQuantity)) as totalCost) " +
+            "FROM OrderItem i " +
+            "JOIN i.order o " +
+            "JOIN Recipe r ON i.dish.id = r.dish.id " +
+            "JOIN Warehouse w ON r.warehouse.id = w.id " +
+            "WHERE o.status = 'COMPLETED' " +
+            "GROUP BY i.dish.dishName")
+    List<Map<String, Double>> getDishSalesCost();
 }

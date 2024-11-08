@@ -29,4 +29,6 @@ public interface OrderService {
             throws DataExitsException, MessagingException, UnsupportedEncodingException;
 
     public Map<String, Long> getDishSalesStatistics() throws DataExitsException;
+
+    Map<String, Map<String, Double>> getDishSalesRevenueAndProfit();
 }
