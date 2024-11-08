@@ -529,11 +529,11 @@ const ProductDetail: React.FC = () => {
                       ADD TO CART
                     </a>
                   </li>
-                  <li>
+                  {/* <li>
                     <a className="wishlist" href="#">
                       <i className="far fa-heart"></i>
                     </a>
-                  </li>
+                  </li> */}
                 </ul>
               </div>
             </div>

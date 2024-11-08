@@ -258,3 +258,15 @@ export const callGetOrderById = async (userId: string, query: string) => {
   return axios.get(`/api/v1/client/order/get-order-by-user-id?userId=${userId}&${query}`);
 };
 
+export const callWishList = (dishId: string,  userId: string) => {
+  return axios.post(`/api/v1/client/wishlist/add-dish-to-wishlist?dishId=${dishId}&userId=${userId}`);
+};
+
+export const callWishListById = async (userId: string, query: string) => {
+  return axios.get(`/api/v1/client/wishlist/get-wishlist-by-user-id?userId=${userId}&${query}`);
+};
+
+export const callDeleteWishList = async (dishId: string,  userId: string) => {
+  return axios.delete(`/api/v1/client/wishlist/remove-dish-from-wishlist?dishId=${dishId}&userId=${userId}`);
+};
+

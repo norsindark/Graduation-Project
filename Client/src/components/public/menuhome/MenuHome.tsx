@@ -2,10 +2,14 @@ import { useState, useEffect } from 'react';
 import {
   callGetAllCategory,
   callGetAllDishes,
+  callWishList,
+  callWishListById,
 } from '../../../services/clientApi';
 import { notification, Pagination } from 'antd';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import Loading from '../../../components/Loading/Loading';
+import { RootState } from '../../../redux/store';
+import { useSelector } from 'react-redux';
 
 interface Product {
   dishId: string;
@@ -22,6 +26,19 @@ interface Product {
 interface Category {
   name: string;
   subCategories: { name: string }[];
+}
+
+interface WishListDish {
+  dishId: string;
+  dishName: string;
+  slug: string;
+  description: string;
+  status: string;
+  thumbImage: string;
+  offerPrice: number;
+  price: number;
+  rating: number;
+  ratingCount: number;
 }
 
 function MenuHome() {
@@ -126,6 +143,65 @@ function MenuHome() {
 
   const handleProductClick = (slug: string) => {
     navigate(`/product-detail/${slug}`);
+  };
+
+  //WishList
+    
+  const userId = useSelector((state: RootState) => state.account.user?.id);
+  const handleAddToWishlist = async (dishId: string) => {
+    console.log("dishId:", dishId);
+    console.log("userId:", userId);
+  
+    if (!userId) {
+      notification.error({
+        message: 'Not logged in',
+        description: 'Please log in to add products to your favorites list.',
+      });
+      return;
+    }
+  
+    try {
+      // Bước 1: Lấy danh sách yêu thích của người dùng
+      const wishListResponse = await callWishListById(userId, '');
+      console.log("wishListResponse:", wishListResponse); // In ra phản hồi từ API
+  
+      // Kiểm tra xem _embedded có tồn tại và truy cập vào wishlistResponseList
+      const wishListItems = wishListResponse.data._embedded?.wishlistResponseList || [];
+      console.log("Wish List Items:", wishListItems); // In ra danh sách món ăn để kiểm tra
+  
+      // Bước 2: Kiểm tra xem sản phẩm đã có trong danh sách yêu thích hay chưa
+      const isInWishlist = wishListItems.some((item: any) => 
+        item.dishes?.some((dish: WishListDish) => dish.dishId === dishId)
+      );
+  
+      if (isInWishlist) {
+        notification.warning({
+          message: 'The product is already in the favorites list',
+          description: 'You have added this product to your favorites list.',
+        });
+        return;
+      }
+  
+      // Bước 3: Thêm sản phẩm vào danh sách yêu thích
+      const response = await callWishList(dishId, userId);
+      if (response.status === 200) {
+        notification.success({
+          message: 'Add to favorites list',
+          description: 'The product has been successfully added to the favorites list.',
+        });
+      } else {
+        notification.error({
+          message: 'Error',
+          description: 'An error occurred while adding a product to your favorites list.',
+        });
+      }
+    } catch (error) {
+      console.error("Error occurred:", error); // Print out errors for testing
+      notification.error({
+        message: 'Error',
+        description: 'Please try again later.',
+      });
+    }
   };
 
   return (
@@ -256,9 +332,9 @@ function MenuHome() {
                       </a>
                     </li> */}
                     <li>
-                      <a href="#">
-                        <i className="fal fa-heart "></i>
-                      </a>
+                      <div className="heart" onClick={() => handleAddToWishlist(product.dishId)}>
+                        <i className="fal fa-heart" ></i>
+                      </div>
                     </li>
                     <li>
                       <Link
