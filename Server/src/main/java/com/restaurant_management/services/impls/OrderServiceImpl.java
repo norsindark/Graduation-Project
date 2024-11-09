@@ -392,6 +392,107 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    public Map<String, Map<String, Map<String, Double>>> getDishSalesRevenueAndProfitByMonth() {
+        List<Map<String, Object>> monthlyRevenueResults = orderItemRepository.getDishSalesRevenueByMonth();
+        System.out.println(monthlyRevenueResults);
+        List<Recipe> recipes = recipeRepository.findAll();
+
+        Map<String, Map<String, Map<String, Double>>> dishStatisticsByMonth = new HashMap<>();
+
+        for (Recipe recipe : recipes) {
+            Dish dish = recipe.getDish();
+            Warehouse warehouse = recipe.getWarehouse();
+            Double quantityUsed = recipe.getQuantityUsed();
+            String recipeUnit = recipe.getUnit();
+            String warehouseUnit = warehouse.getUnit();
+
+            double convertedQuantityUsed = UnitType.convert(quantityUsed, UnitType.fromString(recipeUnit), UnitType.fromString(warehouseUnit));
+            double costPerUnit = warehouse.getImportedPrice();
+
+            String dishName = dish.getDishName();
+
+            monthlyRevenueResults.stream()
+                    .filter(result -> result.get("dishName").equals(dishName))
+                    .forEach(result -> {
+                        int month = (int) result.get("month");
+                        int year = (int) result.get("year");
+                        double revenue = (double) result.get("totalRevenue");
+
+                        Long totalQuantitySold = (Long) result.get("totalQuantitySold");
+                        int totalQuantitySoldInt = totalQuantitySold != null ? totalQuantitySold.intValue() : 0;
+
+                        double updatedCost = costPerUnit * totalQuantitySoldInt * (convertedQuantityUsed / warehouse.getImportedQuantity());
+
+                        double profit = revenue - updatedCost;
+
+                        Map<String, Double> stats = new HashMap<>();
+                        stats.put("totalRevenue", revenue);
+                        stats.put("totalCost", updatedCost);
+                        stats.put("profit", profit);
+
+                        String monthKey = month + "-" + year;
+
+                        dishStatisticsByMonth
+                                .computeIfAbsent(monthKey, k -> new HashMap<>())
+                                .put(dish.getDishName(), stats);
+                    });
+        }
+
+        return dishStatisticsByMonth;
+    }
+
+
+    @Override
+    public Map<String, Map<String, Map<String, Double>>> getDishSalesRevenueAndProfitByWeek() {
+        List<Map<String, Object>> weeklyRevenueResults = orderItemRepository.getDishSalesRevenueByWeek();
+        List<Recipe> recipes = recipeRepository.findAll();
+
+        Map<String, Map<String, Map<String, Double>>> dishStatisticsByWeek = new HashMap<>();
+
+        for (Recipe recipe : recipes) {
+            Dish dish = recipe.getDish();
+            Warehouse warehouse = recipe.getWarehouse();
+            Double quantityUsed = recipe.getQuantityUsed();
+            String recipeUnit = recipe.getUnit();
+            String warehouseUnit = warehouse.getUnit();
+
+            double convertedQuantityUsed = UnitType.convert(quantityUsed, UnitType.fromString(recipeUnit), UnitType.fromString(warehouseUnit));
+            double costPerUnit = warehouse.getImportedPrice();
+
+            String dishName = dish.getDishName();
+
+            weeklyRevenueResults.stream()
+                    .filter(result -> result.get("dishName").equals(dishName))
+                    .forEach(result -> {
+                        int week = (int) result.get("week");
+                        int year = (int) result.get("year");
+                        double revenue = (double) result.get("totalRevenue");
+
+                        Long totalQuantitySold = (Long) result.get("totalQuantitySold");
+                        int totalQuantitySoldInt = totalQuantitySold != null ? totalQuantitySold.intValue() : 0;
+
+                        double updatedCost = costPerUnit * totalQuantitySoldInt * (convertedQuantityUsed / warehouse.getImportedQuantity());
+
+                        double profit = revenue - updatedCost;
+
+                        Map<String, Double> stats = new HashMap<>();
+                        stats.put("totalRevenue", revenue);
+                        stats.put("totalCost", updatedCost);
+                        stats.put("profit", profit);
+
+                        String weekKey = "W" + week + "-" + year;
+
+                        dishStatisticsByWeek
+                                .computeIfAbsent(weekKey, k -> new HashMap<>())
+                                .put(dish.getDishName(), stats);
+                    });
+        }
+
+        return dishStatisticsByWeek;
+    }
+
+
+    @Override
     public Map<String, Map<String, Double>> getDishSalesRevenueAndProfit() {
         List<Recipe> recipes = recipeRepository.findAll();
 
