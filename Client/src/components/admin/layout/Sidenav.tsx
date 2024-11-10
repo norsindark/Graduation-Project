@@ -123,7 +123,7 @@ function Sidenav({ color }: { color: string }) {
       ),
     },
     {
-      key: '8',
+      key: '9',
       label: (
         <NavLink to="/warehouse">
           <span
