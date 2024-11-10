@@ -3,6 +3,7 @@ package com.restaurant_management.services.impls;
 import com.restaurant_management.entites.Role;
 import com.restaurant_management.entites.User;
 import com.restaurant_management.enums.RoleName;
+import com.restaurant_management.enums.StatusType;
 import com.restaurant_management.repositories.RoleRepository;
 import com.restaurant_management.repositories.UserRepository;
 import com.restaurant_management.services.interfaces.OAuthService;
@@ -70,6 +71,7 @@ public class OAuthServiceImpl implements OAuthService {
             newUser.setEmail(email);
             newUser.setFullName(fullName);
             newUser.setEnabled(true);
+            newUser.setStatus(StatusType.ACTIVE.toString());
             newUser.setEmailVerifiedAt(Timestamp.valueOf(LocalDateTime.now()));
             Role role = roleRepository.findByName(RoleName.USER.toString());
             newUser.setRole(role);

@@ -8,7 +8,9 @@ import com.restaurant_management.payloads.responses.ApiResponse;
 import com.restaurant_management.payloads.responses.OfferResponse;
 import com.restaurant_management.repositories.DishRepository;
 import com.restaurant_management.repositories.OfferRepository;
+import com.restaurant_management.services.interfaces.EmailService;
 import com.restaurant_management.services.interfaces.OfferService;
+import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -21,6 +23,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -30,6 +33,7 @@ import java.util.stream.Collectors;
 @Transactional
 public class OfferServiceImpl implements OfferService {
 
+    private final EmailService emailService;
     private final OfferRepository offerRepository;
     private final DishRepository dishRepository;
     private final PagedResourcesAssembler<OfferResponse> pagedResourcesAssembler;
@@ -54,17 +58,8 @@ public class OfferServiceImpl implements OfferService {
         return pagedResourcesAssembler.toModel(offers.map(OfferResponse::new));
     }
 
-    private void checkValidOffer(Offer offer) {
-        if (offer.getAvailableQuantityOffer() == 0) {
-            offerRepository.delete(offer);
-        }
-        if (offer.getEndDate().isBefore(java.time.LocalDate.now())) {
-            offerRepository.delete(offer);
-        }
-    }
-
     @Override
-    public ApiResponse createOffers(List<OfferDto> offerDtos) throws DataExitsException {
+    public ApiResponse createOffers(List<OfferDto> offerDtos) throws DataExitsException, MessagingException, UnsupportedEncodingException {
         List<String> responseMessages = new ArrayList<>();
 
         for (OfferDto offerDto : offerDtos) {
@@ -93,13 +88,19 @@ public class OfferServiceImpl implements OfferService {
 
             offerRepository.save(offer);
             responseMessages.add("Offer created successfully for dish ID: " + offerDto.getDishId());
+
+            if (offer.getOfferType().equals("FIRST_TIME_CUSTOMER_OFFER")
+                            || offer.getOfferType().equals("MONTHLY_SPECIAL")
+                            || offer.getOfferType().equals("MEMBERSHIP")) {
+                emailService.sendOfferNotification(offer);
+            }
         }
 
         return new ApiResponse(String.join("; ", responseMessages), HttpStatus.CREATED);
     }
 
     @Override
-    public ApiResponse updateOffers(List<OfferDto> offerDtos) throws DataExitsException {
+    public ApiResponse updateOffers(List<OfferDto> offerDtos) throws DataExitsException, MessagingException, UnsupportedEncodingException {
         List<String> responseMessages = new ArrayList<>();
 
         for (OfferDto offerDto : offerDtos) {
@@ -127,6 +128,12 @@ public class OfferServiceImpl implements OfferService {
 
             offerRepository.save(offer);
             responseMessages.add("Offer updated successfully for offer ID: " + offerDto.getId());
+
+            if (offer.getOfferType().equals("FIRST_TIME_CUSTOMER_OFFER")
+                    || offer.getOfferType().equals("MONTHLY_SPECIAL")
+                    || offer.getOfferType().equals("MEMBERSHIP")) {
+                emailService.sendOfferNotification(offer);
+            }
         }
 
         return new ApiResponse(String.join("; ", responseMessages), HttpStatus.OK);
@@ -142,4 +149,15 @@ public class OfferServiceImpl implements OfferService {
         offerRepository.deleteAll(offers);
         return new ApiResponse("Offers deleted successfully", HttpStatus.OK);
     }
+
+    private void checkValidOffer(Offer offer) {
+        if (offer.getAvailableQuantityOffer() == 0) {
+            offerRepository.delete(offer);
+        }
+        if (offer.getEndDate().isBefore(java.time.LocalDate.now())) {
+            offerRepository.delete(offer);
+        }
+    }
+
+
 }
