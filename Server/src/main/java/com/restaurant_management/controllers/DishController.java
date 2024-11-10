@@ -25,6 +25,12 @@ public class DishController {
 
     private final DishService dishService;
 
+    @GetMapping("/get-all-dish-names")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> getAllDishNames() throws DataExitsException {
+        return ResponseEntity.ok(dishService.getAllDishNames());
+    }
+
     @GetMapping("/get-dish-by-id/{dishId}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<DishResponse> getDishById(@PathVariable String dishId) throws DataExitsException {

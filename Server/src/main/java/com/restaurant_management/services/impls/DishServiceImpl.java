@@ -47,6 +47,15 @@ public class DishServiceImpl implements DishService {
     private final PagedResourcesAssembler<DishResponse> pagedResourcesAssembler;
 
     @Override
+    public List<Map<String, String>> getAllDishNames() throws DataExitsException {
+        List<Map<String, String>> dishes = dishRepository.getAllDishNames();
+        if (dishes.isEmpty()) {
+            throw new DataExitsException("Dishes not found");
+        }
+        return dishes;
+    }
+
+    @Override
     public DishResponse getDishById(String dishId) throws DataExitsException {
         Dish dish = dishRepository.findById(dishId)
                 .orElseThrow(() -> new DataExitsException("Dish not found"));

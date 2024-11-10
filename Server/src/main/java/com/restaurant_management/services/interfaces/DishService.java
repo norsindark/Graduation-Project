@@ -10,8 +10,11 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 public interface DishService {
+    List<Map<String, String>> getAllDishNames() throws DataExitsException;
 
     DishResponse getDishById(String dishId) throws DataExitsException;
 
