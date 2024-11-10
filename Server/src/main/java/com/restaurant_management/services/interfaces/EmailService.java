@@ -1,5 +1,6 @@
 package com.restaurant_management.services.interfaces;
 
+import com.restaurant_management.entites.Offer;
 import com.restaurant_management.exceptions.DataExitsException;
 import jakarta.mail.MessagingException;
 
@@ -12,6 +13,6 @@ public interface EmailService {
 
     void sendPasswordResetEmail(String email, String token) throws MessagingException, UnsupportedEncodingException;
 
-    void sendEmailListOrderItems(String orderId)
-            throws MessagingException, UnsupportedEncodingException, DataExitsException;
+
+    void sendOfferNotification(Offer offer) throws MessagingException, UnsupportedEncodingException, DataExitsException;
 }

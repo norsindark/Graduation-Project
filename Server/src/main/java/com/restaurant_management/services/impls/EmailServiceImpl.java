@@ -1,11 +1,11 @@
 package com.restaurant_management.services.impls;
 
+import com.restaurant_management.dtos.UserMembershipDto;
+import com.restaurant_management.dtos.UserMonthlySpecialDto;
+import com.restaurant_management.dtos.UserWithoutOrdersProjectionDto;
 import com.restaurant_management.entites.*;
 import com.restaurant_management.exceptions.DataExitsException;
-import com.restaurant_management.repositories.DishOptionSelectionRepository;
-import com.restaurant_management.repositories.DishRepository;
-import com.restaurant_management.repositories.OrderItemRepository;
-import com.restaurant_management.repositories.OrderRepository;
+import com.restaurant_management.repositories.*;
 import com.restaurant_management.services.interfaces.EmailService;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -18,8 +18,13 @@ import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import java.io.UnsupportedEncodingException;
+import java.sql.Timestamp;
+import java.text.NumberFormat;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 @Service
 @Component
@@ -29,6 +34,7 @@ public class EmailServiceImpl implements EmailService {
     private final OrderItemRepository orderItemRepository;
     private final OrderRepository orderRepository;
     private final DishRepository dishRepository;
+    private final UserRepository userRepository;
     private final DishOptionSelectionRepository dishOptionSelectionRepository;
 
 
@@ -108,86 +114,117 @@ public class EmailServiceImpl implements EmailService {
         javaMailSender.send(message);
     }
 
-
-    @Override
-    public void sendEmailListOrderItems(String orderId)
-            throws MessagingException, UnsupportedEncodingException, DataExitsException {
+    public void sendOfferNotification(Offer offer) throws MessagingException, UnsupportedEncodingException, DataExitsException {
         String fromAddress = "dvan78281@gmail.com";
         String senderName = "Sync Food";
-        String subject = "Your Order has been Placed Successfully";
+        String subject = "Exclusive Offer Just for You!";
+        String forUser = "";
 
-        StringBuilder content = new StringBuilder("<html><body>")
-                .append("<h2 style=\"color: #81c784; font-family: Arial, sans-serif; font-size: 18px;\">")
-                .append("Your order has been placed successfully!</h2>")
-                .append("<p style=\"font-family: Arial, sans-serif; font-size: 14px; color: #333;\">")
-                .append("Here is the list of items you have ordered:</p>")
-                .append("<table style=\"border-collapse: collapse; width: 100%;\">")
-                .append("<thead>")
-                .append("<tr style=\"background-color: #f2f2f2;\">")
-                .append("<th style=\"border: 1px solid #ddd; padding: 8px;\">Dish Name</th>")
-                .append("<th style=\"border: 1px solid #ddd; padding: 8px;\">Thumb Image</th>")
-                .append("<th style=\"border: 1px solid #ddd; padding: 8px;\">Price</th>")
-                .append("<th style=\"border: 1px solid #ddd; padding: 8px;\">Quantity</th>")
-                .append("<th style=\"border: 1px solid #ddd; padding: 8px;\">Selected Options</th>")
-                .append("</tr>")
-                .append("</thead>")
-                .append("<tbody>");
-
-        Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new DataExitsException("Order not found"));
-
-        List<OrderItem> items = orderItemRepository.findByOrderId(orderId);
-
-        for (OrderItem item : items) {
-            Dish dish = dishRepository.findById(item.getDish().getId())
-                    .orElseThrow(() -> new DataExitsException("Dish not found"));
-
-            List<DishOptionSelection> selectedOptions = new ArrayList<>();
-            for (OrderItemOption option : item.getOptions()) {
-                if (option != null && option.getId() != null) {
-                    DishOptionSelection optionSelection = dishOptionSelectionRepository.findById(option.getId())
-                            .orElseThrow(() -> new DataExitsException("Dish option selection not found"));
-                    selectedOptions.add(optionSelection);
-                }
+        switch (offer.getOfferType()) {
+            case "FIRST_TIME_CUSTOMER_OFFER" -> {
+                forUser = "First Time Order Customers";
             }
-
-            StringBuilder options = new StringBuilder();
-            for (DishOptionSelection option : selectedOptions) {
-                options.append(option.getDishOption().getOptionName())
-                        .append(" (").append(option.getAdditionalPrice()).append(")").append("<br>");
+            case "MONTHLY_SPECIAL" -> {
+                forUser = "Monthly Special Customers";
             }
-
-            content.append("<tr>")
-                    .append("<td style=\"border: 1px solid #ddd; padding: 8px;\">").append(dish.getDishName()).append("</td>")
-                    .append("<td style=\"border: 1px solid #ddd; padding: 8px;\">")
-                    .append("<img src=\"").append(dish.getThumbImage()).append("\" alt=\"").append(dish.getDishName()).append("\" style=\"width: 100px; height: auto;\"/>")
-                    .append("</td>")
-                    .append("<td style=\"border: 1px solid #ddd; padding: 8px;\">$").append(dish.getPrice()).append("</td>")
-                    .append("<td style=\"border: 1px solid #ddd; padding: 8px;\">").append(item.getQuantity()).append("</td>")
-                    .append("<td style=\"border: 1px solid #ddd; padding: 8px;\">").append(options.toString()).append("</td>")
-                    .append("</tr>");
+            case "MEMBERSHIP" -> {
+                forUser = "Membership Customers";
+            }
         }
 
-        double totalPrice = order.getTotalPrice();
+        NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
 
-        content.append("</tbody>")
+        StringBuilder content = new StringBuilder("<html><body style=\"font-family: Arial, sans-serif; color: #333;\">")
+                .append("<div class=\"layout-content\" style=\"padding: 20px;\">")
+                .append("<h2 style=\"color: #5C8E5F; font-size: 18px;\">")
+                .append("Special Offer on ").append(offer.getDish().getDishName()).append(" for ").append(forUser).append("</h2>")
+                .append("<p style=\"color: #5C8E5F; font-size: 14px;\">")
+                .append("We're excited to bring you a special offer on ").append(offer.getDish().getDishName())
+                .append(". Enjoy a discount of <strong style=\"text-transform: uppercase; font-weight: bold;\">")
+                .append(offer.getDiscountPercentage()).append("% off!</strong></p>")
+                .append("<table style=\"border-collapse: collapse; width: 100%; margin-top: 20px; border-radius: 8px; overflow: hidden;\">")
+                .append("<thead>")
+                .append("<tr style=\"background-color: #81c784;\">")
+                .append("<th style=\"border: 1px solid #FFFFFF; padding: 8px; color: #FFFFFF;\">Dish Name</th>")
+                .append("<th style=\"border: 1px solid #FFFFFF; padding: 8px; color: #FFFFFF;\">Thumb Image</th>")
+                .append("<th style=\"border: 1px solid #FFFFFF; padding: 8px; color: #FFFFFF;\">Price</th>")
+                .append("<th style=\"border: 1px solid #FFFFFF; padding: 8px; color: #FFFFFF;\">Discount</th>")
+                .append("</tr>")
+                .append("</thead>")
+                .append("<tbody>")
+                .append("<tr style=\"background-color: #f0f4e8 ;\">")
+                .append("<td style=\"border: none; padding: 8px; color: #000000E0;\">").append(offer.getDish().getDishName()).append("</td>")
+                .append("<td style=\"border: none; padding: 8px; color: #000000E0;\">")
+                .append("<img src=\"").append(offer.getDish().getThumbImage()).append("\" alt=\"").append(offer.getDish().getDishName())
+                .append("\" style=\"width: 100px; height: auto;\"/></td>")
+                .append("<td style=\"border: none; padding: 8px; color: #000000E0;\">").append(currencyFormat.format(offer.getDish().getPrice())).append("</td>")
+                .append("<td style=\"border: none; padding: 8px; color: #000000E0;\">").append(offer.getDiscountPercentage()).append("%</td>")
+                .append("</tr>")
+                .append("</tbody>")
                 .append("</table>")
-                .append("<p style=\"font-family: Arial, sans-serif; font-size: 16px; font-weight: bold; color: #333;\">") // Tăng kích thước và in đậm
-                .append("Total Price: $").append(totalPrice).append("</p>")
-                .append("<p style=\"font-family: Arial, sans-serif; font-size: 14px; color: #333;\">")
-                .append("We will notify you when your order is on its way.</p>")
-                .append("<p style=\"font-family: Arial, sans-serif; font-size: 14px; color: #333;\">")
-                .append("Thank you for choosing us!</p>")
-                .append("</body></html>");
 
+
+                .append("<a href=\"").append(clientUrl).append("product-detail/").append(offer.getDish().getSlug())
+                .append("\" style=\"display: inline-block; background-color: #4CAF50; color: white; margin-top: 20px; padding: 10px 20px; text-align: center; border-radius: 5px; text-decoration: none;\">")
+                .append("View Product Details</a>")
+
+                .append("<p style=\"color: #5C8E5F;\">Thank you for choosing us! We hope you enjoy this offer.</p>")
+                .append("</div></body></html>");
+
+        List<?> users = checkCondition(offer.getOfferType());
+        int count = 0;
         MimeMessage message = javaMailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true);
 
-        helper.setFrom(fromAddress, senderName);
-        helper.setTo(order.getUser().getEmail());
-        helper.setSubject(subject);
-        helper.setText(content.toString(), true);
-
-        javaMailSender.send(message);
+        if (users != null && !users.isEmpty()) {
+            for (Object userObject : users) {
+                if (count == 2) {
+                    break;
+                }
+                if (userObject instanceof UserWithoutOrdersProjectionDto) {
+                    UserWithoutOrdersProjectionDto user = (UserWithoutOrdersProjectionDto) userObject;
+                    sendEmail(helper, fromAddress, senderName, user.getEmail(), subject, content);
+                    count++;
+                } else if (userObject instanceof UserMonthlySpecialDto) {
+                    UserMonthlySpecialDto user = (UserMonthlySpecialDto) userObject;
+                    sendEmail(helper, fromAddress, senderName, user.getEmail(), subject, content);
+                    count++;
+                } else if (userObject instanceof UserMembershipDto) {
+                    UserMembershipDto user = (UserMembershipDto) userObject;
+                    sendEmail(helper, fromAddress, senderName, user.getEmail(), subject, content);
+                    count++;
+                }
+            }
+        }
     }
+
+    private void sendEmail(MimeMessageHelper helper, String fromAddress, String senderName, String toEmail, String subject, StringBuilder content) {
+        try {
+            helper.setFrom(fromAddress, senderName);
+            helper.setTo(toEmail);
+            helper.setSubject(subject);
+            helper.setText(content.toString(), true);
+            javaMailSender.send(helper.getMimeMessage());
+        } catch (MessagingException e) {
+            e.printStackTrace();
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private List<?> checkCondition(String offerType) {
+        if (offerType == null) {
+            return null;
+        }
+
+        return switch (offerType) {
+            case "MONTHLY_SPECIAL" -> new ArrayList<>(userRepository.findUsersWithCreatedAtBefore(
+                    Timestamp.valueOf(LocalDateTime.now().minusMonths(1))));
+            case "MEMBERSHIP" -> new ArrayList<>(userRepository.findUsersWithCreatedAtBeforeYear(
+                    Timestamp.valueOf(LocalDateTime.now().minusYears(1))));
+            case "FIRST_TIME_CUSTOMER_OFFER" -> new ArrayList<>(userRepository.findUsersWithoutOrders());
+            default -> null;
+        };
+    }
+
 }

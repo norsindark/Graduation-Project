@@ -1,5 +1,8 @@
 package com.restaurant_management.repositories;
 
+import com.restaurant_management.dtos.UserMembershipDto;
+import com.restaurant_management.dtos.UserMonthlySpecialDto;
+import com.restaurant_management.dtos.UserWithoutOrdersProjectionDto;
 import com.restaurant_management.entites.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -8,7 +11,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, String> {
@@ -47,4 +52,19 @@ public interface UserRepository extends JpaRepository<User, String> {
     @Query("SELECT u FROM User u WHERE u.updatedAt >= :keyword")
     Page<User> findByUpdatedAt(@Param("keyword") Timestamp keyword, Pageable pageable);
 
+    @Query("SELECT new com.restaurant_management.dtos.UserWithoutOrdersProjectionDto(u.id, u.email, u.enabled) " +
+            "FROM User u " +
+            "LEFT JOIN u.orders o " +
+            "WHERE o IS NULL")
+    List<UserWithoutOrdersProjectionDto> findUsersWithoutOrders();
+
+    @Query("SELECT new com.restaurant_management.dtos.UserMonthlySpecialDto(u.id, u.email, u.enabled, u.createdAt) " +
+            "FROM User u " +
+            "WHERE u.createdAt <= :oneMonthAgo")
+    List<UserMonthlySpecialDto> findUsersWithCreatedAtBefore(@Param("oneMonthAgo") Timestamp oneMonthAgo);
+
+    @Query("SELECT new com.restaurant_management.dtos.UserMembershipDto(u.id, u.email, u.enabled, u.createdAt) " +
+            "FROM User u " +
+            "WHERE u.createdAt <= :oneYearAgo")
+    List<UserMembershipDto> findUsersWithCreatedAtBeforeYear(@Param("oneYearAgo") Timestamp oneYearAgo);
 }
