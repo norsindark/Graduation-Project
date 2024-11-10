@@ -426,3 +426,45 @@ export const callUpdateStatusOrder = async (orderId: string, status: string) => 
 export const callCancelOrder = async (orderId: string) => {
   return axios.put(`/api/v1/client/order/cancel-order?orderId=${orderId}`);
 }
+
+// offer
+
+export const callGetAllProductOfferDaily = async (query: string) => {
+  return axios.get(`/api/v1/dashboard/offer/get-all-offers?${query}`);
+}
+
+export const callGetOfferById = async (id: string) => {
+  return axios.get(`/api/v1/dashboard/offer/get-offer-by-id?id=${id}`);
+};
+
+export const callAddNewOffers = async (offers: Array<{
+  dishId: string;
+  offerType: string;
+  startDate: string;
+  endDate: string;
+  availableQuantityOffer: number;
+  discountPercentage: number;
+}>) => {
+  return axios.post(`/api/v1/dashboard/offer/create-offer`, offers);
+};
+
+export const callDishNameAndId = async () => {
+  return axios.get(`/api/v1/dashboard/dish/get-all-dish-names`);
+}
+
+export const callDeleteOffers = async (ids: string[]) => {
+  const queryParams = ids.map(id => `ids=${id}`).join('&');
+  return axios.delete(`/api/v1/dashboard/offer/delete-offer?${queryParams}`);
+};
+
+export const callUpdateOffers = async (offers: Array<{
+  id: string;
+  dishId: string;
+  offerType: string;
+  startDate: string;
+  endDate: string;
+  availableQuantityOffer: number;
+  discountPercentage: number;
+}>) => {
+  return axios.put(`/api/v1/dashboard/offer/update-offer`, offers);
+};

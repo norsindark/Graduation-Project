@@ -1,31 +1,98 @@
-import React, { useState } from 'react';
-import { Form, Input, Button, Select, notification, Row, Col } from 'antd';
-import { callAddUser } from '../../../services/serverApi';
-import { UserAddOutlined, CloseOutlined } from '@ant-design/icons';
+import React, { useState, useEffect } from 'react';
+import {
+  Form,
+  Input,
+  Button,
+  Select,
+  notification,
+  Row,
+  Col,
+  DatePicker,
+  Space,
+  Card,
+  InputNumber,
+} from 'antd';
+import {
+  MinusCircleOutlined,
+  PlusOutlined,
+  CloseOutlined,
+} from '@ant-design/icons';
+import {
+  callAddNewOffers,
+  callDishNameAndId,
+} from '../../../services/serverApi';
+import dayjs from 'dayjs';
+import type { Dayjs } from 'dayjs';
 
 const { Option } = Select;
 
-interface UserNewProps {
-  onAddSuccess: () => void;
-  setShowOfferNew: (show: boolean) => void;
+interface DishOption {
+  dishId: string;
+  dishName: string;
 }
 
-const ProductOfferDailyNew: React.FC<UserNewProps> = ({
-  onAddSuccess,
-  setShowOfferNew,
-}) => {
+interface OfferFormValues {
+  offers: {
+    dishId: string;
+    offerType:
+      | 'DAILY'
+      | 'WEEKLY_OFFER'
+      | 'MONTHLY_SPECIAL'
+      | 'MEMBERSHIP'
+      | 'FIRST_TIME_CUSTOMER_OFFER';
+    startDate: Dayjs;
+    endDate: Dayjs;
+    availableQuantityOffer: number;
+    discountPercentage: number;
+  }[];
+}
+
+const ProductOfferDailyNew: React.FC<{
+  onAddSuccess: () => void;
+  setShowOfferNew: (show: boolean) => void;
+}> = ({ onAddSuccess, setShowOfferNew }) => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
+  const [dishes, setDishes] = useState<DishOption[]>([]);
 
-  const onFinish = async (values: any) => {
-    const { email, password, fullName, role } = values;
+  useEffect(() => {
+    fetchDishes();
+  }, []);
+
+  const fetchDishes = async () => {
+    try {
+      const response = await callDishNameAndId();
+      if (response?.status === 200 && response.data) {
+        setDishes(response.data);
+      }
+    } catch (error) {
+      notification.error({
+        message: 'Error',
+        description: 'Failed to fetch dish list',
+        duration: 5,
+        showProgress: true,
+      });
+    }
+  };
+
+  const onFinish = async (values: OfferFormValues) => {
     setLoading(true);
     try {
-      const res = await callAddUser(email, password, fullName, role);
-      if (res?.status == 200) {
+      const formattedOffers = values.offers.map((offer) => ({
+        dishId: offer.dishId,
+        offerType: offer.offerType,
+        startDate: dayjs(offer.startDate).format('YYYY-MM-DD'),
+        endDate: dayjs(offer.endDate).format('YYYY-MM-DD'),
+        availableQuantityOffer: offer.availableQuantityOffer,
+        discountPercentage: offer.discountPercentage,
+      }));
+
+      const response = await callAddNewOffers(formattedOffers);
+
+      if (response?.status === 200) {
         notification.success({
-          message: 'User added successfully',
-          description: 'The new user has been added to the system.',
+          message: 'Offers added successfully',
+          description: 'The new offers have been added to the system.',
           duration: 5,
           showProgress: true,
         });
@@ -33,17 +100,19 @@ const ProductOfferDailyNew: React.FC<UserNewProps> = ({
         onAddSuccess();
       } else {
         notification.error({
-          message: 'Error adding user',
-          description: res.data.errors?.error || 'An error occurred!',
+          message: 'Error adding offers',
+          description:
+            response?.data?.errors?.error ||
+            'An error occurred while adding the new offers.',
           duration: 5,
           showProgress: true,
         });
       }
-    } catch {
+    } catch (error) {
       notification.error({
-        message: 'Error adding user',
+        message: 'Error adding offers',
         description:
-          'An error occurred while adding the new user. Please try again.',
+          'An error occurred while adding the new offers. Please try again.',
         duration: 5,
         showProgress: true,
       });
@@ -52,97 +121,395 @@ const ProductOfferDailyNew: React.FC<UserNewProps> = ({
     }
   };
 
+  const validateDates = (fieldName: number) => async (_: any, value: Dayjs) => {
+    const startDate = form.getFieldValue(['offers', fieldName, 'startDate']);
+    const endDate = form.getFieldValue(['offers', fieldName, 'endDate']);
+    const offerType = form.getFieldValue(['offers', fieldName, 'offerType']);
+
+    if (startDate && endDate && endDate.isBefore(startDate)) {
+      return Promise.reject('End date must be after start date');
+    }
+
+    switch (offerType) {
+      case 'DAILY':
+        if (endDate && !endDate.isSame(startDate, 'day')) {
+          return Promise.reject('Daily offer must be within the same day');
+        }
+        break;
+
+      case 'WEEKLY_OFFER':
+        if (endDate && endDate.diff(startDate, 'day') > 7) {
+          return Promise.reject('Weekly offer cannot exceed 7 days');
+        }
+        break;
+
+      case 'MONTHLY_SPECIAL':
+        if (endDate && endDate.diff(startDate, 'day') > 30) {
+          return Promise.reject('Monthly special cannot exceed 30 days');
+        }
+        break;
+
+      case 'MEMBERSHIP':
+        if (endDate && endDate.diff(startDate, 'day') > 365) {
+          return Promise.reject('Membership offer cannot exceed 1 year');
+        }
+        break;
+
+      case 'FIRST_TIME_CUSTOMER_OFFER':
+        if (endDate && endDate.diff(startDate, 'day') > 90) {
+          return Promise.reject(
+            'First time customer offer cannot exceed 90 days'
+          );
+        }
+        break;
+    }
+
+    return Promise.resolve();
+  };
+
+  const validateStartDate = async (_: any, value: Dayjs) => {
+    if (value && value.isBefore(dayjs(), 'day')) {
+      return Promise.reject('Start date cannot be before today');
+    }
+    return Promise.resolve();
+  };
+
+  const getDefaultEndDate = (offerType: string, startDate: Dayjs) => {
+    switch (offerType) {
+      case 'DAILY':
+        return startDate;
+      case 'WEEKLY_OFFER':
+        return startDate.add(7, 'day');
+      case 'MONTHLY_SPECIAL':
+        return startDate.add(30, 'day');
+      case 'MEMBERSHIP':
+        return startDate.add(365, 'day');
+      case 'FIRST_TIME_CUSTOMER_OFFER':
+        return startDate.add(90, 'day');
+      default:
+        return startDate;
+    }
+  };
+
+  const handleOfferTypeChange = (value: string, fieldName: number) => {
+    const startDate =
+      form.getFieldValue(['offers', fieldName, 'startDate']) || dayjs();
+    const newEndDate = getDefaultEndDate(value, startDate);
+    form.setFieldValue(['offers', fieldName, 'endDate'], newEndDate);
+  };
+
+  const getAvailableDishes = (currentFieldName: number) => {
+    const allOffers = form.getFieldValue('offers') || [];
+    const selectedDishIds = allOffers
+      .map((offer: any, index: number) =>
+        index !== currentFieldName ? offer?.dishId : null
+      )
+      .filter(Boolean);
+
+    return dishes.filter((dish) => !selectedDishIds.includes(dish.dishId));
+  };
+
   return (
     <>
-      <h4 className="text-2xl font-medium text-center mb-4">Create New User</h4>
+      <h4 className="text-2xl font-medium text-center mb-4">
+        Create New Offers
+      </h4>
       <Form
         form={form}
-        name="userNew"
+        name="offerNew"
         onFinish={onFinish}
         layout="vertical"
-        initialValues={{ role: 'USER' }}
+        initialValues={{
+          offers: [
+            {
+              offerType: 'DAILY',
+              startDate: dayjs(),
+              endDate: dayjs(),
+            },
+          ],
+        }}
       >
-        <Row gutter={16}>
-          <Col xs={24} sm={12}>
-            <Form.Item
-              name="email"
-              label="Email"
-              className="font-medium"
-              rules={[
-                { required: true, message: 'Please enter an email!' },
-                { type: 'email', message: 'Invalid email format!' },
-              ]}
-            >
-              <Input />
-            </Form.Item>
-          </Col>
-          <Col xs={24} sm={12}>
-            <Form.Item
-              name="password"
-              label="Password"
-              className="font-medium"
-              rules={[
-                { required: true, message: 'Please enter a password!' },
-                {
-                  min: 6,
-                  message: 'Password must be at least 6 characters long!',
-                },
-              ]}
-            >
-              <Input.Password />
-            </Form.Item>
-          </Col>
-        </Row>
+        <Form.List name="offers">
+          {(fields, { add, remove }) => (
+            <>
+              {fields.map(({ key, name, ...restField }, index) => (
+                <Card
+                  key={key}
+                  title={`Offer #${index + 1}`}
+                  extra={
+                    fields.length > 1 && (
+                      <MinusCircleOutlined onClick={() => remove(name)} />
+                    )
+                  }
+                  style={{ marginBottom: 24 }}
+                >
+                  <Row gutter={16}>
+                    <Col xs={24} sm={12}>
+                      <Form.Item
+                        {...restField}
+                        name={[name, 'dishId']}
+                        label="Select Dish"
+                        className="font-medium"
+                        rules={[
+                          { required: true, message: 'Please select a dish!' },
+                        ]}
+                      >
+                        <Select
+                          showSearch
+                          placeholder="Select a dish"
+                          optionFilterProp="children"
+                          filterOption={(input, option) =>
+                            (option?.children as unknown as string)
+                              .toLowerCase()
+                              .includes(input.toLowerCase())
+                          }
+                          onChange={() => {
+                            // Force re-render để cập nhật danh sách món ăn có sẵn
+                            form.setFields([
+                              {
+                                name: 'offers',
+                                value: form.getFieldValue('offers'),
+                              },
+                            ]);
+                          }}
+                        >
+                          {getAvailableDishes(name).map((dish) => (
+                            <Option key={dish.dishId} value={dish.dishId}>
+                              {dish.dishName}
+                            </Option>
+                          ))}
+                        </Select>
+                      </Form.Item>
+                    </Col>
+                    <Col xs={24} sm={12}>
+                      <Form.Item
+                        {...restField}
+                        name={[name, 'offerType']}
+                        label="Offer Type"
+                        className="font-medium"
+                        rules={[
+                          {
+                            required: true,
+                            message: 'Please select offer type!',
+                          },
+                        ]}
+                      >
+                        <Select
+                          onChange={(value) =>
+                            handleOfferTypeChange(value, name)
+                          }
+                        >
+                          <Option value="DAILY">Daily</Option>
+                          <Option value="WEEKLY_OFFER">Weekly Offer</Option>
+                          <Option value="MONTHLY_SPECIAL">
+                            Monthly Special
+                          </Option>
+                          <Option value="MEMBERSHIP">Membership</Option>
+                          <Option value="FIRST_TIME_CUSTOMER_OFFER">
+                            First Time Customer Offer
+                          </Option>
+                        </Select>
+                      </Form.Item>
+                    </Col>
+                  </Row>
 
-        <Row gutter={16}>
-          <Col xs={24} sm={12}>
-            <Form.Item
-              name="fullName"
-              label="Full Name"
-              className="font-medium"
-              rules={[
-                { required: true, message: 'Please enter the full name!' },
-              ]}
-            >
-              <Input />
-            </Form.Item>
-          </Col>
-          <Col xs={24} sm={12}>
-            <Form.Item
-              name="role"
-              label="Role"
-              className="font-medium"
-              rules={[{ required: true, message: 'Please select a role!' }]}
-            >
-              <Select>
-                <Option value="USER">User</Option>
-                <Option value="ADMIN">Admin</Option>
-                <Option value="EMPLOYEE">Employee</Option>
-              </Select>
-            </Form.Item>
-          </Col>
-        </Row>
+                  <Row gutter={16}>
+                    <Col xs={24} sm={12}>
+                      <Form.Item
+                        {...restField}
+                        name={[name, 'startDate']}
+                        label="Start Date"
+                        className="font-medium"
+                        rules={[
+                          {
+                            required: true,
+                            message: 'Please select start date!',
+                          },
+                          { validator: validateStartDate },
+                        ]}
+                      >
+                        <DatePicker
+                          style={{ width: '100%' }}
+                          format="DD-MM-YYYY"
+                          disabledDate={(current) => {
+                            return current && current < dayjs().startOf('day');
+                          }}
+                        />
+                      </Form.Item>
+                    </Col>
+                    <Col xs={24} sm={12}>
+                      <Form.Item
+                        {...restField}
+                        name={[name, 'endDate']}
+                        label="End Date"
+                        className="font-medium"
+                        rules={[
+                          {
+                            required: true,
+                            message: 'Please select end date!',
+                          },
+                          { validator: validateDates(name) },
+                        ]}
+                      >
+                        <DatePicker
+                          style={{ width: '100%' }}
+                          format="DD-MM-YYYY"
+                          disabledDate={(current) => {
+                            const startDate = form.getFieldValue([
+                              'offers',
+                              name,
+                              'startDate',
+                            ]);
+                            const offerType = form.getFieldValue([
+                              'offers',
+                              name,
+                              'offerType',
+                            ]);
+
+                            if (startDate) {
+                              switch (offerType) {
+                                case 'DAILY':
+                                  return !current?.isSame(startDate, 'day');
+                                case 'WEEKLY_OFFER':
+                                  return (
+                                    current &&
+                                    (current < startDate ||
+                                      current > startDate.add(7, 'day'))
+                                  );
+                                case 'MONTHLY_SPECIAL':
+                                  return (
+                                    current &&
+                                    (current < startDate ||
+                                      current > startDate.add(30, 'day'))
+                                  );
+                                case 'MEMBERSHIP':
+                                  return (
+                                    current &&
+                                    (current < startDate ||
+                                      current > startDate.add(365, 'day'))
+                                  );
+                                case 'FIRST_TIME_CUSTOMER_OFFER':
+                                  return (
+                                    current &&
+                                    (current < startDate ||
+                                      current > startDate.add(90, 'day'))
+                                  );
+                                default:
+                                  return current && current < startDate;
+                              }
+                            }
+                            return current && current < dayjs().startOf('day');
+                          }}
+                        />
+                      </Form.Item>
+                    </Col>
+                  </Row>
+
+                  <Row gutter={16}>
+                    <Col xs={24} sm={12}>
+                      <Form.Item
+                        {...restField}
+                        name={[name, 'availableQuantityOffer']}
+                        label="Available Quantity"
+                        className="font-medium"
+                        rules={[
+                          {
+                            required: true,
+                            message: 'Please enter available quantity!',
+                          },
+                        ]}
+                      >
+                        <Input type="number" min={1} />
+                      </Form.Item>
+                    </Col>
+                    <Col xs={24} sm={12}>
+                      <Form.Item
+                        {...restField}
+                        name={[name, 'discountPercentage']}
+                        label="Discount Percentage"
+                        className="font-medium"
+                        rules={[
+                          {
+                            required: true,
+                            message: 'Please enter discount percentage!',
+                          },
+                        ]}
+                      >
+                        <InputNumber
+                          min={0}
+                          max={100}
+                          formatter={(value) => `${value}%`}
+                          parser={(value) => {
+                            const parsed = parseInt(
+                              value?.replace('%', '') ?? '',
+                              10
+                            );
+                            return isNaN(parsed)
+                              ? 0
+                              : (Math.max(0, Math.min(parsed, 100)) as 0 | 100);
+                          }}
+                          className="w-full"
+                        />
+                      </Form.Item>
+                    </Col>
+                  </Row>
+                </Card>
+              ))}
+
+              <Form.Item>
+                <Button
+                  type="dashed"
+                  onClick={() => {
+                    // Kiểm tra xem còn món ăn nào chưa được chọn không
+                    const availableDishes = getAvailableDishes(-1); // -1 để lấy tất cả món đã chọn
+                    if (availableDishes.length === 0) {
+                      notification.warning({
+                        message: 'No dishes available',
+                        description:
+                          'All dishes have been selected in other offers.',
+                        duration: 5,
+                        showProgress: true,
+                      });
+                      return;
+                    }
+                    add({
+                      offerType: 'DAILY',
+                      startDate: dayjs(),
+                      endDate: dayjs(),
+                    });
+                  }}
+                  block
+                  icon={<PlusOutlined />}
+                  disabled={getAvailableDishes(-1).length === 0}
+                >
+                  Add Offer
+                </Button>
+              </Form.Item>
+            </>
+          )}
+        </Form.List>
 
         <Form.Item>
-          <Button
-            type="primary"
-            shape="round"
-            htmlType="submit"
-            loading={loading}
-            icon={<UserAddOutlined />}
-          >
-            Save
-          </Button>
-          <Button
-            type="primary"
-            danger
-            onClick={() => setShowOfferNew(false)}
-            style={{ marginLeft: 8 }}
-            shape="round"
-            icon={<CloseOutlined />}
-          >
-            Cancel
-          </Button>
+          <Space>
+            <Button
+              type="primary"
+              shape="round"
+              htmlType="submit"
+              loading={loading}
+              icon={<PlusOutlined />}
+            >
+              Save All Offers
+            </Button>
+            <Button
+              type="primary"
+              shape="round"
+              danger
+              onClick={() => setShowOfferNew(false)}
+              icon={<CloseOutlined />}
+            >
+              Cancel
+            </Button>
+          </Space>
         </Form.Item>
       </Form>
     </>
