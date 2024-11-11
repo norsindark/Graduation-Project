@@ -89,7 +89,7 @@ function MenuHome() {
     try {
       const query = `pageNo=${current - 1}&pageSize=${pageSize}&sortBy=dishName&order=asc`;
       const response = await callGetAllDishes(query);
-      
+
       if (
         response.status === 200 &&
         response.data._embedded?.dishResponseList
@@ -146,12 +146,9 @@ function MenuHome() {
   };
 
   //WishList
-    
+
   const userId = useSelector((state: RootState) => state.account.user?.id);
   const handleAddToWishlist = async (dishId: string) => {
-    console.log("dishId:", dishId);
-    console.log("userId:", userId);
-  
     if (!userId) {
       notification.error({
         message: 'Not logged in',
@@ -159,21 +156,18 @@ function MenuHome() {
       });
       return;
     }
-  
+
     try {
       // Bước 1: Lấy danh sách yêu thích của người dùng
       const wishListResponse = await callWishListById(userId, '');
-      console.log("wishListResponse:", wishListResponse); // In ra phản hồi từ API
-  
-      // Kiểm tra xem _embedded có tồn tại và truy cập vào wishlistResponseList
-      const wishListItems = wishListResponse.data._embedded?.wishlistResponseList || [];
-      console.log("Wish List Items:", wishListItems); // In ra danh sách món ăn để kiểm tra
-  
-      // Bước 2: Kiểm tra xem sản phẩm đã có trong danh sách yêu thích hay chưa
-      const isInWishlist = wishListItems.some((item: any) => 
+
+      const wishListItems =
+        wishListResponse.data._embedded?.wishlistResponseList || [];
+
+      const isInWishlist = wishListItems.some((item: any) =>
         item.dishes?.some((dish: WishListDish) => dish.dishId === dishId)
       );
-  
+
       if (isInWishlist) {
         notification.warning({
           message: 'The product is already in the favorites list',
@@ -181,22 +175,22 @@ function MenuHome() {
         });
         return;
       }
-  
-      // Bước 3: Thêm sản phẩm vào danh sách yêu thích
+
       const response = await callWishList(dishId, userId);
       if (response.status === 200) {
         notification.success({
           message: 'Add to favorites list',
-          description: 'The product has been successfully added to the favorites list.',
+          description:
+            'The product has been successfully added to the favorites list.',
         });
       } else {
         notification.error({
           message: 'Error',
-          description: 'An error occurred while adding a product to your favorites list.',
+          description:
+            'An error occurred while adding a product to your favorites list.',
         });
       }
     } catch (error) {
-      console.error("Error occurred:", error); // Print out errors for testing
       notification.error({
         message: 'Error',
         description: 'Please try again later.',
@@ -332,8 +326,11 @@ function MenuHome() {
                       </a>
                     </li> */}
                     <li>
-                      <div className="heart" onClick={() => handleAddToWishlist(product.dishId)}>
-                        <i className="fal fa-heart" ></i>
+                      <div
+                        className="heart"
+                        onClick={() => handleAddToWishlist(product.dishId)}
+                      >
+                        <i className="fal fa-heart"></i>
                       </div>
                     </li>
                     <li>

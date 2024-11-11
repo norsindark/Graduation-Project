@@ -1,9 +1,120 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Slider from 'react-slick';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
+import { callGetAllOffers } from '../../../services/clientApi';
+import { Link, useNavigate } from 'react-router-dom';
+
+interface Offer {
+  id: string;
+  dish: any;
+  discountPercentage: number;
+}
 
 function BannerSlider() {
+  const [weeklyOffers, setWeeklyOffers] = useState<Offer[]>([]);
+  const navigate = useNavigate();
+  useEffect(() => {
+    const fetchOffers = async () => {
+      try {
+        const response = await callGetAllOffers();
+        const currentDate = new Date();
+
+        const validOffers = response.data._embedded.offerResponseList.filter(
+          (offer: any) => {
+            if (offer.offerType !== 'BANNER') return false;
+            const endDate = new Date(offer.endDate + 1);
+            return currentDate <= endDate;
+          }
+        );
+        console.log('validOffers:', validOffers);
+        if (validOffers.length === 0) {
+          setWeeklyOffers([
+            {
+              id: 'default',
+              discountPercentage: 35,
+              dish: {
+                dishName: 'Different spice for a Different taste',
+                categoryName: 'Featured',
+                description:
+                  'Lorem ipsum, dolor sit amet consectetur adipisicing elit. Ipsum fugit minima et debitis ut distinctio optio qui voluptate natus.',
+                thumbImage: '/images/slider_img_1.png',
+                slug: 'special-dish',
+              },
+            },
+            {
+              id: 'default2',
+              discountPercentage: 70,
+              dish: {
+                dishName: 'Eat healthy. Stay healthy.',
+                categoryName: 'Featured',
+                description:
+                  'Lorem ipsum, dolor sit amet consectetur adipisicing elit. Ipsum fugit minima et debitis ut distinctio optio qui voluptate natus.',
+                thumbImage: '/images/slider_img_2.png',
+                slug: 'special-dish',
+              },
+            },
+            {
+              id: 'default3',
+              discountPercentage: 50,
+              dish: {
+                dishName: 'Great food. Tastes good.',
+                categoryName: 'Featured',
+                description:
+                  'Lorem ipsum, dolor sit amet consectetur adipisicing elit. Ipsum fugit minima et debitis ut distinctio optio qui voluptate natus.',
+                thumbImage: '/images/slider_img_3.png',
+                slug: 'special-dish',
+              },
+            },
+          ]);
+        } else {
+          setWeeklyOffers(validOffers);
+        }
+      } catch (error) {
+        console.error('Error fetching offers:', error);
+        setWeeklyOffers([
+          {
+            id: 'default',
+            discountPercentage: 35,
+            dish: {
+              dishName: 'Eat healthy. Stay healthy.',
+              categoryName: 'Featured',
+              description:
+                'Lorem ipsum, dolor sit amet consectetur adipisicing elit. Ipsum fugit minima et debitis ut distinctio optio qui voluptate natus.',
+              thumbImage: '/images/slider_img_2.png',
+              slug: 'special-dish',
+            },
+          },
+          {
+            id: 'default2',
+            discountPercentage: 70,
+            dish: {
+              dishName: 'Great food. Tastes good.',
+              categoryName: 'Featured',
+              description:
+                'Lorem ipsum, dolor sit amet consectetur adipisicing elit. Ipsum fugit minima et debitis ut distinctio optio qui voluptate natus.',
+              thumbImage: '/images/slider_img_2.png',
+              slug: 'special-dish',
+            },
+          },
+          {
+            id: 'default3',
+            discountPercentage: 50,
+            dish: {
+              dishName: 'Great food. Tastes good.',
+              categoryName: 'Featured',
+              description:
+                'Lorem ipsum, dolor sit amet consectetur adipisicing elit. Ipsum fugit minima et debitis ut distinctio optio qui voluptate natus.',
+              thumbImage: '/images/slider_img_3.png',
+              slug: 'special-dish',
+            },
+          },
+        ]);
+      }
+    };
+    fetchOffers();
+  }, []);
+
   const settings = {
     dots: true,
     infinite: true,
@@ -14,6 +125,10 @@ function BannerSlider() {
     autoplaySpeed: 3500,
   };
 
+  const handleProductClick = (slug: string) => {
+    navigate(`/product-detail/${slug}`);
+  };
+
   return (
     <section
       className="fp__banner"
@@ -21,144 +136,59 @@ function BannerSlider() {
     >
       <div className="fp__banner_overlay">
         <Slider {...settings} className="banner_slider">
-          <div className="fp__banner_slider">
-            <div className="container">
-              <div className="row">
-                <div className="col-xl-5 col-md-5 col-lg-5">
-                  <div
-                    className="fp__banner_img wow fadeInLeft"
-                    data-wow-duration="1s"
-                  >
-                    <div className="img">
-                      <img
-                        src="images/slider_img_1.png"
-                        alt="food item"
-                        className="img-fluid w-100"
-                      />
-                      <span> 35% off </span>
+          {weeklyOffers.map((offer) => (
+            <div key={offer.id} className="fp__banner_slider">
+              <div className="container">
+                <div className="row">
+                  <div className="col-xl-5 col-md-5 col-lg-5">
+                    <div
+                      className="fp__banner_img wow fadeInLeft"
+                      data-wow-duration="1s"
+                    >
+                      <div className="img">
+                        <img
+                          src={offer.dish.thumbImage}
+                          alt={offer.dish.dishName}
+                          className="img-fluid w-100"
+                        />
+                        <span
+                          style={{
+                            backgroundImage: 'url(images/offer_shapes.png)',
+                          }}
+                        >
+                          {offer.discountPercentage}% off
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
-                <div className="col-xl-5 col-md-7 col-lg-6">
-                  <div
-                    className="fp__banner_text wow fadeInRight"
-                    data-wow-duration="1s"
-                  >
-                    <h1>Different spice for a Different taste</h1>
-                    <h3>Fast Food & Restaurants</h3>
-                    <p>
-                      Lorem ipsum, dolor sit amet consectetur adipisicing elit.
-                      Ipsum fugit minima et debitis ut distinctio optio qui
-                      voluptate natus.
-                    </p>
-                    <ul className="d-flex flex-wrap">
-                      <li>
-                        <a className="common_btn" href="#">
-                          shop now
-                        </a>
-                      </li>
-                    </ul>
+                  <div className="col-xl-5 col-md-7 col-lg-6">
+                    <div
+                      className="fp__banner_text wow fadeInRight"
+                      data-wow-duration="1s"
+                    >
+                      <h1>{offer.dish.dishName}</h1>
+                      <h3>{offer.dish.categoryName} - Restaurant</h3>
+                      <p>{offer.dish.description}</p>
+                      <ul className="d-flex flex-wrap">
+                        <li>
+                          <Link
+                            to={`/product-detail/${offer.dish.slug}`}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              handleProductClick(offer.dish.slug);
+                            }}
+                            className="common_btn"
+                          >
+                            shop now
+                          </Link>
+                        </li>
+                      </ul>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-          <div className="fp__banner_slider">
-            <div className="container">
-              <div className="row">
-                <div className="col-xl-5 col-md-5 col-lg-5">
-                  <div
-                    className="fp__banner_img wow fadeInLeft"
-                    data-wow-duration="1s"
-                  >
-                    <div className="img">
-                      <img
-                        src="images/slider_img_2.png"
-                        alt="food item"
-                        className="img-fluid w-100"
-                      />
-                      <span
-                        style={{
-                          backgroundImage: 'url(images/offer_shapes.png)',
-                        }}
-                      >
-                        70% off
-                      </span>
-                    </div>
-                  </div>
-                </div>
-                <div className="col-xl-5 col-md-7 col-lg-6">
-                  <div
-                    className="fp__banner_text wow fadeInRight"
-                    data-wow-duration="1s"
-                  >
-                    <h1>Eat healthy. Stay healthy.</h1>
-                    <h3>Fast Food & Restaurants</h3>
-                    <p>
-                      Lorem ipsum, dolor sit amet consectetur adipisicing elit.
-                      Ipsum fugit minima et debitis ut distinctio optio qui
-                      voluptate natus.
-                    </p>
-                    <ul className="d-flex flex-wrap">
-                      <li>
-                        <a className="common_btn" href="#">
-                          shop now
-                        </a>
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="fp__banner_slider">
-            <div className="container">
-              <div className="row">
-                <div className="col-xl-5 col-md-5 col-lg-5">
-                  <div
-                    className="fp__banner_img wow fadeInLeft"
-                    data-wow-duration="1s"
-                  >
-                    <div className="img">
-                      <img
-                        src="images/slider_img_3.png"
-                        alt="food item"
-                        className="img-fluid w-100"
-                      />
-                      <span
-                        style={{
-                          backgroundImage: 'url(images/offer_shapes.png)',
-                        }}
-                      >
-                        50% off
-                      </span>
-                    </div>
-                  </div>
-                </div>
-                <div className="col-xl-5 col-md-7 col-lg-6">
-                  <div
-                    className="fp__banner_text wow fadeInRight"
-                    data-wow-duration="1s"
-                  >
-                    <h1>Great food. Tastes good.</h1>
-                    <h3>Fast Food & Restaurants</h3>
-                    <p>
-                      Lorem ipsum, dolor sit amet consectetur adipisicing elit.
-                      Ipsum fugit minima et debitis ut distinctio optio qui
-                      voluptate natus.
-                    </p>
-                    <ul className="d-flex flex-wrap">
-                      <li>
-                        <a className="common_btn" href="#">
-                          shop now
-                        </a>
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+          ))}
         </Slider>
       </div>
     </section>

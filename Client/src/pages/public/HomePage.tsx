@@ -85,12 +85,12 @@ const HomePage = () => {
         >
           <SlideIntro />
         </div>
-        <div
+        {/* <div
           ref={chefRef}
           className={`fade-in ${chefInView ? 'is-visible' : ''}`}
         >
           <Chef />
-        </div>
+        </div> */}
         <div
           ref={feedBackRef}
           className={`fade-in ${feedBackInView ? 'is-visible' : ''}`}

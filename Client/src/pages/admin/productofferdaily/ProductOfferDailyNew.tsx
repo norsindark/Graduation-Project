@@ -36,7 +36,7 @@ interface OfferFormValues {
     dishId: string;
     offerType:
       | 'DAILY'
-      | 'WEEKLY_OFFER'
+      | 'BANNER'
       | 'MONTHLY_SPECIAL'
       | 'MEMBERSHIP'
       | 'FIRST_TIME_CUSTOMER_OFFER';
@@ -126,20 +126,13 @@ const ProductOfferDailyNew: React.FC<{
     const endDate = form.getFieldValue(['offers', fieldName, 'endDate']);
     const offerType = form.getFieldValue(['offers', fieldName, 'offerType']);
 
-    if (startDate && endDate && endDate.isBefore(startDate)) {
-      return Promise.reject('End date must be after start date');
-    }
-
     switch (offerType) {
       case 'DAILY':
-        if (endDate && !endDate.isSame(startDate, 'day')) {
+        if (
+          endDate &&
+          (endDate < startDate || endDate > startDate.add(1, 'day'))
+        ) {
           return Promise.reject('Daily offer must be within the same day');
-        }
-        break;
-
-      case 'WEEKLY_OFFER':
-        if (endDate && endDate.diff(startDate, 'day') > 7) {
-          return Promise.reject('Weekly offer cannot exceed 7 days');
         }
         break;
 
@@ -177,9 +170,7 @@ const ProductOfferDailyNew: React.FC<{
   const getDefaultEndDate = (offerType: string, startDate: Dayjs) => {
     switch (offerType) {
       case 'DAILY':
-        return startDate;
-      case 'WEEKLY_OFFER':
-        return startDate.add(7, 'day');
+        return startDate.add(1, 'day');
       case 'MONTHLY_SPECIAL':
         return startDate.add(30, 'day');
       case 'MEMBERSHIP':
@@ -224,7 +215,7 @@ const ProductOfferDailyNew: React.FC<{
             {
               offerType: 'DAILY',
               startDate: dayjs(),
-              endDate: dayjs(),
+              endDate: dayjs().add(1, 'day'),
             },
           ],
         }}
@@ -300,7 +291,7 @@ const ProductOfferDailyNew: React.FC<{
                           }
                         >
                           <Option value="DAILY">Daily</Option>
-                          <Option value="WEEKLY_OFFER">Weekly Offer</Option>
+                          <Option value="BANNER">Banner</Option>
                           <Option value="MONTHLY_SPECIAL">
                             Monthly Special
                           </Option>
@@ -369,12 +360,10 @@ const ProductOfferDailyNew: React.FC<{
                             if (startDate) {
                               switch (offerType) {
                                 case 'DAILY':
-                                  return !current?.isSame(startDate, 'day');
-                                case 'WEEKLY_OFFER':
                                   return (
                                     current &&
                                     (current < startDate ||
-                                      current > startDate.add(7, 'day'))
+                                      current > startDate.add(1, 'day'))
                                   );
                                 case 'MONTHLY_SPECIAL':
                                   return (
@@ -475,7 +464,7 @@ const ProductOfferDailyNew: React.FC<{
                     add({
                       offerType: 'DAILY',
                       startDate: dayjs(),
-                      endDate: dayjs(),
+                      endDate: dayjs().add(1, 'day'),
                     });
                   }}
                   block
