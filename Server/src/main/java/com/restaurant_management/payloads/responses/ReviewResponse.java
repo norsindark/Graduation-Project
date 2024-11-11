@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 @NoArgsConstructor
 public class ReviewResponse {
     private String reviewId;
-    private int rating;
+    private Double rating;
     private String comment;
     private String dishId;
     private String dishName;

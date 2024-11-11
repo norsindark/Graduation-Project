@@ -23,4 +23,6 @@ public interface ReviewService {
     ApiResponse deleteReview(String reviewId) throws DataExitsException;
 
     ApiResponse replyReview(ReviewDto reviewDto) throws DataExitsException;
+
+    Double getAverageRatingByDishId(String dishId) throws DataExitsException;
 }

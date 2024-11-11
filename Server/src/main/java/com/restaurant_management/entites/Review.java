@@ -23,12 +23,12 @@ public class Review {
     private String id;
 
     @Column(name = "rating", nullable = false)
-    private int rating;
+    private Double rating;
 
     @Column(name = "comment", columnDefinition = "TEXT")
     private String comment;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "dish_id")
     @JsonIgnore
     @ToString.Exclude

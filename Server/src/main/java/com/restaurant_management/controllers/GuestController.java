@@ -38,6 +38,12 @@ public class GuestController {
         return ResponseEntity.ok(reviewService.getAllReviewsByDishId(dishId, pageNo, pageSize, sortBy, sortDir));
     }
 
+    @GetMapping("/get-average-rating-by-dish")
+    @Operation(summary = "Get average rating by dish ID", tags = {"Review"})
+    public ResponseEntity<Double> getAverageRatingByDishId(@RequestParam String dishId) throws DataExitsException {
+        return ResponseEntity.ok(reviewService.getAverageRatingByDishId(dishId));
+    }
+
     // dish
     @GetMapping("/get-dish-by-id/{dishId}")
     @Operation(summary = "Get dish by ID", tags = {"Dish"})
