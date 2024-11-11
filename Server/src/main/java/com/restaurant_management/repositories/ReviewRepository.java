@@ -16,9 +16,15 @@ public interface ReviewRepository extends JpaRepository<Review, String> {
     @Query("SELECT new com.restaurant_management.payloads.responses.ReviewResponse( " +
             "r.id, r.rating, r.comment, r.dish.id, r.dish.dishName, " +
             "r.user.id, r.user.fullName, r.user.avatar, r.createdAt) " +
-            "FROM Review r WHERE r.user.id = :userId")
+            "FROM Review r WHERE r.user.id = :userId AND r.parentReview IS NULL")
     Page<ReviewResponse> findAllByUserId(@Param("userId") String userId, Pageable pageable);
 
+//    @Query("SELECT new com.restaurant_management.payloads.responses.ReviewResponse( " +
+//            "r.id, r.rating, r.comment, r.dish.id, r.dish.dishName, " +
+//            "r.user.id, r.user.fullName, r.user.avatar, r.createdAt, " +
+//            "r.parentReview.id) " +
+//            "FROM Review r WHERE r.user.id = :userId AND r.parentReview IS NULL")
+//    Page<ReviewResponse> findAllByUserId(@Param("userId") String userId, Pageable pageable);
 
     @Query("SELECT AVG(r.rating) FROM Review r WHERE r.dish.id = :dishId")
     Double getAverageRatingByDishId(@Param("dishId") String dishId);
