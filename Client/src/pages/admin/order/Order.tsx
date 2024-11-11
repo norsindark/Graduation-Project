@@ -62,11 +62,11 @@ interface OrderItem {
 
 enum OrderStatus {
   PENDING = 'PENDING',
-  CONFIRMED = 'CONFIRMED',
+  ACCEPTED = 'ACCEPTED',
+  PROCESSING = 'PROCESSING',
   SHIPPING = 'SHIPPING',
-  DELIVERED = 'DELIVERED',
+  COMPLETED = 'COMPLETED',
   CANCELLED = 'CANCELLED',
-  PAID = 'PAID',
 }
 
 const Order: React.FC = () => {
@@ -180,20 +180,20 @@ const Order: React.FC = () => {
   const renderOrderStatus = (status: string, record: OrderItem) => {
     const statusColor = {
       PENDING: '#faad14',
-      CONFIRMED: '#1890ff',
-      SHIPPING: '#722ed1',
-      DELIVERED: '#52c41a',
+      ACCEPTED: '#1890ff',
+      PROCESSING: '#722ed1',
+      SHIPPING: '#52c41a',
+      COMPLETED: '#52c41a',
       CANCELLED: '#ff4d4f',
-      PAID: '#52c41a',
     };
 
     const statusText = {
       PENDING: 'Pending',
-      CONFIRMED: 'Confirmed',
+      ACCEPTED: 'Accepted',
+      PROCESSING: 'Processing',
       SHIPPING: 'Shipping',
-      DELIVERED: 'Delivered',
+      COMPLETED: 'Completed',
       CANCELLED: 'Cancelled',
-      PAID: 'Paid',
     };
 
     return (
@@ -201,7 +201,7 @@ const Order: React.FC = () => {
         className="font-bold text-base"
         color={statusColor[status as keyof typeof statusColor]}
       >
-        {statusText[status as keyof typeof statusText]}
+        {statusText[status as keyof typeof statusText] || status}
       </Tag>
     );
   };

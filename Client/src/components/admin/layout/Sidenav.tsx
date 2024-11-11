@@ -9,6 +9,7 @@ import { FaCog, FaReplyAll, FaWarehouse } from 'react-icons/fa';
 import { UsergroupAddOutlined } from '@ant-design/icons';
 import { FaCalendarCheck } from 'react-icons/fa';
 import { FaTags } from 'react-icons/fa';
+import logo from '../../../assets/images/imagelogosyndev.png';
 function Sidenav({ color }: { color: string }) {
   const { pathname } = useLocation();
   const page = pathname.replace('/', '');
@@ -197,8 +198,7 @@ function Sidenav({ color }: { color: string }) {
   return (
     <>
       <div className="brand">
-        <img alt="" />
-        <span className="">DuckFunny</span>
+        <img src={logo} alt="Sync Food" className="max-w-32 mx-auto" />
       </div>
       <hr />
       <Menu theme="light" mode="inline" items={menuItems} />

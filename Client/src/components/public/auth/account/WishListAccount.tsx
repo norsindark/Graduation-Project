@@ -1,9 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { notification, Popconfirm } from 'antd';
-import { callWishListById, callDeleteWishList } from '../../../../services/clientApi';
+import { notification, Pagination, Popconfirm } from 'antd';
+import {
+  callWishListById,
+  callDeleteWishList,
+} from '../../../../services/clientApi';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../../redux/store';
 import { useNavigate } from 'react-router-dom';
+import Loading from '../../../../components/Loading/Loading';
 
 interface WishListDish {
   dishId: string;
@@ -28,22 +32,23 @@ interface WishListItem {
 
 const WishListAccount = () => {
   const [isInvoiceModalOpen, setIsInvoiceModalOpen] = useState(false);
-  const [selectedWishListItem, setSelectedWishListItem] = useState<WishListDish | null>(null);
-  
+  const [selectedWishListItem, setSelectedWishListItem] =
+    useState<WishListDish | null>(null);
+
   const [current, setCurrent] = useState(1);
   const [pageSize, setPageSize] = useState(3);
   const [total, setTotal] = useState(0);
   const [listWishListItem, setListWishListItem] = useState<WishListItem[]>([]);
-  
+
   const [loading, setLoading] = useState(false);
-  
+
   const userId = useSelector((state: RootState) => state.account.user?.id);
-  
+
   const navigate = useNavigate();
 
   const handleProductClick = (slug: string) => {
     handleGoBack();
-    navigate(`/product-detail/${slug}`); 
+    navigate(`/product-detail/${slug}`);
   };
 
   const handleViewInvoice = (dish: WishListDish) => {
@@ -57,30 +62,8 @@ const WishListAccount = () => {
   };
 
   const handlePageChange = (page: number) => {
+    setLoading(true);
     setCurrent(page);
-  };
-
-  const renderPageNumbers = () => {
-    const pageNumbers = [];
-    const totalPages = Math.ceil(total / pageSize);
-    
-    let startPage = Math.max(1, current - 1);
-    let endPage = Math.min(totalPages, startPage + 2); // Hiển thị 3 ô
-
-    if (endPage - startPage < 2) {
-      startPage = Math.max(1, endPage - 2);
-    }
-
-    for (let i = startPage; i <= endPage; i++) {
-      pageNumbers.push(
-        <li key={i} className={`page-item ${i === current ? 'active' : ''}`}>
-          <a className="page-link" href="#" onClick={() => handlePageChange(i)} >
-            {i}
-          </a>
-        </li>
-      );
-    }
-    return pageNumbers;
   };
 
   useEffect(() => {
@@ -98,6 +81,7 @@ const WishListAccount = () => {
 
   const fetchItems = async () => {
     setLoading(true);
+    await new Promise((resolve) => setTimeout(resolve, 300));
     try {
       let query = `pageNo=${current - 1}&pageSize=${pageSize}&sortBy=createdAt&sortDir=desc`;
       const response = await callWishListById(userId || '', query);
@@ -124,7 +108,7 @@ const WishListAccount = () => {
       notification.error({
         message: 'Failed to load favorites list',
         description: 'Error loading data!',
-        duration:  5,
+        duration: 5,
         showProgress: true,
       });
     } finally {
@@ -143,10 +127,8 @@ const WishListAccount = () => {
     }
 
     try {
-      console.log("User ID:", userId);
-      console.log("Dish ID:", dishId);
-
-      const response = await callDeleteWishList( dishId, userId);
+      setLoading(true);
+      const response = await callDeleteWishList(dishId, userId);
 
       if (response.status === 200) {
         notification.success({
@@ -158,7 +140,8 @@ const WishListAccount = () => {
       } else {
         notification.error({
           message: 'Cannot delete product',
-          description: response.data.errors?.error || 'Error while deleting product!',
+          description:
+            response.data.errors?.error || 'Error while deleting product!',
           duration: 5,
         });
       }
@@ -168,93 +151,114 @@ const WishListAccount = () => {
         description: 'Error while deleting product!',
         duration: 5,
       });
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="tab-pane fade" id="v-pills-messages2" role="tabpanel" aria-labelledby="v-pills-messages-tab2">
-      <div className="fp_dashboard_body">
-        <h3>wishlist</h3>
-        <div className="fp__dashboard_wishlist">
-          <div className="row">
-            {loading ? (
-              <p>Loading...</p>
-            ) : (
-              listWishListItem.flatMap((item) =>
-                item.dishes.map((dish) => (
-                  <div className="col-xl-4 col-sm-6 col-lg-6" key={dish.dishId}>
-                    <div className="fp__menu_item">
-                      <div className="fp__menu_item_img">
-                        <img
-                          src={dish.thumbImage}
-                          alt={dish.dishName}
-                          className="img-fluid w-100"
-                        />
-                        <a className="category" href="#">
-                          {dish.slug}
-                        </a>
-                      </div>
-                      <div className="fp__menu_item_text">
-                        <p className="rating">
-                          {[...Array(5)].map((_, index) => (
-                            <i
-                              key={index}
-                              className={
-                                index < Math.floor(dish.rating)
-                                  ? "fas fa-star"
-                                  : index < dish.rating
-                                  ? "fas fa-star-half-alt"
-                                  : "far fa-star"
-                              }
-                            ></i>
-                          ))}
-                          <span>{dish.ratingCount}</span>
-                        </p>
-                        <a className="title"
-                           href={`/product-detail/${dish.slug}`}
-                           onClick={(e) => {
-                             e.preventDefault();
-                             handleProductClick(dish.slug);
-                           }}>
-                          {dish.dishName}
-                        </a>
-                        <h5 className="price">
-                          ${dish.offerPrice.toFixed(2)} <del>${dish.price.toFixed(2)}</del>
-                        </h5>
-                        <ul className="d-flex flex-wrap justify-content-center">
-                          <li>
-                            <a href="#">
-                              <i className="far fa-eye"></i>
-                            </a>
-                          </li>
-                          <li>
-                            <Popconfirm
-                              title="Are you sure you want to delete this product?"
-                              onConfirm={() => handleDeleteClick(dish.dishId)}
-                              okText="Yes"
-                              cancelText="No"
-                            >
+    <>
+      <div
+        className="tab-pane fade"
+        id="v-pills-messages2"
+        role="tabpanel"
+        aria-labelledby="v-pills-messages-tab2"
+      >
+        <div className="fp_dashboard_body">
+          <h3>wishlist</h3>
+          {loading ? (
+            <Loading />
+          ) : (
+            <div className="fp__dashboard_wishlist">
+              <div className="row">
+                {listWishListItem.flatMap((item) =>
+                  item.dishes.map((dish) => (
+                    <div
+                      className="col-xl-4 col-sm-6 col-lg-6"
+                      key={dish.dishId}
+                    >
+                      <div className="fp__menu_item ">
+                        <div className="fp__menu_item_img">
+                          <img
+                            src={dish.thumbImage}
+                            alt={dish.dishName}
+                            className="img-fluid w-100"
+                          />
+                          <a className="category" href="#">
+                            {dish.slug}
+                          </a>
+                        </div>
+                        <div className="fp__menu_item_text">
+                          <p className="rating">
+                            {[...Array(5)].map((_, index) => (
+                              <i
+                                key={index}
+                                className={
+                                  index < Math.floor(dish.rating)
+                                    ? 'fas fa-star'
+                                    : index < dish.rating
+                                      ? 'fas fa-star-half-alt'
+                                      : 'far fa-star'
+                                }
+                              ></i>
+                            ))}
+                            <span>{dish.ratingCount}</span>
+                          </p>
+                          <a
+                            className="title"
+                            href={`/product-detail/${dish.slug}`}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              handleProductClick(dish.slug);
+                            }}
+                          >
+                            {dish.dishName}
+                          </a>
+                          <h5 className="price">
+                            ${dish.offerPrice.toFixed(2)}{' '}
+                            <del>${dish.price.toFixed(2)}</del>
+                          </h5>
+                          <ul className="d-flex flex-wrap justify-content-center">
+                            <li>
                               <a href="#">
-                                <i className="fal fa-trash"></i>
+                                <i className="far fa-eye"></i>
                               </a>
-                            </Popconfirm>
-                          </li>
-                        </ul>
+                            </li>
+                            <li>
+                              <Popconfirm
+                                title="Are you sure you want to delete this product?"
+                                onConfirm={() => handleDeleteClick(dish.dishId)}
+                                okText="Yes"
+                                cancelText="No"
+                              >
+                                <a href="#">
+                                  <i className="fal fa-trash"></i>
+                                </a>
+                              </Popconfirm>
+                            </li>
+                          </ul>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))
-              )
-            )}
-          </div>
-          <nav aria-label="Page navigation">
-            <ul className="pagination justify-content-center m-4">
-              {renderPageNumbers()}
-            </ul>
-          </nav>
+                  ))
+                )}
+              </div>
+              {listWishListItem.length > 0 && (
+                <div className="absolute left-[55%] transform z-1000 bg-white p-2 mt-4">
+                  <Pagination
+                    align="center"
+                    current={current}
+                    total={total}
+                    pageSize={pageSize}
+                    onChange={handlePageChange}
+                  />
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

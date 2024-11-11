@@ -13,7 +13,9 @@ function Footer() {
             © 2024, made with
             {<HeartFilled />} by
             <a href="#pablo" className="font-weight-bold" target="_blank">
-              DuckFunny
+              <span className="text-base font-black text-[#81c784]">
+                Sync Food
+              </span>
             </a>
             for a better web.
           </div>

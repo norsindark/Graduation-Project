@@ -1,8 +1,12 @@
-import { Button, notification, Pagination } from 'antd';
+import { Button, notification, Pagination, Tag, Modal } from 'antd';
 import { useEffect, useState } from 'react';
-import { callGetOrderById } from '../../../../services/clientApi';
+import {
+  callGetOrderById,
+  callCancelOrder,
+} from '../../../../services/clientApi';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../../redux/store';
+import { ExclamationCircleOutlined } from '@ant-design/icons';
 
 interface OrderOption {
   optionId: string;
@@ -40,6 +44,49 @@ interface Order {
   orderItems: OrderItem[];
 }
 
+enum OrderStatus {
+  PENDING = 'PENDING',
+  ACCEPTED = 'ACCEPTED',
+  PROCESSING = 'PROCESSING',
+  SHIPPING = 'SHIPPING',
+  COMPLETED = 'COMPLETED',
+}
+
+const isStatusActive = (
+  currentStatus: string | undefined,
+  checkStatus: OrderStatus
+): boolean => {
+  if (!currentStatus) return false;
+
+  if (currentStatus === OrderStatus.COMPLETED) return true;
+
+  switch (checkStatus) {
+    case OrderStatus.PENDING:
+      return [
+        OrderStatus.PENDING,
+        OrderStatus.ACCEPTED,
+        OrderStatus.PROCESSING,
+        OrderStatus.SHIPPING,
+      ].includes(currentStatus as OrderStatus);
+    case OrderStatus.ACCEPTED:
+      return [
+        OrderStatus.ACCEPTED,
+        OrderStatus.PROCESSING,
+        OrderStatus.SHIPPING,
+      ].includes(currentStatus as OrderStatus);
+    case OrderStatus.PROCESSING:
+      return [OrderStatus.PROCESSING, OrderStatus.SHIPPING].includes(
+        currentStatus as OrderStatus
+      );
+    case OrderStatus.SHIPPING:
+      return currentStatus === OrderStatus.SHIPPING;
+    case OrderStatus.COMPLETED:
+      return currentStatus === OrderStatus.COMPLETED;
+    default:
+      return false;
+  }
+};
+
 const OrderAccount = () => {
   const [isInvoiceModalOpen, setIsInvoiceModalOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
@@ -50,6 +97,15 @@ const OrderAccount = () => {
   const [listOrder, setListOrder] = useState<Order[]>([]);
 
   const [loading, setLoading] = useState(false);
+
+  const statusColor = {
+    PENDING: '#faad14',
+    ACCEPTED: '#1890ff',
+    PROCESSING: '#722ed1',
+    SHIPPING: '#52c41a',
+    COMPLETED: '#52c41a',
+    CANCELLED: '#ff4d4f',
+  };
 
   const userId = useSelector((state: RootState) => state.account.user?.id);
 
@@ -119,6 +175,49 @@ const OrderAccount = () => {
     if (pageSize) setPageSize(pageSize);
   };
 
+  const handleCancelOrder = async (orderId: string) => {
+    const { confirm } = Modal;
+    confirm({
+      title: 'Confirm cancel order',
+      icon: <ExclamationCircleOutlined />,
+      content: 'Are you sure you want to cancel this order?',
+      okText: 'Confirm',
+      cancelText: 'Cancel',
+      onOk: async () => {
+        try {
+          setLoading(true);
+          const response = await callCancelOrder(orderId);
+
+          if (response.status === 200) {
+            notification.success({
+              message: 'Cancel order successfully',
+              duration: 5,
+              showProgress: true,
+            });
+            fetchItems(); // Refresh lại danh sách
+          } else {
+            notification.error({
+              message: 'Unable to cancel order',
+              description:
+                response.data.errors?.error || 'Error during cancel process!',
+              duration: 5,
+              showProgress: true,
+            });
+          }
+        } catch (error) {
+          notification.error({
+            message: 'Unable to cancel order',
+            description: 'Error during cancel process!',
+            duration: 5,
+            showProgress: true,
+          });
+        } finally {
+          setLoading(false);
+        }
+      },
+    });
+  };
+
   return (
     <div
       className="tab-pane fade"
@@ -156,10 +255,18 @@ const OrderAccount = () => {
                           </p>
                         </td>
                         <td>
-                          <span
-                            className={`status ${order.orderStatus.toLowerCase()} ${order.orderStatus === 'PENDING' ? 'active' : ''} ${order.orderStatus === 'PAID' ? 'complete' : ''} ${order.orderStatus === 'CANCELLED' ? 'cancelled' : ''} `}
-                          >
-                            {order.orderStatus}
+                          <span className="status ">
+                            <Tag
+                              color={
+                                statusColor[
+                                  order.orderStatus as keyof typeof statusColor
+                                ]
+                              }
+                            >
+                              <p className="font-bold text-base">
+                                {order.orderStatus}
+                              </p>
+                            </Tag>
                           </span>
                         </td>
                         <td>
@@ -167,10 +274,23 @@ const OrderAccount = () => {
                         </td>
                         <td>
                           <a
-                            className="view_invoice"
+                            className="view_invoice mr-2"
                             onClick={() => handleViewInvoice(order)}
                           >
-                            View detail
+                            <p className="text-base font-bold">View</p>
+                          </a>
+                          <a
+                            className="cancel_order"
+                            onClick={() => handleCancelOrder(order.orderId)}
+                            style={{
+                              display:
+                                order.orderStatus === 'PENDING'
+                                  ? 'inline'
+                                  : 'none',
+                              cursor: 'pointer',
+                            }}
+                          >
+                            <p className="text-base font-bold">Cancel</p>
                           </a>
                         </td>
                       </tr>
@@ -192,50 +312,18 @@ const OrderAccount = () => {
             </Button>
             <div className="fp__track_order">
               <ul>
-                <li
-                  className={
-                    selectedOrder?.orderStatus === 'PENDING' ||
-                    selectedOrder?.orderStatus === 'PAID' ||
-                    selectedOrder?.orderStatus === 'PROCESSING' ||
-                    selectedOrder?.orderStatus === 'SHIPPING' ||
-                    selectedOrder?.orderStatus === 'COMPLETED'
-                      ? 'active'
-                      : ''
-                  }
-                >
-                  Pending
-                </li>
-                <li
-                  className={
-                    selectedOrder?.orderStatus === 'ACCEPTED' ||
-                    selectedOrder?.orderStatus === 'PAID'
-                      ? 'active'
-                      : ''
-                  }
-                >
-                  Accepted
-                </li>
-                <li
-                  className={
-                    selectedOrder?.orderStatus === 'PROCESSING' ? 'active' : ''
-                  }
-                >
-                  Processing
-                </li>
-                <li
-                  className={
-                    selectedOrder?.orderStatus === 'SHIPPING' ? 'active' : ''
-                  }
-                >
-                  Shipping
-                </li>
-                <li
-                  className={
-                    selectedOrder?.orderStatus === 'COMPLETED' ? 'active' : ''
-                  }
-                >
-                  Completed
-                </li>
+                {Object.values(OrderStatus).map((status) => (
+                  <li
+                    key={status}
+                    className={
+                      isStatusActive(selectedOrder?.orderStatus, status)
+                        ? 'active'
+                        : ''
+                    }
+                  >
+                    {status.charAt(0) + status.slice(1).toLowerCase()}
+                  </li>
+                ))}
               </ul>
             </div>
             <div className="fp__invoice_header">

@@ -126,20 +126,13 @@ const ProductOfferDailyEdit: React.FC<{
     const endDate = form.getFieldValue('endDate');
     const offerType = form.getFieldValue('offerType');
 
-    if (startDate && endDate && endDate.isBefore(startDate)) {
-      return Promise.reject('End date must be after start date');
-    }
-
     switch (offerType) {
       case 'DAILY':
-        if (endDate && !endDate.isSame(startDate, 'day')) {
+        if (
+          endDate &&
+          (endDate < startDate || endDate > startDate.add(1, 'day'))
+        ) {
           return Promise.reject('Daily offer must be within the same day');
-        }
-        break;
-
-      case 'WEEKLY_OFFER':
-        if (endDate && endDate.diff(startDate, 'day') > 7) {
-          return Promise.reject('Weekly offer cannot exceed 7 days');
         }
         break;
 
@@ -180,10 +173,7 @@ const ProductOfferDailyEdit: React.FC<{
 
     switch (value) {
       case 'DAILY':
-        newEndDate = startDate;
-        break;
-      case 'WEEKLY_OFFER':
-        newEndDate = startDate.add(7, 'day');
+        newEndDate = startDate.add(1, 'day');
         break;
       case 'MONTHLY_SPECIAL':
         newEndDate = startDate.add(30, 'day');
@@ -239,7 +229,7 @@ const ProductOfferDailyEdit: React.FC<{
               >
                 <Select onChange={handleOfferTypeChange}>
                   <Option value="DAILY">Daily</Option>
-                  <Option value="WEEKLY_OFFER">Weekly Offer</Option>
+                  <Option value="BANNER">Banner</Option>
                   <Option value="MONTHLY_SPECIAL">Monthly Special</Option>
                   <Option value="MEMBERSHIP">Membership</Option>
                   <Option value="FIRST_TIME_CUSTOMER_OFFER">
@@ -290,12 +280,10 @@ const ProductOfferDailyEdit: React.FC<{
                     if (startDate) {
                       switch (offerType) {
                         case 'DAILY':
-                          return !current?.isSame(startDate, 'day');
-                        case 'WEEKLY_OFFER':
                           return (
                             current &&
                             (current < startDate ||
-                              current > startDate.add(7, 'day'))
+                              current > startDate.add(1, 'day'))
                           );
                         case 'MONTHLY_SPECIAL':
                           return (
