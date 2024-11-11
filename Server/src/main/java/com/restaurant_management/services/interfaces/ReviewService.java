@@ -13,6 +13,9 @@ public interface ReviewService {
     PagedModel<EntityModel<ReviewResponse>> getAllReviews(int pageNo, int pageSize, String sortBy, String sortDir)
             throws DataExitsException;
 
+    PagedModel<EntityModel<ReviewResponse>> getAllReviewsByUserId(String userId, int pageNo, int pageSize, String sortBy, String sortDir)
+            throws DataExitsException;
+
     ApiResponse createReview(ReviewDto reviewDto) throws DataExitsException;
 
     ApiResponse updateReview(ReviewDto reviewDto) throws DataExitsException;
