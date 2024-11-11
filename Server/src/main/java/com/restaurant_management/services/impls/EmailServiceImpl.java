@@ -3,9 +3,9 @@ package com.restaurant_management.services.impls;
 import com.restaurant_management.dtos.UserMembershipDto;
 import com.restaurant_management.dtos.UserMonthlySpecialDto;
 import com.restaurant_management.dtos.UserWithoutOrdersProjectionDto;
-import com.restaurant_management.entites.*;
+import com.restaurant_management.entites.Offer;
 import com.restaurant_management.exceptions.DataExitsException;
-import com.restaurant_management.repositories.*;
+import com.restaurant_management.repositories.UserRepository;
 import com.restaurant_management.services.interfaces.EmailService;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -24,18 +24,14 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 @Service
 @Component
 @RequiredArgsConstructor
 public class EmailServiceImpl implements EmailService {
 
-    private final OrderItemRepository orderItemRepository;
-    private final OrderRepository orderRepository;
-    private final DishRepository dishRepository;
+
     private final UserRepository userRepository;
-    private final DishOptionSelectionRepository dishOptionSelectionRepository;
 
 
     @Value("${RestaurantManagement.app.ClientUrl}")
@@ -81,7 +77,6 @@ public class EmailServiceImpl implements EmailService {
     }
 
 
-
     @Override
     public void sendPasswordResetEmail(String email, String token)
             throws MessagingException, UnsupportedEncodingException {
@@ -115,9 +110,9 @@ public class EmailServiceImpl implements EmailService {
     }
 
     public void sendOfferNotification(Offer offer) throws MessagingException, UnsupportedEncodingException, DataExitsException {
-        String fromAddress = "dvan78281@gmail.com";
+        String fromAddress = "no-reply@syncfood.com";
         String senderName = "Sync Food";
-        String subject = "Exclusive Offer Just for You!";
+        String subject = "EXCLUSIVE OFFER JUST FOR YOU!";
         String forUser = "";
 
         switch (offer.getOfferType()) {
@@ -162,41 +157,56 @@ public class EmailServiceImpl implements EmailService {
                 .append("</tr>")
                 .append("</tbody>")
                 .append("</table>")
-
-
                 .append("<a href=\"").append(clientUrl).append("product-detail/").append(offer.getDish().getSlug())
                 .append("\" style=\"display: inline-block; background-color: #4CAF50; color: white; margin-top: 20px; padding: 10px 20px; text-align: center; border-radius: 5px; text-decoration: none;\">")
                 .append("View Product Details</a>")
-
                 .append("<p style=\"color: #5C8E5F;\">Thank you for choosing us! We hope you enjoy this offer.</p>")
                 .append("</div></body></html>");
 
         List<?> users = checkCondition(offer.getOfferType());
-        int count = 0;
-        MimeMessage message = javaMailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(message, true);
+        List<String> emails = new ArrayList<>();
+//        int count = 0;
 
         if (users != null && !users.isEmpty()) {
             for (Object userObject : users) {
-                if (count == 2) {
-                    break;
-                }
+//                if (count == 10) {
+//                    break;
+//                }
                 if (userObject instanceof UserWithoutOrdersProjectionDto) {
                     UserWithoutOrdersProjectionDto user = (UserWithoutOrdersProjectionDto) userObject;
-                    sendEmail(helper, fromAddress, senderName, user.getEmail(), subject, content);
-                    count++;
+                    emails.add(user.getEmail());
+//                    count++;
                 } else if (userObject instanceof UserMonthlySpecialDto) {
                     UserMonthlySpecialDto user = (UserMonthlySpecialDto) userObject;
-                    sendEmail(helper, fromAddress, senderName, user.getEmail(), subject, content);
-                    count++;
+                    emails.add(user.getEmail());
+//                    count++;
                 } else if (userObject instanceof UserMembershipDto) {
                     UserMembershipDto user = (UserMembershipDto) userObject;
-                    sendEmail(helper, fromAddress, senderName, user.getEmail(), subject, content);
-                    count++;
+                    emails.add(user.getEmail());
+//                    count++;
                 }
             }
         }
+
+        if (!emails.isEmpty()) {
+            MimeMessage message = javaMailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true);
+            helper.setFrom(fromAddress, senderName);
+            helper.setSubject(subject);
+            helper.setText(content.toString(), true);
+
+            for (String email : emails) {
+                helper.addBcc(email);
+            }
+
+            try {
+                javaMailSender.send(message);
+            } catch (Exception e) {
+                System.out.println("Error sending email: " + e.getMessage());
+            }
+        }
     }
+
 
     private void sendEmail(MimeMessageHelper helper, String fromAddress, String senderName, String toEmail, String subject, StringBuilder content) {
         try {
