@@ -165,4 +165,12 @@ public class ReviewServiceImpl implements ReviewService {
     private boolean hasUserPurchasedDish(String userId, String dishId) {
         return orderRepository.existsByUserIdAndDishId(userId, dishId);
     }
+
+    @Override
+    public Double getAverageRatingByDishId(String dishId) throws DataExitsException {
+        dishRepository.findById(dishId)
+                .orElseThrow(() -> new DataExitsException("Dish not found"));
+
+        return reviewRepository.getAverageRatingByDishId(dishId);
+    }
 }
