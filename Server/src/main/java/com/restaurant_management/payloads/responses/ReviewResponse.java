@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -40,4 +41,19 @@ public class ReviewResponse {
                         .map(ReplyReviewResponse::new)
                         .collect(Collectors.toList()) : null;
     }
+
+    public ReviewResponse(String reviewId, Double rating, String comment, String dishId,
+                          String dishName, String userId, String userFullName,
+                          String userAvatar, Timestamp createdAt) {
+        this.reviewId = reviewId;
+        this.rating = rating;
+        this.comment = comment;
+        this.dishId = dishId;
+        this.dishName = dishName;
+        this.userId = userId;
+        this.userFullName = userFullName;
+        this.userAvatar = userAvatar;
+        this.createdAt = createdAt.toString();
+    }
+
 }
