@@ -20,7 +20,7 @@ const ResetPasswordAccount = () => {
 
     if (!userId) {
       notification.error({
-        message: 'User not found',
+        message: 'User  not found',
         description: 'Please login to change your password',
         duration: 5,
       });
@@ -103,7 +103,7 @@ const ResetPasswordAccount = () => {
                       placeholder="Old Password"
                       autoComplete="old-password"
                     />
-                  </Form.Item>
+                  </ Form.Item>
                 </div>
                 <div className="col-xl-7">
                   <Form.Item
@@ -131,7 +131,7 @@ const ResetPasswordAccount = () => {
                   <Form.Item
                     label="Confirm Password"
                     name="confirmPassword"
-                    dependencies={['password']} // This makes sure confirmPassword depends on the password field
+                    dependencies={['newPassword']} // Đã sửa lại
                     rules={[
                       {
                         required: true,
@@ -139,7 +139,7 @@ const ResetPasswordAccount = () => {
                       },
                       ({ getFieldValue }) => ({
                         validator(_, value) {
-                          if (!value || getFieldValue('password') === value) {
+                          if (!value || getFieldValue('newPassword') === value) { // Đã sửa lại
                             return Promise.resolve();
                           }
                           return Promise.reject(
