@@ -378,7 +378,6 @@ public class OrderServiceImpl implements OrderService {
         }
     }
 
-
     @Override
     public Map<String, Long> getDishSalesStatistics() {
         List<Map<String, Long>> results = orderItemRepository.getDishSalesStatistics();
