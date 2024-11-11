@@ -87,8 +87,6 @@ public class ReviewServiceImpl implements ReviewService {
         return pagedResourcesAssembler.toModel(pageResult);
     }
 
-
-
     @Override
     public ApiResponse createReview(ReviewDto reviewDto) throws DataExitsException {
         Dish dish = dishRepository.findById(reviewDto.getDishId())
