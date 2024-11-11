@@ -71,6 +71,27 @@ public class ReviewServiceImpl implements ReviewService {
         return pagedResourcesAssembler.toModel(new PageImpl<>(reviewResponses, pageable, pageResult.getTotalElements()));
     }
 
+    @Override
+    public PagedModel<EntityModel<ReviewResponse>> getAllReviewsByUserId(String userId, int pageNo, int pageSize, String sortBy, String sortDir)
+            throws DataExitsException {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new DataExitsException("User not found"));
+        Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.fromString(sortDir), sortBy));
+
+        Page<Review> pageResult = reviewRepository.findAllByUserId(user.getId(), pageable);
+
+        if (pageResult.isEmpty()) {
+            throw new DataExitsException("No reviews found");
+        }
+
+        List<ReviewResponse> reviewResponses = pageResult.stream()
+                .filter(review -> review.getParentReview() == null)
+                .map(ReviewResponse::new)
+                .collect(Collectors.toList());
+
+        return pagedResourcesAssembler.toModel(new PageImpl<>(reviewResponses, pageable, pageResult.getTotalElements()));
+    }
+
 
     @Override
     public ApiResponse createReview(ReviewDto reviewDto) throws DataExitsException {

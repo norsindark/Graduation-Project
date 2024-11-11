@@ -86,6 +86,7 @@ public class UserController {
         return ResponseEntity.ok().build();
     }
 
+    // reviews
     @PostMapping("/review/create-review")
     @PreAuthorize("hasRole('USER') || hasRole('ADMIN') || hasRole('EMPLOYEE')")
     public ResponseEntity<ApiResponse> createReview(@RequestBody ReviewDto reviewDto) throws DataExitsException {
@@ -104,5 +105,16 @@ public class UserController {
     public ResponseEntity<ApiResponse> replyReview(@RequestBody ReviewDto reviewDto)
             throws DataExitsException {
         return ResponseEntity.ok(reviewService.replyReview(reviewDto));
+    }
+
+    @GetMapping("/review/get-all-reviews-by-user-id")
+    @PreAuthorize("hasRole('USER') || hasRole('ADMIN') || hasRole('EMPLOYEE')")
+    public ResponseEntity<?> getAllReviewsByUserId(
+            @RequestParam String userId,
+            @RequestParam(defaultValue = "0") int pageNo,
+            @RequestParam(defaultValue = "10") int pageSize,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String sortDir) throws DataExitsException {
+        return ResponseEntity.ok(reviewService.getAllReviewsByUserId(userId, pageNo, pageSize, sortBy, sortDir));
     }
 }
