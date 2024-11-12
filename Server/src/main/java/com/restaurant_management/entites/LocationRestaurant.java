@@ -54,6 +54,30 @@ public class LocationRestaurant {
     @Column(name = "fee_per_km")
     private double feePerKm;
 
+    @Column(name = "phone_number")
+    private String phoneNumber;
+
+    @Column(name = "email")
+    private String email;
+
+    @Column(name = "logo")
+    private String logo;
+
+    @Column(name = "opening_time")
+    private String openingTime;
+
+    @Column(name = "closing_time")
+    private String closingTime;
+
+    @Column(name = "facebook")
+    private String facebook;
+
+    @Column(name = "instagram")
+    private String instagram;
+
+    @Column(name = "twitter")
+    private String twitter;
+
     @Column(name = "created_at")
     @CreationTimestamp
     private Timestamp createdAt;
