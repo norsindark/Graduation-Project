@@ -1,8 +1,11 @@
 package com.restaurant_management.services.impls;
 
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import com.restaurant_management.dtos.LocationRestaurantDto;
 import com.restaurant_management.entites.LocationRestaurant;
 import com.restaurant_management.exceptions.DataExitsException;
+import com.restaurant_management.payloads.requests.SettingRequest;
 import com.restaurant_management.payloads.responses.ApiResponse;
 import com.restaurant_management.repositories.LocationRestaurantRepository;
 import com.restaurant_management.services.interfaces.LocationRestaurantService;
@@ -14,7 +17,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,6 +28,7 @@ import java.util.Map;
 public class LocationRestaurantServiceImpl implements LocationRestaurantService {
 
     private final LocationRestaurantRepository locationRestaurantRepository;
+    private final Cloudinary cloudinary;
 
     @Value("${geocoding.api.key}")
     private String geocodingApiKey;
@@ -99,6 +105,32 @@ public class LocationRestaurantServiceImpl implements LocationRestaurantService 
                 .orElseThrow(() -> new DataExitsException("Location not found"));
         locationRestaurantRepository.delete(location);
         return new ApiResponse("Location deleted successfully", HttpStatus.OK);
+    }
+
+    @Override
+    public ApiResponse settingRestaurant(SettingRequest request) throws DataExitsException {
+        LocationRestaurant location = locationRestaurantRepository.findAll().stream().findFirst()
+                .orElseThrow(() -> new DataExitsException("Location not found"));
+        location.setPhoneNumber(request.getPhoneNumber());
+        location.setEmail(request.getEmail());
+        location.setFacebook(request.getFacebook());
+        location.setInstagram(request.getInstagram());
+        location.setTwitter(request.getTwitter());
+        location.setOpeningTime(request.getOpeningTime());
+        location.setClosingTime(request.getClosingTime());
+        locationRestaurantRepository.save(location);
+        return new ApiResponse("Setting updated successfully", HttpStatus.OK);
+    }
+
+    @Override
+    public ApiResponse settingLogo(MultipartFile file) throws DataExitsException, IOException {
+        LocationRestaurant location = locationRestaurantRepository.findAll().stream().findFirst()
+                .orElseThrow(() -> new DataExitsException("Location not found"));
+        var uploadResult = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.emptyMap());
+        String imageUrl = (String) uploadResult.get("url");
+        location.setLogo(imageUrl);
+        locationRestaurantRepository.save(location);
+        return new ApiResponse(imageUrl, HttpStatus.OK);
     }
 
     private Map<String, Double> getCoordinatesFromAddress(String address) {
