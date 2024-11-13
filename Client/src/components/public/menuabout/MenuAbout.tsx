@@ -62,6 +62,8 @@ function MenuAbout() {
   const [pageSize, setPageSize] = useState<number>(8);
   const [total, setTotal] = useState<number>(0);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [sortOption, setSortOption] = useState<string>(''); 
+  const [searchTerm, setSearchTerm] = useState<string>('');
 
   const navigate = useNavigate();
 
@@ -128,28 +130,31 @@ function MenuAbout() {
   };
 
   const filteredProducts = products.filter((product) => {
-    if (activeFilter === '*') return true;
+    const matchesSearchTerm = product.dishName.toLowerCase().includes(searchTerm.toLowerCase());
+
+    // Kiểm tra khoảng giá
+    const matchesPriceRange = product.offerPrice >= priceRange[0] && product.offerPrice <= priceRange[1];
+
+    if (activeFilter === '*') return matchesSearchTerm && matchesPriceRange;
 
     const category = categories.find(
-      (cat) =>
-        cat.name === activeFilter.replace('All ', '') ||
-        cat.subCategories.some((subCat) => subCat.name === activeFilter)
+        (cat) =>
+            cat.name === activeFilter.replace('All ', '') ||
+            cat.subCategories.some((subCat) => subCat.name === activeFilter)
     );
 
     if (!category) return false;
 
-    if (activeFilter.startsWith('All ')) {
-      return (
-        product.categoryName.toLowerCase() === category.name.toLowerCase() ||
-        category.subCategories.some(
-          (subCat) =>
-            product.categoryName.toLowerCase() === subCat.name.toLowerCase()
-        )
-      );
-    } else {
-      return product.categoryName.toLowerCase() === activeFilter.toLowerCase();
-    }
-  });
+    const matchesCategory = activeFilter.startsWith('All ')
+        ? product.categoryName.toLowerCase() === category.name.toLowerCase() ||
+          category.subCategories.some(
+              (subCat) =>
+                  product.categoryName.toLowerCase() === subCat.name.toLowerCase()
+          )
+        : product.categoryName.toLowerCase() === activeFilter.toLowerCase();
+
+    return matchesSearchTerm && matchesCategory && matchesPriceRange;
+});
 
   const handleProductClick = (slug: string) => {
     navigate(`/product-detail/${slug}`);
@@ -217,6 +222,25 @@ function MenuAbout() {
     }
   };
 
+
+  const handleSortChange = (value: string) => {
+    setSortOption(value);
+    setCurrent(1); // Đặt lại trang về 1 khi thay đổi sắp xếp
+  };
+
+  const sortedProducts = [...filteredProducts]; 
+  if (sortOption === 'priceLowToHigh') {
+    sortedProducts.sort((a, b) => a.offerPrice - b.offerPrice);
+  } else if (sortOption === 'priceHighToLow') {
+    sortedProducts.sort((a, b) => b.offerPrice - a.offerPrice);
+  }
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+  };
+
+
+
   return (
     <section className="fp__menu mt_95 xs_mt_65">
       <div className="container">
@@ -243,11 +267,13 @@ function MenuAbout() {
         <Form className="fp__search_menu_form">
           <div className="row">
             <div className="col-xl-4 col-md-5">
-              <Form.Item className="relative">
+            <Form.Item className="relative">
                 <Input
                   size="large"
                   type="text"
                   placeholder="Tìm kiếm..."
+                  value={searchTerm}
+                  onChange={handleSearchChange}
                   className="pr-20 rounded-3xl"
                 />
                 <Button
@@ -261,42 +287,43 @@ function MenuAbout() {
               </Form.Item>
             </div>
             <div className="col-xl-2 col-md-2">
-              <Form.Item label="Rating" className="text-xl font-medium">
+              {/* <Form.Item label="Rating" className="text-xl font-medium">
                 <Rate
                   allowHalf
                   defaultValue={0}
                   onChange={(value) => setRatingFilter(value)}
                 />
-              </Form.Item>
+              </Form.Item> */}
             </div>
             <div className="col-xl-3 col-md-3">
-              <Form.Item label="Price" className="mb-2 text-xl font-medium">
-                <Slider
-                  range
-                  min={0}
-                  max={1000000}
-                  defaultValue={[0, 1000000]}
-                  onChange={(value) => setPriceRange(value as [number, number])}
-                />
-              </Form.Item>
-            </div>
+  <Form.Item label="Price" className="mb-2 text-xl font-medium">
+    <Slider
+      range
+      min={0}
+      max={1000000}
+      defaultValue={[0, 1000000]}
+      onChange={(value) => setPriceRange(value as [number, number])}
+    />
+    <div className="price-range-label">
+      <span>{`Giá: ${priceRange[0].toLocaleString()} - ${priceRange[1].toLocaleString()} VNĐ`}</span>
+    </div>
+  </Form.Item>
+</div>
             <div className="col-xl-3 col-md-4">
               <Form.Item>
-                <Select size="large" className="text-xl font-medium">
-                  <Select.Option className="text-xl font-medium " value="">
-                    Select Product
-                  </Select.Option>
+                <Select
+                  size="large"
+                  className="text-xl font-medium"
+                  onChange={handleSortChange}
+                >
                   <Select.Option className="text-xl font-medium" value="">
-                    highlight
+                    Chọn sản phẩm
                   </Select.Option>
-                  <Select.Option className="text-xl font-medium" value="">
-                    new
+                  <Select.Option className="text-xl font-medium" value="priceLowToHigh">
+                    Giá từ thấp đến cao
                   </Select.Option>
-                  <Select.Option className="text-xl font-medium" value="">
-                    Price low to high
-                  </Select.Option>
-                  <Select.Option className="text-xl font-medium" value="">
-                    Price high to low
+                  <Select.Option className="text-xl font-medium" value="priceHighToLow">
+                    Giá từ cao đến thấp
                   </Select.Option>
                 </Select>
               </Form.Item>
@@ -324,7 +351,7 @@ function MenuAbout() {
                   </button>
                   {showDropdown === index && (
                     <ul
-                      className="absolute  shadow-lg w-60  left-0 rounded-md focus:outline-none z-50"
+                      className="absolute shadow-lg w-60 left-0 rounded-md focus:outline-none z-50"
                       onMouseEnter={() => setShowDropdown(index)}
                       onMouseLeave={() => setShowDropdown(null)}
                     >
@@ -332,7 +359,7 @@ function MenuAbout() {
                         <li key={`${menu.title}-${itemIndex}`}>
                           <button
                             onClick={() => handleFilter(item)}
-                            className="block bg-white text-xl font-medium px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-gray-900 w-full text-left transition-transform duration-200 ease-in-out transform hover:translate-x-1"
+                            className="block bg-white text-xl font-medium px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-gray-900 w -full text-left transition-transform duration-200 ease-in-out transform hover:translate-x-1"
                           >
                             {item}
                           </button>
@@ -347,7 +374,7 @@ function MenuAbout() {
         </div>
 
         <div className="row">
-          {filteredProducts.map((product, index) => (
+          {sortedProducts.map((product, index) => (
             <div
               className={`col-xl-3 col-sm-6 col-lg-4 wow fadeInUp ${
                 index % 2 === 0
