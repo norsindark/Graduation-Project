@@ -115,7 +115,6 @@ public class WarehouseServiceImpl implements WarehouseService {
         }
     }
 
-
     @Override
     public ApiResponse updateWarehouse(WarehouseRequest request) throws DataExitsException {
         Optional<Warehouse> warehouseOpt = warehouseRepository.findById(request.getWarehouseId());
