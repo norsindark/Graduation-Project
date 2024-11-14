@@ -25,6 +25,7 @@ public class GuestController {
     private final CouponService couponService;
     private final ReviewService reviewService;
     private final OfferService offerService;
+    private final BlogService blogService;
 
     // review
     @GetMapping("/get-all-reviews-by-dish")
@@ -131,5 +132,22 @@ public class GuestController {
     @Operation(summary = "Get offer by ID", tags = {"Offer"})
     public ResponseEntity<OfferResponse> getOfferById(@RequestParam String id) throws DataExitsException {
         return ResponseEntity.ok(offerService.getOfferById(id));
+    }
+
+    // blogs
+    @GetMapping("/get-all-blogs")
+    @Operation(summary = "Get all blogs")
+    public ResponseEntity<PagedModel<EntityModel<BlogResponse>>> getAllBlogs(
+            @RequestParam(defaultValue = "0") int pageNo,
+            @RequestParam(defaultValue = "10") int pageSize,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String sortDir) throws DataExitsException {
+        return ResponseEntity.ok(blogService.getAllBlogs(pageNo, pageSize, sortBy, sortDir));
+    }
+
+    @GetMapping("/get-blog-by-id")
+    @Operation(summary = "Get blog by ID")
+    public ResponseEntity<BlogResponse> getBlogById(@RequestParam String blogId) throws DataExitsException {
+        return ResponseEntity.ok(blogService.getBlogById(blogId));
     }
 }

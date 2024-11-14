@@ -5,6 +5,7 @@ import com.restaurant_management.entites.User;
 import com.restaurant_management.enums.RoleName;
 import com.restaurant_management.repositories.RoleRepository;
 import com.restaurant_management.repositories.UserRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,6 +15,16 @@ import java.util.Optional;
 
 @Configuration
 public class DataLoaderConfig {
+
+    @Value("${restaurant_management.admin.email}")
+    private String adminEmail;
+
+    @Value("${restaurant_management.admin.password}")
+    private String adminPassword;
+
+    @Value("${restaurant_management.admin.fullName}")
+    private String adminFullName;
+
 
     @Bean
     public CommandLineRunner loadRolesAndAdmin(UserRepository userRepository, RoleRepository roleRepository, BCryptPasswordEncoder passwordEncoder) {
@@ -32,10 +43,10 @@ public class DataLoaderConfig {
             if (existingAdmin.isEmpty()) {
                 Role adminRole = roleRepository.findByName(RoleName.ADMIN.name());
                 if (adminRole != null) {
-                    String encodedPassword = passwordEncoder.encode("123456");
+                    String encodedPassword = passwordEncoder.encode(adminPassword);
                     User admin = User.builder()
-                            .fullName("NTuan")
-                            .email("norsindark@gmail.com")
+                            .fullName(adminFullName)
+                            .email(adminEmail)
                             .password(encodedPassword)
                             .role(adminRole)
                             .enabled(true)

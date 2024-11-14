@@ -26,7 +26,6 @@ import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
-//@CrossOrigin(origins = "*", allowedHeaders = "*")
 @Tag(name = "Admin")
 @RequestMapping("/api/v1/dashboard")
 public class AdminController {
