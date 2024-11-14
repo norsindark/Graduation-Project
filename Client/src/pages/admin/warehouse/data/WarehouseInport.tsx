@@ -207,12 +207,12 @@ const WarehouseImport = (props: WarehouseImportProps) => {
       dataIndex: 'categoryName',
       key: 'categoryName',
       sorter: (a: any, b: any) => a.categoryName.localeCompare(b.categoryName),
-      render: (text: string) => {
-        const category = categoryList.find(
-          (category) => category.categoryId === text
-        );
-        return category ? category.categoryName : 'Not found';
-      },
+      // render: (text: string) => {
+      //   const category = categoryList.find(
+      //     (category) => category.categoryId === text
+      //   );
+      //   return category ? category.categoryName : 'Not found';
+      // },
     },
   ];
 
