@@ -1,6 +1,7 @@
 export interface Category {
   categoryId: string;
   categoryName: string;
+  categoryStatus: string;
 }
 
 export interface Ingredient {

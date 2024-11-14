@@ -7,6 +7,7 @@ import {
   Space,
   Popconfirm,
   Tag,
+  Tooltip,
 } from 'antd';
 import CategoryNew from './CategoryNew';
 import CategoryEdit from './CategoryEdit';
@@ -195,7 +196,13 @@ const Category: React.FC = () => {
       dataIndex: 'description',
       key: 'description',
       render: (description: string) =>
-        description ? description : 'No Description',
+        description ? (
+          <Tooltip title={description}>
+            <span>{description.length > 50 ? description.slice(0, 50) + '...' : description}</span>
+          </Tooltip>
+        ) : (
+          'No Description'
+        ),
       sorter: (a: CategoryItem, b: CategoryItem) =>
         a.description.localeCompare(b.description),
     },
