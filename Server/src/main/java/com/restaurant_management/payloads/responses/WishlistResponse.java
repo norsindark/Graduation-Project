@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Data
 @AllArgsConstructor
@@ -16,13 +17,14 @@ public class WishlistResponse {
     private String userId;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private List<DishFromWishlistResponse> dishes;
+    private List<DishWithRatingResponse> dishes;
 
-    public WishlistResponse(Wishlist wishlist, List<DishFromWishlistResponse> dishes) {
+    public WishlistResponse(Wishlist wishlist, List<DishWithRatingResponse> dishes) {
         this.WishlistId = wishlist.getId();
         this.userId = wishlist.getUser().getId();
         this.createdAt = wishlist.getCreatedAt();
         this.updatedAt = wishlist.getUpdatedAt();
-        this.dishes = dishes.stream().map(DishFromWishlistResponse::new).toList();
+        this.dishes = dishes.stream().map(dish -> new DishWithRatingResponse(dish, dish.getRating())).collect(Collectors.toList());
+
     }
 }

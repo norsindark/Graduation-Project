@@ -1,6 +1,7 @@
 package com.restaurant_management.configs;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -22,6 +23,11 @@ import java.util.Arrays;
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
+    @Value("${ngrok.domain.client}")
+    private String ngrokDomainClient;
+
+    @Value("${ngrok.domain.server}")
+    private String ngrokDomainServer;
 
     private final AuthenticationProvider authProvider;
     private final JwtAuthTokenFilterConfig jwtAuthFilter;
@@ -87,8 +93,8 @@ public class SecurityConfig {
         configuration.setAllowedOrigins(Arrays.asList(
                 "http://localhost:3000",
                 "http://localhost:8080",
-                "https://5b5c-1-53-221-171.ngrok-free.app",
-                "https://78ca-1-53-221-171.ngrok-free.app"
+                ngrokDomainClient,
+                ngrokDomainServer
         ));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
