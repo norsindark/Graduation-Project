@@ -42,7 +42,7 @@ const WishListAccount = () => {
 
   const [loading, setLoading] = useState(false);
 
-  const userId = useSelector((state: RootState) => state.account.user?.id);
+  const userId = useSelector((state: RootState) => state.account?.user?.id);
 
   const navigate = useNavigate();
 
@@ -68,12 +68,6 @@ const WishListAccount = () => {
 
   useEffect(() => {
     if (!userId) {
-      notification.error({
-        message: 'Failed to load favorites list',
-        description: 'Please log in to continue!',
-        duration: 5,
-        showProgress: true,
-      });
       return;
     }
     fetchItems();
@@ -85,6 +79,7 @@ const WishListAccount = () => {
     try {
       let query = `pageNo=${current - 1}&pageSize=${pageSize}&sortBy=createdAt&sortDir=desc`;
       const response = await callWishListById(userId || '', query);
+      console.log('responseWishList', response);
       if (response?.status === 200) {
         if (
           response?.data?._embedded?.wishlistResponseList &&
@@ -96,13 +91,6 @@ const WishListAccount = () => {
           setListWishListItem([]);
           setTotal(0);
         }
-      } else {
-        notification.error({
-          message: 'Failed to load favorites list',
-          description: response.data.errors?.error || 'Error loading data!',
-          duration: 5,
-          showProgress: true,
-        });
       }
     } catch {
       notification.error({
@@ -122,8 +110,9 @@ const WishListAccount = () => {
         message: 'Cannot delete product',
         description: 'Please log in to continue!',
         duration: 5,
+        showProgress: true,
       });
-      return; // Ngừng thực hiện nếu userId là undefined
+      return;
     }
 
     try {
@@ -135,6 +124,7 @@ const WishListAccount = () => {
           message: 'Deleted successfully',
           description: 'Product has been removed from favorites list.',
           duration: 5,
+          showProgress: true,
         });
         fetchItems(); // Làm mới danh sách yêu thích sau khi xóa
       } else {
@@ -143,6 +133,7 @@ const WishListAccount = () => {
           description:
             response.data.errors?.error || 'Error while deleting product!',
           duration: 5,
+          showProgress: true,
         });
       }
     } catch {
@@ -150,6 +141,7 @@ const WishListAccount = () => {
         message: 'Cannot delete product',
         description: 'Error while deleting product!',
         duration: 5,
+        showProgress: true,
       });
     } finally {
       setLoading(false);
@@ -165,7 +157,7 @@ const WishListAccount = () => {
         aria-labelledby="v-pills-messages-tab2"
       >
         <div className="fp_dashboard_body">
-          <h3>wishlist</h3>
+          <h3>Favorites list</h3>
           {loading ? (
             <Loading />
           ) : (
@@ -190,22 +182,23 @@ const WishListAccount = () => {
                         </div>
                         <div className="fp__menu_item_text">
                           <p className="rating">
-                            {[...Array(5)].map((_, index) => (
+                            {[...Array(5)].map((_, i) => (
                               <i
-                                key={index}
+                                key={i}
                                 className={
-                                  index < Math.floor(dish.rating)
+                                  i < Math.round(dish.rating)
                                     ? 'fas fa-star'
-                                    : index < dish.rating
-                                      ? 'fas fa-star-half-alt'
-                                      : 'far fa-star'
+                                    : 'far fa-star'
                                 }
                               ></i>
                             ))}
-                            <span>{dish.ratingCount}</span>
+                            <span>
+                              {' '}
+                              {Math.round(dish.rating * 10) / 10 || 0}
+                            </span>
                           </p>
                           <a
-                            className="title"
+                            className="title truncate block whitespace-nowrap overflow-hidden"
                             href={`/product-detail/${dish.slug}`}
                             onClick={(e) => {
                               e.preventDefault();

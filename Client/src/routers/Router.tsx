@@ -34,6 +34,14 @@ import PaymentPage from '../pages/public/PaymentPage';
 import OrderSuccess from '../pages/public/OrderSuccess';
 import PaymentReturn from '../pages/public/PaymentReturn';
 import ProductOfferDaily from '../pages/admin/productofferdaily/ProductOfferDaily';
+import FaqsPage from '../pages/public/FaqsPage';
+import PrivacyPolicyPage from '../pages/public/PrivacyPolicyPage';
+import TestimonialPage from '../pages/public/TestimonialPage';
+import TermsAndConditionPage from '../pages/public/TermsAndConditionPage';
+import BlogPage from '../pages/public/BlogPage';
+import BlogDetail from '../pages/public/BlogDetail';
+import ContactPage from '../pages/public/ContactPage';
+
 export const router = createBrowserRouter([
   {
     path: '/',
@@ -79,6 +87,34 @@ export const router = createBrowserRouter([
       {
         path: '/about',
         element: <AboutPage />,
+      },
+      {
+        path: '/faqs',
+        element: <FaqsPage />,
+      },
+      {
+        path: '/privacy-policy',
+        element: <PrivacyPolicyPage />,
+      },
+      {
+        path: '/testimonial',
+        element: <TestimonialPage />,
+      },
+      {
+        path: '/terms-condition',
+        element: <TermsAndConditionPage />,
+      },
+      {
+        path: '/blog',
+        element: <BlogPage />,
+      },
+      {
+        path: '/blog-detail/:slug',
+        element: <BlogDetail />,
+      },
+      {
+        path: '/contact',
+        element: <ContactPage />,
       },
       {
         path: '/menu',

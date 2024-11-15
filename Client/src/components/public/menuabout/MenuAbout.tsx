@@ -4,6 +4,7 @@ import {
   callGetAllDishes,
   callWishList,
   callWishListById,
+  callGetAllOffers,
 } from '../../../services/clientApi';
 import {
   notification,
@@ -34,6 +35,7 @@ interface Product {
 
 interface Category {
   name: string;
+  status: string;
   subCategories: { name: string }[];
 }
 
@@ -62,29 +64,42 @@ function MenuAbout() {
   const [pageSize, setPageSize] = useState<number>(8);
   const [total, setTotal] = useState<number>(0);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [sortOption, setSortOption] = useState<string>(''); 
+  const [sortOption, setSortOption] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState<string>('');
+  const [offers, setOffers] = useState<any[]>([]);
 
   const navigate = useNavigate();
 
   useEffect(() => {
     fetchCategories();
     fetchProducts();
+    fetchOffers();
   }, [current, pageSize]);
 
   const fetchCategories = async () => {
     try {
       const response = await callGetAllCategory();
       const categoriesData = response.data._embedded.categoryResponseList;
-      setCategories(categoriesData);
-      const formattedMenuItems = categoriesData.map((category: Category) => ({
-        title: category.name,
-        items: [
-          `All ${category.name}`,
-          ...category.subCategories.map((subCategory) => subCategory.name),
-        ],
-      }));
-      setMenuItems(formattedMenuItems);
+
+      const activeCategories = categoriesData.filter(
+        (category: Category) => category.status === 'ACTIVE'
+      );
+
+      if (activeCategories.length > 0) {
+        setCategories(activeCategories);
+        const formattedMenuItems = activeCategories.map(
+          (category: Category) => ({
+            title: category.name,
+            items: [
+              `All ${category.name}`,
+              ...category.subCategories
+                .filter((subCat: any) => subCat.status === 'ACTIVE')
+                .map((subCategory: any) => subCategory.name),
+            ],
+          })
+        );
+        setMenuItems(formattedMenuItems);
+      }
     } catch (error) {
       console.error('Error fetching categories:', error);
     }
@@ -118,6 +133,27 @@ function MenuAbout() {
     }
   };
 
+  const fetchOffers = async () => {
+    try {
+      const response = await callGetAllOffers();
+      const currentDate = new Date();
+
+      const validOffers = response.data._embedded.offerResponseList.filter(
+        (offer: any) => {
+          const endDate = new Date(offer.endDate);
+          return currentDate <= endDate;
+        }
+      );
+      setOffers(validOffers);
+    } catch (error) {
+      console.error('Error fetching offers:', error);
+    }
+  };
+
+  const getProductOffer = (dishId: string) => {
+    return offers.find((offer) => offer.dish.dishId === dishId);
+  };
+
   const handleFilter = (filter: string) => {
     setActiveFilter(filter);
     setShowDropdown(null);
@@ -130,31 +166,35 @@ function MenuAbout() {
   };
 
   const filteredProducts = products.filter((product) => {
-    const matchesSearchTerm = product.dishName.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearchTerm = product.dishName
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
 
     // Kiểm tra khoảng giá
-    const matchesPriceRange = product.offerPrice >= priceRange[0] && product.offerPrice <= priceRange[1];
+    const matchesPriceRange =
+      product.offerPrice >= priceRange[0] &&
+      product.offerPrice <= priceRange[1];
 
     if (activeFilter === '*') return matchesSearchTerm && matchesPriceRange;
 
     const category = categories.find(
-        (cat) =>
-            cat.name === activeFilter.replace('All ', '') ||
-            cat.subCategories.some((subCat) => subCat.name === activeFilter)
+      (cat) =>
+        cat.name === activeFilter.replace('All ', '') ||
+        cat.subCategories.some((subCat) => subCat.name === activeFilter)
     );
 
     if (!category) return false;
 
     const matchesCategory = activeFilter.startsWith('All ')
-        ? product.categoryName.toLowerCase() === category.name.toLowerCase() ||
-          category.subCategories.some(
-              (subCat) =>
-                  product.categoryName.toLowerCase() === subCat.name.toLowerCase()
-          )
-        : product.categoryName.toLowerCase() === activeFilter.toLowerCase();
+      ? product.categoryName.toLowerCase() === category.name.toLowerCase() ||
+        category.subCategories.some(
+          (subCat) =>
+            product.categoryName.toLowerCase() === subCat.name.toLowerCase()
+        )
+      : product.categoryName.toLowerCase() === activeFilter.toLowerCase();
 
     return matchesSearchTerm && matchesCategory && matchesPriceRange;
-});
+  });
 
   const handleProductClick = (slug: string) => {
     navigate(`/product-detail/${slug}`);
@@ -194,6 +234,8 @@ function MenuAbout() {
         notification.warning({
           message: 'The product is already in the favorites list',
           description: 'You have added this product to your favorites list.',
+          duration: 5,
+          showProgress: true,
         });
         return;
       }
@@ -205,6 +247,8 @@ function MenuAbout() {
           message: 'Add to favorites list',
           description:
             'The product has been successfully added to the favorites list.',
+          duration: 5,
+          showProgress: true,
         });
       } else {
         notification.error({
@@ -222,13 +266,12 @@ function MenuAbout() {
     }
   };
 
-
   const handleSortChange = (value: string) => {
     setSortOption(value);
     setCurrent(1); // Đặt lại trang về 1 khi thay đổi sắp xếp
   };
 
-  const sortedProducts = [...filteredProducts]; 
+  const sortedProducts = [...filteredProducts];
   if (sortOption === 'priceLowToHigh') {
     sortedProducts.sort((a, b) => a.offerPrice - b.offerPrice);
   } else if (sortOption === 'priceHighToLow') {
@@ -238,8 +281,6 @@ function MenuAbout() {
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
   };
-
-
 
   return (
     <section className="fp__menu mt_95 xs_mt_65">
@@ -267,7 +308,7 @@ function MenuAbout() {
         <Form className="fp__search_menu_form">
           <div className="row">
             <div className="col-xl-4 col-md-5">
-            <Form.Item className="relative">
+              <Form.Item className="relative">
                 <Input
                   size="large"
                   type="text"
@@ -296,19 +337,19 @@ function MenuAbout() {
               </Form.Item> */}
             </div>
             <div className="col-xl-3 col-md-3">
-  <Form.Item label="Price" className="mb-2 text-xl font-medium">
-    <Slider
-      range
-      min={0}
-      max={1000000}
-      defaultValue={[0, 1000000]}
-      onChange={(value) => setPriceRange(value as [number, number])}
-    />
-    <div className="price-range-label">
-      <span>{`Giá: ${priceRange[0].toLocaleString()} - ${priceRange[1].toLocaleString()} VNĐ`}</span>
-    </div>
-  </Form.Item>
-</div>
+              <Form.Item label="Price" className="mb-2 text-xl font-medium">
+                <Slider
+                  range
+                  min={0}
+                  max={1000000}
+                  defaultValue={[0, 1000000]}
+                  onChange={(value) => setPriceRange(value as [number, number])}
+                />
+                <div className="price-range-label">
+                  <span>{`Giá: ${priceRange[0].toLocaleString()} - ${priceRange[1].toLocaleString()} VNĐ`}</span>
+                </div>
+              </Form.Item>
+            </div>
             <div className="col-xl-3 col-md-4">
               <Form.Item>
                 <Select
@@ -319,10 +360,16 @@ function MenuAbout() {
                   <Select.Option className="text-xl font-medium" value="">
                     Chọn sản phẩm
                   </Select.Option>
-                  <Select.Option className="text-xl font-medium" value="priceLowToHigh">
+                  <Select.Option
+                    className="text-xl font-medium"
+                    value="priceLowToHigh"
+                  >
                     Giá từ thấp đến cao
                   </Select.Option>
-                  <Select.Option className="text-xl font-medium" value="priceHighToLow">
+                  <Select.Option
+                    className="text-xl font-medium"
+                    value="priceHighToLow"
+                  >
                     Giá từ cao đến thấp
                   </Select.Option>
                 </Select>
@@ -411,7 +458,7 @@ function MenuAbout() {
                     <span> {Math.round(product.rating * 10) / 10 || 0}</span>
                   </p>
                   <a
-                    className="title"
+                    className="title truncate block whitespace-nowrap overflow-hidden"
                     href={`/product-detail/${product.slug}`}
                     onClick={(e) => {
                       e.preventDefault();
@@ -421,12 +468,35 @@ function MenuAbout() {
                     {product.dishName}
                   </a>
                   <h5 className="price">
-                    {product.offerPrice.toLocaleString()} VNĐ
-                    {product.offerPrice < product.price && (
-                      <del className="ml-2">
-                        {product.price.toLocaleString()} VNĐ
-                      </del>
-                    )}
+                    {(() => {
+                      const offer = getProductOffer(product.dishId);
+                      if (offer) {
+                        const discountedPrice =
+                          product.price * (1 - offer.discountPercentage / 100);
+                        return (
+                          <>
+                            {discountedPrice.toLocaleString()} VNĐ
+                            <del className="ml-2">
+                              {product.price.toLocaleString()} VNĐ
+                            </del>
+                            <span className="offer-badge ml-2 text-xs bg-red-500 text-white px-2 py-1 rounded">
+                              -{offer.discountPercentage}%
+                            </span>
+                          </>
+                        );
+                      } else {
+                        return (
+                          <>
+                            {product.offerPrice.toLocaleString()} VNĐ
+                            {product.offerPrice < product.price && (
+                              <del className="ml-2">
+                                {product.price.toLocaleString()} VNĐ
+                              </del>
+                            )}
+                          </>
+                        );
+                      }
+                    })()}
                   </h5>
                   <ul className="d-flex flex-wrap justify-content-center">
                     <li>

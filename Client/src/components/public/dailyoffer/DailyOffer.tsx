@@ -34,7 +34,6 @@ const DailyOffer: React.FC = () => {
             return currentDate <= endDate;
           }
         );
-        console.log('validOffers', validOffers);
         if (validOffers.length === 0) {
           setDailyOffers([
             {
@@ -150,7 +149,24 @@ const DailyOffer: React.FC = () => {
     return className;
   };
 
-  const handleProductClick = (slug: string) => {
+  const handleProductClick = (slug: string, offer: any) => {
+    localStorage.setItem(
+      'currentOffer',
+      JSON.stringify({
+        id: offer.id,
+        offerType: 'DAILY',
+        discountPercentage: offer.discountPercentage,
+        availableQuantityOffer: offer.availableQuantityOffer,
+        startDate: offer.startDate,
+        endDate: offer.endDate,
+        dish: {
+          dishId: offer.dish.dishId,
+          availableQuantity: offer.dish.availableQuantity,
+          price: offer.dish.price,
+          offerPrice: offer.dish.price * (1 - offer.discountPercentage / 100),
+        },
+      })
+    );
     navigate(`/product-detail/${slug}`);
   };
   const handleAddToWishlist = async (dishId: string) => {
@@ -176,6 +192,8 @@ const DailyOffer: React.FC = () => {
         notification.warning({
           message: 'The product is already in the favorites list',
           description: 'You have added this product to your favorites list.',
+          duration: 5,
+          showProgress: true,
         });
         return;
       }
@@ -186,6 +204,8 @@ const DailyOffer: React.FC = () => {
           message: 'Add to favorites list',
           description:
             'The product has been successfully added to the favorites list.',
+          duration: 5,
+          showProgress: true,
         });
       } else {
         notification.error({
@@ -236,11 +256,11 @@ const DailyOffer: React.FC = () => {
               }}
             >
               <div className="fp__offer_item_single">
-                <div className="img">
+                <div className="img relative w-full h-[200px] overflow-hidden">
                   <img
                     src={offer.dish.thumbImage}
                     alt={offer.dish.dishName}
-                    className="img-fluid w-100"
+                    className="absolute w-full h-full object-cover object-center"
                   />
                 </div>
                 <div className="text">
@@ -250,7 +270,7 @@ const DailyOffer: React.FC = () => {
                     to={`/product-detail/${offer.dish.slug}`}
                     onClick={(e) => {
                       e.preventDefault();
-                      handleProductClick(offer.dish.slug);
+                      handleProductClick(offer.dish.slug, offer);
                     }}
                   >
                     {offer.dish.dishName}
@@ -273,7 +293,7 @@ const DailyOffer: React.FC = () => {
                         to={`/product-detail/${offer.dish.slug}`}
                         onClick={(e) => {
                           e.preventDefault();
-                          handleProductClick(offer.dish.slug);
+                          handleProductClick(offer.dish.slug, offer);
                         }}
                       >
                         <i className="far fa-eye"></i>
