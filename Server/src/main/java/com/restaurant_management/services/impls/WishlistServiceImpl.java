@@ -6,10 +6,12 @@ import com.restaurant_management.entites.Wishlist;
 import com.restaurant_management.exceptions.DataExitsException;
 import com.restaurant_management.payloads.responses.ApiResponse;
 import com.restaurant_management.payloads.responses.DishFromWishlistResponse;
+import com.restaurant_management.payloads.responses.DishWithRatingResponse;
 import com.restaurant_management.payloads.responses.WishlistResponse;
 import com.restaurant_management.repositories.DishRepository;
 import com.restaurant_management.repositories.UserRepository;
 import com.restaurant_management.repositories.WishlistRepository;
+import com.restaurant_management.services.interfaces.ReviewService;
 import com.restaurant_management.services.interfaces.WishlistService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
@@ -19,13 +21,17 @@ import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class WishlistServiceImpl implements WishlistService {
 
     private final WishlistRepository wishlistRepository;
+    private final ReviewService reviewService;
     private final UserRepository userRepository;
     private final DishRepository dishRepository;
     private final PagedResourcesAssembler<WishlistResponse> pagedResourcesAssembler;
@@ -36,16 +42,40 @@ public class WishlistServiceImpl implements WishlistService {
         User user = userRepository.findById(userId).orElseThrow(() -> new DataExitsException("User not found"));
         Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.fromString(sortDir), sortBy));
         Page<Wishlist> wishlistPage = wishlistRepository.findByUser(user, pageable);
+
         List<WishlistResponse> wishlistResponses = wishlistPage.stream()
                 .map(wishlist -> {
                     List<DishFromWishlistResponse> dishes = wishlistRepository.findDishesByWishlist(wishlist.getId());
                     if (dishes.isEmpty()) {
                         throw new RuntimeException("Dishes not found in wishlist");
                     }
-                    return new WishlistResponse(wishlist, dishes);
+
+                    List<DishWithRatingResponse> dishWithRatings = dishes.stream().map(dish -> {
+                        Double rating = null;
+                        try {
+                            rating = reviewService.getAverageRatingByDishId(dish.getDishId());
+                        } catch (DataExitsException e) {
+                            throw new RuntimeException(e);
+                        }
+                        return DishWithRatingResponse.builder()
+                                .dishId(dish.getDishId())
+                                .dishName(dish.getDishName())
+                                .rating(rating)
+                                .slug(dish.getSlug())
+                                .description(dish.getDescription())
+                                .status(dish.getStatus())
+                                .thumbImage(dish.getThumbImage())
+                                .offerPrice(dish.getOfferPrice())
+                                .price(dish.getPrice())
+                                .build();
+                    }).collect(Collectors.toList());
+
+                    return new WishlistResponse(wishlist, dishWithRatings);
                 }).toList();
+
         return pagedResourcesAssembler.toModel(new PageImpl<>(wishlistResponses, pageable, wishlistPage.getTotalElements()));
     }
+
 
     @Override
     public ApiResponse addDishToWishlist(String dishId, String userId) throws DataExitsException {
