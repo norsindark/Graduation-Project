@@ -39,6 +39,37 @@ function SlideIntro() {
     prevArrow: <PrevArrow />,
   };
 
+  const sliderData = [
+    {
+      id: 1,
+      image: 'images/offer_slider_3.png',
+      title: 'Royal Seafood Pizza',
+      description:
+        'Indulge in premium tiger prawns, fresh squid, crab sticks, imported scallops topped with finest Mozzarella cheese',
+    },
+    {
+      id: 2,
+      image: 'images/offer_slider_2.png',
+      title: 'Cheese Beef Burger',
+      description:
+        "Soft brioche bun, Australian Wagyu beef, melted Cheddar cheese, fresh vegetables with chef's special sauce",
+    },
+    {
+      id: 3,
+      image: 'images/offer_slider_1.png',
+      title: 'Spicy Crispy Chicken Burger',
+      description:
+        'Crispy coating, secret-recipe marinated chicken, fresh vegetables with signature Japanese mayonnaise',
+    },
+    {
+      id: 4,
+      image: 'images/offer_slider_4.png',
+      title: 'Korean Spicy Fried Chicken',
+      description:
+        'Crispy fried chicken glazed with sweet & spicy Korean sauce, topped with roasted sesame and special chili powder',
+    },
+  ];
+
   return (
     <section className="fp__add_slider mt_100 xs_mt_70 pt_100 xs_pt_70 pb_100 xs_pb_70">
       <div className="container">
@@ -47,54 +78,20 @@ function SlideIntro() {
           className="row add_slider wow fadeInUp"
           data-wow-duration="1s"
         >
-          <div className="col-xl-4">
-            <a
-              href="#"
-              className="fp__add_slider_single"
-              style={{ background: 'url(images/offer_slider_3.png)' }}
-            >
-              <div className="text">
-                <h3>red chicken</h3>
-                <p>Lorem ipsum dolor sit amet consectetur.</p>
-              </div>
-            </a>
-          </div>
-          <div className="col-xl-4">
-            <a
-              href="#"
-              className="fp__add_slider_single"
-              style={{ background: 'url(images/offer_slider_2.png)' }}
-            >
-              <div className="text">
-                <h3>red chicken</h3>
-                <p>Lorem ipsum dolor sit amet consectetur.</p>
-              </div>
-            </a>
-          </div>
-          <div className="col-xl-4">
-            <a
-              href="#"
-              className="fp__add_slider_single"
-              style={{ background: 'url(images/offer_slider_1.png)' }}
-            >
-              <div className="text">
-                <h3>red chicken</h3>
-                <p>Lorem ipsum dolor sit amet consectetur.</p>
-              </div>
-            </a>
-          </div>
-          <div className="col-xl-4">
-            <a
-              href="#"
-              className="fp__add_slider_single"
-              style={{ background: 'url(images/offer_slider_4.png)' }}
-            >
-              <div className="text">
-                <h3>red chicken</h3>
-                <p>Lorem ipsum dolor sit amet consectetur.</p>
-              </div>
-            </a>
-          </div>
+          {sliderData.map((item) => (
+            <div key={item.id} className="col-xl-4">
+              <a
+                href="#"
+                className="fp__add_slider_single"
+                style={{ background: `url(${item.image})` }}
+              >
+                <div className="text">
+                  <h3>{item.title}</h3>
+                  <p>{item.description}</p>
+                </div>
+              </a>
+            </div>
+          ))}
         </Slider>
       </div>
     </section>

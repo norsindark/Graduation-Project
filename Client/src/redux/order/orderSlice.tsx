@@ -12,7 +12,9 @@ export interface CartItem {
   detail: {
     dishName: string;
     price: number;
+    originalPrice: number;
     thumbImage: string;
+    discountPercentage?: number;
   };
   selectedOptions: {
     [groupId: string]: {
@@ -22,6 +24,7 @@ export interface CartItem {
     };
   };
   availableQuantity: number;
+  offerId?: string;
 }
 
 export interface OrderState {
@@ -64,6 +67,7 @@ export const orderSlice = createSlice({
       const existingItemIndex = state.carts.findIndex(
         (c) =>
           c.dishId === item.dishId &&
+          c.offerId === item.offerId &&
           JSON.stringify(c.selectedOptions) ===
             JSON.stringify(item.selectedOptions)
       );

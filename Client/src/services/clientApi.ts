@@ -279,4 +279,6 @@ export const callGetAllOffers = async () => {
   return axios.get(`/api/v1/auth/guest/get-all-offers`);
 };
 
-
+export const callGetReviewByUserId = async (userId: string, query: string) => {
+  return axios.get(`/api/v1/client/review/get-all-reviews-by-user-id?userId=${userId}&${query}`);
+};

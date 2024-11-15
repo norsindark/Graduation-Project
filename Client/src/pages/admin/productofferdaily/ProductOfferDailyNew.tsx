@@ -101,9 +101,7 @@ const ProductOfferDailyNew: React.FC<{
       } else {
         notification.error({
           message: 'Error adding offers',
-          description:
-            response?.data?.errors?.error ||
-            'An error occurred while adding the new offers.',
+          description: 'This dish is already in another offer.',
           duration: 5,
           showProgress: true,
         });

@@ -41,6 +41,7 @@ interface DishDetail {
   rating: number;
   slug: string;
   availableQuantity: number;
+  discountPercentage?: number;
 }
 
 const ProductDetail: React.FC = () => {
@@ -55,6 +56,10 @@ const ProductDetail: React.FC = () => {
   const dispatch = useDispatch();
   const orderState = useSelector((state: RootState) => state.order);
   const [hasAddedToCart, setHasAddedToCart] = useState(false);
+  const [currentOffer, setCurrentOffer] = useState<{
+    discountPercentage: number;
+    offerId: string;
+  } | null>(null);
 
   useEffect(() => {
     if (hasAddedToCart) {
@@ -80,6 +85,17 @@ const ProductDetail: React.FC = () => {
   }, [orderState.status, orderState.error, hasAddedToCart, dispatch]);
 
   useEffect(() => {
+    const loadOffer = () => {
+      const offerData = localStorage.getItem('currentOffer');
+      if (offerData) {
+        const offer = JSON.parse(offerData);
+        setCurrentOffer(offer);
+      }
+    };
+    loadOffer();
+  }, []);
+
+  useEffect(() => {
     const fetchDishDetail = async () => {
       setLoading(true);
       try {
@@ -89,9 +105,22 @@ const ProductDetail: React.FC = () => {
         const matchingDish = allDishes.find(
           (dish: DishDetail) => dish.slug === slug
         );
+
         if (matchingDish) {
           const detailResponse = await callGetDishDetail(matchingDish.dishId);
-          setDishDetail(detailResponse.data);
+          const dishData = detailResponse.data;
+
+          if (currentOffer) {
+            const discountedPrice =
+              dishData.price * (1 - currentOffer.discountPercentage / 100);
+            setDishDetail({
+              ...dishData,
+              offerPrice: discountedPrice,
+              discountPercentage: currentOffer.discountPercentage,
+            });
+          } else {
+            setDishDetail(dishData);
+          }
         } else {
           console.error('Dish not found');
           notification.error({
@@ -117,7 +146,7 @@ const ProductDetail: React.FC = () => {
     };
 
     fetchDishDetail();
-  }, [slug, navigate]);
+  }, [slug, navigate, currentOffer]);
 
   const handleChangeButton = (type: string) => {
     if (type === 'MINUS') {
@@ -260,8 +289,12 @@ const ProductDetail: React.FC = () => {
   };
 
   const calculateTotalPrice = () => {
-    const basePrice = dishDetail?.offerPrice ?? 0;
+    if (!dishDetail) return 0;
 
+    // Sử dụng giá offer nếu có
+    const basePrice = dishDetail.offerPrice ?? dishDetail.price;
+
+    // Tính tổng giá options
     const optionsPrice = Object.values(selectedOptions).reduce(
       (total, optionGroup) =>
         total +
@@ -278,6 +311,7 @@ const ProductDetail: React.FC = () => {
   const handleAddToCart = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
     if (dishDetail) {
+      // Kiểm tra size đã được chọn chưa
       const radioGroups = sortedOptions.filter(
         (group) => group.optionGroupName.toLowerCase() === 'size'
       );
@@ -297,6 +331,7 @@ const ProductDetail: React.FC = () => {
         return;
       }
 
+      // Kiểm tra số lượng
       const totalQuantityInCart = getTotalQuantityInCart(dishDetail.dishId);
       const newTotalQuantity = totalQuantityInCart + currentQuantity;
 
@@ -310,6 +345,7 @@ const ProductDetail: React.FC = () => {
         return;
       }
 
+      // Format options
       const formattedOptions = Object.entries(selectedOptions).reduce(
         (acc, [groupId, options]) => {
           const option = options[0];
@@ -329,10 +365,21 @@ const ProductDetail: React.FC = () => {
         detail: {
           dishName: dishDetail.dishName,
           price: calculateTotalPrice(),
+          originalPrice: dishDetail.price,
+          discountPercentage:
+            currentOffer?.discountPercentage ||
+            (dishDetail.offerPrice < dishDetail.price
+              ? Math.round(
+                  ((dishDetail.price - dishDetail.offerPrice) /
+                    dishDetail.price) *
+                    100
+                )
+              : undefined),
           thumbImage: dishDetail.thumbImage,
         },
-        availableQuantity: dishDetail.availableQuantity,
         selectedOptions: formattedOptions,
+        availableQuantity: dishDetail.availableQuantity,
+        offerId: currentOffer?.offerId,
       };
 
       dispatch(doAddProductAction(cartItem));

@@ -4,6 +4,7 @@ import {
   callGetAllDishes,
   callWishList,
   callWishListById,
+  callGetAllOffers,
 } from '../../../services/clientApi';
 import { notification, Pagination } from 'antd';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
@@ -25,6 +26,7 @@ interface Product {
 
 interface Category {
   name: string;
+  status: string;
   subCategories: { name: string }[];
 }
 
@@ -52,32 +54,44 @@ function MenuHome() {
   const [total, setTotal] = useState<number>(0);
 
   const [categories, setCategories] = useState<Category[]>([]);
+  const [offers, setOffers] = useState<any[]>([]);
 
   const navigate = useNavigate();
 
   useEffect(() => {
     fetchCategories();
     fetchProducts();
+    fetchOffers();
   }, [current, pageSize]);
 
   const fetchCategories = async () => {
     try {
       const response = await callGetAllCategory();
       const categoriesData = response.data._embedded.categoryResponseList;
-      setCategories(categoriesData);
-      const formattedMenuItems = categoriesData.map((category: Category) => ({
-        title: category.name,
-        items: [
-          `All ${category.name}`,
-          ...category.subCategories.map((subCategory) => subCategory.name),
-        ],
-      }));
-      setMenuItems(formattedMenuItems);
+
+      const activeCategories = categoriesData.filter(
+        (category: Category) => category.status === 'ACTIVE'
+      );
+
+      if (activeCategories.length > 0) {
+        setCategories(activeCategories);
+        const formattedMenuItems = activeCategories.map(
+          (category: Category) => ({
+            title: category.name,
+            items: [
+              `All ${category.name}`,
+              ...category.subCategories
+                .filter((subCat: any) => subCat.status === 'ACTIVE')
+                .map((subCategory: any) => subCategory.name),
+            ],
+          })
+        );
+        setMenuItems(formattedMenuItems);
+      }
     } catch (error) {
       console.error('Error fetching categories:', error);
     }
   };
-
   const handleFilter = (filter: string) => {
     setActiveFilter(filter);
     setShowDropdown(null);
@@ -110,6 +124,27 @@ function MenuHome() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const fetchOffers = async () => {
+    try {
+      const response = await callGetAllOffers();
+      const currentDate = new Date();
+
+      const validOffers = response.data._embedded.offerResponseList.filter(
+        (offer: any) => {
+          const endDate = new Date(offer.endDate);
+          return currentDate <= endDate;
+        }
+      );
+      setOffers(validOffers);
+    } catch (error) {
+      console.error('Error fetching offers:', error);
+    }
+  };
+
+  const getProductOffer = (dishId: string) => {
+    return offers.find((offer) => offer.dish.dishId === dishId);
   };
 
   const handlePageChange = (page: number, pageSize?: number) => {
@@ -158,7 +193,6 @@ function MenuHome() {
     }
 
     try {
-      // Bước 1: Lấy danh sách yêu thích của người dùng
       const wishListResponse = await callWishListById(userId, '');
 
       const wishListItems =
@@ -172,6 +206,8 @@ function MenuHome() {
         notification.warning({
           message: 'The product is already in the favorites list',
           description: 'You have added this product to your favorites list.',
+          duration: 5,
+          showProgress: true,
         });
         return;
       }
@@ -182,6 +218,8 @@ function MenuHome() {
           message: 'Add to favorites list',
           description:
             'The product has been successfully added to the favorites list.',
+          duration: 5,
+          showProgress: true,
         });
       } else {
         notification.error({
@@ -302,7 +340,7 @@ function MenuHome() {
                     <span> {Math.round(product.rating * 10) / 10 || 0}</span>
                   </p>
                   <a
-                    className="title"
+                    className="title truncate block whitespace-nowrap overflow-hidden"
                     href={`/product-detail/${product.slug}`}
                     onClick={(e) => {
                       e.preventDefault();
@@ -312,12 +350,35 @@ function MenuHome() {
                     {product.dishName}
                   </a>
                   <h5 className="price">
-                    {product.offerPrice.toLocaleString()} VNĐ
-                    {product.offerPrice < product.price && (
-                      <del className="ml-2">
-                        {product.price.toLocaleString()} VNĐ
-                      </del>
-                    )}
+                    {(() => {
+                      const offer = getProductOffer(product.dishId);
+                      if (offer) {
+                        const discountedPrice =
+                          product.price * (1 - offer.discountPercentage / 100);
+                        return (
+                          <>
+                            {discountedPrice.toLocaleString()} VNĐ
+                            <del className="ml-2">
+                              {product.price.toLocaleString()} VNĐ
+                            </del>
+                            <span className="offer-badge ml-2 text-xs bg-red-500 text-white px-2 py-1 rounded">
+                              -{offer.discountPercentage}%
+                            </span>
+                          </>
+                        );
+                      } else {
+                        return (
+                          <>
+                            {product.offerPrice.toLocaleString()} VNĐ
+                            {product.offerPrice < product.price && (
+                              <del className="ml-2">
+                                {product.price.toLocaleString()} VNĐ
+                              </del>
+                            )}
+                          </>
+                        );
+                      }
+                    })()}
                   </h5>
                   <ul className="d-flex flex-wrap justify-content-center">
                     {/* <li>

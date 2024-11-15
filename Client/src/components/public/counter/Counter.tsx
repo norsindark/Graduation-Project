@@ -28,7 +28,7 @@ const Counter = () => {
 
   return (
     <section
-      className="fp__counter"
+      className="fp__counter mt-5"
       style={{ background: 'url(images/counter_bg2.jpg)' }}
       ref={counterRef} // Reference to the section
     >

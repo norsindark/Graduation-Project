@@ -110,12 +110,7 @@ const OrderAccount = () => {
   const userId = useSelector((state: RootState) => state.account.user?.id);
 
   if (!userId) {
-    notification.error({
-      message: 'Can not fetch order list',
-      description: 'Please login to continue!',
-      duration: 5,
-      showProgress: true,
-    });
+    return;
   }
 
   useEffect(() => {
@@ -140,13 +135,6 @@ const OrderAccount = () => {
           setListOrder([]);
           setTotal(0);
         }
-      } else {
-        notification.error({
-          message: 'Can not fetch order list',
-          description: response.data.errors?.error || 'Error in loading data!',
-          duration: 5,
-          showProgress: true,
-        });
       }
     } catch {
       notification.error({

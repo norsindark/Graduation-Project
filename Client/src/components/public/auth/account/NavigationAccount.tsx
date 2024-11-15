@@ -9,10 +9,12 @@ import Loading from '../../../Loading/Loading';
 
 interface NavigationAccountProps {
   initialActiveTab: string | null;
+  onClose: () => void;
 }
 
 const NavigationAccount: React.FC<NavigationAccountProps> = ({
   initialActiveTab,
+  onClose,
 }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -36,6 +38,7 @@ const NavigationAccount: React.FC<NavigationAccountProps> = ({
       if (res?.status == 200) {
         dispatch(doLogoutAction());
         navigate('/');
+        onClose();
         notification.success({
           message: 'Logout success!',
           duration: 5,

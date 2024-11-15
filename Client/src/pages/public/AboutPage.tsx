@@ -111,7 +111,7 @@ function AboutPage() {
         </div>
       </section>
       <WhyChoose />
-      <Chef />
+
       <Counter />
       <FeedBack />
     </>

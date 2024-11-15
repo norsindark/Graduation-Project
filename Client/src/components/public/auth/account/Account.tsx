@@ -45,7 +45,10 @@ const Account: React.FC<AccountProps> = ({
                 className="col-xl-3 col-lg-4 wow fadeInUp"
                 data-wow-duration="1s"
               >
-                <NavigationAccount initialActiveTab={initialActiveTab} />
+                <NavigationAccount
+                  initialActiveTab={initialActiveTab}
+                  onClose={onClose}
+                />
               </div>
               <div
                 className="col-xl-9 col-lg-8 wow fadeInUp"
@@ -60,7 +63,7 @@ const Account: React.FC<AccountProps> = ({
                     />
                     <OrderAccount />
                     <WishListAccount />
-                    <ReviewAccount />
+                    <ReviewAccount onClose={onClose} />
                     <ResetPasswordAccount />
                   </div>
                 </div>

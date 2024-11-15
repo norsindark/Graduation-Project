@@ -6,13 +6,13 @@ const HeaderTop = () => {
           <div className="col-xl-4 col-md-8">
             <ul className="fp__topbar_info d-flex flex-wrap">
               <li>
-                <a href="mailto:example@gmail.com">
-                  <i className="fas fa-envelope"></i> Unifood@gmail.com
+                <a href="mailto:synfood.bmt@gmail.com">
+                  <i className="fas fa-envelope"></i> synfood.bmt@gmail.com
                 </a>
               </li>
               <li>
-                <a href="callto:123456789">
-                  <i className="fas fa-phone-alt"></i> +96487452145214
+                <a href="callto:0966501365">
+                  <i className="fas fa-phone-alt"></i> +84 0966501365
                 </a>
               </li>
             </ul>
