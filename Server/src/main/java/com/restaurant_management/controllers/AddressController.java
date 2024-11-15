@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-//@CrossOrigin(origins = "*", allowedHeaders = "*")
+//@CrossOrigin
 @RequestMapping("/api/v1/client/address")
 @Tag(name = "Address")
 public class AddressController {

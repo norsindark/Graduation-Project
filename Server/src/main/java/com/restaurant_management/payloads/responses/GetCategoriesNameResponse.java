@@ -10,4 +10,5 @@ import lombok.NoArgsConstructor;
 public class GetCategoriesNameResponse {
     private String categoryId;
     private String categoryName;
+    private String categoryStatus;
 }

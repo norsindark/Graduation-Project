@@ -72,8 +72,8 @@ public class WarehouseServiceImpl implements WarehouseService {
 
         UnitType unitType = UnitType.valueOf(request.getUnit().toUpperCase(Locale.ROOT));
 
-        Timestamp expiredDate = Timestamp.valueOf(LocalDate.parse(request.getExpiredDate()).atStartOfDay());
-        Timestamp importedDate = Timestamp.valueOf(LocalDate.parse(request.getImportedDate()).atStartOfDay());
+        Timestamp expiredDate = request.getExpiredDate();
+        Timestamp importedDate = request.getImportedDate();
 
         if (importedDate.after(expiredDate)) {
             throw new DataExitsException("Imported date must be before expired date!");
@@ -102,7 +102,9 @@ public class WarehouseServiceImpl implements WarehouseService {
         }
 
         try {
-            List<WarehouseDto> warehouses = ExcelHelperUtil.excelToWarehouseDtos(file.getInputStream());
+            ExcelHelperUtil excelHelperUtil = new ExcelHelperUtil(categoryRepository);
+            List<WarehouseDto> warehouses = excelHelperUtil.excelToWarehouseDtos(file.getInputStream());
+
             int successCount = 0;
 
             for (WarehouseDto warehouseDto : warehouses) {
