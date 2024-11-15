@@ -49,6 +49,7 @@ public class Category {
     @JsonIgnore
     private Set<Category> subCategories = new HashSet<>();
 
+
     @OneToMany(mappedBy = "category", orphanRemoval = false, fetch = FetchType.LAZY)
     @JsonIgnore
     private Set<Warehouse> warehouses = new HashSet<>();

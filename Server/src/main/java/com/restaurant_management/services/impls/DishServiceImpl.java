@@ -15,6 +15,7 @@ import com.restaurant_management.payloads.responses.ApiResponse;
 import com.restaurant_management.payloads.responses.DishResponse;
 import com.restaurant_management.repositories.*;
 import com.restaurant_management.services.interfaces.DishService;
+import com.restaurant_management.services.interfaces.ReviewService;
 import com.restaurant_management.utils.ImgBBUploaderUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
@@ -38,12 +39,14 @@ import java.util.stream.Collectors;
 public class DishServiceImpl implements DishService {
     private final DishImageRepository dishImageRepository;
     private final DishRepository dishRepository;
+    private final ReviewService reviewService;
     private final RecipeRepository recipeRepository;
     private final CategoryRepository categoryRepository;
     private final WarehouseRepository warehouseRepository;
     private final ImgBBUploaderUtil imgBBUploaderUtil;
     private final DishOptionRepository dishOptionRepository;
     private final DishOptionSelectionRepository dishOptionSelectionRepository;
+    private final WishlistRepository wishlistRepository;
     private final PagedResourcesAssembler<DishResponse> pagedResourcesAssembler;
 
     @Override
@@ -64,8 +67,9 @@ public class DishServiceImpl implements DishService {
         List<DishImage> images = dishImageRepository.findByDish(dish);
         List<DishOptionSelection> optionSelections = dishOptionSelectionRepository.findByDish(dish);
         int maxAvailableQuantity = getMaxAvailableDishQuantity(dishId);
+        Double rating = reviewService.getAverageRatingByDishId(dishId);
 
-        return new DishResponse(dish, recipes, images, optionSelections, maxAvailableQuantity);
+        return new DishResponse(dish, recipes, images, optionSelections, maxAvailableQuantity, rating);
     }
 
     @Override
@@ -88,13 +92,20 @@ public class DishServiceImpl implements DishService {
 
                     int maxAvailableQuantity = getMaxAvailableDishQuantity(dish.getId());
 
-                    return new DishResponse(dish, recipes, images, optionSelections, maxAvailableQuantity);
+                    Double rating = 0.0;
+                    try {
+                        rating = reviewService.getAverageRatingByDishId(dish.getId());
+                    } catch (DataExitsException e) {
+                        e.printStackTrace();
+                    }
+
+                    return new DishResponse(dish, recipes, images, optionSelections, maxAvailableQuantity, rating);
                 })
                 .collect(Collectors.toList());
         return pagedResourcesAssembler.toModel(new PageImpl<>(dishResponses, pageable, dishes.getTotalElements()));
     }
 
-    private int getMaxAvailableDishQuantity(String dishId)  {
+    private int getMaxAvailableDishQuantity(String dishId) {
         return dishRepository.findById(dishId)
                 .map(dish -> {
                     List<Recipe> recipes = recipeRepository.findByDish(dish);
@@ -108,11 +119,18 @@ public class DishServiceImpl implements DishService {
                                         .map(warehouse -> {
                                             UnitType warehouseUnit = UnitType.fromString(warehouse.getUnit());
 
-                                            double availableInWarehouse = UnitType.convert(
-                                                    warehouse.getAvailableQuantity(), warehouseUnit, recipeUnit
-                                            );
+                                            double availableInWarehouse = warehouse.getAvailableQuantity();
 
-                                            return (int) (availableInWarehouse / recipe.getQuantityUsed());
+//                                            System.out.println("Converting ingredient: " + recipe.getWarehouse().getIngredientName() +
+//                                                    ". Warehouse available quantity: " + availableInWarehouse + " " + warehouseUnit +
+//                                                    ". Recipe unit: " + recipeUnit + ". Warehouse unit: " + warehouseUnit);
+
+                                            double convertedQuantity = UnitType.convert(availableInWarehouse, warehouseUnit, recipeUnit);
+
+//                                            System.out.println("Converted ingredient: " + recipe.getWarehouse().getIngredientName() +
+//                                                    ". Converted quantity: " + convertedQuantity + " " + recipeUnit);
+
+                                            return (int) (convertedQuantity / recipe.getQuantityUsed());
                                         })
                                         .orElse(0);
                             })
@@ -175,6 +193,7 @@ public class DishServiceImpl implements DishService {
         Dish dish = dishRepository.findById(dishId)
                 .orElseThrow(() -> new DataExitsException("Dish not found"));
 
+        wishlistRepository.deleteWishlistByDish(dish);
         recipeRepository.deleteAll(recipeRepository.findByDish(dish));
         dishRepository.delete(dish);
 

@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.sql.Timestamp;
+
 
 @Data
 @NoArgsConstructor
@@ -17,9 +19,9 @@ public class WarehouseDto {
 
     private String unit;
 
-    private String importedDate;
+    private Timestamp importedDate;
 
-    private String expiredDate;
+    private Timestamp expiredDate;
 
     private double importedPrice;
 

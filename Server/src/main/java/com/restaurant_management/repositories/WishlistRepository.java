@@ -7,6 +7,7 @@ import com.restaurant_management.payloads.responses.DishFromWishlistResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -23,4 +24,7 @@ public interface WishlistRepository extends JpaRepository<Wishlist, String> {
             "FROM Wishlist w JOIN w.dish d WHERE w.id = :wishlistId")
     List<DishFromWishlistResponse> findDishesByWishlist(@Param("wishlistId") String wishlistId);
 
+    @Modifying
+    @Query("DELETE FROM Wishlist w WHERE w.dish = :dish")
+    void deleteWishlistByDish(@Param("dish") Dish dish);
 }

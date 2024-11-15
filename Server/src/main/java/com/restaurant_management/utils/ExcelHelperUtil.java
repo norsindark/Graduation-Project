@@ -1,24 +1,32 @@
 package com.restaurant_management.utils;
 
 import com.restaurant_management.dtos.WarehouseDto;
+import com.restaurant_management.entites.Category;
+import com.restaurant_management.repositories.CategoryRepository;
+import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 
+@RequiredArgsConstructor
 public class ExcelHelperUtil {
+
+    private final CategoryRepository categoryRepository;
 
     public static boolean isExcelFile(MultipartFile file) {
         String contentType = file.getContentType();
         return contentType.equals("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
     }
 
-    public static List<WarehouseDto> excelToWarehouseDtos(InputStream is) {
+    public List<WarehouseDto> excelToWarehouseDtos(InputStream is) {
         List<WarehouseDto> warehouseDtos = new ArrayList<>();
         try {
             Workbook workbook = new XSSFWorkbook(is);
@@ -56,10 +64,10 @@ public class ExcelHelperUtil {
                             warehouseDto.setUnit(currentCell.getStringCellValue());
                             break;
                         case 3:
-                            warehouseDto.setImportedDate(currentCell.getStringCellValue());
+                            warehouseDto.setImportedDate(Timestamp.valueOf(currentCell.getStringCellValue()));
                             break;
                         case 4:
-                            warehouseDto.setExpiredDate(currentCell.getStringCellValue());
+                            warehouseDto.setExpiredDate(Timestamp.valueOf(currentCell.getStringCellValue()));
                             break;
                         case 5:
                             warehouseDto.setImportedPrice(currentCell.getNumericCellValue());
@@ -71,7 +79,9 @@ public class ExcelHelperUtil {
                             warehouseDto.setSupplierName(currentCell.getStringCellValue());
                             break;
                         case 8:
-                            warehouseDto.setCategoryId(currentCell.getStringCellValue());
+                            String categoryName = currentCell.getStringCellValue();
+                            String categoryId = getCategoryIdByName(categoryName);
+                            warehouseDto.setCategoryId(categoryId);
                             break;
                         default:
                             break;
@@ -94,5 +104,14 @@ public class ExcelHelperUtil {
             }
         }
         return true;
+    }
+
+    private String getCategoryIdByName(String categoryName) {
+        Optional<Category> category = categoryRepository.findByName(categoryName);
+        if (category.isPresent()) {
+            return category.get().getId();
+        } else {
+            return "Unknown";
+        }
     }
 }

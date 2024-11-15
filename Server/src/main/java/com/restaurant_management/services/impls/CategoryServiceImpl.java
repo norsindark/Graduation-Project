@@ -51,7 +51,7 @@ public class CategoryServiceImpl implements CategoryService {
             throw new DataExitsException("No Category found");
         }
         return categories.stream()
-                .map(category -> new GetCategoriesNameResponse(category.getId(), category.getName()))
+                .map(category -> new GetCategoriesNameResponse(category.getId(), category.getName(), category.getStatus()))
                 .collect(Collectors.toList());
     }
 
