@@ -5,11 +5,18 @@ import { NavLink, useLocation } from 'react-router-dom';
 import { BiSolidDashboard } from 'react-icons/bi';
 import { CgMenuLeftAlt } from 'react-icons/cg';
 import { AiOutlineHome } from 'react-icons/ai';
-import { FaCog, FaReplyAll, FaWarehouse } from 'react-icons/fa';
+import {
+  FaCalendarAlt,
+  FaCog,
+  FaReplyAll,
+  FaShoppingCart,
+  FaWarehouse,
+} from 'react-icons/fa';
 import { UsergroupAddOutlined } from '@ant-design/icons';
 import { FaCalendarCheck } from 'react-icons/fa';
 import { FaTags } from 'react-icons/fa';
 import logo from '../../../assets/images/imagelogosyndev.png';
+import { FaBlog } from 'react-icons/fa6';
 function Sidenav({ color }: { color: string }) {
   const { pathname } = useLocation();
   const page = pathname.replace('/', '');
@@ -51,6 +58,22 @@ function Sidenav({ color }: { color: string }) {
     {
       key: '4',
       label: (
+        <NavLink to="/employee-shift">
+          <span
+            className="icon"
+            style={{
+              background: page === 'employee-shift' ? color : '',
+            }}
+          >
+            <FaCalendarAlt />
+          </span>
+          <span className="label">Employee Shift</span>
+        </NavLink>
+      ),
+    },
+    {
+      key: '5',
+      label: (
         <NavLink to="/attendance">
           <span
             className="icon"
@@ -65,7 +88,11 @@ function Sidenav({ color }: { color: string }) {
       ),
     },
     {
-      key: '5',
+      key: '6',
+      label: <div className="text-sm font-bold text-navy-200 ">DISH PAGES</div>,
+    },
+    {
+      key: '7',
       label: (
         <NavLink to="/category">
           <span
@@ -79,7 +106,7 @@ function Sidenav({ color }: { color: string }) {
       ),
     },
     {
-      key: '6',
+      key: '8',
       label: (
         <NavLink to="/product-option">
           <span
@@ -94,7 +121,7 @@ function Sidenav({ color }: { color: string }) {
       ),
     },
     {
-      key: '7',
+      key: '9',
       label: (
         <NavLink to="/product-daily-offer">
           <span
@@ -109,7 +136,7 @@ function Sidenav({ color }: { color: string }) {
       ),
     },
     {
-      key: '8',
+      key: '10',
       label: (
         <NavLink to="/product">
           <span
@@ -124,7 +151,7 @@ function Sidenav({ color }: { color: string }) {
       ),
     },
     {
-      key: '9',
+      key: '11',
       label: (
         <NavLink to="/warehouse">
           <span
@@ -138,7 +165,7 @@ function Sidenav({ color }: { color: string }) {
       ),
     },
     {
-      key: '10',
+      key: '12',
       label: (
         <NavLink to="/Coupon">
           <span
@@ -152,21 +179,21 @@ function Sidenav({ color }: { color: string }) {
       ),
     },
     {
-      key: '11',
+      key: '13',
       label: (
         <NavLink to="/order">
           <span
             className="icon"
             style={{ background: page === 'order' ? color : '' }}
           >
-            <FaWarehouse />
+            <FaShoppingCart />
           </span>
           <span className="label">Order</span>
         </NavLink>
       ),
     },
     {
-      key: '12',
+      key: '14',
       label: (
         <NavLink to="/review">
           <span
@@ -180,7 +207,59 @@ function Sidenav({ color }: { color: string }) {
       ),
     },
     {
-      key: '13',
+      key: '15',
+      label: <div className="text-sm font-bold text-navy-200 ">BLOG PAGES</div>,
+    },
+    {
+      key: '16',
+      label: (
+        <NavLink to="/category-blog-admin">
+          <span
+            className="icon"
+            style={{ background: page === 'category-blog-admin' ? color : '' }}
+          >
+            <CgMenuLeftAlt />
+          </span>
+          <span className="label">Category Blog</span>
+        </NavLink>
+      ),
+    },
+    {
+      key: '17',
+      label: (
+        <NavLink to="/blog-admin">
+          <span
+            className="icon"
+            style={{ background: page === 'blog-admin' ? color : '' }}
+          >
+            <FaBlog />
+          </span>
+          <span className="label">All Blogs</span>
+        </NavLink>
+      ),
+    },
+    {
+      key: '18',
+      label: (
+        <NavLink to="/comments-blog-admin">
+          <span
+            className="icon"
+            style={{ background: page === 'comments-blog-admin' ? color : '' }}
+          >
+            <FaReplyAll />
+          </span>
+          <span className="label">Comments</span>
+        </NavLink>
+      ),
+    },
+    {
+      key: '19',
+      label: (
+        <div className="text-sm font-bold text-navy-200 ">SETTING PAGES</div>
+      ),
+    },
+    {
+      key: '20',
       label: (
         <NavLink to="/setting">
           <span

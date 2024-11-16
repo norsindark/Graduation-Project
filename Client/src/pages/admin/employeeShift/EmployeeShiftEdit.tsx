@@ -2,24 +2,52 @@ import React, { useState, useEffect } from 'react';
 import { Form, Select, DatePicker, Button, notification } from 'antd';
 import moment from 'moment';
 import {
-  callAddNewEmployeeShift,
+  callUpdateEmployeeShift,
   callGetAllEmployees,
   callGetAllShift,
-} from '../../../../services/serverApi';
-import { CalendarOutlined, CloseOutlined } from '@ant-design/icons';
+} from '../../../services/serverApi';
+import { SaveOutlined, CloseOutlined } from '@ant-design/icons';
 
 const { Option } = Select;
-const { RangePicker } = DatePicker;
 
-interface EmployeeShiftNewProps {
-  onAddSuccess: () => void;
-  setShowEmployeeShiftNew: (show: boolean) => void;
+interface EmployeeShift {
+  id: string;
+  employee: {
+    id: string;
+    employeeName: string;
+    salary: number;
+    jobTitle: string;
+    createdAt: string;
+    updatedAt: string;
+  };
+  shift: {
+    id: string;
+    shiftName: string;
+    startTime: string;
+    endTime: string;
+    createdAt: string;
+    updatedAt: string;
+  };
+  workDate: string;
+  newWorkDate: string;
+  status: string | null;
+  notes: string | null;
+  createdAt: string;
+  updatedAt: string;
 }
 
-const EmployeeShiftNew: React.FC<EmployeeShiftNewProps> = ({
-  onAddSuccess,
-  setShowEmployeeShiftNew,
+interface EmployeeShiftEditProps {
+  currentEmployeeShift: EmployeeShift;
+  onEditSuccess: () => void;
+  setShowEmployeeShiftEdit: (show: boolean) => void;
+}
+
+const EmployeeShiftEdit: React.FC<EmployeeShiftEditProps> = ({
+  currentEmployeeShift,
+  onEditSuccess,
+  setShowEmployeeShiftEdit,
 }) => {
+  const [form] = Form.useForm();
   const [employees, setEmployees] = useState<any[]>([]);
   const [shifts, setShifts] = useState<any[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -27,13 +55,19 @@ const EmployeeShiftNew: React.FC<EmployeeShiftNewProps> = ({
   useEffect(() => {
     fetchEmployees();
     fetchShifts();
-  }, []);
+    form.setFieldsValue({
+      employeeId: currentEmployeeShift.employee.id,
+      shiftId: currentEmployeeShift.shift.id,
+      workDate: moment(currentEmployeeShift.workDate),
+      newWorkDate: '',
+    });
+  }, [currentEmployeeShift, form]);
 
   const fetchEmployees = async () => {
     try {
-      const responseGetAllEmployees = await callGetAllEmployees();
-      if (responseGetAllEmployees?.status === 200) {
-        setEmployees(responseGetAllEmployees.data);
+      const response = await callGetAllEmployees();
+      if (response?.status === 200) {
+        setEmployees(response.data);
       }
     } catch (error) {
       notification.error({
@@ -47,9 +81,9 @@ const EmployeeShiftNew: React.FC<EmployeeShiftNewProps> = ({
 
   const fetchShifts = async () => {
     try {
-      const responseGetAllShift = await callGetAllShift('');
-      if (responseGetAllShift?.status === 200) {
-        setShifts(responseGetAllShift.data._embedded.shiftResponseList);
+      const response = await callGetAllShift('');
+      if (response?.status === 200) {
+        setShifts(response.data._embedded.shiftResponseList);
       }
     } catch (error) {
       notification.error({
@@ -62,25 +96,24 @@ const EmployeeShiftNew: React.FC<EmployeeShiftNewProps> = ({
   };
 
   const onFinish = async (values: any) => {
-
     setIsSubmitting(true);
     try {
-      const response = await callAddNewEmployeeShift(
-        values.employeeIds,
-        values.shiftId,
-        values.dateRange[0].format('YYYY-MM-DD'),
-        values.dateRange[1].format('YYYY-MM-DD')
+      const response = await callUpdateEmployeeShift(
+        currentEmployeeShift.employee.id,
+        currentEmployeeShift.shift.id,
+        moment(currentEmployeeShift.workDate).format('YYYY-MM-DD'),
+        values.newWorkDate.format('YYYY-MM-DD')
       );
       if (response?.status === 200) {
         notification.success({
-          message: 'Create new employee shift successfully!',
+          message: 'Update employee shift successfully!',
           duration: 5,
           showProgress: true,
         });
-        onAddSuccess();
+        onEditSuccess();
       } else {
         notification.error({
-          message: 'Unable to create new employee shift',
+          message: 'Update employee shift failed!',
           description: response.data.errors?.error || 'An error occurred!',
           duration: 5,
           showProgress: true,
@@ -88,8 +121,8 @@ const EmployeeShiftNew: React.FC<EmployeeShiftNewProps> = ({
       }
     } catch (error) {
       notification.error({
-        message: 'Error creating new employee shift',
-        description: 'An error occurred while creating the shift!',
+        message: 'Error updating employee shift',
+        description: 'An error occurred in the update process!',
         duration: 5,
         showProgress: true,
       });
@@ -101,18 +134,16 @@ const EmployeeShiftNew: React.FC<EmployeeShiftNewProps> = ({
   return (
     <div className="container">
       <h4 className="text-center p-3 font-[500] text-[18px]">
-        Create New Employee Shift
+        Edit employee shift
       </h4>
-      <Form layout="vertical" onFinish={onFinish}>
+      <Form form={form} layout="vertical" onFinish={onFinish}>
         <Form.Item
-          name="employeeIds"
+          name="employeeId"
           className="font-medium"
-          label="Employees"
-          rules={[
-            { required: true, message: 'Please select at least one employee!' },
-          ]}
+          label="Employee"
+          rules={[{ required: true, message: 'Please select an employee!' }]}
         >
-          <Select mode="multiple" placeholder="Select employees">
+          <Select placeholder="Select employee" disabled>
             {employees.map((employee) => (
               <Option key={employee.id} value={employee.id}>
                 {employee.employeeName} - {employee.email}
@@ -120,13 +151,14 @@ const EmployeeShiftNew: React.FC<EmployeeShiftNewProps> = ({
             ))}
           </Select>
         </Form.Item>
+
         <Form.Item
           name="shiftId"
-          className="font-medium"
           label="Shift"
+          className="font-medium"
           rules={[{ required: true, message: 'Please select a shift!' }]}
         >
-          <Select placeholder="Select shift" allowClear>
+          <Select placeholder="Select shift" disabled>
             {shifts.map((shift) => (
               <Option key={shift.shiftId} value={shift.shiftId}>
                 {shift.shiftName} - Time: {shift.startTime} - {shift.endTime}
@@ -134,13 +166,25 @@ const EmployeeShiftNew: React.FC<EmployeeShiftNewProps> = ({
             ))}
           </Select>
         </Form.Item>
+
         <Form.Item
-          name="dateRange"
+          name="workDate"
           className="font-medium"
-          label="Date Range"
-          rules={[{ required: true, message: 'Please select a date range!' }]}
+          label="Work date"
+          rules={[{ required: true, message: 'Please select a work date!' }]}
         >
-          <RangePicker />
+          <DatePicker style={{ width: '100%' }} disabled />
+        </Form.Item>
+
+        <Form.Item
+          name="newWorkDate"
+          className="font-medium"
+          label="New work date"
+          rules={[
+            { required: true, message: 'Please select a new work date!' },
+          ]}
+        >
+          <DatePicker style={{ width: '100%' }} />
         </Form.Item>
         <Form.Item>
           <Button
@@ -148,15 +192,15 @@ const EmployeeShiftNew: React.FC<EmployeeShiftNewProps> = ({
             shape="round"
             htmlType="submit"
             loading={isSubmitting}
-            icon={<CalendarOutlined />}
+            icon={<SaveOutlined />}
           >
-            Create New Employee Shift
+            Save changes
           </Button>
           <Button
             type="primary"
             shape="round"
             danger
-            onClick={() => setShowEmployeeShiftNew(false)}
+            onClick={() => setShowEmployeeShiftEdit(false)}
             style={{ marginLeft: 10 }}
             icon={<CloseOutlined />}
           >
@@ -168,4 +212,4 @@ const EmployeeShiftNew: React.FC<EmployeeShiftNewProps> = ({
   );
 };
 
-export default EmployeeShiftNew;
+export default EmployeeShiftEdit;

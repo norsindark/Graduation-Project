@@ -103,7 +103,7 @@ const NavigationAccountAdmin = () => {
             Shift Management
           </button>
 
-          <button
+          {/* <button
             className="nav-link"
             id="v-pills-employee-shift-management-tab"
             data-bs-toggle="pill"
@@ -117,7 +117,7 @@ const NavigationAccountAdmin = () => {
               <i className="fas fa-calendar-alt"></i>
             </span>{' '}
             Employee Shift Management
-          </button>
+          </button> */}
 
           <button
             className="nav-link"
