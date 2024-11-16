@@ -20,4 +20,6 @@ public interface OfferRepository extends JpaRepository<Offer, String> {
 
     @Query("SELECT o.discountPercentage FROM Offer o WHERE o.dish.id = :dishId AND o.availableQuantityOffer > 0")
     Optional<Integer> findDiscountPercentageByDishId(@Param("dishId") String dishId);
+
+
 }
