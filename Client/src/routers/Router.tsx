@@ -41,7 +41,10 @@ import TermsAndConditionPage from '../pages/public/TermsAndConditionPage';
 import BlogPage from '../pages/public/BlogPage';
 import BlogDetail from '../pages/public/BlogDetail';
 import ContactPage from '../pages/public/ContactPage';
-
+import CategoryBlog from '../pages/admin/categorisBlog/CategoryBlog';
+import Blog from '../pages/admin/blog/Blog';
+import CommentsBlog from '../pages/admin/commentsBlog/CommentsBlog';
+import EmployeeShift from '../pages/admin/employeeShift/EmployeeShift';
 export const router = createBrowserRouter([
   {
     path: '/',
@@ -170,6 +173,10 @@ export const router = createBrowserRouter([
         element: <User />,
       },
       {
+        path: '/employee-shift',
+        element: <EmployeeShift />,
+      },
+      {
         path: '/attendance',
         element: <AttendanceManagement />,
       },
@@ -212,6 +219,18 @@ export const router = createBrowserRouter([
       {
         path: '/setting',
         element: <Setting />,
+      },
+      {
+        path: '/category-blog-admin',
+        element: <CategoryBlog />,
+      },
+      {
+        path: '/blog-admin',
+        element: <Blog />,
+      },
+      {
+        path: '/comments-blog-admin',
+        element: <CommentsBlog />,
       },
     ],
   },

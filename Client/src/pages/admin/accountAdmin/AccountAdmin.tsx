@@ -7,7 +7,7 @@ import AttendanceManagement from '../attendanceManagement/AttendanceManagement';
 import InformationAdmin from './Information/InformationAdmin';
 import EmployeeStatistics from './dashboard/EmployeeStatistics';
 import EmployeeManagement from './employeeManagement/EmployeeManagement';
-import EmployeeShift from './employeeShift/EmployeeShift';
+import EmployeeShift from '../employeeShift/EmployeeShift';
 const AccountAdmin = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -53,7 +53,7 @@ const AccountAdmin = () => {
 
                     <ShiftManagement />
 
-                    <EmployeeShift />
+                    {/* <EmployeeShift /> */}
 
                     <InformationAdmin />
                   </div>

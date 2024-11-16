@@ -39,14 +39,14 @@ interface EmployeeShift {
 import {
   callGetAllEmployeeShift,
   callDeleteEmployeeShift,
-} from '../../../../services/serverApi';
+} from '../../../services/serverApi';
 
 const EmployeeShift: React.FC = () => {
   const [listEmployeeShift, setListEmployeeShift] = useState<EmployeeShift[]>(
     []
   );
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(2);
+  const [pageSize, setPageSize] = useState(5);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
 
@@ -253,72 +253,61 @@ const EmployeeShift: React.FC = () => {
   ];
 
   return (
-    <div
-      className="tab-pane fade"
-      id="v-pills-employee-shift-management"
-      role="tabpanel"
-      aria-labelledby="v-pills-employee-shift-management-tab"
-    >
-      <div className="fp_dashboard_body">
-        <h3>
-          <FaCalendarAlt style={{ fontSize: '22px', marginRight: '5px' }} />
-          Employee Shift Management
-        </h3>
-        <Card
-          title="Employee Shift Management"
-          extra={
-            !showEmployeeShiftNew &&
-            !showEmployeeShiftEdit && (
-              <Button
-                type="primary"
-                shape="round"
-                icon={<PlusOutlined />}
-                onClick={() => setShowEmployeeShiftNew(true)}
-              >
-                Create New Shift
-              </Button>
-            )
-          }
-        >
-          {showEmployeeShiftNew ? (
-            <EmployeeShiftNew
-              onAddSuccess={handleAddSuccess}
-              setShowEmployeeShiftNew={setShowEmployeeShiftNew}
-            />
-          ) : showEmployeeShiftEdit && currentEmployeeShift ? (
-            <EmployeeShiftEdit
-              currentEmployeeShift={currentEmployeeShift}
-              onEditSuccess={handleEditSuccess}
-              setShowEmployeeShiftEdit={setShowEmployeeShiftEdit}
-            />
-          ) : (
-            <Table
-              dataSource={listEmployeeShift}
-              columns={columns}
-              rowKey="id"
-              loading={loading}
-              onChange={onChange}
-              pagination={{
-                current: currentPage,
-                pageSize: pageSize,
-                total: total,
-                showSizeChanger: true,
-                showQuickJumper: true,
-                pageSizeOptions: ['1', '2'],
-                onShowSizeChange: (current, size) => {
-                  setCurrentPage(1);
-                  setPageSize(size);
-                },
-              }}
-              scroll={{ x: 'max-content' }}
-              bordered
-              rowClassName={(record, index) =>
-                index % 2 === 0 ? 'table-row-light' : 'table-row-dark'
-              }
-            />
-          )}
-        </Card>
-      </div>
+    <div className="layout-content">
+      <Card
+        title="Employee Shift Management"
+        extra={
+          !showEmployeeShiftNew &&
+          !showEmployeeShiftEdit && (
+            <Button
+              type="primary"
+              shape="round"
+              icon={<PlusOutlined />}
+              onClick={() => setShowEmployeeShiftNew(true)}
+            >
+              Create New Shift
+            </Button>
+          )
+        }
+      >
+        {showEmployeeShiftNew ? (
+          <EmployeeShiftNew
+            onAddSuccess={handleAddSuccess}
+            setShowEmployeeShiftNew={setShowEmployeeShiftNew}
+          />
+        ) : showEmployeeShiftEdit && currentEmployeeShift ? (
+          <EmployeeShiftEdit
+            currentEmployeeShift={currentEmployeeShift}
+            onEditSuccess={handleEditSuccess}
+            setShowEmployeeShiftEdit={setShowEmployeeShiftEdit}
+          />
+        ) : (
+          <Table
+            dataSource={listEmployeeShift}
+            columns={columns}
+            rowKey="id"
+            loading={loading}
+            onChange={onChange}
+            pagination={{
+              current: currentPage,
+              pageSize: pageSize,
+              total: total,
+              showSizeChanger: true,
+              showQuickJumper: true,
+              pageSizeOptions: ['5', '10', '20', '50'],
+              onShowSizeChange: (current, size) => {
+                setCurrentPage(1);
+                setPageSize(size);
+              },
+            }}
+            scroll={{ x: 'max-content' }}
+            bordered
+            rowClassName={(record, index) =>
+              index % 2 === 0 ? 'table-row-light' : 'table-row-dark'
+            }
+          />
+        )}
+      </Card>
     </div>
   );
 };
