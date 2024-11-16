@@ -17,4 +17,7 @@ public interface OfferRepository extends JpaRepository<Offer, String> {
 
     @Query("SELECT o FROM Offer o WHERE o.dish.id = :dishId")
     Optional<Offer> findByDishId(@Param("dishId") String dishId);
+
+    @Query("SELECT o.discountPercentage FROM Offer o WHERE o.dish.id = :dishId AND o.availableQuantityOffer > 0")
+    Optional<Integer> findDiscountPercentageByDishId(@Param("dishId") String dishId);
 }
