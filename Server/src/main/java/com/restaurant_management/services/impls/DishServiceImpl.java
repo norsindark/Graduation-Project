@@ -39,6 +39,7 @@ import java.util.stream.Collectors;
 public class DishServiceImpl implements DishService {
     private final DishImageRepository dishImageRepository;
     private final DishRepository dishRepository;
+    private final OfferRepository offerRepository;
     private final ReviewService reviewService;
     private final RecipeRepository recipeRepository;
     private final CategoryRepository categoryRepository;
@@ -68,6 +69,9 @@ public class DishServiceImpl implements DishService {
         List<DishOptionSelection> optionSelections = dishOptionSelectionRepository.findByDish(dish);
         int maxAvailableQuantity = getMaxAvailableDishQuantity(dishId);
         Double rating = reviewService.getAverageRatingByDishId(dishId);
+        Integer discount = offerRepository.findDiscountPercentageByDishId(dishId).orElse(0);
+        Double offerPrice = dish.getPrice() - (dish.getPrice() * discount / 100.0);
+        dish.setOfferPrice(offerPrice);
 
         return new DishResponse(dish, recipes, images, optionSelections, maxAvailableQuantity, rating);
     }
