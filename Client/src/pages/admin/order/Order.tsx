@@ -339,7 +339,7 @@ const Order: React.FC = () => {
       width: 120,
       render: (_: any, record: OrderItem) => (
         <Button
-          type="primary"
+          type="default"
           shape="round"
           icon={<EyeOutlined />}
           onClick={() => {

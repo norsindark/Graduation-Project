@@ -428,9 +428,12 @@ const ProductNew: React.FC<ProductNewProps> = ({
             >
               <Select>
                 {categoryList
-                  .filter(category => category.categoryStatus === 'ACTIVE')
+                  .filter((category) => category.categoryStatus === 'ACTIVE')
                   .map((category) => (
-                    <Option key={category.categoryId} value={category.categoryId}>
+                    <Option
+                      key={category.categoryId}
+                      value={category.categoryId}
+                    >
                       {category.categoryName}
                     </Option>
                   ))}
@@ -490,9 +493,14 @@ const ProductNew: React.FC<ProductNewProps> = ({
                           }
                         >
                           {ingredientList
-                            .sort((a, b) => a.ingredientName.localeCompare(b.ingredientName))
+                            .sort((a, b) =>
+                              a.ingredientName.localeCompare(b.ingredientName)
+                            )
                             .map((ingredient) => (
-                              <Option key={ingredient.warehouseId} value={ingredient.warehouseId}>
+                              <Option
+                                key={ingredient.warehouseId}
+                                value={ingredient.warehouseId}
+                              >
                                 {ingredient.ingredientName}
                               </Option>
                             ))}
@@ -549,24 +557,24 @@ const ProductNew: React.FC<ProductNewProps> = ({
           <Col xs={24} sm={12}>
             <Form.List
               name="optionSelections"
-            // rules={[
-            //   {
-            //     validator: async (_, value) => {
-            //       if (!value || value.length === 0) {
-            //         setTimeout(() => {
-            //           notification.error({
-            //             message: 'Error',
-            //             description: 'Please enter option selection!',
-            //             duration: 5,
-            //             showProgress: true,
-            //           });
-            //         }, 800);
-            //         return Promise.reject();
-            //       }
-            //       return Promise.resolve();
-            //     },
-            //   },
-            // ]}
+              // rules={[
+              //   {
+              //     validator: async (_, value) => {
+              //       if (!value || value.length === 0) {
+              //         setTimeout(() => {
+              //           notification.error({
+              //             message: 'Error',
+              //             description: 'Please enter option selection!',
+              //             duration: 5,
+              //             showProgress: true,
+              //           });
+              //         }, 800);
+              //         return Promise.reject();
+              //       }
+              //       return Promise.resolve();
+              //     },
+              //   },
+              // ]}
             >
               {(fields, { add, remove }) => (
                 <>
@@ -583,12 +591,12 @@ const ProductNew: React.FC<ProductNewProps> = ({
                         {...restField}
                         name={[name, 'optionId']}
                         className="mb-0 w-full"
-                      // rules={[
-                      //   {
-                      //     required: true,
-                      //     message: 'Please enter option name!',
-                      //   },
-                      // ]}
+                        // rules={[
+                        //   {
+                        //     required: true,
+                        //     message: 'Please enter option name!',
+                        //   },
+                        // ]}
                       >
                         <Select
                           placeholder="Select option"
@@ -655,7 +663,7 @@ const ProductNew: React.FC<ProductNewProps> = ({
               className="font-medium"
             >
               <ReactQuill
-                className=" h-[250px] max-h-[1200px] w-full bg-white"
+                className=" h-[3200px] max-h-[1200px] w-full bg-white"
                 theme="snow"
                 modules={modules}
                 formats={formats}

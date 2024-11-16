@@ -207,7 +207,7 @@ const Coupon: React.FC = () => {
           //   className="flex justify-center items-center flex-col"
         >
           <Button
-            type="primary"
+            type="default"
             shape="round"
             icon={<EyeOutlined />}
             onClick={() => handleViewClick(record)}

@@ -186,7 +186,7 @@ const Product: React.FC = () => {
       render: (_: any, record: Dish) => (
         <Space size="small">
           <Button
-            type="primary"
+            type="default"
             icon={<EyeOutlined />}
             shape="round"
             onClick={() => handleViewDetail(record)}

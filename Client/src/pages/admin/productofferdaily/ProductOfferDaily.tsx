@@ -471,7 +471,7 @@ const ProductOfferDaily: React.FC = () => {
       render: (_: any, record: OfferItem) => (
         <Space size="small">
           <Button
-            type="primary"
+            type="default"
             shape="round"
             icon={<EyeOutlined />}
             onClick={() => handleDetailClick(record.id)}
