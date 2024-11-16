@@ -30,7 +30,7 @@ interface WishListItem {
   dishes: WishListDish[];
 }
 
-const WishListAccount = () => {
+const WishListAccount = ({ onClose }: { onClose: () => void }) => {
   const [isInvoiceModalOpen, setIsInvoiceModalOpen] = useState(false);
   const [selectedWishListItem, setSelectedWishListItem] =
     useState<WishListDish | null>(null);
@@ -48,6 +48,13 @@ const WishListAccount = () => {
 
   const handleProductClick = (slug: string) => {
     handleGoBack();
+    onClose();
+    setTimeout(() => {
+      window.scrollTo({
+        top: 300,
+        behavior: 'smooth',
+      });
+    }, 100);
     navigate(`/product-detail/${slug}`);
   };
 
@@ -79,7 +86,6 @@ const WishListAccount = () => {
     try {
       let query = `pageNo=${current - 1}&pageSize=${pageSize}&sortBy=createdAt&sortDir=desc`;
       const response = await callWishListById(userId || '', query);
-      console.log('responseWishList', response);
       if (response?.status === 200) {
         if (
           response?.data?._embedded?.wishlistResponseList &&

@@ -62,7 +62,7 @@ const Account: React.FC<AccountProps> = ({
                       onAddressUpdate={onAddressUpdate}
                     />
                     <OrderAccount />
-                    <WishListAccount />
+                    <WishListAccount onClose={onClose} />
                     <ReviewAccount onClose={onClose} />
                     <ResetPasswordAccount />
                   </div>
