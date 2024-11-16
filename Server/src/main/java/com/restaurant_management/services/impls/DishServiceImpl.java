@@ -28,10 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -56,8 +53,16 @@ public class DishServiceImpl implements DishService {
         if (dishes.isEmpty()) {
             throw new DataExitsException("Dishes not found");
         }
+
+        Set<String> offerDishIds = offerRepository.findAll().stream()
+                .map(offer -> String.valueOf(offer.getDish().getId()))
+                .collect(Collectors.toSet());
+
+        dishes.removeIf(dish -> offerDishIds.contains(dish.get("dishId")));
+
         return dishes;
     }
+
 
     @Override
     public DishResponse getDishById(String dishId) throws DataExitsException {
