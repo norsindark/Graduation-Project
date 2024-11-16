@@ -150,23 +150,6 @@ const DailyOffer: React.FC = () => {
   };
 
   const handleProductClick = (slug: string, offer: any) => {
-    localStorage.setItem(
-      'currentOffer',
-      JSON.stringify({
-        id: offer.id,
-        offerType: 'DAILY',
-        discountPercentage: offer.discountPercentage,
-        availableQuantityOffer: offer.availableQuantityOffer,
-        startDate: offer.startDate,
-        endDate: offer.endDate,
-        dish: {
-          dishId: offer.dish.dishId,
-          availableQuantity: offer.dish.availableQuantity,
-          price: offer.dish.price,
-          offerPrice: offer.dish.price * (1 - offer.discountPercentage / 100),
-        },
-      })
-    );
     navigate(`/product-detail/${slug}`);
   };
   const handleAddToWishlist = async (dishId: string) => {

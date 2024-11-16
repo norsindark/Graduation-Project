@@ -486,7 +486,9 @@ const ProductDetail: React.FC = () => {
                 </p>
                 <h3 className="price">
                   {dishDetail?.offerPrice.toLocaleString('vi-VN')} VNĐ
-                  <del>{dishDetail?.price.toLocaleString('vi-VN')} VNĐ</del>
+                  {dishDetail?.offerPrice < dishDetail?.price && (
+                    <del>{dishDetail?.price.toLocaleString('vi-VN')} VNĐ</del>
+                  )}
                 </h3>
                 <p className="short_description">{dishDetail?.description}</p>
 

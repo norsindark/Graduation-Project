@@ -159,14 +159,6 @@ function BannerSlider() {
   };
 
   const handleProductClick = (slug: string, offer: BannerOffer) => {
-    localStorage.setItem(
-      'currentOffer',
-      JSON.stringify({
-        discountPercentage: offer.discountPercentage,
-        offerPrice: offer.dish.offerPrice,
-        offerId: offer.id,
-      })
-    );
     navigate(`/product-detail/${slug}`);
   };
 

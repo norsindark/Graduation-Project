@@ -8,7 +8,6 @@ import {
 } from '../../../services/clientApi';
 import { notification, Pagination } from 'antd';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import Loading from '../../../components/Loading/Loading';
 import { RootState } from '../../../redux/store';
 import { useSelector } from 'react-redux';
 
