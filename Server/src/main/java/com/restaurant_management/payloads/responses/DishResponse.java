@@ -27,6 +27,7 @@ public class DishResponse {
     private String thumbImage;
     private Double offerPrice;
     private Double price;
+    private Integer discountPercentage;
     private String categoryId;
     private String categoryName;
     private List<DishImageResponse> images;
@@ -47,7 +48,7 @@ public class DishResponse {
         this.categoryName = dish.getCategory().getName();
     }
 
-    public DishResponse(Dish dish, List<Recipe> recipes, List<DishImage> images, List<DishOptionSelection> optionSelections, int availableQuantity, Double rating) {
+    public DishResponse(Dish dish, List<Recipe> recipes, List<DishImage> images, List<DishOptionSelection> optionSelections, int availableQuantity, Double rating, Integer discountPercentage) {
         this.dishId = dish.getId();
         this.dishName = dish.getDishName();
         this.rating = rating;
@@ -59,6 +60,7 @@ public class DishResponse {
         this.thumbImage = dish.getThumbImage();
         this.offerPrice = dish.getOfferPrice();
         this.price = dish.getPrice();
+        this.discountPercentage = discountPercentage;
         this.images = images.stream().map(DishImageResponse::new).toList();
         this.recipes = recipes.stream().map(RecipeResponse::new).toList();
         this.categoryId = dish.getCategory().getId();

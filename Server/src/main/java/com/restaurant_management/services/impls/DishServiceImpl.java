@@ -73,7 +73,7 @@ public class DishServiceImpl implements DishService {
         Double offerPrice = dish.getPrice() - (dish.getPrice() * discount / 100.0);
         dish.setOfferPrice(offerPrice);
 
-        return new DishResponse(dish, recipes, images, optionSelections, maxAvailableQuantity, rating);
+        return new DishResponse(dish, recipes, images, optionSelections, maxAvailableQuantity, rating, discount);
     }
 
     @Override
@@ -102,8 +102,11 @@ public class DishServiceImpl implements DishService {
                     } catch (DataExitsException e) {
                         e.printStackTrace();
                     }
+                    Integer discount = offerRepository.findDiscountPercentageByDishId(dish.getId()).orElse(0);
+                    Double offerPrice = dish.getPrice() - (dish.getPrice() * discount / 100.0);
+                    dish.setOfferPrice(offerPrice);
 
-                    return new DishResponse(dish, recipes, images, optionSelections, maxAvailableQuantity, rating);
+                    return new DishResponse(dish, recipes, images, optionSelections, maxAvailableQuantity, rating, discount);
                 })
                 .collect(Collectors.toList());
         return pagedResourcesAssembler.toModel(new PageImpl<>(dishResponses, pageable, dishes.getTotalElements()));
