@@ -24,6 +24,9 @@ public class Blog {
     @Column(name = "blog_id", length = 36, nullable = false)
     private String id;
 
+    @Column(name = "thumbnail")
+    private String thumbnail;
+
     @Column(name = "title", nullable = false)
     private String title;
 
@@ -38,11 +41,23 @@ public class Blog {
     @Column(name = "status")
     private String status;
 
+    @Column(name = "seo_title")
+    private String seoTitle;
+
+    @Column(name = "seo_description", columnDefinition = "TEXT")
+    private String seoDescription;
+
+    @Column(name = "tags")
+    private String tags;
+
+    @ManyToOne
+    @JoinColumn(name = "category_id", nullable = false)
+    private CategoryBlog categoryBlog;
+
     @OneToMany(mappedBy = "blog", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     @ToString.Exclude
     private List<Comment> comments = new ArrayList<>();
-
 
     @Column(name = "created_at")
     @CreationTimestamp
