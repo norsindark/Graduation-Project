@@ -26,6 +26,7 @@ public class GuestController {
     private final ReviewService reviewService;
     private final OfferService offerService;
     private final BlogService blogService;
+    private final CategoryBlogService categoryBlogService;
 
     // review
     @GetMapping("/get-all-reviews-by-dish")
@@ -64,14 +65,12 @@ public class GuestController {
 
     // category
     @GetMapping("/get-all-categories-name")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('EMPLOYEE')")
     @Operation(summary = "Get all category names", tags = {"Category"})
     public ResponseEntity<List<GetCategoriesNameResponse>> getAllCategoriesName() throws DataExitsException {
         return ResponseEntity.ok(categoryService.getAllCategoriesName());
     }
 
     @GetMapping("/get-all-categories")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('EMPLOYEE')")
     @Operation(summary = "Get all categories", tags = {"Category"})
     public ResponseEntity<PagedModel<EntityModel<CategoryResponse>>> getAllCategories(
             @RequestParam(defaultValue = "0") int pageNo,
@@ -149,5 +148,26 @@ public class GuestController {
     @Operation(summary = "Get blog by ID")
     public ResponseEntity<BlogResponse> getBlogById(@RequestParam String blogId) throws DataExitsException {
         return ResponseEntity.ok(blogService.getBlogById(blogId));
+    }
+
+    // category blogs
+
+    @GetMapping("/get-all-categories")
+    public ResponseEntity<?> getAllCategoriesBlog(
+            @RequestParam(defaultValue = "0") int pageNo,
+            @RequestParam(defaultValue = "10") int pageSize,
+            @RequestParam(defaultValue = "name") String sortBy,
+            @RequestParam(defaultValue = "asc") String sortDir) throws DataExitsException {
+        return ResponseEntity.ok(categoryBlogService.getAllCategoryBlog(pageNo, pageSize, sortBy, sortDir));
+    }
+
+    @GetMapping("/get-all-categories-name")
+    public ResponseEntity<?> getAllCategoriesBlogName() throws DataExitsException {
+        return ResponseEntity.ok(categoryBlogService.getAllCategoryBlogName());
+    }
+
+    @GetMapping("/get-category-blog-by-id")
+    public ResponseEntity<?> getCategoryBlogById(@RequestParam String categoryBlogId) throws DataExitsException {
+        return ResponseEntity.ok(categoryBlogService.getCategoryBlogById(categoryBlogId));
     }
 }
