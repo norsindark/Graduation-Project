@@ -3,8 +3,6 @@ package com.restaurant_management.controllers;
 import com.restaurant_management.exceptions.DataExitsException;
 import com.restaurant_management.payloads.requests.CategoryBlogRequest;
 import com.restaurant_management.payloads.responses.ApiResponse;
-import com.restaurant_management.payloads.responses.CategoryResponse;
-import com.restaurant_management.payloads.responses.GetCategoriesNameResponse;
 import com.restaurant_management.services.interfaces.CategoryBlogService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;

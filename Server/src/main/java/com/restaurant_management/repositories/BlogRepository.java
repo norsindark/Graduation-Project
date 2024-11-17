@@ -12,7 +12,11 @@ public interface BlogRepository extends JpaRepository<Blog, String> {
     @Query("SELECT new com.restaurant_management.payloads.responses.BlogResponse(" +
             "b.id, b.title, SUBSTRING(b.content, 1, 100), " +
             "b.status, b.author.fullName, " +
+            "b.thumbnail, b.tags, b.seoTitle, b.seoDescription, " +
+            "SIZE(b.comments), " +
+            "b.categoryBlog.name, b.categoryBlog.id, " +
             "b.createdAt, b.updatedAt) " +
             "FROM Blog b")
     Page<BlogResponse> findAllBlogs(Pageable pageable);
+
 }

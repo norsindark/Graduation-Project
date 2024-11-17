@@ -8,6 +8,7 @@ import com.restaurant_management.payloads.responses.GetUserResponse;
 import com.restaurant_management.payloads.responses.OrderResponse;
 import com.restaurant_management.payloads.responses.UserResponse;
 import com.restaurant_management.services.interfaces.AdminService;
+import com.restaurant_management.services.interfaces.CommentService;
 import com.restaurant_management.services.interfaces.OrderService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -32,6 +33,7 @@ public class AdminController {
 
     private final AdminService adminService;
     private final OrderService orderService;
+    private final CommentService commentService;
 
     @PostMapping("/user/add-user")
     @PreAuthorize("hasRole('ADMIN')")
@@ -97,5 +99,12 @@ public class AdminController {
     public ResponseEntity<ApiResponse> updateOrderStatus(@RequestParam String orderId, @RequestParam String status)
             throws DataExitsException, MessagingException, UnsupportedEncodingException {
         return ResponseEntity.ok(orderService.updateOrderStatus(orderId, status));
+    }
+
+    // comments
+    @DeleteMapping("/comment/delete-comment")
+    @Operation(summary = "Delete comment", tags = {"Comment"})
+    public ResponseEntity<?> deleteComment(@RequestParam String commentId) throws DataExitsException {
+        return ResponseEntity.ok(commentService.deleteComment(commentId));
     }
 }

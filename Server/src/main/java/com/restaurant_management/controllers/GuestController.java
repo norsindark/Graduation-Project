@@ -9,7 +9,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -27,6 +26,7 @@ public class GuestController {
     private final OfferService offerService;
     private final BlogService blogService;
     private final CategoryBlogService categoryBlogService;
+    private final CommentService commentService;
 
     // review
     @GetMapping("/get-all-reviews-by-dish")
@@ -152,8 +152,9 @@ public class GuestController {
 
     // category blogs
 
-    @GetMapping("/get-all-categories")
-    public ResponseEntity<?> getAllCategoriesBlog(
+    @GetMapping("/category-blog/get-all-categories-blog")
+    @Operation(summary = "Get all category blogs", tags = {"CategoryBlog"})
+    public ResponseEntity<?> getAllCategoryBlog(
             @RequestParam(defaultValue = "0") int pageNo,
             @RequestParam(defaultValue = "10") int pageSize,
             @RequestParam(defaultValue = "name") String sortBy,
@@ -161,13 +162,45 @@ public class GuestController {
         return ResponseEntity.ok(categoryBlogService.getAllCategoryBlog(pageNo, pageSize, sortBy, sortDir));
     }
 
-    @GetMapping("/get-all-categories-name")
+    @GetMapping("/category-blog/get-all-categories-blog-name")
+    @Operation(summary = "Get all category blog names", tags = {"CategoryBlog"})
     public ResponseEntity<?> getAllCategoriesBlogName() throws DataExitsException {
         return ResponseEntity.ok(categoryBlogService.getAllCategoryBlogName());
     }
 
-    @GetMapping("/get-category-blog-by-id")
-    public ResponseEntity<?> getCategoryBlogById(@RequestParam String categoryBlogId) throws DataExitsException {
+    @GetMapping("/category-blog/get-category-blog-by-id")
+    @Operation(summary = "Get category blog by ID", tags = {"CategoryBlog"})
+    public ResponseEntity<?> getCategoryBlogById(
+            @RequestParam String categoryBlogId) throws DataExitsException {
         return ResponseEntity.ok(categoryBlogService.getCategoryBlogById(categoryBlogId));
+    }
+
+    // comments blog
+    @GetMapping("/comment/get-all-comments-by-blog-id")
+    @Operation(summary = "Get all comments by blog ID", tags = {"Comment"})
+    public ResponseEntity<?> getAllCommentsByBlogId(
+            @RequestParam String blogId,
+            @RequestParam(defaultValue = "0") int pageNo,
+            @RequestParam(defaultValue = "10") int pageSize,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String sortDir) throws DataExitsException {
+        return ResponseEntity.ok(commentService.getAllCommentsByBlogId(blogId, pageNo, pageSize, sortBy, sortDir));
+    }
+
+    @GetMapping("/comment/get-comment-by-id")
+    @Operation(summary = "Get comment by ID", tags = {"Comment"})
+    public ResponseEntity<?> getCommentById(
+            @RequestParam String commentId) throws DataExitsException {
+        return ResponseEntity.ok(commentService.getCommentById(commentId));
+    }
+
+    @GetMapping("/comment/get-all-comments")
+    @Operation(summary = "Get all comments", tags = {"Comment"})
+    public ResponseEntity<?> getAllComments(
+            @RequestParam(defaultValue = "0") int pageNo,
+            @RequestParam(defaultValue = "10") int pageSize,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String sortDir) throws DataExitsException {
+        return ResponseEntity.ok(commentService.getAllComments(pageNo, pageSize, sortBy, sortDir));
     }
 }
