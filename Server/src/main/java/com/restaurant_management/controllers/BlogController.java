@@ -9,6 +9,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 @RestController
 @RequiredArgsConstructor
@@ -40,6 +43,14 @@ public class BlogController {
     @Operation(summary = "Create new blog", tags = {"Blog"})
     public ResponseEntity<?> createBlog(@RequestBody BlogDto blogDto) throws DataExitsException {
         return ResponseEntity.ok(blogService.createBlog(blogDto));
+    }
+
+    @PostMapping("/create-blog-thumbnail-url")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Create blog thumbnail URL", tags = {"Blog"})
+    public ResponseEntity<?> createBlogThumbnailUrl(@RequestBody MultipartFile thumbnailUrl)
+            throws DataExitsException, IOException {
+        return ResponseEntity.ok(blogService.createBlogThumbnailUrl(thumbnailUrl));
     }
 
     @PutMapping("/update-blog")

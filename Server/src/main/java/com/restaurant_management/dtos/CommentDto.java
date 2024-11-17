@@ -7,7 +7,9 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class CommentDto {
+    private String commentId;
     private String content;
     private String author;
-    private String status;
+    private String blogId;
+    private String parentCommentId;
 }

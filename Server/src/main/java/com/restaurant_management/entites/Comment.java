@@ -8,6 +8,8 @@ import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Data
@@ -31,9 +33,18 @@ public class Comment {
     private User author;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "blog_id", nullable = false)
+    @JoinColumn(name = "blog_id")
     @JsonIgnore
     private Blog blog;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_comment_id")
+    @JsonIgnore
+    private Comment parentComment;
+
+    @OneToMany(mappedBy = "parentComment")
+    @JsonIgnore
+    private List<Comment> replies = new ArrayList<>();
 
     @Column(name = "created_at")
     @CreationTimestamp
