@@ -1,68 +1,32 @@
 version: '3.8'
 
 services:
-  frontend:
-    build:
-      context: ./Client
-      dockerfile: Dockerfile
-    container_name: frontendDocker
-    ports:
-      - "3000:3000"
-    volumes:
-      - ./Client:/app
-      - /app/node_modules
-    depends_on:
-      - backend
-    networks:
-      - shared-network
-
   backend:
     build:
       context: ./Server
       dockerfile: Dockerfile
-    container_name: backendDocker
     ports:
       - "8080:8080"
-    volumes:
-      - ./Server:/app
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://host.docker.internal:5432/restaurant-management
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=05022001
     depends_on:
-      - db
-    networks:
-      - shared-network
+      - database
 
-  db:
-    image: postgres:14
+  frontend:
+    build:
+      context: ./Client
+      dockerfile: Dockerfile
     ports:
-      - "5432:5432"
+      - "3000:3000"
+
+  database:
+    image: postgres:16
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 05022001
-      POSTGRES_DB: restaurant_management
-    container_name: dbDocker
-    volumes:
-      - postgres-data:/var/lib/postgresql/data
-    networks:
-      - shared-network
-
-  nginx:
-    image: nginx:latest
-    container_name: nginx
-    hostname: nginx
+      POSTGRES_DB: restaurant-management
     ports:
-      - "80:80"
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf
-    command: /bin/sh -c "nginx -g 'daemon off;'"
-    depends_on:
-      - frontend
-      - backend
-      - db
-    networks:
-      - shared-network
-
-networks:
-  shared-network:
-    driver: bridge
-
-volumes:
-  postgres-data:
+      - "5433:5432"
