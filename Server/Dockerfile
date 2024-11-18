@@ -1,14 +1,9 @@
-FROM eclipse-temurin:17-jdk-focal
- 
-WORKDIR /app
- 
-COPY .mvn/ .mvn
-COPY mvnw pom.xml ./
-RUN ./mvnw dependency:go-offline
- 
-COPY src ./src
+FROM openjdk:21-jdk-slim
 
-# Expose cổng 8080 để truy cập backen
+WORKDIR /app
+
+COPY target/*.jar app.jar
+
 EXPOSE 8080
- 
-CMD ["./mvnw", "spring-boot:run"]
+
+ENTRYPOINT ["java", "-jar", "app.jar"]
