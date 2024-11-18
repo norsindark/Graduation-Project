@@ -20,7 +20,7 @@ services:
       context: ./Client
       dockerfile: Dockerfile
     ports:
-      - "80:3000"
+      - "3000:3000"
 
   database:
     image: postgres:16
