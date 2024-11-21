@@ -7,51 +7,26 @@ import {
   Space,
   Popconfirm,
   Tag,
+  Image,
 } from 'antd';
 import { EditOutlined, DeleteOutlined, PlusOutlined } from '@ant-design/icons';
 import CategoryBlogNew from './CategoryBlogNew';
 import CategoryBlogEdit from './CategoryBlogEdit';
+import {
+  callDeleteCategoryBlog,
+  callGetAllCategoryBlog,
+} from '../../../services/serverApi';
 
 interface CategoryBlogItem {
-  id: string;
-  name: string;
-  image: string;
+  categoryBlogId: string;
+  categoryName: string;
+  slug: string;
   status: string;
-  createdAt: string;
-  updatedAt: string;
-  displayOrder: string;
+  thumbnail: string | null;
+  displayOrder: number;
+  createdDate: string;
+  updatedDate: string;
 }
-
-// Dữ liệu giả để sử dụng tạm thời khi chưa có API
-const fakeData: CategoryBlogItem[] = [
-  {
-    id: '1',
-    name: 'Tin Công Nghệ',
-    image: '/images/technology.jpg',
-    status: 'ACTIVE',
-    createdAt: '2024-03-20',
-    updatedAt: '2024-03-20',
-    displayOrder: '1',
-  },
-  {
-    id: '2',
-    name: 'Tin Thể Thao',
-    image: '/images/sports.jpg',
-    status: 'ACTIVE',
-    createdAt: '2024-03-20',
-    updatedAt: '2024-03-20',
-    displayOrder: '2',
-  },
-  {
-    id: '3',
-    name: 'Finance',
-    image: '../../../../public/images/blog_3.jpg',
-    status: 'ACTIVE',
-    createdAt: '2023-03-01',
-    updatedAt: '2023-03-02',
-    displayOrder: '3',
-  },
-];
 
 const CategoryBlog: React.FC = () => {
   const [dataSource, setDataSource] = useState<CategoryBlogItem[]>([]);
@@ -65,42 +40,28 @@ const CategoryBlog: React.FC = () => {
   const [pageSize, setPageSize] = useState(5);
   const [total, setTotal] = useState(0);
 
+  const [sortQuery, setSortQuery] = useState('');
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     fetchCategoriesBlog();
   }, [current, pageSize]);
 
-  const fetchCategoriesBlog = () => {
+  const fetchCategoriesBlog = async () => {
     setLoading(true);
-
-    // Dữ liệu giả
-    setTimeout(() => {
-      const start = (current - 1) * pageSize;
-      const end = start + pageSize;
-      const paginatedData = fakeData.slice(start, end);
-      setDataSource(paginatedData);
-      setTotal(fakeData.length);
-      setLoading(false);
-    }, 500);
-
-    // *** Dữ liệu thật sẽ sử dụng API ***
-    // Khi có API, bỏ comment đoạn sau và xóa đoạn xử lý dữ liệu giả ở trên
-    /*
     try {
       let query = `pageNo=${current - 1}&pageSize=${pageSize}`;
-      // Thêm điều kiện sắp xếp nếu có
       if (sortQuery) {
         query += `&sortBy=${sortQuery}`;
       } else {
         query += `&sortBy=name&sortDir=desc`;
       }
-      const response = await callGetAllCategory(query);
+      const response = await callGetAllCategoryBlog(query);
       if (
         response?.status === 200 &&
-        response.data._embedded?.categoryResponseList
+        response.data._embedded?.categoryBlogResponseList
       ) {
-        const categories = response.data._embedded.categoryResponseList;
+        const categories = response.data._embedded.categoryBlogResponseList;
         setDataSource(categories);
         setTotal(response.data.page.totalElements);
         setCurrent(response.data.page.number + 1);
@@ -112,11 +73,12 @@ const CategoryBlog: React.FC = () => {
       notification.error({
         message: 'Error loading category list',
         description: 'Please try again later',
+        duration: 5,
+        showProgress: true,
       });
     } finally {
       setLoading(false);
     }
-    */
   };
 
   const handleAddSuccess = () => {
@@ -129,89 +91,84 @@ const CategoryBlog: React.FC = () => {
     setShowCategoryBlogEdit(true);
   };
 
-  const handleDeleteClick = (id: string) => {
-    const updatedData = dataSource.filter((item) => item.id !== id);
-    setDataSource(updatedData);
-    notification.success({
-      message: 'Category deleted successfully!',
-      duration: 2,
-    });
-
-    // *** Xử lý xóa bằng API (khi có API) ***
-    /*
+  const handleDeleteClick = async (id: string) => {
     try {
-      const res = await callDeleteCategory(id);
+      setLoading(true);
+      const res = await callDeleteCategoryBlog(id);
       if (res?.status === 200) {
         notification.success({
           message: 'Category deleted successfully!',
           duration: 5,
+          showProgress: true,
         });
         fetchCategoriesBlog();
       } else {
         notification.error({
           message: 'Error deleting category',
           description: res.data.errors?.error || 'Error during delete process!',
+          duration: 5,
+          showProgress: true,
         });
       }
     } catch (error) {
       notification.error({
         message: 'Error deleting category.',
+        duration: 5,
+        showProgress: true,
       });
+    } finally {
+      setLoading(false);
     }
-    */
+  };
+
+  const onChange = (pagination: any, sortDir: any) => {
+    setCurrent(pagination.current);
+    setPageSize(pagination.pageSize);
+    if (sortDir && sortDir.field) {
+      const order = sortDir.order === 'ascend' ? 'asc' : 'desc';
+      setSortQuery(`${sortDir.field},${order}`);
+    } else {
+      setSortQuery('');
+    }
   };
 
   const columns = [
     {
-      title: 'STT',
+      title: 'displayOrder',
       dataIndex: 'displayOrder',
       key: 'displayOrder',
-      width: '10%',
       sorter: (a: CategoryBlogItem, b: CategoryBlogItem) =>
-        Number(a.displayOrder) - Number(b.displayOrder),
+        a.displayOrder - b.displayOrder,
     },
+
     {
-      title: 'Hình Ảnh',
-      dataIndex: 'image',
-      key: 'image',
-      width: '10%',
-      render: (image: string) => (
-        <img
-          src={image}
-          alt="Category"
-          style={{
-            width: 80,
-            height: 80,
-            objectFit: 'cover',
-            borderRadius: '8px',
-          }}
-        />
-      ),
-    },
-    {
-      title: 'Tên Danh Mục',
-      dataIndex: 'name',
-      key: 'name',
-      width: '30%',
+      title: 'Category Name',
+      dataIndex: 'categoryName',
+      key: 'categoryName',
       sorter: (a: CategoryBlogItem, b: CategoryBlogItem) =>
-        a.name.localeCompare(b.name),
+        a.categoryName.localeCompare(b.categoryName),
     },
     {
-      title: 'Trạng Thái',
+      title: 'Status',
       dataIndex: 'status',
       key: 'status',
-      width: '15%',
+
       render: (status: string) => (
-        <Tag color={status === 'INACTIVE' ? 'error' : 'success'}>
-          {status === 'INACTIVE' ? 'Không hoạt động' : 'Hoạt động'}
+        <Tag
+          color={status === 'ACTIVE' ? 'green' : 'red'}
+          className="text-base"
+        >
+          {status === 'ACTIVE' ? 'Active' : 'Inactive'}
         </Tag>
       ),
+      sorter: (a: CategoryBlogItem, b: CategoryBlogItem) =>
+        a.status.localeCompare(b.status),
     },
     {
       title: 'Action',
       key: 'action',
       render: (_: any, record: CategoryBlogItem) => (
-        <Space>
+        <Space size="small">
           <Button
             type="primary"
             shape="round"
@@ -222,7 +179,7 @@ const CategoryBlog: React.FC = () => {
           </Button>
           <Popconfirm
             title={'Delete this category?'}
-            onConfirm={() => handleDeleteClick(record.id)}
+            onConfirm={() => handleDeleteClick(record.categoryBlogId)}
           >
             <Button
               type="primary"
@@ -251,7 +208,7 @@ const CategoryBlog: React.FC = () => {
               shape="round"
               icon={<PlusOutlined />}
             >
-              Thêm Danh Mục Mới
+              Create New Category
             </Button>
           )
         }
@@ -273,13 +230,23 @@ const CategoryBlog: React.FC = () => {
             columns={columns}
             rowKey="id"
             loading={loading}
+            onChange={onChange}
             pagination={{
-              current,
-              pageSize,
-              total,
+              current: current,
+              pageSize: pageSize,
+              total: total,
               showSizeChanger: true,
+              showQuickJumper: true,
               pageSizeOptions: ['5', '10', '20', '50'],
+              onShowSizeChange: (current, size) => {
+                setCurrent(1);
+                setPageSize(size);
+              },
             }}
+            bordered
+            rowClassName={(record, index) =>
+              index % 2 === 0 ? 'table-row-light' : 'table-row-dark'
+            }
           />
         )}
       </Card>
