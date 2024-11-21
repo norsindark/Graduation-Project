@@ -282,3 +282,28 @@ export const callGetAllOffers = async () => {
 export const callGetReviewByUserId = async (userId: string, query: string) => {
   return axios.get(`/api/v1/client/review/get-all-reviews-by-user-id?userId=${userId}&${query}`);
 };
+
+// blog
+export const callGetAllBlog = async (query: string) => {
+  return axios.get(`/api/v1/auth/guest/get-all-blogs?${query}`);
+};
+
+export const callGetBlogBySlug = async (slug: string) => {
+  return axios.get(`/api/v1/auth/guest/get-blog-by-slug?slug=${slug}`);
+};
+
+export const callAddComment = async (content: string, author: string, blogId: string) => {
+  return axios.post(`/api/v1/client/comment/create-new-comment`, { blogId, author, content });
+};
+
+export const callAddReplyComment = async (content: string, author: string, parentCommentId: string) => {
+  return axios.post(`/api/v1/client/comment/create-new-comment`, { content, author, parentCommentId });
+};
+
+export const callGetAllComment = async (blogId: string, query: string) => {
+  return axios.get(`/api/v1/client/comment/get-all-comments-by-blog-id?blogId=${blogId}&${query}`);
+};
+
+export const callUpdateComment = async (commentId: string, content: string, author: string, blogId: string) => {
+  return axios.put(`/api/v1/client/comment/update-comment`, { commentId, content, author, blogId });
+};
