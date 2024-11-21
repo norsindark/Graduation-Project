@@ -150,6 +150,12 @@ public class GuestController {
         return ResponseEntity.ok(blogService.getBlogById(blogId));
     }
 
+    @GetMapping("/get-blog-by-slug")
+    @Operation(summary = "Get blog by slug")
+    public ResponseEntity<BlogResponse> getBlogBySlug(@RequestParam String slug) throws DataExitsException {
+        return ResponseEntity.ok(blogService.getBlogBySlug(slug));
+    }
+
     // category blogs
 
     @GetMapping("/category-blog/get-all-categories-blog")
