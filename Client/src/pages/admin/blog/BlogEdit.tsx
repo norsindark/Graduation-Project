@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Form,
   Input,
@@ -11,12 +11,22 @@ import {
   Modal,
   Row,
   Col,
+  Tag,
+  Space,
 } from 'antd';
 import { SaveOutlined, CloseOutlined, UploadOutlined } from '@ant-design/icons';
-import type { UploadFile } from 'antd/es/upload/interface';
+import type { UploadChangeParam, UploadFile } from 'antd/es/upload/interface';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import { RcFile } from 'antd/es/upload';
+import {
+  callGetAllNameAndIdBlog,
+  callCreateThumbnailBlogUrl,
+  callUpdateBlog,
+} from '../../../services/serverApi';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../../redux/store';
+import { modules, formats } from '../../../utils/config-reactquill';
 
 const { TextArea } = Input;
 const { Option } = Select;
@@ -25,26 +35,24 @@ interface BlogEditProps {
   currentBlog: {
     id: string;
     title: string;
-    image: string;
-    category: string;
+    thumbnail: string | null;
+    categoryBlogName: string;
+    categoryBlogId: string;
     author: string;
     status: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
-    createdAt: string;
-    description: string;
-    seoTitle?: string;
-    seoDescription?: string;
+    content: string;
+    tags: string;
+    seoTitle: string;
+    seoDescription: string;
   };
   setShowBlogEdit: (value: boolean) => void;
   onEditSuccess: () => void;
 }
 
-// Data mẫu cho danh mục (giống BlogNew)
-const categoryOptions = [
-  { value: '1', label: 'Công Nghệ' },
-  { value: '2', label: 'Lập Trình' },
-  { value: '3', label: 'Đánh Giá' },
-  { value: '4', label: 'Tin Tức' },
-];
+interface CategoryOption {
+  categoryBlogId: string;
+  categoryBlogName: string;
+}
 
 const BlogEdit: React.FC<BlogEditProps> = ({
   currentBlog,
@@ -53,39 +61,56 @@ const BlogEdit: React.FC<BlogEditProps> = ({
 }) => {
   const [form] = Form.useForm();
   const [fileList, setFileList] = useState<UploadFile[]>([]);
-  const [description, setDescription] = useState('');
+
   const [loading, setLoading] = useState(false);
   const [previewVisible, setPreviewVisible] = useState(false);
   const [previewImage, setPreviewImage] = useState('');
   const [previewTitle, setPreviewTitle] = useState('');
+  const [tags, setTags] = useState<string[]>([]);
+  const [inputValue, setInputValue] = useState<string>('');
+  const [categoryOptions, setCategoryOptions] = useState<CategoryOption[]>([]);
+  const [file, setFile] = useState<File | null>(null);
+
+  const userId = useSelector((state: RootState) => state.account.user?.id);
 
   // Khởi tạo giá trị form từ currentBlog
+
   useEffect(() => {
     if (currentBlog) {
       form.setFieldsValue({
         title: currentBlog.title,
-        categoryId: categoryOptions.find(
-          (cat) => cat.label === currentBlog.category
-        )?.value,
+        categoryId: currentBlog.categoryBlogId,
         status: currentBlog.status === 'PUBLISHED',
         seoTitle: currentBlog.seoTitle,
         seoDescription: currentBlog.seoDescription,
+        content: currentBlog.content,
       });
-      setDescription(currentBlog.description || '');
+      setTags(currentBlog.tags ? currentBlog.tags.split(',') : []);
 
       // Khởi tạo fileList với ảnh hiện tại
-      if (currentBlog.image) {
+      if (currentBlog.thumbnail) {
         setFileList([
           {
             uid: '-1',
             name: 'Current Image',
             status: 'done',
-            url: currentBlog.image,
+            url: currentBlog.thumbnail,
           },
         ]);
       }
     }
   }, [currentBlog, form]);
+
+  // Fetch danh mục
+  useEffect(() => {
+    const fetchData = async () => {
+      const response = await callGetAllNameAndIdBlog();
+      if (response?.status === 200) {
+        setCategoryOptions(response.data);
+      }
+    };
+    fetchData();
+  }, []);
 
   const getBase64 = (file: RcFile): Promise<string> =>
     new Promise((resolve, reject) => {
@@ -127,63 +152,100 @@ const BlogEdit: React.FC<BlogEditProps> = ({
     return false;
   };
 
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInputValue(e.target.value);
+  };
+
+  const handleInputConfirm = () => {
+    if (inputValue && !tags.includes(inputValue.trim())) {
+      const newTags = [...tags, inputValue.trim()];
+      setTags(newTags);
+      form.setFieldsValue({ tags: newTags });
+    }
+    setInputValue('');
+  };
+
+  const handleTagClose = (removedTag: string) => {
+    const newTags = tags.filter((tag) => tag !== removedTag);
+    setTags(newTags);
+    form.setFieldsValue({ tags: newTags });
+  };
+
+  const handleUploadImage = async (
+    event: UploadChangeParam<UploadFile<any>>
+  ) => {
+    const selectedFile = event.fileList[0]?.originFileObj;
+    if (selectedFile) {
+      setFile(selectedFile);
+    }
+  };
+
   const onFinish = async (values: any) => {
     setLoading(true);
     try {
-      const image = fileList[0]?.url || '';
-      if (!image) {
-        message.error('Vui lòng tải lên hình ảnh bài viết!');
-        setLoading(false);
-        return;
+      let thumbnailUrl = currentBlog.thumbnail;
+
+      // Nếu có file mới được upload
+      if (file) {
+        const newForm = new FormData();
+        newForm.append('thumbnailUrl', file as Blob);
+        const thumbnailResponse = await callCreateThumbnailBlogUrl(newForm);
+        if (thumbnailResponse?.status !== 200) {
+          throw new Error('Error uploading image');
+        }
+        thumbnailUrl = thumbnailResponse.data.message;
       }
 
-      const blogData = {
-        ...values,
-        id: currentBlog.id,
-        image,
-        description,
-        status: values.status ? 'PUBLISHED' : 'DRAFT',
-        author: currentBlog.author,
-        category: categoryOptions.find((cat) => cat.value === values.categoryId)
-          ?.label,
-        updatedAt: new Date().toISOString(),
-        seoTitle: values.seoTitle,
-        seoDescription: values.seoDescription,
-      };
+      const tagsString = tags.join(',');
 
-      console.log('Updating:', blogData);
+      const response = await callUpdateBlog(
+        currentBlog.id,
+        thumbnailUrl || '',
+        values.title,
+        values.content,
+        values.seoTitle,
+        values.seoDescription,
+        tagsString,
+        userId || '',
+        values.status ? 'PUBLISHED' : 'DRAFT',
+        values.categoryId
+      );
 
-      // Giả lập API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      if (response?.status === 200) {
+        notification.success({
+          message: 'Success!',
+          description: 'Blog has been updated successfully.',
+          duration: 5,
+          showProgress: true,
+        });
 
-      notification.success({
-        message: 'Thành công!',
-        description: 'Bài viết đã được cập nhật thành công.',
-        duration: 5,
-      });
-
-      onEditSuccess();
-      setShowBlogEdit(false);
+        onEditSuccess();
+        setShowBlogEdit(false);
+      }
     } catch (error: any) {
       notification.error({
-        message: 'Lỗi!',
-        description: error.message || 'Đã xảy ra lỗi khi cập nhật bài viết.',
+        message: 'Error!',
+        description:
+          error.message || 'An error occurred while updating the blog.',
         duration: 5,
+        showProgress: true,
       });
     } finally {
       setLoading(false);
     }
   };
 
+  // Return JSX giống như BlogNew nhưng với các giá trị được điền sẵn
   return (
     <>
       <h4 className="text-center text-xl font-semibold mb-4">Edit blog</h4>
 
       <Form form={form} layout="vertical" onFinish={onFinish}>
         <Row gutter={16}>
+          {/* Phần upload ảnh */}
           <Col xs={24} sm={12}>
             <Form.Item
-              label="Hình ảnh bài viết"
+              label="Blog thumbnail"
               name="image"
               className="font-medium"
             >
@@ -195,112 +257,157 @@ const BlogEdit: React.FC<BlogEditProps> = ({
                   const isJpgOrPng =
                     file.type === 'image/jpeg' || file.type === 'image/png';
                   if (!isJpgOrPng) {
-                    message.error('Chỉ chấp nhận file JPG/PNG!');
-                    return false;
-                  }
-                  const isLt2M = file.size / 1024 / 1024 < 2;
-                  if (!isLt2M) {
-                    message.error('Hình ảnh phải nhỏ hơn 2MB!');
+                    message.error('Only JPG/PNG files are allowed!');
                     return false;
                   }
                   handleImageUpload(file);
                   return false;
                 }}
+                onChange={handleUploadImage}
                 onPreview={handlePreview}
                 onRemove={() => setFileList([])}
               >
                 {fileList.length >= 1 ? null : (
                   <div>
                     <UploadOutlined />
-                    <div style={{ marginTop: 8 }}>Tải lên</div>
+                    <div style={{ marginTop: 8 }}>Upload</div>
                   </div>
                 )}
               </Upload>
             </Form.Item>
           </Col>
+
+          {/* Phần title và category */}
           <Col xs={24} sm={12}>
             <Form.Item
-              label="Tiêu đề"
+              label="Title"
               name="title"
               className="font-medium"
               rules={[
-                { required: true, message: 'Vui lòng nhập tiêu đề!' },
-                { min: 10, message: 'Tiêu đề phải có ít nhất 10 ký tự!' },
+                { required: true, message: 'Please enter a title!' },
+                { min: 10, message: 'Title must be at least 10 characters!' },
               ]}
             >
-              <Input placeholder="Nhập tiêu đề bài viết" />
+              <Input placeholder="Enter a title" />
             </Form.Item>
+
+            <Form.Item label="Tags" name="tags" className="font-medium">
+              <div className="tags-input border rounded-md p-2">
+                <Space wrap className="mb-2">
+                  {tags.map((tag) => (
+                    <Tag
+                      key={tag}
+                      closable
+                      onClose={() => handleTagClose(tag)}
+                      className="bg-blue-50 text-blue-700"
+                    >
+                      {tag}
+                    </Tag>
+                  ))}
+                </Space>
+                <Input
+                  placeholder="Enter tag and press Enter"
+                  value={inputValue}
+                  onChange={handleInputChange}
+                  onPressEnter={(e) => {
+                    e.preventDefault();
+                    handleInputConfirm();
+                  }}
+                  onBlur={handleInputConfirm}
+                  className="mt-2"
+                />
+              </div>
+            </Form.Item>
+
             <Form.Item
-              label="Danh mục"
+              label="Category"
               name="categoryId"
               className="font-medium"
-              rules={[{ required: true, message: 'Vui lòng chọn danh mục!' }]}
+              rules={[{ required: true, message: 'Please select a category!' }]}
             >
-              <Select placeholder="Chọn danh mục">
+              <Select placeholder="Select a category">
                 {categoryOptions.map((category) => (
-                  <Option key={category.value} value={category.value}>
-                    {category.label}
+                  <Option
+                    key={category.categoryBlogId}
+                    value={category.categoryBlogId}
+                  >
+                    {category.categoryBlogName}
                   </Option>
                 ))}
               </Select>
             </Form.Item>
           </Col>
 
+          {/* Phần content */}
           <Col xs={24} sm={24}>
             <Form.Item
-              label="Nội dung"
-              name="description"
+              label="Content"
+              name="content"
               className="font-medium"
+              rules={[
+                { required: true, message: 'Please enter content!' },
+                {
+                  min: 100,
+                  message: 'Content must be at least 100 characters!',
+                },
+              ]}
             >
               <ReactQuill
                 theme="snow"
-                value={description}
-                onChange={setDescription}
                 className="h-[320px] max-h-[1200px] w-full bg-white"
+                modules={modules}
+                formats={formats}
               />
             </Form.Item>
           </Col>
+
+          {/* Phần SEO và status */}
           <Col xs={24} sm={12}>
             <Form.Item
               label="SEO Title"
               name="seoTitle"
               className="font-medium mt-5"
               rules={[
-                { required: true, message: 'Vui lòng nhập SEO title!' },
-                { max: 60, message: 'SEO title không được vượt quá 60 ký tự!' },
+                { required: true, message: 'Please enter SEO title!' },
+                {
+                  max: 60,
+                  message: 'SEO title must be less than 60 characters!',
+                },
               ]}
             >
-              <Input placeholder="Nhập SEO title" />
+              <Input placeholder="Enter SEO title" />
             </Form.Item>
             <Form.Item
-              label="Trạng thái"
+              label="Status"
               name="status"
               valuePropName="checked"
               className="font-medium"
             >
-              <Switch checkedChildren="Xuất bản" unCheckedChildren="Bản nháp" />
+              <Switch checkedChildren="Published" unCheckedChildren="Draft" />
             </Form.Item>
           </Col>
+
           <Col xs={24} sm={12}>
             <Form.Item
               label="SEO Description"
               name="seoDescription"
               className="font-medium mt-5"
               rules={[
-                { required: true, message: 'Vui lòng nhập SEO description!' },
+                { required: true, message: 'Please enter SEO description!' },
                 {
                   max: 160,
-                  message: 'SEO description không được vượt quá 160 ký tự!',
+                  message: 'SEO description must be less than 160 characters!',
                 },
               ]}
             >
               <TextArea
-                placeholder="Nhập SEO description"
+                placeholder="Enter SEO description"
                 autoSize={{ minRows: 3, maxRows: 5 }}
               />
             </Form.Item>
           </Col>
 
+          {/* Buttons */}
           <div className="flex flex-col sm:flex-row gap-2 mt-8">
             <Button
               type="primary"
@@ -311,7 +418,7 @@ const BlogEdit: React.FC<BlogEditProps> = ({
               size="large"
               className="w-full sm:w-auto"
             >
-              Cập nhật
+              Update Blog
             </Button>
             <Button
               danger
@@ -321,7 +428,7 @@ const BlogEdit: React.FC<BlogEditProps> = ({
               size="large"
               className="w-full sm:w-auto"
             >
-              Hủy
+              Cancel
             </Button>
           </div>
         </Row>
