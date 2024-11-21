@@ -11,6 +11,7 @@ import {
   Typography,
   Image,
   Descriptions,
+  Divider,
 } from 'antd';
 import {
   EditOutlined,
@@ -21,80 +22,31 @@ import {
 import moment from 'moment';
 import BlogNew from './BlogNew';
 import BlogEdit from './BlogEdit';
+import {
+  callDeleteBlog,
+  callGetAllBlog,
+  callGetBlogById,
+} from '../../../services/serverApi';
 
 const { Title, Paragraph } = Typography;
+const { Text } = Typography;
 
 interface BlogPost {
   id: string;
   title: string;
-  image: string;
-  category: string;
-  author: string;
+  content: string;
   status: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
+  author: string;
+  thumbnail: string | null;
+  tags: string;
+  seoTitle: string;
+  seoDescription: string;
+  totalComments: number;
+  categoryBlogName: string;
+  categoryBlogId: string;
   createdAt: string;
-  description: string;
-  seoTitle?: string;
-  seoDescription?: string;
+  updatedAt: string;
 }
-
-// Data mẫu
-const fakeData: BlogPost[] = [
-  {
-    id: '1',
-    title: 'Top 10 xu hướng công nghệ năm 2024',
-    image: '/images/tech-trends.jpg',
-    category: 'Công Nghệ',
-    author: 'Nguyễn Văn A',
-    status: 'PUBLISHED',
-    createdAt: '2024-03-20',
-    description:
-      'Tổng hợp những xu hướng công nghệ nổi bật nhất trong năm 2024',
-    seoTitle: 'Top 10 xu hướng công nghệ nổi bật 2024 | TechBlog',
-    seoDescription:
-      'Khám phá 10 xu hướng công nghệ đang định hình tương lai trong năm 2024.',
-  },
-  {
-    id: '2',
-    title: 'Hướng dẫn lập trình React từ cơ bản đến nâng cao',
-    image: '/images/react-tutorial.jpg',
-    category: 'Lập Trình',
-    author: 'Trần Thị B',
-    status: 'DRAFT',
-    createdAt: '2024-03-19',
-    description:
-      'Hướng dẫn chi tiết cách lập trình React từ cơ bản đến nâng cao',
-    seoTitle: 'Hướng dẫn lập trình React từ cơ bản đến nâng cao | TechBlog',
-    seoDescription:
-      'Học cách lập trình React từ cơ bản đến nâng cao. Bài viết cung cấp các ví dụ và hướng dẫn chi tiết.',
-  },
-  {
-    id: '3',
-    title: 'Review MacBook Pro M3 2024',
-    image: '/images/macbook-review.jpg',
-    category: 'Đánh giá',
-    author: 'Lê Văn C',
-    status: 'PUBLISHED',
-    createdAt: '2024-03-18',
-    description: 'Đánh giá chi tiết về MacBook Pro M3 2024',
-    seoTitle: 'Review MacBook Pro M3 2024 | TechBlog',
-    seoDescription:
-      'Đánh giá chi tiết về MacBook Pro M3 2024. Đánh giá về thiết kế, hiệu suất và các tính năng mới nhất.',
-  },
-  {
-    id: '4',
-    title: 'Tương lai của AI trong năm 2024',
-    image: '/images/ai-future.jpg',
-    category: 'Công Nghệ',
-    author: 'Phạm Thị D',
-    status: 'ARCHIVED',
-    createdAt: '2024-03-17',
-    description:
-      '<p>Nội dung chi tiết về tương lai của AI trong năm 2024...</p',
-    seoTitle: 'Tương lai của AI trong năm 2024 | TechBlog',
-    seoDescription:
-      'Khám phá tương lai của AI trong năm 2024 và ảnh hưởng đến các ngành công nghệ.',
-  },
-];
 
 const Blog: React.FC = () => {
   const [dataSource, setDataSource] = useState<BlogPost[]>([]);
@@ -103,6 +55,7 @@ const Blog: React.FC = () => {
   const [currentBlog, setCurrentBlog] = useState<BlogPost | null>(null);
   const [current, setCurrent] = useState(1);
   const [pageSize, setPageSize] = useState(5);
+  const [sortQuery, setSortQuery] = useState('');
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
   const [viewModalVisible, setViewModalVisible] = useState(false);
@@ -111,13 +64,38 @@ const Blog: React.FC = () => {
     fetchBlog();
   }, [current, pageSize]);
 
-  const fetchBlog = () => {
+  const fetchBlog = async () => {
     setLoading(true);
-    setTimeout(() => {
-      setDataSource(fakeData);
-      setTotal(fakeData.length);
+    try {
+      let query = `pageNo=${current - 1}&pageSize=${pageSize}`;
+      if (sortQuery) {
+        query += `&${sortQuery}`;
+      } else {
+        query += `&sortBy=createdAt&sortDir=desc`;
+      }
+
+      const response = await callGetAllBlog(query);
+      if (response?.status === 200) {
+        const { blogResponseList } = response.data._embedded;
+        const { totalElements, number } = response.data.page;
+
+        setDataSource(blogResponseList);
+        setTotal(totalElements);
+        setCurrent(number + 1);
+      } else {
+        setDataSource([]);
+        setTotal(0);
+      }
+    } catch (error) {
+      notification.error({
+        message: 'Error',
+        description: 'Please try again later',
+        duration: 5,
+        showProgress: true,
+      });
+    } finally {
       setLoading(false);
-    }, 500);
+    }
   };
 
   const getStatusColor = (status: string) => {
@@ -136,11 +114,11 @@ const Blog: React.FC = () => {
   const getStatusText = (status: string) => {
     switch (status) {
       case 'PUBLISHED':
-        return 'Đã xuất bản';
+        return 'Published';
       case 'DRAFT':
-        return 'Bản nháp';
+        return 'Draft';
       case 'ARCHIVED':
-        return 'Đã lưu trữ';
+        return 'Archived';
       default:
         return status;
     }
@@ -156,30 +134,73 @@ const Blog: React.FC = () => {
     setShowBlogEdit(true);
   };
 
-  const handleViewClick = (record: BlogPost) => {
-    setCurrentBlog(record);
-    setViewModalVisible(true);
+  const handleViewClick = async (record: BlogPost) => {
+    try {
+      const response = await callGetBlogById(record.id);
+      if (response?.status === 200) {
+        setCurrentBlog(response.data);
+        setViewModalVisible(true);
+      }
+    } catch (error) {
+      notification.error({
+        message: 'Error',
+        description: 'Cannot load blog details',
+        duration: 5,
+        showProgress: true,
+      });
+    }
   };
 
-  const handleDeleteClick = (id: string) => {
-    const updatedData = dataSource.filter((item) => item.id !== id);
-    setDataSource(updatedData);
-    setTotal(updatedData.length);
-    notification.success({
-      message: 'Xóa bài viết thành công!',
-      duration: 2,
-    });
+  const handleDeleteClick = async (id: string) => {
+    try {
+      setLoading(true);
+      const res = await callDeleteBlog(id);
+      if (res?.status === 200) {
+        notification.success({
+          message: 'Category deleted successfully!',
+          duration: 5,
+          showProgress: true,
+        });
+        fetchBlog();
+      } else {
+        notification.error({
+          message: 'Error deleting category',
+          description: res.data.errors?.error || 'Error during delete process!',
+          duration: 5,
+          showProgress: true,
+        });
+      }
+    } catch (error) {
+      notification.error({
+        message: 'Error deleting category.',
+        duration: 5,
+        showProgress: true,
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const onChange = (pagination: any, sortDir: any) => {
+    setCurrent(pagination.current);
+    setPageSize(pagination.pageSize);
+    if (sortDir && sortDir.field) {
+      const order = sortDir.order === 'ascend' ? 'asc' : 'desc';
+      setSortQuery(`${sortDir.field},${order}`);
+    } else {
+      setSortQuery('');
+    }
   };
 
   const columns = [
     {
-      title: 'Hình ảnh',
-      dataIndex: 'image',
-      key: 'image',
+      title: 'Image',
+      dataIndex: 'thumbnail',
+      key: 'thumbnail',
       width: 120,
-      render: (image: string) => (
+      render: (thumbnail: string) => (
         <Image
-          src={image}
+          src={thumbnail || '../../../../public/images/default-blog-thumb.png'}
           alt="Blog thumbnail"
           style={{
             width: 100,
@@ -187,12 +208,13 @@ const Blog: React.FC = () => {
             objectFit: 'cover',
             borderRadius: '8px',
           }}
+          fallback="../../../../public/images/default-blog-thumb.png"
           preview={false}
         />
       ),
     },
     {
-      title: 'Tiêu đề',
+      title: 'Title',
       dataIndex: 'title',
       key: 'title',
       render: (title: string) => (
@@ -206,30 +228,45 @@ const Blog: React.FC = () => {
           {title}
         </div>
       ),
+      sorter: (a: BlogPost, b: BlogPost) => a.title.localeCompare(b.title),
     },
     {
-      title: 'Danh mục',
-      dataIndex: 'category',
-      key: 'category',
+      title: 'Category',
+      dataIndex: 'categoryBlogName',
+      key: 'categoryBlogName',
+      sorter: (a: BlogPost, b: BlogPost) =>
+        a.categoryBlogName.localeCompare(b.categoryBlogName),
     },
     {
-      title: 'Tác giả',
+      title: 'Author',
       dataIndex: 'author',
       key: 'author',
+      sorter: (a: BlogPost, b: BlogPost) => a.author.localeCompare(b.author),
     },
     {
-      title: 'Trạng thái',
+      title: 'Status',
       dataIndex: 'status',
       key: 'status',
       render: (status: string) => (
-        <Tag color={getStatusColor(status)}>{getStatusText(status)}</Tag>
+        <Tag color={getStatusColor(status)} className="text-base">
+          {getStatusText(status)}
+        </Tag>
       ),
+      sorter: (a: BlogPost, b: BlogPost) => a.status.localeCompare(b.status),
     },
     {
-      title: 'Thao tác',
+      title: 'Comments',
+      dataIndex: 'totalComments',
+      key: 'totalComments',
+      render: (total: number) => <Tag color="blue">{total}</Tag>,
+      sorter: (a: BlogPost, b: BlogPost) => a.totalComments - b.totalComments,
+    },
+
+    {
+      title: 'Action',
       key: 'action',
       render: (_: any, record: BlogPost) => (
-        <Space>
+        <Space size="small">
           <Button
             type="default"
             shape="round"
@@ -247,7 +284,7 @@ const Blog: React.FC = () => {
             Sửa
           </Button>
           <Popconfirm
-            title="Bạn có chắc chắn muốn xóa bài viết này?"
+            title="Are you sure you want to delete this blog?"
             onConfirm={() => handleDeleteClick(record.id)}
           >
             <Button
@@ -264,10 +301,11 @@ const Blog: React.FC = () => {
     },
   ];
 
+  console.log('currentBlog', currentBlog);
   return (
     <div className="layout-content">
       <Card
-        title="Quản Lý Bài Viết"
+        title="Blog Management"
         extra={
           !showBlogNew &&
           !showBlogEdit && (
@@ -277,7 +315,7 @@ const Blog: React.FC = () => {
               shape="round"
               icon={<PlusOutlined />}
             >
-              Thêm Bài Viết
+              Create New Blog
             </Button>
           )
         }
@@ -302,73 +340,130 @@ const Blog: React.FC = () => {
             columns={columns}
             rowKey="id"
             loading={loading}
+            onChange={onChange}
             pagination={{
-              current,
-              pageSize,
-              total,
+              current: current,
+              pageSize: pageSize,
+              total: total,
               showSizeChanger: true,
-              pageSizeOptions: ['5', '10', '20'],
-              onChange: (page, size) => {
-                setCurrent(page);
+              showQuickJumper: true,
+              pageSizeOptions: ['5', '10', '20', '50'],
+              onShowSizeChange: (current, size) => {
+                setCurrent(1);
                 setPageSize(size);
               },
             }}
+            bordered
+            rowClassName={(record, index) =>
+              index % 2 === 0 ? 'table-row-light' : 'table-row-dark'
+            }
+            scroll={{ x: 'max-content' }}
           />
         )}
       </Card>
-
       <Modal
         open={viewModalVisible}
-        title={<Title level={4}>Chi tiết bài viết</Title>}
+        centered
+        title={
+          <div className="text-center">
+            <Title level={4} className="text-gray-800">
+              📄 Blog Details
+            </Title>
+          </div>
+        }
         onCancel={() => {
           setViewModalVisible(false);
           setCurrentBlog(null);
         }}
         width={1000}
         footer={null}
+        className="custom-modal"
       >
         {currentBlog && (
-          <div className="blog-view-content">
-            <div className="mb-6">
-              <Title level={3}>{currentBlog.title}</Title>
-              <div className="flex items-center gap-4 text-gray-500 mb-4">
-                <span>
-                  {moment(currentBlog.createdAt).format('DD/MM/YYYY HH:mm')}
-                </span>
-                <span>•</span>
-                <span>{currentBlog.author}</span>
-                <span>•</span>
-                <Tag color="blue">{currentBlog.category}</Tag>
+          <div className="blog-view-content p-6 bg-white rounded-lg shadow-lg">
+            <div className="space-y-4 mb-6 border-b pb-4">
+              <Title level={3} className="text-gray-900">
+                {currentBlog.title}
+              </Title>
+              <Space size={[0, 8]} wrap>
+                <Text type="secondary">
+                  🕒 {moment(currentBlog.createdAt).format('DD/MM/YYYY HH:mm')}
+                </Text>
+                <Divider type="vertical" />
+                <Text type="secondary">✍️ {currentBlog.author}</Text>
+                <Divider type="vertical" />
+                <Tag color="blue">{currentBlog.categoryBlogName}</Tag>
                 <Tag color={getStatusColor(currentBlog.status)}>
                   {getStatusText(currentBlog.status)}
                 </Tag>
+                <Tag color="orange">
+                  💬 {currentBlog.totalComments} comments
+                </Tag>
+              </Space>
+            </div>
+
+            {currentBlog.thumbnail && (
+              <div className="mb-6">
+                <Image
+                  src={currentBlog.thumbnail}
+                  alt={currentBlog.title}
+                  className="rounded-lg shadow-md w-full"
+                  style={{ maxHeight: '400px', objectFit: 'cover' }}
+                  fallback="/default-blog-image.jpg"
+                />
+              </div>
+            )}
+
+            <div className="mb-6">
+              <Title level={5} className="text-gray-800">
+                📖 Content
+              </Title>
+              <div
+                className="blog-content text-gray-700 leading-relaxed"
+                dangerouslySetInnerHTML={{ __html: currentBlog.content }}
+              />
+            </div>
+
+            <div className="mb-6">
+              <Title level={5} className="text-gray-800">
+                🏷️ Tags
+              </Title>
+              <div className="flex flex-wrap gap-2">
+                {currentBlog.tags.split(',').map((tag) => (
+                  <Tag key={tag.trim()} className="bg-gray-100 text-gray-600">
+                    {tag.trim()}
+                  </Tag>
+                ))}
               </div>
             </div>
 
-            <div className="mb-6">
-              <Image
-                src={currentBlog.image}
-                alt={currentBlog.title}
-                className="rounded-lg w-full object-cover"
-                style={{ maxHeight: '400px' }}
-              />
-            </div>
-
-            <div className="mb-6">
-              <Title level={5}>Mô tả</Title>
-              <div
-                dangerouslySetInnerHTML={{ __html: currentBlog.description }}
-              />
-            </div>
-
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <Title level={5}>Thông tin SEO</Title>
+            <div className="bg-gray-50 p-4 rounded-lg border mb-6">
+              <Title level={5} className="text-gray-800">
+                🌟 SEO Information
+              </Title>
               <Descriptions column={1}>
                 <Descriptions.Item label="SEO Title">
                   {currentBlog.seoTitle}
                 </Descriptions.Item>
                 <Descriptions.Item label="SEO Description">
                   {currentBlog.seoDescription}
+                </Descriptions.Item>
+              </Descriptions>
+            </div>
+
+            <div>
+              <Descriptions column={2} bordered size="small">
+                <Descriptions.Item label="Created Date">
+                  {moment(currentBlog.createdAt).format('DD/MM/YYYY HH:mm')}
+                </Descriptions.Item>
+                <Descriptions.Item label="Last Updated">
+                  {moment(currentBlog.updatedAt).format('DD/MM/YYYY HH:mm')}
+                </Descriptions.Item>
+                <Descriptions.Item label="ID Blog">
+                  {currentBlog.id}
+                </Descriptions.Item>
+                <Descriptions.Item label="Category Name">
+                  {currentBlog.categoryBlogName}
                 </Descriptions.Item>
               </Descriptions>
             </div>

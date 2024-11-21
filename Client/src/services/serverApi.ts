@@ -468,3 +468,53 @@ export const callUpdateOffers = async (offers: Array<{
 }>) => {
   return axios.put(`/api/v1/dashboard/offer/update-offer`, offers);
 };
+
+// blog
+
+export const callGetAllCategoryBlog = async (query: string) => {
+  return axios.get(`/api/v1/dashboard/category-blog/get-all-categories?${query}`);
+}
+
+export const callDeleteCategoryBlog = async (categoryBlogId: string) => {
+  return axios.delete(`/api/v1/dashboard/category-blog/delete-category-blog?categoryBlogId=${categoryBlogId}`);
+}
+
+export const callAddNewCategoryBlog = async (categoryBlogName: string,status: string,  displayOrder: number) => {
+  return axios.post(`/api/v1/dashboard/category-blog/add-new-category-blog`, {categoryBlogName, status, displayOrder});
+}
+
+export const callUpdateCategoryBlog = async (categoryBlogId: string, categoryBlogName: string, status: string, displayOrder: number) => {
+  return axios.put(`/api/v1/dashboard/category-blog/update-category-blog`, {categoryBlogId, categoryBlogName, status, displayOrder});
+}
+
+export const callGetAllNameAndIdBlog = async () => {
+  return axios.get(`/api/v1/dashboard/category-blog/get-all-categories-name`);
+}
+
+export const callGetAllBlog = async (query: string) => {
+  return axios.get(`/api/v1/dashboard/blog/get-all-blogs?${query}`);
+}
+
+export const callGetBlogById = async (blogId: string) => {
+  return axios.get(`/api/v1/dashboard/blog/get-blog-by-id?blogId=${blogId}`);
+}
+
+export const callCreateThumbnailBlogUrl = async (thumbnailUrl: FormData) => {
+  return axios.post(`/api/v1/dashboard/blog/create-blog-thumbnail-url`, thumbnailUrl, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+}
+
+export const callAddNewBlog = async (thumbnail: string, title: string, content: string, seoTitle: string, seoDescription: string, tags: string, author: string, status: string, categoryBlogId: string) => {
+  return axios.post(`/api/v1/dashboard/blog/create-new-blog`, {thumbnail, title, content, seoTitle, seoDescription, tags, author, status, categoryBlogId});
+}
+
+export const callDeleteBlog = async (blogId: string) => {
+  return axios.delete(`/api/v1/dashboard/blog/delete-blog?blogId=${blogId}`);
+}
+
+export const callUpdateBlog = async (id: string, thumbnail: string, title: string, content: string, seoTitle: string, seoDescription: string, tags: string, author: string, status: string, categoryBlogId: string) => {
+  return axios.put(`/api/v1/dashboard/blog/update-blog`, {id, thumbnail, title, content, seoTitle, seoDescription, tags, author, status, categoryBlogId});
+}
