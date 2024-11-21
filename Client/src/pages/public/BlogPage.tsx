@@ -1,114 +1,77 @@
+import { Pagination } from 'antd';
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { callGetAllBlog } from '../../services/clientApi';
+import { notification } from 'antd';
 
 interface Blog {
-  id: number;
+  id: string;
   slug: string;
   title: string;
-  category: string;
-  image: string;
-  date: string;
-  comments: number;
+  categoryBlogName: string;
+  status: string;
+  thumbnail: string;
+  createdAt: string;
+  totalComments: number;
+  author: string;
 }
 
 function BlogPage() {
-  const [blogs, setBlogs] = useState<Blog[]>([
-    {
-      id: 1,
-      slug: 'blog-1',
-      title: 'Competently supply customized initiatives',
-      category: 'chicken',
-      image: 'images/menu2_img_1.jpg',
-      date: '25 oct 2022',
-      comments: 25,
-    },
-    {
-      id: 2,
-      slug: 'blog-2',
-      title: 'Unicode UTF8 Character Sets They Sltimate Guide Systems',
-      category: 'kabab',
-      image: 'images/menu2_img_2.jpg',
-      date: '27 oct 2022',
-      comments: 41,
-    },
-    {
-      id: 3,
-      slug: 'blog-3',
-      title: "Quality Foods Requirements For Every Human Body's",
-      category: 'grill',
-      image: 'images/menu2_img_3.jpg',
-      date: '27 oct 2022',
-      comments: 32,
-    },
-    {
-      id: 4,
-      slug: 'blog-4',
-      title: 'Competently supply customized initiatives',
-      category: 'chicken',
-      image: 'images/menu2_img_4.jpg',
-      date: '25 oct 2022',
-      comments: 25,
-    },
-    {
-      id: 5,
-      slug: 'blog-5',
-      title: 'Unicode UTF8 Character Sets They Sltimate Guide Systems',
-      category: 'kabab',
-      image: 'images/menu2_img_5.jpg',
-      date: '27 oct 2022',
-      comments: 41,
-    },
-    {
-      id: 6,
-      slug: 'blog-6',
-      title: "Quality Foods Requirements For Every Human Body's",
-      category: 'grill',
-      image: 'images/menu2_img_6.jpg',
-      date: '27 oct 2022',
-      comments: 32,
-    },
-    {
-      id: 7,
-      slug: 'blog-7',
-      title: 'Competently supply customized initiatives',
-      category: 'chicken',
-      image: 'images/menu2_img_7.jpg',
-      date: '25 oct 2022',
-      comments: 25,
-    },
-    {
-      id: 8,
-      slug: 'blog-8',
-      title: 'Unicode UTF8 Character Sets They Sltimate Guide Systems',
-      category: 'kabab',
-      image: 'images/menu2_img_8.jpg',
-      date: '27 oct 2022',
-      comments: 41,
-    },
-    {
-      id: 9,
-      slug: 'blog-9',
-      title: "Quality Foods Requirements For Every Human Body's",
-      category: 'grill',
-      image: 'images/menu2_img_1.jpg',
-      date: '27 oct 2022',
-      comments: 32,
-    },
-  ]);
+  const [current, setCurrent] = useState<number>(1);
+  const [pageSize, setPageSize] = useState<number>(8);
+  const [total, setTotal] = useState<number>(0);
+  const [blogs, setBlogs] = useState<Blog[]>([]);
+  const [loading, setLoading] = useState(false);
 
-  // Sau này khi có API, bạn có thể uncomment đoạn code này
-  // useEffect(() => {
-  //   const fetchBlogs = async () => {
-  //     try {
-  //       const response = await fetch('API_URL/blogs');
-  //       const data = await response.json();
-  //       setBlogs(data);
-  //     } catch (error) {
-  //       console.error('Error fetching blogs:', error);
-  //     }
-  //   };
-  //   fetchBlogs();
-  // }, []);
+  useEffect(() => {
+    fetchBlogs();
+  }, [current, pageSize]);
+
+  const fetchBlogs = async () => {
+    setLoading(true);
+    try {
+      const query = `pageNo=${current - 1}&pageSize=${pageSize}&sortBy=createdAt&sortDir=desc`;
+      const response = await callGetAllBlog(query);
+      const blogsData = response.data._embedded?.blogResponseList;
+      if (blogsData) {
+        const activeBlogs = blogsData.filter(
+          (blog: Blog) => blog.status === 'PUBLISHED'
+        );
+        if (activeBlogs.length > 0) {
+          setBlogs(activeBlogs);
+          setTotal(response.data.page.totalElements);
+        } else {
+          setBlogs([]);
+          setTotal(0);
+        }
+      }
+    } catch (error) {
+      setBlogs([]);
+      setTotal(0);
+      notification.error({
+        message: 'Error loading blog list',
+        description: 'Please try again later',
+        duration: 5,
+        showProgress: true,
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePageChange = (page: number, pageSize?: number) => {
+    setCurrent(page);
+    if (pageSize) setPageSize(pageSize);
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    });
+  };
 
   return (
     <>
@@ -151,24 +114,26 @@ function BlogPage() {
                     className="fp__single_blog_img"
                   >
                     <img
-                      src={blog.image}
-                      alt="blog"
+                      src={blog.thumbnail}
+                      alt={blog.title}
                       className="img-fluid w-100"
                     />
                   </Link>
                   <div className="fp__single_blog_text">
                     <a className="category" href="#">
-                      {blog.category}
+                      {blog.categoryBlogName}
                     </a>
                     <ul className="d-flex flex-wrap mt_15">
                       <li>
-                        <i className="fas fa-user"></i>admin
+                        <i className="fas fa-user"></i>
+                        {blog.author}
                       </li>
                       <li>
-                        <i className="fas fa-calendar-alt"></i> {blog.date}
+                        <i className="fas fa-calendar-alt"></i>{' '}
+                        {formatDate(blog.createdAt)}
                       </li>
                       <li>
-                        <i className="fas fa-comments"></i> {blog.comments}{' '}
+                        <i className="fas fa-comments"></i> {blog.totalComments}{' '}
                         comment
                       </li>
                     </ul>
@@ -181,34 +146,15 @@ function BlogPage() {
             ))}
           </div>
 
-          <div className="fp__pagination mt_35">
-            <div className="row">
-              <div className="col-12">
-                <nav aria-label="...">
-                  <ul className="pagination">
-                    <li className="page-item">
-                      <a className="page-link" href="#">
-                        <i className="fas fa-long-arrow-alt-left"></i>
-                      </a>
-                    </li>
-                    <li className="page-item">
-                      <a className="page-link" href="#">
-                        1
-                      </a>
-                    </li>
-                    <li className="page-item active">
-                      <a className="page-link" href="#">
-                        2
-                      </a>
-                    </li>
-                    <li className="page-item">
-                      <a className="page-link" href="#">
-                        <i className="fas fa-long-arrow-alt-right"></i>
-                      </a>
-                    </li>
-                  </ul>
-                </nav>
-              </div>
+          <div className="row mt-4">
+            <div className="col-12 d-flex justify-content-center mb-4 mt-2">
+              <Pagination
+                current={current}
+                total={total}
+                pageSize={pageSize}
+                onChange={handlePageChange}
+                showQuickJumper
+              />
             </div>
           </div>
         </div>
