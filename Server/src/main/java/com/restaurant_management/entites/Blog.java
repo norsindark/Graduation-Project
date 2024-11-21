@@ -30,6 +30,9 @@ public class Blog {
     @Column(name = "title", nullable = false)
     private String title;
 
+    @Column(name = "slug", nullable = false)
+    private String slug;
+
     @Column(name = "content", nullable = false, columnDefinition = "TEXT")
     private String content;
 

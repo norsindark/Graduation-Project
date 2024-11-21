@@ -13,6 +13,8 @@ import java.io.IOException;
 public interface BlogService {
     BlogResponse getBlogById(String blogId) throws DataExitsException;
 
+    BlogResponse getBlogBySlug(String slug) throws DataExitsException;
+
     PagedModel<EntityModel<BlogResponse>> getAllBlogs(int pageNo, int pageSize, String sortBy, String sortDir)
             throws DataExitsException;
     ApiResponse createBlog(BlogDto blogDto) throws DataExitsException;

@@ -45,13 +45,20 @@ public class BlogServiceImpl implements BlogService {
     }
 
     @Override
+    public BlogResponse getBlogBySlug(String slug) throws DataExitsException {
+        Blog blog = blogRepository.findBySlug(slug)
+                .orElseThrow(() -> new DataExitsException("Blog not found"));
+        return new BlogResponse(blog);
+    }
+
+    @Override
     public PagedModel<EntityModel<BlogResponse>> getAllBlogs(int pageNo, int pageSize, String sortBy, String sortDir)
             throws DataExitsException {
         Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.fromString(sortDir), sortBy));
         Page<BlogResponse> pageResult = blogRepository.findAllBlogs(pageable);
-        pageResult.getContent().forEach(blogResponse -> {
-            blogResponse.setContent(blogResponse.getContent().substring(0, 100) + "...");
-        });
+//        pageResult.getContent().forEach(blogResponse -> {
+//            blogResponse.setContent(blogResponse.getContent().substring(0, 100) + "...");
+//        });
         if (pageResult.isEmpty()) {
             throw new DataExitsException("No blog found");
         }
@@ -71,6 +78,7 @@ public class BlogServiceImpl implements BlogService {
         blog.setAuthor(user);
         blog.setCategoryBlog(categoryBlog);
         blog.setTitle(blogDto.getTitle());
+        blog.setSlug(generateSlug(blogDto.getTitle()));
         blog.setContent(blogDto.getContent());
         blog.setSeoTitle(blogDto.getSeoTitle());
         blog.setSeoDescription(blogDto.getSeoDescription());
@@ -108,6 +116,7 @@ public class BlogServiceImpl implements BlogService {
         }
 
         blog.setTitle(blogDto.getTitle());
+        blog.setSlug(generateSlug(blogDto.getTitle()));
         blog.setContent(blogDto.getContent());
         blog.setSeoTitle(blogDto.getSeoTitle());
         blog.setSeoDescription(blogDto.getSeoDescription());
@@ -144,5 +153,9 @@ public class BlogServiceImpl implements BlogService {
                 .orElseThrow(() -> new DataExitsException("Blog not found"));
         blogRepository.delete(blog);
         return new ApiResponse("Blog deleted", HttpStatus.OK);
+    }
+
+    private String generateSlug(String title) {
+        return title.toLowerCase().replace(" ", "-");
     }
 }

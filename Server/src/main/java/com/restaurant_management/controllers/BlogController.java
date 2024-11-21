@@ -27,6 +27,13 @@ public class BlogController {
         return ResponseEntity.ok(blogService.getBlogById(blogId));
     }
 
+    @GetMapping("/get-blog-by-slug")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Get blog by slug", tags = {"Blog"})
+    public ResponseEntity<?> getBlogBySlug(@RequestParam String slug) throws DataExitsException {
+        return ResponseEntity.ok(blogService.getBlogBySlug(slug));
+    }
+
     @GetMapping("/get-all-blogs")
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Get all blogs", tags = {"Blog"})
