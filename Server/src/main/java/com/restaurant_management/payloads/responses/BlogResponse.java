@@ -12,6 +12,7 @@ import java.sql.Timestamp;
 public class BlogResponse {
     private String id;
     private String title;
+    private String slug;
     private String content;
     private String status;
     private String author;
@@ -28,6 +29,7 @@ public class BlogResponse {
     public BlogResponse(Blog blog) {
         this.id = blog.getId();
         this.title = blog.getTitle();
+        this.slug = blog.getSlug();
         this.content = blog.getContent();
         this.status = blog.getStatus();
         this.author = blog.getAuthor().getFullName();
@@ -42,12 +44,13 @@ public class BlogResponse {
         this.updatedAt = blog.getUpdatedAt();
     }
 
-    public BlogResponse(String id, String title, String content,
+    public BlogResponse(String id, String title, String slug , String content,
                         String status, String author, String thumbnail, String tags,
                         String seoTitle, String seoDescription, Integer totalComments,
                         String categoryBlogName, String categoryBlogId, Timestamp createdAt, Timestamp updatedAt) {
         this.id = id;
         this.title = title;
+        this.slug = slug;
         this.content = content;
         this.status = status;
         this.author = author;
