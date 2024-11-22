@@ -108,6 +108,49 @@ const Footer = () => {
                   </Form.Item>
                 </Form>
 
+                {/* <Form form={form} onFinish={handleSubmit} className="w-[300px]"> 
+                  <Form.Item
+                    name="email"
+                    rules={[{ required: true, message: 'Please enter your email!' }, { type: 'email', message: 'Please enter a valid email!' }]}
+                    className="flex items-center space-x-2"
+                  >
+                    <Input
+                      type="text"
+                      placeholder="Subscribe"
+                      className="flex-1 p-2 border border-gray-300 rounded-l-md w-[300px]"
+                    />
+                    <Button
+                      type="primary"
+                      shape="round"
+                      className="p-2 bg-blue-500 text-white hover:bg-blue-600"
+                      htmlType="submit"
+                      icon={<SendOutlined />}
+                    >
+                      Subscribe
+                    </Button>
+                  </Form.Item>
+                </Form> */}
+
+                {/* <Form form={form} onFinish={handleSubmit} className="w-[300px]"> 
+                  <Form.Item className="flex items-center space-x-2">
+                    <Input
+                      type="email"
+                      placeholder="Enter your email"
+                      className="flex-1 p-2 border border-gray-300 rounded-l-md w-[300px]"
+                      name="email"
+                    />
+                    <Button
+                      type="primary"
+                      shape="round"
+                      className="p-2 bg-blue-500 text-white hover:bg-blue-600"
+                      htmlType="submit"
+                      icon={<SendOutlined />}
+                    >
+                      Subscribe
+                    </Button>
+                  </Form.Item>
+                </Form> */}
+
                 <div className="fp__footer_social_link">
                   <h5>follow us:</h5>
                   <ul className="d-flex flex-wrap">
