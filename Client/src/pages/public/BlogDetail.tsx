@@ -7,7 +7,7 @@ import ReactQuill from 'react-quill';
 import { RootState } from '../../redux/store';
 import { useSelector } from 'react-redux';
 import { Form } from 'antd';
-import { callAddComment } from '../../services/clientApi';
+import { callAddComment, callGetAllBlogsToSearch } from '../../services/clientApi';
 import { SendOutlined } from '@ant-design/icons';
 import CommentBlog from '../../components/public/commentblog/CommentBlog';
 import { formatDateEnUS } from '../../utils/formatDateEn-US';
@@ -42,6 +42,8 @@ function BlogDetail() {
   const [loading, setLoading] = useState(false);
   const [prevBlog, setPrevBlog] = useState<PrevNextBlog | null>(null);
   const [nextBlog, setNextBlog] = useState<PrevNextBlog | null>(null);
+  const [allBlogs, setAllBlogs] = useState<BlogDetail[]>([]);
+  
 
   const [form] = Form.useForm();
   const userId = useSelector((state: RootState) => state.account.user?.id);
@@ -50,7 +52,32 @@ function BlogDetail() {
     if (slug) {
       fetchBlogDetail();
     }
+    fetchAllBlogs();
   }, [slug]);
+
+  // console.log(allBlogs);
+  
+
+  const fetchAllBlogs = async () => {
+    setLoading(true);
+    try {
+      const response = await callGetAllBlogsToSearch();
+      console.log("res: ",response);
+      
+      if (response.status === 200) {
+        setAllBlogs(response.data);
+      }
+    } catch (error) {
+      notification.error({
+        message: 'Error loading blogs',
+        description: 'Please try again later',
+        duration: 3,
+        showProgress: true,
+      });
+    } finally {
+      setLoading(false);
+    }
+  }
 
   const fetchBlogDetail = async () => {
     if (!slug) return;

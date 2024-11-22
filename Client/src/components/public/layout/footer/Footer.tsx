@@ -1,12 +1,33 @@
-import { Button, Form, Input } from 'antd';
+import { Button, Form, Input, notification } from 'antd';
 import logo from '../../../../assets/images/imagelogosyndev1.png';
 import { SendOutlined } from '@ant-design/icons';
 
 const Footer = () => {
   const [form] = Form.useForm();
-  const handleSubmit = (values: any) => {
-    console.log(values);
+
+  const handleSubmit = async (values: any) => {
+    const email = values.email;
+    console.log("email", form.getFieldValue("email"));
+
+
+    notification.success({
+      message: 'Success',
+      description: 'Your email has been sent successfully',
+    });
+
+    fetch('https://script.google.com/macros/s/AKfycbwqnYqMaQAfxi20vzN9t-CwAU3zUD6VidbeGZJ9isvb3qSLGm7YbVVT_HtuxPNQJHvMdw/exec', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams({
+        email: email,
+      }),
+    });
+
+    form.resetFields();
   };
+
   return (
     <footer>
       <div className="footer_overlay pt_100 xs_pt_70 pb_100 xs_pb_70">
@@ -27,7 +48,7 @@ const Footer = () => {
                 </p>
                 <a className="info" href="callto:0966501365">
                   <i className="fas fa-phone-alt"></i>
-                  +84 0966501365
+                  +84 966 501 365
                 </a>
                 <a className="info" href="mailto:websolutionus1@gmail.com">
                   <i className="fas fa-envelope"></i>
@@ -73,21 +94,15 @@ const Footer = () => {
             <div className="col-lg-3 col-sm-8 col-md-6 order-lg-4">
               <div className="fp__footer_content ">
                 <h3>subscribe</h3>
-                <Form form={form} onFinish={handleSubmit} className="w-[300px]">
-                  <Form.Item className="flex items-center space-x-2">
-                    <Input
-                      type="text"
-                      placeholder="Subscribe"
-                      className="flex-1 p-2 border border-gray-300 rounded-l-md w-[300px]"
-                      name="email"
-                    />
-                    <Button
-                      type="primary"
-                      shape="round"
-                      className="p-2 bg-blue-500 text-white hover:bg-blue-600"
-                      htmlType="submit"
-                      icon={<SendOutlined />}
-                    >
+                <Form form={form} onFinish={handleSubmit}>
+                  <Form.Item
+                    name="email"
+                    rules={[{ required: true, message: 'Please enter your email!' }, { type: 'email', message: 'Please enter a valid email!' }]}
+                  >
+                    <Input placeholder="Enter your email" />
+                  </Form.Item>
+                  <Form.Item>
+                    <Button type="primary" htmlType="submit" icon={<SendOutlined />}>
                       Subscribe
                     </Button>
                   </Form.Item>
