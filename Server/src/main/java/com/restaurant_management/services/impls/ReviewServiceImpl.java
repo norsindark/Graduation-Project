@@ -167,4 +167,20 @@ public class ReviewServiceImpl implements ReviewService {
 
         return reviewRepository.getAverageRatingByDishId(dishId);
     }
+
+    @Override
+    public List<ReviewResponse> getTop20HighestRatedReviews() throws DataExitsException {
+        List<Review> reviews = reviewRepository.findAll();
+
+        if (reviews.isEmpty()) {
+            throw new DataExitsException("No reviews found");
+        }
+
+        return reviews.stream()
+                .filter(review -> review.getParentReview() == null)
+                .sorted((r1, r2) -> Double.compare(r2.getRating(), r1.getRating()))
+                .limit(20)
+                .map(ReviewResponse::new)
+                .collect(Collectors.toList());
+    }
 }

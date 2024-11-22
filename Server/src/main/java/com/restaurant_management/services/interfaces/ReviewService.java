@@ -7,6 +7,8 @@ import com.restaurant_management.payloads.responses.ReviewResponse;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
 
+import java.util.List;
+
 public interface ReviewService {
     PagedModel<EntityModel<ReviewResponse>> getAllReviewsByDishId(String dishId, int pageNo, int pageSize, String sortBy, String sortDir)
             throws DataExitsException;
@@ -25,4 +27,6 @@ public interface ReviewService {
     ApiResponse replyReview(ReviewDto reviewDto) throws DataExitsException;
 
     Double getAverageRatingByDishId(String dishId) throws DataExitsException;
+
+    List<ReviewResponse> getTop20HighestRatedReviews() throws DataExitsException;
 }

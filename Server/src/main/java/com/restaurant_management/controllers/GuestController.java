@@ -47,6 +47,12 @@ public class GuestController {
         return ResponseEntity.ok(reviewService.getAverageRatingByDishId(dishId));
     }
 
+    @GetMapping("/get-top-20-highest-rated-reviews")
+    @Operation(summary = "Get top 20 highest rated reviews", tags = {"Review"})
+    public ResponseEntity<List<ReviewResponse>> getTop20HighestRatedReviews() throws DataExitsException {
+        return ResponseEntity.ok(reviewService.getTop20HighestRatedReviews());
+    }
+
     // dish
     @GetMapping("/get-dish-by-id/{dishId}")
     @Operation(summary = "Get dish by ID", tags = {"Dish"})
