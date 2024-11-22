@@ -37,20 +37,22 @@ public interface BlogRepository extends JpaRepository<Blog, String> {
             "FROM Blog b")
     List<SearchBlogResponse> getAllBlogToSearch();
 
-    @Query("SELECT b.tags FROM Blog b")
-    List<String> findAllTags();
+    @Query(value = "SELECT b.tags, COUNT(b) as tag_count " +
+            "FROM Blog b " +
+            "GROUP BY b.tags " +
+            "ORDER BY tag_count DESC")
+    List<Object[]> findPopularTags(Pageable pageable);
 
     @Query("SELECT new com.restaurant_management.payloads.responses.BlogResponse(" +
             "b.id, b.title, " +
             "b.slug, " +
             "SUBSTRING(b.content, 1, 100), " +
-//            "b.content, " +
             "b.status, b.author.fullName, " +
             "b.thumbnail, b.tags, b.seoTitle, b.seoDescription, " +
             "SIZE(b.comments), " +
             "b.categoryBlog.name, b.categoryBlog.id, " +
             "b.createdAt, b.updatedAt) " +
             "FROM Blog b " +
-            "WHERE b.tags IN :tags")
-    Page<BlogResponse> findByTags(List<String> tags, Pageable pageable);
+            "WHERE TRIM(LOWER(b.tags)) LIKE(LOWER(CONCAT('%', :tag, '%')))")
+    Page<BlogResponse> findByTags(String tag, Pageable pageable);
 }
