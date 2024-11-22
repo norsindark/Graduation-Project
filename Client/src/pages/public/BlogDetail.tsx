@@ -242,6 +242,34 @@ function BlogDetail() {
     e.preventDefault();
   };
 
+  const handleShare = (platform: string) => {
+    const currentUrl = window.location.href;
+    const title = blogData?.title || '';
+
+    let shareUrl = '';
+
+    switch (platform) {
+      case 'facebook':
+        shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(currentUrl)}`;
+        break;
+      case 'twitter':
+        shareUrl = `https://twitter.com/intent/tweet?url=${encodeURIComponent(currentUrl)}&text=${encodeURIComponent(title)}`;
+        break;
+      case 'linkedin':
+        shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(currentUrl)}`;
+        break;
+      default:
+        notification.error({
+          message: 'Lỗi chia sẻ',
+          description: 'Không hỗ trợ nền tảng này',
+          duration: 3,
+        });
+        return;
+    }
+
+    window.open(shareUrl, '_blank', 'width=600,height=400');
+  };
+
   return (
     <>
       <section
@@ -335,17 +363,26 @@ function BlogDetail() {
                         <span>share:</span>
                         <ul className="d-flex flex-wrap">
                           <li>
-                            <a href="#">
+                            <a
+                              onClick={() => handleShare('facebook')}
+                              style={{ cursor: 'pointer' }}
+                            >
                               <i className="fab fa-facebook-f"></i>
                             </a>
                           </li>
                           <li>
-                            <a href="#">
+                            <a
+                              onClick={() => handleShare('linkedin')}
+                              style={{ cursor: 'pointer' }}
+                            >
                               <i className="fab fa-linkedin-in"></i>
                             </a>
                           </li>
                           <li>
-                            <a href="#">
+                            <a
+                              onClick={() => handleShare('twitter')}
+                              style={{ cursor: 'pointer' }}
+                            >
                               <i className="fab fa-twitter"></i>
                             </a>
                           </li>

@@ -36,7 +36,7 @@ import PaymentReturn from '../pages/public/PaymentReturn';
 import ProductOfferDaily from '../pages/admin/productofferdaily/ProductOfferDaily';
 import FaqsPage from '../pages/public/FaqsPage';
 import PrivacyPolicyPage from '../pages/public/PrivacyPolicyPage';
-import TestimonialPage from '../pages/public/TestimonialPage';
+
 import TermsAndConditionPage from '../pages/public/TermsAndConditionPage';
 import BlogPage from '../pages/public/BlogPage';
 import BlogDetail from '../pages/public/BlogDetail';
@@ -99,10 +99,7 @@ export const router = createBrowserRouter([
         path: '/privacy-policy',
         element: <PrivacyPolicyPage />,
       },
-      {
-        path: '/testimonial',
-        element: <TestimonialPage />,
-      },
+
       {
         path: '/terms-condition',
         element: <TermsAndConditionPage />,
