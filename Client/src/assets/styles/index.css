@@ -116,3 +116,10 @@
   height: 100%;
   object-fit: cover;
 }
+
+.image-thumbnailBlog {
+  width: 56px !important;
+  height: 56px !important;
+  object-fit: cover;
+  border-radius: 6px;
+}

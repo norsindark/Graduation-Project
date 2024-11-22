@@ -87,7 +87,9 @@ const AvatarAccount: React.FC = () => {
     <div className="dasboard_header">
       <div className="dasboard_header_img">
         <img
-          src={user?.avatar || 'images/comment_img_2.jpg'}
+          src={
+            user?.avatar || '../../../../../../public/images/comment_img_2.jpg'
+          }
           alt="user"
           className="img-fluid w-100"
         />
