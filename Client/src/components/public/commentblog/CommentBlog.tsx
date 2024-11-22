@@ -14,7 +14,7 @@ interface Comment {
   content: string;
   userId: string;
   author: string;
-  userAvatar: string;
+  avatar: string;
   createdAt: string;
   replies: Comment[];
 }
@@ -123,9 +123,10 @@ export default function CommentBlog({
 
   const handleReply = async (values: { content: string }) => {
     if (!currentReplyTo || !userId) {
-      notification.error({
-        message: 'Error',
-        description: 'Missing required information to reply',
+      notification.warning({
+        message: 'Warning',
+        description:
+          'Missing required information to reply of Please login to reply',
         duration: 3,
         showProgress: true,
       });
@@ -222,7 +223,13 @@ export default function CommentBlog({
 
     return replies.map((reply) => (
       <div key={reply.commentId} className="fp__single_comment replay">
-        <img src={reply.userAvatar} alt="review" className="img-fluid" />
+        <img
+          src={
+            reply.avatar || '../../../../../../public/images/comment_img_2.jpg'
+          }
+          alt="review"
+          className="image-thumbnailBlog"
+        />
         <div className="fp__single_comm_text">
           <h3>
             {reply.author} <span>{formatDateEnUS(reply.createdAt)}</span>
@@ -245,14 +252,14 @@ export default function CommentBlog({
                   className="mr-2"
                   icon={<i className="fas fa-save"></i>}
                 >
-                  Lưu
+                  Save
                 </Button>
                 <Button
                   size="small"
                   onClick={handleCancelEdit}
                   icon={<i className="fas fa-times"></i>}
                 >
-                  Hủy
+                  Cancel
                 </Button>
               </div>
             </div>
@@ -274,15 +281,6 @@ export default function CommentBlog({
                 </span>
               )}
               <div className="comment-actions">
-                <Button
-                  type="text"
-                  className="text-blue-500 ml-2"
-                  size="small"
-                  icon={<i className="fas fa-reply"></i>}
-                  onClick={() => showReplyModal(reply.commentId)}
-                >
-                  Reply
-                </Button>
                 {reply.author === userEmail && (
                   <Button
                     type="text"
@@ -305,7 +303,13 @@ export default function CommentBlog({
 
   const renderComment = (comment: Comment) => (
     <div key={comment.commentId} className="fp__single_comment m-0 border-0">
-      <img src={comment.userAvatar} alt="review" className="img-fluid" />
+      <img
+        src={
+          comment.avatar || '../../../../../../public/images/comment_img_2.jpg'
+        }
+        alt="review"
+        className="image-thumbnailBlog"
+      />
       <div className="fp__single_comm_text">
         <h3>
           {comment.author} <span>{formatDateEnUS(comment.createdAt)}</span>

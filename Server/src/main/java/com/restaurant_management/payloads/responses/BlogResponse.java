@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.sql.Timestamp;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -63,5 +64,9 @@ public class BlogResponse {
         this.categoryBlogId = categoryBlogId;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
+    }
+
+    public static List<BlogResponse> toListBlogResponse(List<Blog> blogs) {
+        return blogs.stream().map(BlogResponse::new).toList();
     }
 }

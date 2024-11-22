@@ -6,6 +6,7 @@ import com.restaurant_management.services.interfaces.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.ResponseEntity;
@@ -134,6 +135,41 @@ public class GuestController {
     }
 
     // blogs
+    @GetMapping("/blog/search-blog-by-title")
+    @Operation(summary = "Search blog by title")
+    public ResponseEntity<List<BlogResponse>> searchBlogByTitle(@RequestParam String title) throws DataExitsException {
+        return ResponseEntity.ok(blogService.searchBlogByTitle(title));
+    }
+
+    @GetMapping("/blog/get-all-blog-to-search")
+    @Operation(summary = "Get all blog to search")
+    public ResponseEntity<List<SearchBlogResponse>> getAllBlogToSearch() throws DataExitsException {
+        return ResponseEntity.ok(blogService.getAllBlogToSearch());
+    }
+
+    @GetMapping("/blog/get-all-tags")
+    @Operation(summary = "Get all tags")
+    public ResponseEntity<List<String>> getAllTags(
+            @RequestParam(defaultValue = "0") int pageNo,
+            @RequestParam(defaultValue = "10") int pageSize,
+            @RequestParam(defaultValue = "tag_count") String sortBy,
+            @RequestParam(defaultValue = "DESC") String sortDir)
+            throws DataExitsException {
+        return ResponseEntity.ok(blogService.getAllTags(pageNo, pageSize, sortBy, sortDir));
+    }
+
+    @GetMapping("/blog/get-all-blogs-by-tags")
+    @Operation(summary = "Get all blogs by tags")
+    public ResponseEntity<PagedModel<EntityModel<BlogResponse>>>
+    getAllBlogsByTags(
+            @RequestParam String tag,
+            @RequestParam(defaultValue = "0") int pageNo,
+            @RequestParam(defaultValue = "10") int pageSize,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String sortDir) throws DataExitsException {
+        return ResponseEntity.ok(blogService.getAllBlogsByTags(tag, pageNo, pageSize, sortBy, sortDir));
+    }
+
     @GetMapping("/get-all-blogs")
     @Operation(summary = "Get all blogs")
     public ResponseEntity<PagedModel<EntityModel<BlogResponse>>> getAllBlogs(
@@ -179,6 +215,12 @@ public class GuestController {
     public ResponseEntity<?> getCategoryBlogById(
             @RequestParam String categoryBlogId) throws DataExitsException {
         return ResponseEntity.ok(categoryBlogService.getCategoryBlogById(categoryBlogId));
+    }
+
+    @GetMapping("/category-blog/count-blog-by-category-blog")
+    @Operation(summary = "Count blog by category blog ID", tags = {"CategoryBlog"})
+    public ResponseEntity<?> countBlogByCategoryBlog() throws DataExitsException {
+        return ResponseEntity.ok(categoryBlogService.countBlogByCategoryBlog());
     }
 
     // comments blog
