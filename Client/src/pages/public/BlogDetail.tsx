@@ -11,7 +11,7 @@ import ReactQuill from 'react-quill';
 import { RootState } from '../../redux/store';
 import { useSelector } from 'react-redux';
 import { Form } from 'antd';
-import { callAddComment, callGetAllBlogsToSearch } from '../../services/clientApi';
+import { callAddComment } from '../../services/clientApi';
 import { SendOutlined } from '@ant-design/icons';
 import CommentBlog from '../../components/public/commentblog/CommentBlog';
 import { formatDateEnUS } from '../../utils/formatDateEn-US';
@@ -62,8 +62,6 @@ function BlogDetail() {
   const [loading, setLoading] = useState(false);
   const [prevBlog, setPrevBlog] = useState<PrevNextBlog | null>(null);
   const [nextBlog, setNextBlog] = useState<PrevNextBlog | null>(null);
-  const [allBlogs, setAllBlogs] = useState<BlogDetail[]>([]);
-  
 
   const [latestBlogs, setLatestBlogs] = useState<LatestBlog[]>([]);
 
@@ -87,32 +85,7 @@ function BlogDetail() {
     if (slug) {
       fetchBlogDetail();
     }
-    fetchAllBlogs();
   }, [slug]);
-
-  // console.log(allBlogs);
-  
-
-  const fetchAllBlogs = async () => {
-    setLoading(true);
-    try {
-      const response = await callGetAllBlogsToSearch();
-      console.log("res: ",response);
-      
-      if (response.status === 200) {
-        setAllBlogs(response.data);
-      }
-    } catch (error) {
-      notification.error({
-        message: 'Error loading blogs',
-        description: 'Please try again later',
-        duration: 3,
-        showProgress: true,
-      });
-    } finally {
-      setLoading(false);
-    }
-  }
 
   const fetchBlogDetail = async () => {
     if (!slug) return;
@@ -269,6 +242,34 @@ function BlogDetail() {
     e.preventDefault();
   };
 
+  const handleShare = (platform: string) => {
+    const currentUrl = window.location.href;
+    const title = blogData?.title || '';
+
+    let shareUrl = '';
+
+    switch (platform) {
+      case 'facebook':
+        shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(currentUrl)}`;
+        break;
+      case 'twitter':
+        shareUrl = `https://twitter.com/intent/tweet?url=${encodeURIComponent(currentUrl)}&text=${encodeURIComponent(title)}`;
+        break;
+      case 'linkedin':
+        shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(currentUrl)}`;
+        break;
+      default:
+        notification.error({
+          message: 'Lỗi chia sẻ',
+          description: 'Không hỗ trợ nền tảng này',
+          duration: 3,
+        });
+        return;
+    }
+
+    window.open(shareUrl, '_blank', 'width=600,height=400');
+  };
+
   return (
     <>
       <section
@@ -362,17 +363,26 @@ function BlogDetail() {
                         <span>share:</span>
                         <ul className="d-flex flex-wrap">
                           <li>
-                            <a href="#">
+                            <a
+                              onClick={() => handleShare('facebook')}
+                              style={{ cursor: 'pointer' }}
+                            >
                               <i className="fab fa-facebook-f"></i>
                             </a>
                           </li>
                           <li>
-                            <a href="#">
+                            <a
+                              onClick={() => handleShare('linkedin')}
+                              style={{ cursor: 'pointer' }}
+                            >
                               <i className="fab fa-linkedin-in"></i>
                             </a>
                           </li>
                           <li>
-                            <a href="#">
+                            <a
+                              onClick={() => handleShare('twitter')}
+                              style={{ cursor: 'pointer' }}
+                            >
                               <i className="fab fa-twitter"></i>
                             </a>
                           </li>
