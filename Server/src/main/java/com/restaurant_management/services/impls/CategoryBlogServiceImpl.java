@@ -7,6 +7,7 @@ import com.restaurant_management.exceptions.DataExitsException;
 import com.restaurant_management.payloads.requests.CategoryBlogRequest;
 import com.restaurant_management.payloads.responses.ApiResponse;
 import com.restaurant_management.payloads.responses.CategoryBlogResponse;
+import com.restaurant_management.payloads.responses.CountBlogByCategoryBlogResponse;
 import com.restaurant_management.repositories.CategoryBlogRepository;
 import com.restaurant_management.services.interfaces.CategoryBlogService;
 import lombok.RequiredArgsConstructor;
@@ -132,6 +133,11 @@ public class CategoryBlogServiceImpl implements CategoryBlogService {
                 .orElseThrow(() -> new DataExitsException("Category Blog does not exist"));
         categoryBlogRepository.delete(categoryBlog);
         return new ApiResponse("Category Blog is deleted successfully", HttpStatus.OK);
+    }
+
+    @Override
+    public List<CountBlogByCategoryBlogResponse> countBlogByCategoryBlog() throws DataExitsException {
+        return categoryBlogRepository.countBlogByCategoryBlog();
     }
 
     private String generateSlug(String name) {

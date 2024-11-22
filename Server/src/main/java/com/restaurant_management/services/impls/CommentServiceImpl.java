@@ -18,6 +18,7 @@ import org.springframework.hateoas.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -64,7 +65,7 @@ public class CommentServiceImpl implements CommentService {
             String blogId, int pageNo, int pageSize, String sortBy, String sortDir) throws DataExitsException {
 
         Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.fromString(sortDir), sortBy));
-
+        
         Page<Comment> comments = commentRepository.findAllByBlogId(blogId, pageable);
 
         if (comments.isEmpty()) {
@@ -76,8 +77,30 @@ public class CommentServiceImpl implements CommentService {
                 .map(CommentResponse::new)
                 .collect(Collectors.toList());
 
+        if (sortBy != null && !sortBy.isEmpty()) {
+            Comparator<CommentResponse> comparator;
+
+            switch (sortBy) {
+                case "createdAt":
+                    comparator = Comparator.comparing(CommentResponse::getCreatedAt);
+                    break;
+                case "author":
+                    comparator = Comparator.comparing(CommentResponse::getAuthor);
+                    break;
+                default:
+                    comparator = Comparator.comparing(CommentResponse::getCreatedAt);
+                    break;
+            }
+
+            if ("desc".equalsIgnoreCase(sortDir)) {
+                comparator = comparator.reversed();
+            }
+
+            commentResponses.sort(comparator);
+        }
         return pagedResourcesAssembler.toModel(new PageImpl<>(commentResponses, pageable, comments.getTotalElements()));
     }
+
 
 
     @Override
