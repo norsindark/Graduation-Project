@@ -301,9 +301,25 @@ export const callAddReplyComment = async (content: string, author: string, paren
 };
 
 export const callGetAllComment = async (blogId: string, query: string) => {
-  return axios.get(`/api/v1/client/comment/get-all-comments-by-blog-id?blogId=${blogId}&${query}`);
+  return axios.get(`/api/v1/auth/guest/comment/get-all-comments-by-blog-id?blogId=${blogId}&${query}`);
 };
 
 export const callUpdateComment = async (commentId: string, content: string, author: string, blogId: string) => {
   return axios.put(`/api/v1/client/comment/update-comment`, { commentId, content, author, blogId });
+};
+
+export const callSearchBlog = async () => {
+  return axios.get(`/api/v1/auth/guest/blog/get-all-blog-to-search`);
+};
+
+export const callGetAllTags = async () => {
+  return axios.get(`/api/v1/auth/guest/blog/get-all-tags`);
+};
+
+export const callGetBlogByTag = async (tag: string, query: string) => {
+  return axios.get(`/api/v1/auth/guest/blog/get-all-blogs-by-tags?tag=${tag}&${query}`);
+};
+
+export const callGetAllCountBlogByCategory = async () => {
+  return axios.get(`/api/v1/auth/guest/category-blog/count-blog-by-category-blog`);
 };
