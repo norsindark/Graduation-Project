@@ -4,6 +4,7 @@ import com.restaurant_management.exceptions.DataExitsException;
 import com.restaurant_management.payloads.requests.CategoryBlogRequest;
 import com.restaurant_management.payloads.responses.ApiResponse;
 import com.restaurant_management.payloads.responses.CategoryBlogResponse;
+import com.restaurant_management.payloads.responses.CountBlogByCategoryBlogResponse;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.web.multipart.MultipartFile;
@@ -27,4 +28,6 @@ public interface CategoryBlogService {
     ApiResponse updateThumbnail(MultipartFile file, String CategoryBlogId) throws DataExitsException, IOException;
 
     ApiResponse deleteCategoryBlog(String categoryBlogId) throws DataExitsException;
+
+    List<CountBlogByCategoryBlogResponse> countBlogByCategoryBlog() throws DataExitsException;
 }
