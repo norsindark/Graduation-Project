@@ -28,6 +28,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -118,20 +119,24 @@ public class BlogServiceImpl implements BlogService {
     }
 
     @Override
-    public List<String> getAllTags() throws DataExitsException {
-        List<String> tags = blogRepository.findAllTags();
-        if (tags.isEmpty()) {
-            throw new DataExitsException("No tag found");
+    public List<String> getAllTags(int pageNo, int pageSize, String sortBy, String sortDir) throws DataExitsException {
+        Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.fromString(sortDir), sortBy));
+        List<Object[]> result = blogRepository.findPopularTags(pageable);
+        List<String> popularTags = new ArrayList<>();
+        for (Object[] row : result) {
+            String tag = (String) row[0];
+            popularTags.add(tag);
         }
-        return tags;
+        return popularTags;
     }
 
     @Override
     public PagedModel<EntityModel<BlogResponse>> getAllBlogsByTags(
-            List<String> tags, int pageNo, int pageSize, String sortBy, String sortDir)
+            String tag, int pageNo, int pageSize, String sortBy, String sortDir)
             throws DataExitsException {
         Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.fromString(sortDir), sortBy));
-        Page<BlogResponse> pageResult = blogRepository.findByTags(tags, pageable);
+        tag = tag.trim().toLowerCase();
+        Page<BlogResponse> pageResult = blogRepository.findByTags(tag, pageable);
         if (pageResult.isEmpty()) {
             throw new DataExitsException("No blog found");
         }

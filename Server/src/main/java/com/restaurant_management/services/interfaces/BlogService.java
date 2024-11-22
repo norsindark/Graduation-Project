@@ -31,10 +31,10 @@ public interface BlogService {
 
     List<SearchBlogResponse> getAllBlogToSearch() throws DataExitsException;
 
-    List<String> getAllTags() throws DataExitsException;
+    List<String> getAllTags(int pageNo, int pageSize, String sortBy, String sortDir) throws DataExitsException;
 
 //    List<BlogResponse> getAllBlogsByTags(List<String> tag) throws DataExitsException;
     PagedModel<EntityModel<BlogResponse>> getAllBlogsByTags(
-            List<String> tags, int pageNo, int pageSize, String sortBy, String sortDir)
+            String tag, int pageNo, int pageSize, String sortBy, String sortDir)
             throws DataExitsException;
 }
