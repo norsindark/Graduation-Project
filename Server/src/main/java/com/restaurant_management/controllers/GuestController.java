@@ -217,6 +217,12 @@ public class GuestController {
         return ResponseEntity.ok(categoryBlogService.getCategoryBlogById(categoryBlogId));
     }
 
+    @GetMapping("/category-blog/count-blog-by-category-blog")
+    @Operation(summary = "Count blog by category blog ID", tags = {"CategoryBlog"})
+    public ResponseEntity<?> countBlogByCategoryBlog() throws DataExitsException {
+        return ResponseEntity.ok(categoryBlogService.countBlogByCategoryBlog());
+    }
+
     // comments blog
     @GetMapping("/comment/get-all-comments-by-blog-id")
     @Operation(summary = "Get all comments by blog ID", tags = {"Comment"})
