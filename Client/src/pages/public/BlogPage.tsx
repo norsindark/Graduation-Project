@@ -190,7 +190,10 @@ function BlogPage() {
                         comment
                       </li>
                     </ul>
-                    <Link className="title" to={`/blog-detail/${blog.slug}`}>
+                    <Link
+                      className="title  truncate block whitespace-nowrap overflow-hidden"
+                      to={`/blog-detail/${blog.slug}`}
+                    >
                       {blog.title}
                     </Link>
                   </div>
