@@ -12,7 +12,7 @@ const HeaderTop = () => {
               </li>
               <li>
                 <a href="callto:0966501365">
-                  <i className="fas fa-phone-alt"></i> +84 0966501365
+                  <i className="fas fa-phone-alt"></i> +84 966 501 365
                 </a>
               </li>
             </ul>
