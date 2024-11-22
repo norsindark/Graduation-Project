@@ -8,6 +8,7 @@ import com.restaurant_management.entites.User;
 import com.restaurant_management.exceptions.DataExitsException;
 import com.restaurant_management.payloads.responses.ApiResponse;
 import com.restaurant_management.payloads.responses.BlogResponse;
+import com.restaurant_management.payloads.responses.SearchBlogResponse;
 import com.restaurant_management.repositories.BlogRepository;
 import com.restaurant_management.repositories.CategoryBlogRepository;
 import com.restaurant_management.repositories.UserRepository;
@@ -27,6 +28,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -97,6 +99,44 @@ public class BlogServiceImpl implements BlogService {
         return new ApiResponse("Blog created successfully", HttpStatus.CREATED);
     }
 
+    @Override
+    public List<BlogResponse> searchBlogByTitle(String title) throws DataExitsException {
+        List<Blog> blogs = blogRepository.searchByTitle(title);
+        if (blogs.isEmpty()) {
+            throw new DataExitsException("No blog found");
+        }
+        return BlogResponse.toListBlogResponse(blogs);
+    }
+
+    @Override
+    public List<SearchBlogResponse> getAllBlogToSearch() throws DataExitsException {
+        List<SearchBlogResponse> blogs = blogRepository.getAllBlogToSearch();
+        if (blogs.isEmpty()) {
+            throw new DataExitsException("No blog found");
+        }
+        return blogs;
+    }
+
+    @Override
+    public List<String> getAllTags() throws DataExitsException {
+        List<String> tags = blogRepository.findAllTags();
+        if (tags.isEmpty()) {
+            throw new DataExitsException("No tag found");
+        }
+        return tags;
+    }
+
+    @Override
+    public PagedModel<EntityModel<BlogResponse>> getAllBlogsByTags(
+            List<String> tags, int pageNo, int pageSize, String sortBy, String sortDir)
+            throws DataExitsException {
+        Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.fromString(sortDir), sortBy));
+        Page<BlogResponse> pageResult = blogRepository.findByTags(tags, pageable);
+        if (pageResult.isEmpty()) {
+            throw new DataExitsException("No blog found");
+        }
+        return pagedResourcesAssembler.toModel(pageResult);
+    }
 
     @Override
     public ApiResponse updateBlog(BlogDto blogDto) throws DataExitsException {
