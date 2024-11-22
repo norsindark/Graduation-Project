@@ -91,7 +91,7 @@ function Setting() {
     setLoading(true);
     try {
       const response = await callGetLocationRestaurant();
-      
+
       if (response.status === 200) {
         setLocation(response.data);
       } else if (response.status === 400) {
@@ -111,9 +111,7 @@ function Setting() {
     setSelectedSetting(setting);
   };
 
-  const handleEditClick = (record: Location) => {
-    
-  };
+  const handleEditClick = (record: Location) => {};
 
   const handleDeleteClick = async (id: string) => {
     try {
@@ -226,29 +224,29 @@ function Setting() {
 
   const renderSettingContent = () => {
     switch (selectedSetting) {
-      case 'logo':
-        return (
-          <div>
-            <h2 className="text-xl font-semibold mb-2">Logo Settings</h2>
-            <p>Current Logo: {logoSettings.currentLogo}</p>
-            <Upload
-              beforeUpload={() => false}
-              onChange={(info) => {
-                if (info.file.status !== 'uploading') {
-                  message.success(
-                    `${info.file.name} file uploaded successfully`
-                  );
-                  setLogoSettings({
-                    ...logoSettings,
-                    currentLogo: info.file.name,
-                  });
-                }
-              }}
-            >
-              <Button icon={<UploadOutlined />}>Click to Upload</Button>
-            </Upload>
-          </div>
-        );
+      // case 'logo':
+      //   return (
+      //     <div>
+      //       <h2 className="text-xl font-semibold mb-2">Logo Settings</h2>
+      //       <p>Current Logo: {logoSettings.currentLogo}</p>
+      //       <Upload
+      //         beforeUpload={() => false}
+      //         onChange={(info) => {
+      //           if (info.file.status !== 'uploading') {
+      //             message.success(
+      //               `${info.file.name} file uploaded successfully`
+      //             );
+      //             setLogoSettings({
+      //               ...logoSettings,
+      //               currentLogo: info.file.name,
+      //             });
+      //           }
+      //         }}
+      //       >
+      //         <Button icon={<UploadOutlined />}>Click to Upload</Button>
+      //       </Upload>
+      //     </div>
+      //   );
       case 'location':
         return (
           <div className="w-full">
@@ -318,7 +316,10 @@ function Setting() {
     <div className="layout-content">
       <div className="container mx-auto p-4">
         <Row gutter={[16, 16]}>
-          {['logo', 'location'].map((setting) => (
+          {[
+            // 'logo',
+            'location',
+          ].map((setting) => (
             <Col xs={24} sm={12} md={8} lg={6} xl={4} key={setting}>
               <Button
                 type={selectedSetting === setting ? 'primary' : 'default'}

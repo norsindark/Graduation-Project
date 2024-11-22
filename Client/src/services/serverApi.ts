@@ -518,3 +518,15 @@ export const callDeleteBlog = async (blogId: string) => {
 export const callUpdateBlog = async (id: string, thumbnail: string, title: string, content: string, seoTitle: string, seoDescription: string, tags: string, author: string, status: string, categoryBlogId: string) => {
   return axios.put(`/api/v1/dashboard/blog/update-blog`, {id, thumbnail, title, content, seoTitle, seoDescription, tags, author, status, categoryBlogId});
 }
+
+export const callGetAllCommentBlog = async (query: string) => {
+  return axios.get(`/api/v1/client/comment/get-all-comments?${query}`);
+}
+
+export const callGetCommentBlogById = async (blogId: string) => {
+  return axios.get(`/api/v1/client/comment/get-all-comments-by-blog-id?blogId=${blogId}`);
+}
+
+export const callDeleteCommentBlog = async (commentId: string) => {
+  return axios.delete(`/api/v1/dashboard/comment/delete-comment?commentId=${commentId}`);
+}

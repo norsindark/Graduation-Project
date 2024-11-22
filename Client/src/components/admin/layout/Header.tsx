@@ -23,7 +23,7 @@ import {
   FacebookFilled,
 } from '@ant-design/icons';
 
-import { NavLink, Link } from 'react-router-dom';
+import { NavLink, Link, Form } from 'react-router-dom';
 import styled from 'styled-components';
 import avtar from '../../../assets/images/team-2.jpg';
 import {
@@ -42,7 +42,7 @@ import { useNavigate } from 'react-router-dom';
 import { notification } from 'antd';
 import {
   callGetAllIngredientWhenLowStock,
-  callGetAllIngredientWhenNearlyExpired
+  callGetAllIngredientWhenNearlyExpired,
 } from '../../../services/serverApi';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
@@ -210,10 +210,9 @@ function Header({
       } catch (error) {
         console.error('Error fetching nearly expired ingredients:', error);
       }
-    }
+    };
     fetchLowStockIngredients();
     fetchNearlyExpiredIngredients();
-
   }, []);
 
   const breadcrumbItems = [
@@ -288,10 +287,9 @@ function Header({
     },
   ];
 
-
   const combinedData = [
-    ...bellData.map(item => ({ ...item, type: 'bellData' })),
-    ...bellData2.map(item => ({ ...item, type: 'bellData2' })),
+    ...bellData.map((item) => ({ ...item, type: 'bellData' })),
+    ...bellData2.map((item) => ({ ...item, type: 'bellData2' })),
   ];
 
   return (
@@ -412,7 +410,11 @@ function Header({
                 </div>
               </div>
             </Drawer>
-            <Badge size="small" className="header-notifications" count={bellData.length + bellData2.length}>
+            <Badge
+              size="small"
+              className="header-notifications"
+              count={bellData.length + bellData2.length}
+            >
               <Dropdown
                 trigger={['click']}
                 dropdownRender={() => (
@@ -437,9 +439,14 @@ function Header({
                             avatar={
                               <Avatar shape="square">
                                 {!item.image ? (
-                                  <ExclamationCircleOutlined style={{ fontSize: '24px', color: 'red' }} />
+                                  <ExclamationCircleOutlined
+                                    style={{ fontSize: '24px', color: 'red' }}
+                                  />
                                 ) : (
-                                  <img src={item.image} alt={item.ingredientName} />
+                                  <img
+                                    src={item.image}
+                                    alt={item.ingredientName}
+                                  />
                                 )}
                               </Avatar>
                             }
@@ -447,21 +454,43 @@ function Header({
                               <span>
                                 {item.ingredientName}
                                 {item.type === 'bellData' && ' (low stock)'}
-                                {item.type === 'bellData2' && (dayjs(item.expiredDate).isBefore(dayjs()) ? ' (expired)' : ' (nearly expired)')}
+                                {item.type === 'bellData2' &&
+                                  (dayjs(item.expiredDate).isBefore(dayjs())
+                                    ? ' (expired)'
+                                    : ' (nearly expired)')}
                               </span>
                             }
                             description={
                               <div>
-                                <p><strong>Available Quantity:</strong> {item.availableQuantity} {item.unit}</p>
+                                <p>
+                                  <strong>Available Quantity:</strong>{' '}
+                                  {item.availableQuantity} {item.unit}
+                                </p>
                                 {item.type === 'bellData2' ? (
                                   <>
-                                    <p><strong>Imported Date:</strong> {dayjs(item.importedDate).format('DD-MM-YYYY')}</p>
-                                    <p><strong>Expired Date:</strong> {dayjs(item.expiredDate).format('DD-MM-YYYY')}</p>
+                                    <p>
+                                      <strong>Imported Date:</strong>{' '}
+                                      {dayjs(item.importedDate).format(
+                                        'DD-MM-YYYY'
+                                      )}
+                                    </p>
+                                    <p>
+                                      <strong>Expired Date:</strong>{' '}
+                                      {dayjs(item.expiredDate).format(
+                                        'DD-MM-YYYY'
+                                      )}
+                                    </p>
                                   </>
                                 ) : (
                                   <>
-                                    <p><strong>Imported Quantity:</strong> {item.importedQuantity} {item.unit}</p>
-                                    <p><strong>Quantity Used:</strong> {item.quantityUsed} {item.unit}</p>
+                                    <p>
+                                      <strong>Imported Quantity:</strong>{' '}
+                                      {item.importedQuantity} {item.unit}
+                                    </p>
+                                    <p>
+                                      <strong>Quantity Used:</strong>{' '}
+                                      {item.quantityUsed} {item.unit}
+                                    </p>
                                   </>
                                 )}
                               </div>
@@ -507,11 +536,13 @@ function Header({
                 <span>Sign in</span>
               </Link>
             )}
-            {/* <Input
-              className="header-search w-[300px]"
-              placeholder="Type here..."
-              prefix={<SearchOutlined />}
-            /> */}
+            {/* <Form>
+              <Input
+                className="header-search w-[400px]"
+                placeholder="Type here..."
+                prefix={<SearchOutlined />}
+              />
+            </Form> */}
           </Col>
         </Row>
       </section>

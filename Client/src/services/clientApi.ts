@@ -327,3 +327,7 @@ export const callGetBlogByTag = async (tag: string, query: string) => {
 export const callGetAllCountBlogByCategory = async () => {
   return axios.get(`/api/v1/auth/guest/category-blog/count-blog-by-category-blog`);
 };
+
+export const callGet20HightestReview = async () => {
+  return axios.get(`/api/v1/auth/guest/get-top-20-highest-rated-reviews`);
+};

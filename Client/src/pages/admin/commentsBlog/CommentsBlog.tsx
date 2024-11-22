@@ -13,28 +13,29 @@ import {
 import type { ColumnsType } from 'antd/es/table';
 import dayjs from 'dayjs';
 import { DeleteOutlined } from '@ant-design/icons';
+import {
+  callDeleteCommentBlog,
+  callGetAllCommentBlog,
+} from '../../../services/serverApi';
+import { callGetCommentBlogById } from '../../../services/serverApi';
 const { Text } = Typography;
 
 interface Comment {
   commentId: string;
   content: string;
+  author: string;
+  avatar: string | null;
   blogId: string;
   blogTitle: string;
-  userId: string;
-  userFullName: string;
-  userAvatar: string | null;
-  replies: Reply[];
   createdAt: string;
+  replies: Reply[];
 }
 
 interface Reply {
   commentId: string;
   content: string;
-  blogId: string;
-  blogTitle: string;
-  userFullName: string;
-  userAvatar: string | null;
-  replies: Reply[];
+  author: string;
+  avatar: string | null;
   createdAt: string;
 }
 
@@ -42,54 +43,6 @@ interface Blog {
   blogId: string;
   title: string;
 }
-
-// Thêm data fake
-const FAKE_COMMENTS: Comment[] = [
-  {
-    commentId: '1',
-    content: 'Bài viết rất hay và bổ ích!',
-    blogId: '1',
-    blogTitle: 'Top 10 món ăn Việt Nam',
-    userId: 'user1',
-    userFullName: 'Nguyễn Văn A',
-    userAvatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=1',
-    createdAt: '2024-03-15T10:00:00',
-    replies: [
-      {
-        commentId: '1-1',
-        content: 'Cảm ơn bạn đã chia sẻ!',
-        blogId: '1',
-        blogTitle: 'Top 10 món ăn Việt Nam',
-        userFullName: 'Trần Thị B',
-        userAvatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=2',
-        createdAt: '2024-03-15T10:30:00',
-        replies: [],
-      },
-    ],
-  },
-  {
-    commentId: '2',
-    content: 'Tôi rất thích cách trình bày của bài viết này',
-    blogId: '2',
-    blogTitle: 'Cách nấu phở ngon',
-    userId: 'user2',
-    userFullName: 'Lê Thị C',
-    userAvatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=3',
-    createdAt: '2024-03-14T15:00:00',
-    replies: [],
-  },
-  {
-    commentId: '3',
-    content: 'Bài viết rất chi tiết và dễ hiểu',
-    blogId: '1',
-    blogTitle: 'Top 10 món ăn Việt Nam',
-    userId: 'user3',
-    userFullName: 'Phạm Văn D',
-    userAvatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=4',
-    createdAt: '2024-03-13T09:00:00',
-    replies: [],
-  },
-];
 
 function CommentsBlog() {
   const [blogs, setBlogs] = useState<Blog[]>([]);
@@ -107,39 +60,43 @@ function CommentsBlog() {
     fetchComments(selectedBlog?.blogId || '');
   }, [current, pageSize, sortQuery, selectedBlog]);
 
-  // Thay đổi hàm fetchComments để sử dụng data fake
   const fetchComments = async (blogId: string) => {
     setLoading(true);
     setError(null);
     try {
-      // Giả lập delay network
-      await new Promise((resolve) => setTimeout(resolve, 500));
-
-      let filteredComments = [...FAKE_COMMENTS];
-
-      // Lọc theo blog nếu có blogId
+      let response;
       if (blogId) {
-        filteredComments = filteredComments.filter(
-          (comment) => comment.blogId === blogId
-        );
+        response = await callGetCommentBlogById(blogId);
+      } else {
+        const query = `pageNo=${current - 1}&pageSize=${pageSize}&sortBy=createdAt&sortDir=desc`;
+        response = await callGetAllCommentBlog(query);
       }
 
-      setComments(filteredComments);
-      setTotal(filteredComments.length);
-
-      // Tạo danh sách blogs duy nhất
-      if (blogs.length === 0) {
-        const uniqueBlogs = Array.from(
-          new Set(
-            FAKE_COMMENTS.map((comment) =>
-              JSON.stringify({
-                blogId: comment.blogId,
-                title: comment.blogTitle,
-              })
+      if (response?.data?._embedded?.commentResponseList) {
+        const commentsList = response.data._embedded.commentResponseList;
+        setComments(commentsList);
+        setTotal(response.data.page.totalElements);
+        if (blogs.length === 0) {
+          const uniqueBlogs = Array.from(
+            new Set(
+              commentsList.map((comment: Comment) =>
+                JSON.stringify({
+                  blogId: comment.blogId,
+                  title: comment.blogTitle,
+                })
+              )
             )
           )
-        ).map((str) => JSON.parse(str));
-        setBlogs(uniqueBlogs);
+            .map((str: unknown) => {
+              if (typeof str === 'string') {
+                return JSON.parse(str) as Blog;
+              }
+              return null;
+            })
+            .filter((item): item is Blog => item !== null);
+
+          setBlogs(uniqueBlogs);
+        }
       }
     } catch (error) {
       setError('Failed to fetch comments');
@@ -157,49 +114,46 @@ function CommentsBlog() {
     fetchComments(blog.blogId);
   };
 
-  // Thay đổi hàm handleDeleteClick để sử dụng data fake
   const handleDeleteClick = async (commentId: string) => {
     try {
-      // Giả lập delay network
-      await new Promise((resolve) => setTimeout(resolve, 500));
-
-      notification.success({
-        message: 'Comment deleted successfully!',
-        duration: 5,
-      });
-
-      // Cập nhật state để xóa comment
-      setComments((prevComments) =>
-        prevComments.filter((comment) => {
-          // Xóa comment chính
-          if (comment.commentId === commentId) return false;
-
-          // Xóa reply nếu có
-          comment.replies = comment.replies.filter(
-            (reply) => reply.commentId !== commentId
-          );
-          return true;
-        })
-      );
+      const res = await callDeleteCommentBlog(commentId);
+      if (res?.status === 200) {
+        notification.success({
+          message: 'Comment deleted successfully!',
+          duration: 5,
+          showProgress: true,
+        });
+        fetchComments(selectedBlog?.blogId || '');
+      } else {
+        notification.error({
+          message: 'Error deleting comment.',
+          description: 'Please delete all replies before deleting the comment!',
+          duration: 5,
+          showProgress: true,
+        });
+      }
     } catch (error) {
       notification.error({
         message: 'Error deleting comment.',
         description: 'Failed to delete comment',
         duration: 5,
+        showProgress: true,
       });
     }
   };
 
-  const renderReplyWithDelete = (reply: Reply, level = 1) => (
-    <div
-      key={reply.commentId}
-      className={`border-l-2 border-gray-200 pl-4 mb-${level === 1 ? '4' : '2'}`}
-    >
+  const renderReplyWithDelete = (reply: Reply) => (
+    <div key={reply.commentId} className="border-l-2 border-gray-200 pl-4 mb-4">
       <Space direction="vertical" size="small" className="w-full">
         <Space className="w-full justify-between">
           <Space>
-            <Avatar src={reply.userAvatar || '/default-avatar.png'} />
-            <Text strong>{reply.userFullName}</Text>
+            <Avatar
+              src={
+                reply.avatar ||
+                '../../../../../../public/images/comment_img_2.jpg'
+              }
+            />
+            <Text strong>{reply.author}</Text>
             <Text type="secondary">
               {dayjs(reply.createdAt).format('DD/MM/YYYY HH:mm:ss')}
             </Text>
@@ -214,25 +168,37 @@ function CommentsBlog() {
           </Popconfirm>
         </Space>
         <Text>{reply.content}</Text>
-        {reply.replies && reply.replies.length > 0 && (
-          <div className="pl-8">
-            {reply.replies.map((nestedReply) =>
-              renderReplyWithDelete(nestedReply, level + 1)
-            )}
-          </div>
-        )}
       </Space>
     </div>
   );
 
+  const onChange = (pagination: any, filters: any, sorter: any) => {
+    const newCurrent = pagination.current;
+    const newPageSize = pagination.pageSize;
+
+    if (newCurrent !== current || newPageSize !== pageSize) {
+      setCurrent(newCurrent);
+      setPageSize(newPageSize);
+    }
+
+    if (sorter && sorter.field) {
+      const order = sorter.order === 'ascend' ? 'asc' : 'desc';
+      setSortQuery(`${sorter.field},${order}`);
+    } else {
+      setSortQuery('');
+    }
+  };
+
   const columns: ColumnsType<Comment> = [
     {
-      title: 'User',
-      dataIndex: 'userFullName',
-      key: 'userFullName',
+      title: 'Author',
+      dataIndex: 'author',
+      key: 'author',
       render: (text, record) => (
         <Space>
-          <Avatar src={record.userAvatar || '/default-avatar.png'} />
+          <Avatar
+            src={record.avatar || '../../../../public/images/comment_img_2.jpg'}
+          />
           <Text strong>{text}</Text>
         </Space>
       ),
@@ -243,6 +209,7 @@ function CommentsBlog() {
       dataIndex: 'content',
       key: 'content',
     },
+
     {
       title: 'Created At',
       dataIndex: 'createdAt',
@@ -331,24 +298,25 @@ function CommentsBlog() {
               dataSource={comments}
               rowKey="commentId"
               loading={loading}
+              onChange={onChange}
               pagination={{
-                current,
-                pageSize,
-                total,
+                current: current,
+                pageSize: pageSize,
+                total: total,
                 showSizeChanger: true,
                 pageSizeOptions: ['5', '10', '20', '50'],
                 showTotal: (total) => `Total ${total} items`,
                 position: ['bottomRight'],
               }}
               expandable={{
-                expandedRowRender: (record) => (
+                expandedRowRender: (record: Comment) => (
                   <div className="pl-8">
                     {record.replies.map((reply) =>
                       renderReplyWithDelete(reply)
                     )}
                   </div>
                 ),
-                rowExpandable: (record) =>
+                rowExpandable: (record: Comment) =>
                   record.replies && record.replies.length > 0,
               }}
             />

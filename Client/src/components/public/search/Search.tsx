@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Modal, Input, Button } from 'antd';
-
+import { CloseOutlined, SearchOutlined } from '@ant-design/icons';
 const Search = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [searchText, setSearchText] = useState('');
@@ -12,6 +12,20 @@ const Search = () => {
       img: 'images/menu2_img_1.jpg',
       rating: 4.5,
       category: 'Biryani',
+    },
+    {
+      title: 'Chicken Masala',
+      price: '$80.00',
+      img: 'images/menu2_img_2.jpg',
+      rating: 4.0,
+      category: 'Chicken',
+    },
+    {
+      title: 'Chicken Masala',
+      price: '$80.00',
+      img: 'images/menu2_img_2.jpg',
+      rating: 4.0,
+      category: 'Chicken',
     },
     {
       title: 'Chicken Masala',
@@ -43,10 +57,11 @@ const Search = () => {
       </a>
       <Modal
         title={
-          <div className=" text-center mx-auto w-1/2 block rounded-full bg-colorPrimary size-8 font-medium h-10 text-3xl text-white">
+          <div className=" text-center mx-auto w-1/2 block rounded-full bg-[#81c784] size-8 font-medium h-10 text-3xl text-white">
             Search
           </div>
         }
+        width={1200}
         centered
         open={isModalVisible}
         onOk={handleOk}
@@ -66,6 +81,7 @@ const Search = () => {
             style={{ fontWeight: 'medium', margin: '0px' }}
             size="large"
             onClick={handleOk}
+            icon={<SearchOutlined />}
           >
             <div className="text-[16px]">Search</div>
           </Button>,
@@ -81,24 +97,37 @@ const Search = () => {
             shape="round"
             size="large"
             onClick={handleCancel}
+            icon={<CloseOutlined />}
           >
             <div className="text-[16px]">Cancel</div>
           </Button>,
         ]}
       >
-        <Input
-          placeholder="Search . . ."
-          value={searchText}
-          onChange={(e) => setSearchText(e.target.value)}
-        />
-        <section className="fp__menu mt_10 xs_mt_45 mb_100 xs_mb_70">
+        <div className="relative w-full max-w-sm mx-auto">
+          <Input
+            placeholder="🔍 Search..."
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
+            className="w-full py-2.5 px-4 text-gray-700 bg-white border-2 border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 ease-in-out"
+          />
+          {searchText && (
+            <button
+              onClick={() => setSearchText('')}
+              className="absolute top-1/2 right-3 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors duration-200"
+            >
+              ✖️
+            </button>
+          )}
+        </div>
+
+        <section className="fp__menu mt_10 xs_mt_45 mb_55 xs_mb_70">
           <div className="container">
             <div className="row">
               {items.length > 0 ? (
                 items.map((item, index) => (
                   <div
                     key={index}
-                    className="col-xl-6 col-sm-6 col-lg-4 burger pizza wow fadeInUp"
+                    className="col-xl-3 col-sm-6 col-lg-4 burger pizza wow fadeInUp"
                     data-wow-duration="1s"
                   >
                     <div className="fp__menu_item">
@@ -126,7 +155,10 @@ const Search = () => {
                           ))}
                           <span>{Math.floor(item.rating * 10)}</span>
                         </p>
-                        <a className="title" href="menu_details.html">
+                        <a
+                          className="title  truncate block whitespace-nowrap overflow-hidden "
+                          href="menu_details.html"
+                        >
                           {item.title}
                         </a>
                         <h5 className="price">{item.price}</h5>
@@ -161,42 +193,6 @@ const Search = () => {
             </div>
           </div>
         </section>
-
-        <div className="fp__pagination mt_-40 ">
-          <div className="row">
-            <div className="col-12">
-              <nav aria-label="...">
-                <ul className="pagination">
-                  <li className="page-item">
-                    <a className="page-link" href="#">
-                      <i className="fas fa-long-arrow-alt-left"></i>
-                    </a>
-                  </li>
-                  <li className="page-item">
-                    <a className="page-link" href="#">
-                      1
-                    </a>
-                  </li>
-                  <li className="page-item active">
-                    <a className="page-link" href="#">
-                      2
-                    </a>
-                  </li>
-                  <li className="page-item">
-                    <a className="page-link" href="#">
-                      3
-                    </a>
-                  </li>
-                  <li className="page-item">
-                    <a className="page-link" href="#">
-                      <i className="fas fa-long-arrow-alt-right"></i>
-                    </a>
-                  </li>
-                </ul>
-              </nav>
-            </div>
-          </div>
-        </div>
       </Modal>
     </li>
   );
