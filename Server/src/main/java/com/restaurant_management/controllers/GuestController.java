@@ -6,10 +6,10 @@ import com.restaurant_management.services.interfaces.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -54,6 +54,13 @@ public class GuestController {
     }
 
     // dish
+    @GetMapping("/get-all-dishes-to-search")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> getAllDishesToSearch() throws DataExitsException {
+        return ResponseEntity.ok(dishService.getAllDishToSearch());
+    }
+
+
     @GetMapping("/get-dish-by-id/{dishId}")
     @Operation(summary = "Get dish by ID", tags = {"Dish"})
     public ResponseEntity<DishResponse> getDishById(@PathVariable String dishId) throws DataExitsException {

@@ -6,6 +6,7 @@ import com.restaurant_management.payloads.requests.DishRequest;
 import com.restaurant_management.payloads.requests.UpdateThumbRequest;
 import com.restaurant_management.payloads.responses.ApiResponse;
 import com.restaurant_management.payloads.responses.DishResponse;
+import com.restaurant_management.payloads.responses.SearchDishResponse;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
 
@@ -28,4 +29,6 @@ public interface DishService {
     ApiResponse deleteDish(String dishId) throws DataExitsException;
 
     ApiResponse updateThumbnail(UpdateThumbRequest request) throws DataExitsException, IOException;
+
+    List<SearchDishResponse> getAllDishToSearch() throws DataExitsException;
 }
