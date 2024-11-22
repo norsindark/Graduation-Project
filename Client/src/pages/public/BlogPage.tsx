@@ -1,7 +1,7 @@
 import { Pagination } from 'antd';
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { callGetAllBlog } from '../../services/clientApi';
+import { Link, useSearchParams } from 'react-router-dom';
+import { callGetAllBlog, callGetBlogByTag } from '../../services/clientApi';
 import { notification } from 'antd';
 
 interface Blog {
@@ -22,10 +22,18 @@ function BlogPage() {
   const [total, setTotal] = useState<number>(0);
   const [blogs, setBlogs] = useState<Blog[]>([]);
   const [loading, setLoading] = useState(false);
+  const [searchParams] = useSearchParams();
+  const [selectedTag, setSelectedTag] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchBlogs();
-  }, [current, pageSize]);
+    const tagFromUrl = searchParams.get('tag');
+    if (tagFromUrl) {
+      setSelectedTag(tagFromUrl);
+      fetchBlogsByTag(tagFromUrl);
+    } else {
+      fetchBlogs();
+    }
+  }, [searchParams]);
 
   const fetchBlogs = async () => {
     setLoading(true);
@@ -50,6 +58,38 @@ function BlogPage() {
       setTotal(0);
       notification.error({
         message: 'Error loading blog list',
+        description: 'Please try again later',
+        duration: 5,
+        showProgress: true,
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchBlogsByTag = async (tag: string) => {
+    setLoading(true);
+    try {
+      const query = `pageNo=${current - 1}&pageSize=${pageSize}&sortBy=createdAt&sortDir=desc`;
+      const response = await callGetBlogByTag(tag, query);
+      const blogsData = response.data._embedded?.blogResponseList;
+      if (blogsData) {
+        const activeBlogs = blogsData.filter(
+          (blog: Blog) => blog.status === 'PUBLISHED'
+        );
+        if (activeBlogs.length > 0) {
+          setBlogs(activeBlogs);
+          setTotal(response.data.page.totalElements);
+        } else {
+          setBlogs([]);
+          setTotal(0);
+        }
+      }
+    } catch (error) {
+      setBlogs([]);
+      setTotal(0);
+      notification.error({
+        message: 'Error loading blogs by tag',
         description: 'Please try again later',
         duration: 5,
         showProgress: true,
@@ -101,6 +141,19 @@ function BlogPage() {
 
       <section className="fp__blog_page fp__blog2 mt_120 xs_mt_65 mb_100 xs_mb_70">
         <div className="container">
+          {selectedTag && (
+            <div className="mb-6 bg-gray-50 border-l-4 border-blue-500 p-4 rounded-lg shadow-sm transition-all duration-300 ease-in-out">
+              <h3 className="text-2xl  sm:text-2xl font-semibold text-gray-800 flex items-center gap-2 mb-2">
+                <span className="text-blue-500">🏷️</span>
+                Showing posts tagged:
+                <span className="text-blue-600">"{selectedTag}"</span>
+              </h3>
+              <p className="text-sm text-gray-500">
+                Explore related posts for better insights on "{selectedTag}".
+              </p>
+            </div>
+          )}
+
           <div className="row">
             {blogs.map((blog) => (
               <div
