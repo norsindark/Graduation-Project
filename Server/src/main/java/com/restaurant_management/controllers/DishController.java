@@ -25,6 +25,12 @@ public class DishController {
 
     private final DishService dishService;
 
+    @GetMapping("/get-all-dishes-to-search")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> getAllDishesToSearch() throws DataExitsException {
+        return ResponseEntity.ok(dishService.getAllDishToSearch());
+    }
+
     @GetMapping("/get-all-dish-names")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> getAllDishNames() throws DataExitsException {

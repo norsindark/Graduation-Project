@@ -13,6 +13,7 @@ import com.restaurant_management.payloads.requests.RecipeRequest;
 import com.restaurant_management.payloads.requests.UpdateThumbRequest;
 import com.restaurant_management.payloads.responses.ApiResponse;
 import com.restaurant_management.payloads.responses.DishResponse;
+import com.restaurant_management.payloads.responses.SearchDishResponse;
 import com.restaurant_management.repositories.*;
 import com.restaurant_management.services.interfaces.DishService;
 import com.restaurant_management.services.interfaces.ReviewService;
@@ -48,6 +49,15 @@ public class DishServiceImpl implements DishService {
     private final PagedResourcesAssembler<DishResponse> pagedResourcesAssembler;
 
     @Override
+    public List<SearchDishResponse> getAllDishToSearch() throws DataExitsException {
+        List<SearchDishResponse> dishes = dishRepository.findAllDishToSearch();
+        if (dishes.isEmpty()) {
+            throw new DataExitsException("Dishes not found");
+        }
+        return dishes;
+    }
+
+    @Override
     public List<Map<String, String>> getAllDishNames() throws DataExitsException {
         List<Map<String, String>> dishes = dishRepository.getAllDishNames();
         if (dishes.isEmpty()) {
@@ -62,7 +72,6 @@ public class DishServiceImpl implements DishService {
 
         return dishes;
     }
-
 
     @Override
     public DishResponse getDishById(String dishId) throws DataExitsException {
