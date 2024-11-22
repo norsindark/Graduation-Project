@@ -33,7 +33,8 @@ public interface BlogRepository extends JpaRepository<Blog, String> {
 
     @Query("SELECT new com.restaurant_management.payloads.responses.SearchBlogResponse(" +
             "b.id, b.title, " +
-            "b.slug, b.thumbnail) " +
+            "b.slug, b.thumbnail, " +
+            "b.author.fullName) " +
             "FROM Blog b")
     List<SearchBlogResponse> getAllBlogToSearch();
 
