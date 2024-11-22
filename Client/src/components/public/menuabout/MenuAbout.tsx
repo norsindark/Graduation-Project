@@ -312,7 +312,7 @@ function MenuAbout() {
                 <Input
                   size="large"
                   type="text"
-                  placeholder="Tìm kiếm..."
+                  placeholder="Search..."
                   value={searchTerm}
                   onChange={handleSearchChange}
                   className="pr-20 rounded-3xl"
@@ -346,7 +346,7 @@ function MenuAbout() {
                   onChange={(value) => setPriceRange(value as [number, number])}
                 />
                 <div className="price-range-label">
-                  <span>{`Giá: ${priceRange[0].toLocaleString()} - ${priceRange[1].toLocaleString()} VNĐ`}</span>
+                  <span>{`Price: ${priceRange[0].toLocaleString()} - ${priceRange[1].toLocaleString()} VNĐ`}</span>
                 </div>
               </Form.Item>
             </div>
@@ -358,19 +358,19 @@ function MenuAbout() {
                   onChange={handleSortChange}
                 >
                   <Select.Option className="text-xl font-medium" value="">
-                    Chọn sản phẩm
+                    Select Sort
                   </Select.Option>
                   <Select.Option
                     className="text-xl font-medium"
                     value="priceLowToHigh"
                   >
-                    Giá từ thấp đến cao
+                    Price Low to High
                   </Select.Option>
                   <Select.Option
                     className="text-xl font-medium"
                     value="priceHighToLow"
                   >
-                    Giá từ cao đến thấp
+                    Price High to Low
                   </Select.Option>
                 </Select>
               </Form.Item>
