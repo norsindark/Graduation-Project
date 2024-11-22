@@ -3,9 +3,9 @@
   <database-model serializer="dbm" dbms="POSTGRES" family-id="POSTGRES" format-version="4.52">
     <root id="1">
       <DateStyle>mdy</DateStyle>
-      <IntrospectionStateNumber>4585</IntrospectionStateNumber>
+      <IntrospectionStateNumber>4697</IntrospectionStateNumber>
       <ServerVersion>16.4</ServerVersion>
-      <StartupTime>1732193612</StartupTime>
+      <StartupTime>1732255127</StartupTime>
       <TimeZones>true ACDT
 true ACSST
 false ACST
@@ -800,7 +800,7 @@ false Zulu
 14697||10|C|G
 14697||-9223372036854775808|U|G
 14697||10|U|G</Grants>
-      <IntrospectionStateNumber>4585</IntrospectionStateNumber>
+      <IntrospectionStateNumber>4697</IntrospectionStateNumber>
       <ObjectId>16389</ObjectId>
       <OwnerName>postgres</OwnerName>
     </database>
@@ -4237,8 +4237,8 @@ false Zulu
     <schema id="265" parent="2" name="public">
       <Comment>standard public schema</Comment>
       <Current>1</Current>
-      <IntrospectionStateNumber>4585</IntrospectionStateNumber>
-      <LastIntrospectionLocalTimestamp>2024-11-21.13:08:54</LastIntrospectionLocalTimestamp>
+      <IntrospectionStateNumber>4697</IntrospectionStateNumber>
+      <LastIntrospectionLocalTimestamp>2024-11-22.08:57:26</LastIntrospectionLocalTimestamp>
       <ObjectId>2200</ObjectId>
       <StateNumber>524</StateNumber>
       <OwnerName>pg_database_owner</OwnerName>
@@ -7629,8 +7629,8 @@ false Zulu
       <OwnerName>postgres</OwnerName>
     </table>
     <table id="515" parent="265" name="comments">
-      <ObjectId>42201</ObjectId>
-      <StateNumber>4479</StateNumber>
+      <ObjectId>42919</ObjectId>
+      <StateNumber>4694</StateNumber>
       <AccessMethodId>2</AccessMethodId>
       <OwnerName>postgres</OwnerName>
     </table>
@@ -7966,7 +7966,7 @@ false Zulu
       <DasType>text|0s</DasType>
       <NotNull>1</NotNull>
       <Position>2</Position>
-      <StateNumber>4578</StateNumber>
+      <StateNumber>4689</StateNumber>
       <TypeId>25</TypeId>
     </column>
     <column id="568" parent="512" name="created_at">
@@ -7978,7 +7978,7 @@ false Zulu
     <column id="569" parent="512" name="seo_description">
       <DasType>text|0s</DasType>
       <Position>4</Position>
-      <StateNumber>4578</StateNumber>
+      <StateNumber>4690</StateNumber>
       <TypeId>25</TypeId>
     </column>
     <column id="570" parent="512" name="seo_title">
@@ -8256,75 +8256,74 @@ false Zulu
       <DasType>varchar(36)|0s</DasType>
       <NotNull>1</NotNull>
       <Position>1</Position>
-      <StateNumber>3399</StateNumber>
+      <StateNumber>4691</StateNumber>
       <TypeId>1043</TypeId>
     </column>
     <column id="610" parent="515" name="content">
       <DasType>text|0s</DasType>
       <NotNull>1</NotNull>
       <Position>2</Position>
-      <StateNumber>4579</StateNumber>
+      <StateNumber>4691</StateNumber>
       <TypeId>25</TypeId>
     </column>
     <column id="611" parent="515" name="created_at">
       <DasType>timestamp(6)|0s</DasType>
       <Position>3</Position>
-      <StateNumber>3399</StateNumber>
+      <StateNumber>4691</StateNumber>
       <TypeId>1114</TypeId>
     </column>
     <column id="612" parent="515" name="updated_at">
       <DasType>timestamp(6)|0s</DasType>
       <Position>4</Position>
-      <StateNumber>3399</StateNumber>
+      <StateNumber>4691</StateNumber>
       <TypeId>1114</TypeId>
     </column>
     <column id="613" parent="515" name="user_id">
       <DasType>varchar(36)|0s</DasType>
       <NotNull>1</NotNull>
       <Position>5</Position>
-      <StateNumber>3399</StateNumber>
+      <StateNumber>4691</StateNumber>
       <TypeId>1043</TypeId>
     </column>
     <column id="614" parent="515" name="blog_id">
       <DasType>varchar(36)|0s</DasType>
-      <NotNull>1</NotNull>
       <Position>6</Position>
-      <StateNumber>3399</StateNumber>
+      <StateNumber>4691</StateNumber>
       <TypeId>1043</TypeId>
     </column>
     <column id="615" parent="515" name="parent_comment_id">
       <DasType>varchar(36)|0s</DasType>
       <Position>7</Position>
-      <StateNumber>4479</StateNumber>
+      <StateNumber>4691</StateNumber>
       <TypeId>1043</TypeId>
     </column>
     <foreign-key id="616" parent="515" name="fk8omq0tc18jd43bu5tjh6jvraq">
       <ColNames>user_id</ColNames>
-      <ObjectId>42378</ObjectId>
-      <StateNumber>3435</StateNumber>
+      <ObjectId>42926</ObjectId>
+      <StateNumber>4694</StateNumber>
       <RefKeyColPositions>1</RefKeyColPositions>
       <RefTableId>42326</RefTableId>
     </foreign-key>
     <foreign-key id="617" parent="515" name="fk9aakob3a7aghrm94k9kmbrjqd">
       <ColNames>blog_id</ColNames>
-      <ObjectId>42913</ObjectId>
-      <StateNumber>4584</StateNumber>
+      <ObjectId>42931</ObjectId>
+      <StateNumber>4695</StateNumber>
       <RefKeyColPositions>1</RefKeyColPositions>
       <RefTableId>42896</RefTableId>
     </foreign-key>
     <foreign-key id="618" parent="515" name="fk7h839m3lkvhbyv3bcdv7sm4fj">
       <ColNames>parent_comment_id</ColNames>
-      <ObjectId>42890</ObjectId>
-      <StateNumber>4485</StateNumber>
+      <ObjectId>42936</ObjectId>
+      <StateNumber>4696</StateNumber>
       <RefKeyColPositions>1</RefKeyColPositions>
-      <RefTableId>42201</RefTableId>
+      <RefTableId>42919</RefTableId>
     </foreign-key>
     <index id="619" parent="515" name="comments_pkey">
       <ColNames>comment_id</ColNames>
       <NameSurrogate>1</NameSurrogate>
-      <ObjectId>42206</ObjectId>
+      <ObjectId>42924</ObjectId>
       <Primary>1</Primary>
-      <StateNumber>3399</StateNumber>
+      <StateNumber>4691</StateNumber>
       <Unique>1</Unique>
       <AccessMethodId>403</AccessMethodId>
       <CollationNames>default</CollationNames>
@@ -8333,10 +8332,10 @@ false Zulu
     </index>
     <key id="620" parent="515" name="comments_pkey">
       <NameSurrogate>1</NameSurrogate>
-      <ObjectId>42207</ObjectId>
+      <ObjectId>42925</ObjectId>
       <Primary>1</Primary>
-      <StateNumber>3399</StateNumber>
-      <UnderlyingIndexId>42206</UnderlyingIndexId>
+      <StateNumber>4691</StateNumber>
+      <UnderlyingIndexId>42924</UnderlyingIndexId>
     </key>
     <column id="621" parent="516" name="coupon_usage_id">
       <DasType>varchar(36)|0s</DasType>
@@ -8724,7 +8723,7 @@ false Zulu
     <column id="674" parent="522" name="long_description">
       <DasType>text|0s</DasType>
       <Position>6</Position>
-      <StateNumber>4580</StateNumber>
+      <StateNumber>4692</StateNumber>
       <TypeId>25</TypeId>
     </column>
     <column id="675" parent="522" name="offer_price">
@@ -9532,7 +9531,7 @@ false Zulu
     <column id="790" parent="531" name="comment">
       <DasType>text|0s</DasType>
       <Position>2</Position>
-      <StateNumber>4581</StateNumber>
+      <StateNumber>4693</StateNumber>
       <TypeId>25</TypeId>
     </column>
     <column id="791" parent="531" name="created_at">

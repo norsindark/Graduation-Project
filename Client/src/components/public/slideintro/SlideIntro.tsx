@@ -43,30 +43,26 @@ function SlideIntro() {
     {
       id: 1,
       image: 'images/offer_slider_3.png',
-      title: 'Royal Seafood Pizza',
-      description:
-        'Indulge in premium tiger prawns, fresh squid, crab sticks, imported scallops topped with finest Mozzarella cheese',
+      title: 'Seafood Pizza',
+      description: 'Prawns, squid, crab, scallops, Mozzarella.',
     },
     {
       id: 2,
       image: 'images/offer_slider_2.png',
-      title: 'Cheese Beef Burger',
-      description:
-        "Soft brioche bun, Australian Wagyu beef, melted Cheddar cheese, fresh vegetables with chef's special sauce",
+      title: 'Beef Burger',
+      description: 'Brioche, Wagyu, Cheddar, veggies, sauce.',
     },
     {
       id: 3,
       image: 'images/offer_slider_1.png',
-      title: 'Spicy Crispy Chicken Burger',
-      description:
-        'Crispy coating, secret-recipe marinated chicken, fresh vegetables with signature Japanese mayonnaise',
+      title: 'Spicy Chicken',
+      description: 'Crispy chicken, marinade, veggies, mayo.',
     },
     {
       id: 4,
       image: 'images/offer_slider_4.png',
-      title: 'Korean Spicy Fried Chicken',
-      description:
-        'Crispy fried chicken glazed with sweet & spicy Korean sauce, topped with roasted sesame and special chili powder',
+      title: 'Korean Chicken',
+      description: 'Fried chicken, Korean sauce, sesame, chili.',
     },
   ];
 

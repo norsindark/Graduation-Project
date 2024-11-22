@@ -144,6 +144,7 @@ function Review() {
         notification.success({
           message: 'Review deleted successfully!',
           duration: 5,
+          showProgress: true,
         });
         fetchReviews(selectedDish?.dishId || '');
       } else {
@@ -151,6 +152,7 @@ function Review() {
           message: 'Error deleting review.',
           description: res?.data?.message || 'Unknown error occurred',
           duration: 5,
+          showProgress: true,
         });
       }
     } catch (error) {
@@ -158,6 +160,7 @@ function Review() {
         message: 'Error deleting review.',
         description: 'Failed to delete review',
         duration: 5,
+        showProgress: true,
       });
     }
   };
@@ -199,7 +202,7 @@ function Review() {
 
   const columns: ColumnsType<Review> = [
     {
-      title: 'User',
+      title: 'Author',
       dataIndex: 'userFullName',
       key: 'userFullName',
       render: (text, record) => (
