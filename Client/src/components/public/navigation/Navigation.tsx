@@ -67,11 +67,7 @@ const Navigation = () => {
                 Privacy Policy
               </NavLink>
             </li>
-            <li className={style}>
-              <NavLink className={style} to="/testimonial">
-                Testimonial
-              </NavLink>
-            </li>
+
             <li className={style}>
               <NavLink className={style} to="/terms-condition">
                 Terms and Condition
