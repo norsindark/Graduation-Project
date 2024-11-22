@@ -6,6 +6,7 @@ import com.restaurant_management.services.interfaces.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.ResponseEntity;
@@ -148,20 +149,25 @@ public class GuestController {
 
     @GetMapping("/blog/get-all-tags")
     @Operation(summary = "Get all tags")
-    public ResponseEntity<List<String>> getAllTags() throws DataExitsException {
-        return ResponseEntity.ok(blogService.getAllTags());
+    public ResponseEntity<List<String>> getAllTags(
+            @RequestParam(defaultValue = "0") int pageNo,
+            @RequestParam(defaultValue = "10") int pageSize,
+            @RequestParam(defaultValue = "tag_count") String sortBy,
+            @RequestParam(defaultValue = "DESC") String sortDir)
+            throws DataExitsException {
+        return ResponseEntity.ok(blogService.getAllTags(pageNo, pageSize, sortBy, sortDir));
     }
 
     @GetMapping("/blog/get-all-blogs-by-tags")
     @Operation(summary = "Get all blogs by tags")
     public ResponseEntity<PagedModel<EntityModel<BlogResponse>>>
     getAllBlogsByTags(
-            @RequestParam List<String> tags,
+            @RequestParam String tag,
             @RequestParam(defaultValue = "0") int pageNo,
             @RequestParam(defaultValue = "10") int pageSize,
             @RequestParam(defaultValue = "createdAt") String sortBy,
             @RequestParam(defaultValue = "desc") String sortDir) throws DataExitsException {
-        return ResponseEntity.ok(blogService.getAllBlogsByTags(tags, pageNo, pageSize, sortBy, sortDir));
+        return ResponseEntity.ok(blogService.getAllBlogsByTags(tag, pageNo, pageSize, sortBy, sortDir));
     }
 
     @GetMapping("/get-all-blogs")
