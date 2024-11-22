@@ -14,12 +14,14 @@ public class CommentReplyResponse {
     private String commentId;
     private String content;
     private String author;
+    private String avatar;
     private Timestamp createdAt;
 
     public CommentReplyResponse(Comment comment) {
         this.commentId = comment.getId();
         this.content = comment.getContent();
         this.author = comment.getAuthor().getUsername();
+        this.avatar = comment.getAuthor().getAvatar();
         this.createdAt = comment.getCreatedAt();
     }
 }
