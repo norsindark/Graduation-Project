@@ -1,40 +1,50 @@
-import { useState } from 'react';
-import { Modal, Input, Button } from 'antd';
+import { useState, useEffect } from 'react';
+import { Modal, Input, Button, Pagination } from 'antd';
 import { CloseOutlined, SearchOutlined } from '@ant-design/icons';
+import { callGetAllDishes } from '../../../services/clientApi';
+import { useNavigate } from 'react-router-dom';
+
 const Search = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [searchText, setSearchText] = useState('');
+  const [products, setProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+  const [current, setCurrent] = useState(1);
+  const pageSize = 4; // Số sản phẩm mỗi trang
 
-  const items = [
-    {
-      title: 'Hyderabadi biryani',
-      price: '$70.00',
-      img: 'images/menu2_img_1.jpg',
-      rating: 4.5,
-      category: 'Biryani',
-    },
-    {
-      title: 'Chicken Masala',
-      price: '$80.00',
-      img: 'images/menu2_img_2.jpg',
-      rating: 4.0,
-      category: 'Chicken',
-    },
-    {
-      title: 'Chicken Masala',
-      price: '$80.00',
-      img: 'images/menu2_img_2.jpg',
-      rating: 4.0,
-      category: 'Chicken',
-    },
-    {
-      title: 'Chicken Masala',
-      price: '$80.00',
-      img: 'images/menu2_img_2.jpg',
-      rating: 4.0,
-      category: 'Chicken',
-    },
-  ];
+  useEffect(() => {
+    if (isModalVisible) {
+      fetchProducts();
+    }
+  }, [isModalVisible]);
+
+  const fetchProducts = async () => {
+    setLoading(true);
+    try {
+      const query = `pageNo=0&pageSize=100&sortBy=dishName&order=asc`;
+      const response = await callGetAllDishes(query);
+      if (
+        response.status === 200 &&
+        response.data._embedded?.dishResponseList
+      ) {
+        setProducts(response.data._embedded.dishResponseList);
+      }
+    } catch (error) {
+      console.error('Error loading dishes:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filteredProducts = products.filter((product) =>
+    product.dishName.toLowerCase().includes(searchText.toLowerCase())
+  );
+
+  const handleProductClick = (slug: string) => {
+    navigate(`/product-detail/${slug}`);
+    setIsModalVisible(false);
+  };
 
   const showModal = () => {
     setIsModalVisible(true);
@@ -48,6 +58,18 @@ const Search = () => {
 
   const handleCancel = () => {
     setIsModalVisible(false);
+  };
+
+  // Tính toán sản phẩm cho trang hiện tại
+  const getCurrentPageData = () => {
+    const startIndex = (current - 1) * pageSize;
+    const endIndex = startIndex + pageSize;
+    return filteredProducts.slice(startIndex, endIndex);
+  };
+
+  // Xử lý thay đổi trang
+  const handlePageChange = (page: number) => {
+    setCurrent(page);
   };
 
   return (
@@ -123,72 +145,67 @@ const Search = () => {
         <section className="fp__menu mt_10 xs_mt_45 mb_55 xs_mb_70">
           <div className="container">
             <div className="row">
-              {items.length > 0 ? (
-                items.map((item, index) => (
-                  <div
-                    key={index}
-                    className="col-xl-3 col-sm-6 col-lg-4 burger pizza wow fadeInUp"
-                    data-wow-duration="1s"
-                  >
-                    <div className="fp__menu_item">
-                      <div className="fp__menu_item_img">
-                        <img
-                          src={item.img}
-                          alt="menu"
-                          className="img-fluid w-100"
-                        />
-                        <a className="category" href="#">
-                          {item.category}
-                        </a>
-                      </div>
-                      <div className="fp__menu_item_text">
-                        <p className="rating">
-                          {[...Array(5)].map((_, i) => (
-                            <i
-                              key={i}
-                              className={
-                                i < Math.floor(item.rating)
-                                  ? 'fas fa-star'
-                                  : 'far fa-star'
-                              }
-                            ></i>
-                          ))}
-                          <span>{Math.floor(item.rating * 10)}</span>
-                        </p>
-                        <a
-                          className="title  truncate block whitespace-nowrap overflow-hidden "
-                          href="menu_details.html"
-                        >
-                          {item.title}
-                        </a>
-                        <h5 className="price">{item.price}</h5>
-                        <ul className="d-flex flex-wrap justify-content-center">
-                          <li>
-                            <a
-                              href="#"
-                              data-bs-toggle="modal"
-                              data-bs-target="#cartModal"
-                            >
-                              <i className="fas fa-shopping-basket"></i>
-                            </a>
-                          </li>
-                          <li>
-                            <a href="#">
-                              <i className="fal fa-heart"></i>
-                            </a>
-                          </li>
-                          <li>
-                            <a href="#">
-                              <i className="far fa-eye"></i>
-                            </a>
-                          </li>
-                        </ul>
+              {loading ? (
+                <div className="text-center">Loading...</div>
+              ) : filteredProducts.length > 0 ? (
+                <>
+                  {getCurrentPageData().map((item) => (
+                    <div
+                      key={item.dishId}
+                      className="col-xl-3 col-sm-6 col-lg-4 wow fadeInUp"
+                      onClick={() => handleProductClick(item.slug)}
+                    >
+                      <div className="fp__menu_item cursor-pointer">
+                        <div className="fp__menu_item_img">
+                          <img
+                            src={item.thumbImage}
+                            alt={item.dishName}
+                            className="img-fluid w-100"
+                          />
+                          <a className="category">{item.categoryName}</a>
+                        </div>
+                        <div className="fp__menu_item_text">
+                          <p className="rating">
+                            {[...Array(5)].map((_, i) => (
+                              <i
+                                key={i}
+                                className={
+                                  i < Math.floor(item.rating)
+                                    ? 'fas fa-star'
+                                    : 'far fa-star'
+                                }
+                              ></i>
+                            ))}
+                            <span>{item.rating}</span>
+                          </p>
+                          <a className="title truncate block whitespace-nowrap overflow-hidden">
+                            {item.dishName}
+                          </a>
+                          <h5 className="price">
+                            {item.offerPrice.toLocaleString()} VNĐ
+                            {item.offerPrice < item.price && (
+                              <del className="ml-2">
+                                {item.price.toLocaleString()} VNĐ
+                              </del>
+                            )}
+                          </h5>
+                        </div>
                       </div>
                     </div>
+                  ))}
+                  <div className="col-12 d-flex justify-content-center mt-4">
+                    <Pagination
+                      current={current}
+                      total={filteredProducts.length}
+                      pageSize={pageSize}
+                      onChange={handlePageChange}
+                      showSizeChanger={false}
+                      className="custom-pagination"
+                    />
                   </div>
-                ))
+                </>
               ) : (
-                <p>No items found</p>
+                <div className="text-center">No items found</div>
               )}
             </div>
           </div>

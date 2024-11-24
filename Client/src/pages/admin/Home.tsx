@@ -114,7 +114,7 @@ function Home() {
       bnb: 'redtext',
     },
     {
-      today: 'Sản phẩm trong kho',
+      today: 'Sản phẩm hết hàng',
       title: '13,200',
       persent: '10%',
       icon: cart,
@@ -246,7 +246,7 @@ function Home() {
     },
   ];
   // const onChange = (pagination, filters, sorter, extra) => {
- 
+
   // };
 
   return (
@@ -321,45 +321,35 @@ function Home() {
           </Col>
         </Row>
       </div>
+      <Row gutter={[24, 0]}>
+        <Col xs={24} sm={24} md={12} lg={12} xl={24} className="mb-24">
+          <Card
+            title="Sản phẩm bán chạy"
+            bordered={false}
+            className="criclebox h-full"
+          >
+            <Table
+              dataSource={bestSellingProducts}
+              columns={[
+                {
+                  title: 'Tên sản phẩm',
+                  dataIndex: 'name',
+                  key: 'name',
+                },
+                {
+                  title: 'Số lượng bán',
+                  dataIndex: 'sales',
+                  key: 'sales',
+                  sorter: (a, b) => a.sales - b.sales,
+                },
+              ]}
+              pagination={false}
+            />
+          </Card>
+        </Col>
+      </Row>
     </>
   );
 }
 
 export default Home;
-
-// <Row gutter={[24, 0]}>
-// <Col xs={24} sm={24} md={12} lg={12} xl={12} className="mb-24">
-//   <Card
-//     title="Sản phẩm bán chạy"
-//     bordered={false}
-//     className="criclebox h-full"
-//   >
-//     <Table
-//       dataSource={bestSellingProducts}
-//       columns={[
-//         {
-//           title: 'Tên sản phẩm',
-//           dataIndex: 'name',
-//           key: 'name',
-//         },
-//         {
-//           title: 'Số lượng bán',
-//           dataIndex: 'sales',
-//           key: 'sales',
-//           sorter: (a, b) => a.sales - b.sales,
-//         },
-//       ]}
-//       pagination={false}
-//     />
-//   </Card>
-// </Col>
-// <Col xs={24} sm={24} md={12} lg={12} xl={12} className="mb-24">
-//   <Card
-//     title="Thông tin kho hàng"
-//     bordered={false}
-//     className="criclebox h-full"
-//   >
-//     {/* Thêm biểu đồ hoặc thông tin về kho hàng ở đây */}
-//   </Card>
-// </Col>
-// </Row>

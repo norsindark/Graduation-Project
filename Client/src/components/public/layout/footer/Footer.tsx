@@ -13,15 +13,18 @@ const Footer = () => {
       description: 'Your email has been sent successfully',
     });
 
-    fetch('https://script.google.com/macros/s/AKfycbwqnYqMaQAfxi20vzN9t-CwAU3zUD6VidbeGZJ9isvb3qSLGm7YbVVT_HtuxPNQJHvMdw/exec', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: new URLSearchParams({
-        email: email,
-      }),
-    });
+    fetch(
+      'https://script.google.com/macros/s/AKfycbwqnYqMaQAfxi20vzN9t-CwAU3zUD6VidbeGZJ9isvb3qSLGm7YbVVT_HtuxPNQJHvMdw/exec',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+          email: email,
+        }),
+      }
+    );
 
     form.resetFields();
   };
@@ -94,19 +97,23 @@ const Footer = () => {
                 <h3>subscribe</h3>
                 <Form form={form} onFinish={handleSubmit}>
                   <Form.Item
-                    className="flex items-center space-x-2 p-2 border border-gray-300 rounded-l-md"
+                    className="flex items-center space-x-2 p-2 border border-gray-300 rounded-l-md "
                     name="email"
-                    rules={[{ required: true, message: 'Please enter your email!' }, { type: 'email', message: 'Please enter a valid email!' }]}
+                    rules={[
+                      { required: true, message: 'Please enter your email!' },
+                      { type: 'email', message: 'Please enter a valid email!' },
+                    ]}
                   >
-                    <Input placeholder="Enter your email" />
+                    <Input placeholder="Enter your email" size="large" />
                   </Form.Item>
                   {/* <Form.Item> */}
                   <Button
-                    size='small'
+                    size="small"
                     type="primary"
                     htmlType="submit"
                     className=" items-center m-1"
-                    icon={<SendOutlined />}>
+                    icon={<SendOutlined />}
+                  >
                     Subscribe
                   </Button>
                   {/* </Form.Item> */}
@@ -164,7 +171,7 @@ const Footer = () => {
           </div>
         </div>
       </div>
-    </footer >
+    </footer>
   );
 };
 
