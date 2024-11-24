@@ -12,6 +12,7 @@ import com.restaurant_management.services.interfaces.OrderService;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.*;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.EntityModel;
@@ -164,13 +165,15 @@ public class OrderServiceImpl implements OrderService {
                     .sum()
                     : 0;
 
-            double totalPrice = (dish.getPrice() * orderItemDto.getQuantity()) + totalAdditionalPrice;
+            double totalPrice = (dish.getOfferPrice() != null)
+                    ? dish.getOfferPrice() * orderItemDto.getQuantity()
+                    : dish.getPrice() * orderItemDto.getQuantity();
 
             OrderItem orderItem = OrderItem.builder()
                     .order(order)
                     .dish(dish)
                     .quantity(orderItemDto.getQuantity())
-                    .price(dish.getPrice())
+                    .price(dish.getOfferPrice() != null ? dish.getOfferPrice() : dish.getPrice())
                     .totalPrice(totalPrice)
                     .options(new ArrayList<>())
                     .build();
@@ -393,44 +396,25 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public Map<String, Map<String, Map<String, Double>>> getDishSalesRevenueAndProfitByMonth() {
         List<Map<String, Object>> monthlyRevenueResults = orderItemRepository.getDishSalesRevenueByMonth();
-        System.out.println(monthlyRevenueResults);
         List<Recipe> recipes = recipeRepository.findAll();
+
+        Map<Dish, List<Recipe>> recipesByDish = recipes.stream()
+                .collect(Collectors.groupingBy(Recipe::getDish));
 
         Map<String, Map<String, Map<String, Double>>> dishStatisticsByMonth = new HashMap<>();
 
-        for (Recipe recipe : recipes) {
-            Dish dish = recipe.getDish();
-            Warehouse warehouse = recipe.getWarehouse();
-            Double quantityUsed = recipe.getQuantityUsed();
-            String recipeUnit = recipe.getUnit();
-            String warehouseUnit = warehouse.getUnit();
+        for (Map.Entry<Dish, List<Recipe>> entry : recipesByDish.entrySet()) {
+            Dish dish = entry.getKey();
+            List<Recipe> dishRecipes = entry.getValue();
 
-            double convertedQuantityUsed = UnitType.convert(quantityUsed, UnitType.fromString(recipeUnit), UnitType.fromString(warehouseUnit));
-            double costPerUnit = warehouse.getImportedPrice();
-
-            String dishName = dish.getDishName();
+            Map<String, Double> stats = calculateDishStats(dish, dishRecipes, monthlyRevenueResults, "month");
 
             monthlyRevenueResults.stream()
-                    .filter(result -> result.get("dishName").equals(dishName))
+                    .filter(result -> result.get("dishName").equals(dish.getDishName()))
                     .forEach(result -> {
                         int month = (int) result.get("month");
                         int year = (int) result.get("year");
-                        double revenue = (double) result.get("totalRevenue");
-
-                        Long totalQuantitySold = (Long) result.get("totalQuantitySold");
-                        int totalQuantitySoldInt = totalQuantitySold != null ? totalQuantitySold.intValue() : 0;
-
-                        double updatedCost = costPerUnit * totalQuantitySoldInt * (convertedQuantityUsed / warehouse.getImportedQuantity());
-
-                        double profit = revenue - updatedCost;
-
-                        Map<String, Double> stats = new HashMap<>();
-                        stats.put("totalRevenue", revenue);
-                        stats.put("totalCost", updatedCost);
-                        stats.put("profit", profit);
-
                         String monthKey = month + "-" + year;
-
                         dishStatisticsByMonth
                                 .computeIfAbsent(monthKey, k -> new HashMap<>())
                                 .put(dish.getDishName(), stats);
@@ -446,41 +430,23 @@ public class OrderServiceImpl implements OrderService {
         List<Map<String, Object>> weeklyRevenueResults = orderItemRepository.getDishSalesRevenueByWeek();
         List<Recipe> recipes = recipeRepository.findAll();
 
+        Map<Dish, List<Recipe>> recipesByDish = recipes.stream()
+                .collect(Collectors.groupingBy(Recipe::getDish));
+
         Map<String, Map<String, Map<String, Double>>> dishStatisticsByWeek = new HashMap<>();
 
-        for (Recipe recipe : recipes) {
-            Dish dish = recipe.getDish();
-            Warehouse warehouse = recipe.getWarehouse();
-            Double quantityUsed = recipe.getQuantityUsed();
-            String recipeUnit = recipe.getUnit();
-            String warehouseUnit = warehouse.getUnit();
+        for (Map.Entry<Dish, List<Recipe>> entry : recipesByDish.entrySet()) {
+            Dish dish = entry.getKey();
+            List<Recipe> dishRecipes = entry.getValue();
 
-            double convertedQuantityUsed = UnitType.convert(quantityUsed, UnitType.fromString(recipeUnit), UnitType.fromString(warehouseUnit));
-            double costPerUnit = warehouse.getImportedPrice();
-
-            String dishName = dish.getDishName();
+            Map<String, Double> stats = calculateDishStats(dish, dishRecipes, weeklyRevenueResults, "week");
 
             weeklyRevenueResults.stream()
-                    .filter(result -> result.get("dishName").equals(dishName))
+                    .filter(result -> result.get("dishName").equals(dish.getDishName()))
                     .forEach(result -> {
                         int week = (int) result.get("week");
                         int year = (int) result.get("year");
-                        double revenue = (double) result.get("totalRevenue");
-
-                        Long totalQuantitySold = (Long) result.get("totalQuantitySold");
-                        int totalQuantitySoldInt = totalQuantitySold != null ? totalQuantitySold.intValue() : 0;
-
-                        double updatedCost = costPerUnit * totalQuantitySoldInt * (convertedQuantityUsed / warehouse.getImportedQuantity());
-
-                        double profit = revenue - updatedCost;
-
-                        Map<String, Double> stats = new HashMap<>();
-                        stats.put("totalRevenue", revenue);
-                        stats.put("totalCost", updatedCost);
-                        stats.put("profit", profit);
-
                         String weekKey = "W" + week + "-" + year;
-
                         dishStatisticsByWeek
                                 .computeIfAbsent(weekKey, k -> new HashMap<>())
                                 .put(dish.getDishName(), stats);
@@ -495,49 +461,60 @@ public class OrderServiceImpl implements OrderService {
     public Map<String, Map<String, Double>> getDishSalesRevenueAndProfit() {
         List<Recipe> recipes = recipeRepository.findAll();
 
-        Map<String, Double> dishTotalRevenue = new HashMap<>();
-        Map<String, Double> dishTotalCost = new HashMap<>();
+        Map<Dish, List<Recipe>> recipesByDish = recipes.stream()
+                .collect(Collectors.groupingBy(Recipe::getDish));
 
-        for (Recipe recipe : recipes) {
-            Dish dish = recipe.getDish();
+        List<Map<String, Object>> revenueResults = orderItemRepository.getDishSalesRevenue();
+
+        Map<String, Map<String, Double>> dishStatistics = new HashMap<>();
+
+        for (Map.Entry<Dish, List<Recipe>> entry : recipesByDish.entrySet()) {
+            Dish dish = entry.getKey();
+            List<Recipe> dishRecipes = entry.getValue();
+
+            Map<String, Double> stats = calculateDishStats(dish, dishRecipes, revenueResults, "total");
+
+            dishStatistics.put(dish.getDishName(), stats);
+        }
+
+        return dishStatistics;
+    }
+
+    @NotNull
+    private Map<String, Double> calculateDishStats(Dish dish, List<Recipe> dishRecipes, List<Map<String, Object>> revenueResults, String timeKey) {
+        double totalCost = 0.0;
+
+        for (Recipe recipe : dishRecipes) {
             Warehouse warehouse = recipe.getWarehouse();
             Double quantityUsed = recipe.getQuantityUsed();
             String recipeUnit = recipe.getUnit();
             String warehouseUnit = warehouse.getUnit();
 
             double convertedQuantityUsed = UnitType.convert(quantityUsed, UnitType.fromString(recipeUnit), UnitType.fromString(warehouseUnit));
-
             double costPerUnit = warehouse.getImportedPrice();
-
-            double cost = costPerUnit * (convertedQuantityUsed / warehouse.getImportedQuantity());
-
-            List<Map<String, Double>> revenueResults = orderItemRepository.getDishSalesRevenue();
-            for (Map<String, Double> result : revenueResults) {
-                String dishName = String.valueOf(result.get("dishName"));
-                if (dishName.equals(dish.getDishName())) {
-                    double revenue = (Double) result.get("totalRevenue");
-                    dishTotalRevenue.put(dishName, revenue);
-                }
-            }
-
-            dishTotalCost.put(dish.getDishName(), cost);
+            totalCost += costPerUnit * convertedQuantityUsed;
         }
 
-        Map<String, Map<String, Double>> dishStatistics = new HashMap<>();
-        for (String dishName : dishTotalRevenue.keySet()) {
-            double revenue = dishTotalRevenue.get(dishName);
-            double cost = dishTotalCost.getOrDefault(dishName, 0.0);
-            double profit = revenue - cost;
+        String dishName = dish.getDishName();
+        double finalTotalCost = totalCost;
 
-            Map<String, Double> stats = new HashMap<>();
-            stats.put("totalRevenue", revenue);
-            stats.put("totalCost", cost);
-            stats.put("profit", profit);
+        Map<String, Double> stats = new HashMap<>();
+        revenueResults.stream()
+                .filter(result -> result.get("dishName").equals(dishName))
+                .forEach(result -> {
+                    double revenue = (double) result.get("totalRevenue");
+                    Long totalQuantitySold = (Long) result.get("totalQuantitySold");
+                    int totalQuantitySoldInt = totalQuantitySold != null ? totalQuantitySold.intValue() : 0;
 
-            dishStatistics.put(dishName, stats);
-        }
+                    double updatedCost = finalTotalCost * totalQuantitySoldInt;
+                    double profit = revenue - updatedCost;
 
-        return dishStatistics;
+                    stats.put("totalRevenue", revenue);
+                    stats.put("totalCost", updatedCost);
+                    stats.put("profit", profit);
+                });
+
+        return stats;
     }
 
     private void sendEmailListOrderItems(String email, List<OrderItemDto> items, String couponId, Double totalPrice, String paymentMethod, String status, Double shippingFee)
