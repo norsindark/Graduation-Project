@@ -7,6 +7,7 @@ import com.restaurant_management.enums.UnitType;
 import com.restaurant_management.exceptions.DataExitsException;
 import com.restaurant_management.payloads.responses.ApiResponse;
 import com.restaurant_management.payloads.responses.OrderResponse;
+import com.restaurant_management.payloads.responses.StatisticResponse;
 import com.restaurant_management.repositories.*;
 import com.restaurant_management.services.interfaces.OrderService;
 import jakarta.mail.MessagingException;
@@ -379,6 +380,11 @@ public class OrderServiceImpl implements OrderService {
                         });
             }
         }
+    }
+
+    @Override
+    public StatisticResponse getTotalRevenue() {
+        return orderRepository.getTotalRevenue();
     }
 
     @Override

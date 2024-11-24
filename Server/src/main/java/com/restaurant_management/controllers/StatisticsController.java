@@ -17,6 +17,12 @@ import org.springframework.web.bind.annotation.RestController;
 public class StatisticsController {
     private final OrderService orderService;
 
+    @GetMapping("order/get-total-revenue")
+    @Operation(summary = "get total revenue", tags = {"Order"})
+    public ResponseEntity<?> getTotalRevenue() throws DataExitsException {
+        return ResponseEntity.ok(orderService.getTotalRevenue());
+    }
+
     @GetMapping("order/get-dish-sales-statistics")
     @Operation(summary = "get dish sales statistics", tags = {"Order"})
     public ResponseEntity<?> getDishSalesStatistics() throws DataExitsException {
