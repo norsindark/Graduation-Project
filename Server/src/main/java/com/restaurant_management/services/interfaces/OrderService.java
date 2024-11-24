@@ -4,6 +4,7 @@ import com.restaurant_management.dtos.OrderDto;
 import com.restaurant_management.exceptions.DataExitsException;
 import com.restaurant_management.payloads.responses.ApiResponse;
 import com.restaurant_management.payloads.responses.OrderResponse;
+import com.restaurant_management.payloads.responses.StatisticResponse;
 import jakarta.mail.MessagingException;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
@@ -27,6 +28,8 @@ public interface OrderService {
 
     ApiResponse cancelOrder(String orderId)
             throws DataExitsException, MessagingException, UnsupportedEncodingException;
+
+    StatisticResponse getTotalRevenue() throws DataExitsException;
 
     Map<String, Long> getDishSalesStatistics() throws DataExitsException;
 
