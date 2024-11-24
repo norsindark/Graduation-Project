@@ -28,7 +28,7 @@ public interface OrderItemRepository extends JpaRepository<OrderItem, String> {
             "JOIN i.order o " +
             "WHERE o.status = 'COMPLETED' " +
             "GROUP BY i.dish.dishName")
-    List<Map<String, Double>> getDishSalesRevenue();
+    List<Map<String, Object>> getDishSalesRevenue();
 
     @Query("SELECT new map(i.dish.dishName as dishName, " +
             "MONTH(i.createdAt) as month, YEAR(i.createdAt) as year, " +
