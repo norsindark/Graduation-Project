@@ -63,6 +63,8 @@ function CheckoutPage() {
   const [editingAddressId, setEditingAddressId] = useState<string | null>(null);
   const [updatedOrderSummary, setUpdatedOrderSummary] =
     useState<OrderSummary | null>(null);
+  const [cachedOrderSummary, setCachedOrderSummary] =
+    useState<OrderSummary | null>(null);
 
   const userId = useSelector((state: RootState) => state.account.user?.id);
 
@@ -157,27 +159,109 @@ function CheckoutPage() {
   };
 
   const handleSelectAddress = async (id: string) => {
-    const address = addresses.find((address) => address.id === id);
-
-    if (!address) {
-      console.error('Address not found');
-      return;
-    }
-
-    const { street, commune, district, city, state, country } = address;
-    const addressString = [street, commune, district, city, state, country]
-      .filter(Boolean)
-      .join(', ');
-
     try {
+      // Kiểm tra id
+      if (!id) {
+        notification.error({
+          message: 'Invalid Address',
+          description: 'Address ID is required',
+          duration: 5,
+          showProgress: true,
+        });
+        return;
+      }
+
+      // Kiểm tra addresses array
+      if (!Array.isArray(addresses) || addresses.length === 0) {
+        notification.error({
+          message: 'No Addresses Available',
+          description: 'Please add a delivery address first',
+          duration: 5,
+          showProgress: true,
+        });
+        return;
+      }
+
+      const address = addresses.find((address) => address.id === id);
+
+      if (!address) {
+        notification.error({
+          message: 'Address Not Found',
+          description: 'The selected address could not be found',
+          duration: 5,
+          showProgress: true,
+        });
+        return;
+      }
+
+      const requiredFields = [
+        'street',
+        'commune',
+        'district',
+        'city',
+        'state',
+        'country',
+      ];
+      const missingFields = requiredFields.filter(
+        (field) => !address[field as keyof typeof address]
+      );
+
+      const { street, commune, district, city, state, country } = address;
+      const addressString = [street, commune, district, city, state, country]
+        .filter(Boolean)
+        .join(', ');
+
+      if (!addressString.trim()) {
+        notification.error({
+          message: 'Invalid Address Format',
+          description: 'Address cannot be empty',
+          duration: 5,
+          showProgress: true,
+        });
+        return;
+      }
+
+      notification.info({
+        message: 'Calculating Delivery Fee',
+        description: 'Please wait while we calculate the delivery fee...',
+        duration: 2,
+        showProgress: true,
+      });
+
       const response = await callGeocoding(addressString);
+
+      if (!response || !response.data) {
+        throw new Error('Invalid response from geocoding service');
+      }
+
       setSelectedAddressId(id);
       const deliveryData: DeliveryResponse = response.data;
       setDeliveryInfo(deliveryData);
+
+      // Kiểm tra và xử lý fee
       const feeString = response.data.fee;
+      if (!feeString) {
+        throw new Error('Delivery fee not available');
+      }
+
       const feeAmount = Math.round(
         parseFloat(feeString.replace(' VND', '').replace(',', ''))
       );
+
+      if (isNaN(feeAmount)) {
+        throw new Error('Invalid delivery fee format');
+      }
+
+      // Kiểm tra orderSummary
+      if (!orderSummary) {
+        notification.error({
+          message: 'Order Information Missing',
+          description: 'Unable to update order summary. Please try again.',
+          duration: 5,
+          showProgress: true,
+        });
+        return;
+      }
 
       const newOrderSummary = {
         ...orderSummary,
@@ -186,18 +270,37 @@ function CheckoutPage() {
           orderSummary.subtotal + feeAmount - (orderSummary.discount || 0)
         ),
       };
+
       setUpdatedOrderSummary(newOrderSummary);
+
+      notification.success({
+        message: 'Address Selected',
+        description: 'Delivery fee has been calculated successfully',
+        duration: 3,
+        showProgress: true,
+      });
     } catch (error) {
-      console.error('Error calling geocoding API', error);
+      console.error('Error in handleSelectAddress:', error);
+
+      let errorMessage = 'An unexpected error occurred';
+      let errorDescription = 'Please try again later';
+
+      if (error instanceof Error) {
+        errorMessage = error.message;
+        errorDescription = 'Please check your address details and try again';
+      }
+
       notification.error({
-        message: 'Error calculating delivery fee',
-        description: 'Unable to calculate delivery fee. Please try again.',
+        message: errorMessage,
+        description: errorDescription,
         duration: 5,
+        showProgress: true,
       });
     }
   };
 
   const handleCreateNewAddress = () => {
+    setCachedOrderSummary(updatedOrderSummary || orderSummary);
     setIsAccountModalOpen(true);
     setEditingAddressId(null);
   };
@@ -411,7 +514,11 @@ function CheckoutPage() {
                   subtotal:{' '}
                   <span>
                     {formatPrice(
-                      (updatedOrderSummary || orderSummary)?.subtotal || 0
+                      (
+                        updatedOrderSummary ||
+                        cachedOrderSummary ||
+                        orderSummary
+                      )?.subtotal || 0
                     )}{' '}
                     VNĐ
                   </span>
@@ -429,7 +536,11 @@ function CheckoutPage() {
                   delivery:{' '}
                   <span>
                     {formatPrice(
-                      (updatedOrderSummary || orderSummary)?.delivery || 0
+                      (
+                        updatedOrderSummary ||
+                        cachedOrderSummary ||
+                        orderSummary
+                      )?.delivery || 0
                     )}{' '}
                     VNĐ
                   </span>
@@ -438,7 +549,11 @@ function CheckoutPage() {
                   discount:{' '}
                   <span>
                     {formatPrice(
-                      (updatedOrderSummary || orderSummary)?.discount || 0
+                      (
+                        updatedOrderSummary ||
+                        cachedOrderSummary ||
+                        orderSummary
+                      )?.discount || 0
                     )}{' '}
                     VNĐ
                   </span>
@@ -447,22 +562,30 @@ function CheckoutPage() {
                   <span>total:</span>{' '}
                   <span>
                     {formatPrice(
-                      (updatedOrderSummary || orderSummary)?.total || 0
+                      (
+                        updatedOrderSummary ||
+                        cachedOrderSummary ||
+                        orderSummary
+                      )?.total || 0
                     )}{' '}
                     VNĐ
                   </span>
                 </p>
 
                 <form>
-                  {orderSummary?.appliedCoupon && (
+                  {(updatedOrderSummary || cachedOrderSummary || orderSummary)
+                    ?.appliedCoupon && (
                     <>
-                      <div className="flex items-center ">
-                        <span className=" w-[181px] ml-4">
-                          Applied Coupon:{' '}
-                        </span>
+                      <div className="flex items-center">
+                        <span className="w-[181px] ml-4">Applied Coupon: </span>
                         <input
                           type="text"
-                          value={orderSummary.appliedCoupon.couponCode}
+                          value={
+                            (updatedOrderSummary?.appliedCoupon?.couponCode ||
+                              cachedOrderSummary?.appliedCoupon?.couponCode ||
+                              orderSummary?.appliedCoupon?.couponCode) ??
+                            ''
+                          }
                           disabled
                           className="applied-coupon-input"
                         />
@@ -487,11 +610,14 @@ function CheckoutPage() {
           onClose={() => {
             setIsAccountModalOpen(false);
             setEditingAddressId(null);
-            fetchAddresses(); // Refresh addresses when modal is closed
+            if (cachedOrderSummary) {
+              setUpdatedOrderSummary(cachedOrderSummary);
+            }
+            fetchAddresses();
           }}
           initialActiveTab="address"
           editingAddressId={editingAddressId}
-          onAddressUpdate={handleAddressUpdate} // Pass the callback
+          onAddressUpdate={handleAddressUpdate}
         />
       )}
     </>

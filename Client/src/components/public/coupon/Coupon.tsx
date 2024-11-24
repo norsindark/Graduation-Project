@@ -156,9 +156,11 @@ function Coupon({ cartItems }: { cartItems: any }) {
 
   return (
     <div className="container mt-4">
-      <h2 className="text-center mb-2 text-uppercase font-bold text-black text-xl drop-shadow-lg">
-        discount for you
-      </h2>
+      {coupons.filter(isValidCoupon).length > 0 && (
+        <h2 className="text-center mb-2 text-uppercase font-bold text-black text-xl drop-shadow-lg">
+          discount for you
+        </h2>
+      )}
 
       <Slider {...settings}>
         {coupons.filter(isValidCoupon).map((coupon: any) => (
