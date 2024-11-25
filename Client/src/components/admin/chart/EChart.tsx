@@ -1,27 +1,72 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import ReactApexChart from 'react-apexcharts';
 import { Row, Col, Typography } from 'antd';
+import { callGetDishSalesStatistics } from '../../../services/serverApi';
 import eChart from './configs/eChart';
 
 const EChart: React.FC = () => {
   const { Title, Paragraph } = Typography;
+  const [chartData, setChartData] = useState<{
+    categories: string[];
+    data: number[];
+  }>({
+    categories: [],
+    data: [],
+  });
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await callGetDishSalesStatistics();
+        const salesData = response.data;
+
+        // Chuyển đổi dữ liệu cho chart
+        const categories = Object.keys(salesData);
+        const data = Object.values(salesData);
+
+        setChartData({
+          categories,
+          data: data as number[],
+        });
+      } catch (error) {
+        console.error('Error fetching chart data:', error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const chartOptions = {
+    ...eChart.options,
+    xaxis: {
+      ...eChart.options.xaxis,
+      categories: chartData.categories,
+    },
+  };
+
+  const chartSeries = [
+    {
+      name: 'Number of sales',
+      data: chartData.data,
+    },
+  ];
 
   const items = [
     {
-      Title: '3.6K',
-      user: 'Users',
+      Title: chartData.data.reduce((a, b) => a + b, 0),
+      user: 'Total number of dishes sold',
     },
     {
-      Title: '2m',
-      user: 'Clicks',
+      Title: chartData.categories.length,
+      user: 'Number of dish types',
     },
     {
-      Title: '$772',
-      user: 'Sales',
+      Title: Math.max(...chartData.data),
+      user: 'Most sold dish',
     },
     {
-      Title: '82',
-      user: 'Items',
+      Title: Math.min(...chartData.data),
+      user: 'Least sold dish',
     },
   ];
 
@@ -30,21 +75,14 @@ const EChart: React.FC = () => {
       <div id="chart">
         <ReactApexChart
           className="bar-chart"
-          options={eChart.options}
-          series={eChart.series}
+          options={chartOptions}
+          series={chartSeries}
           type="bar"
           height={220}
         />
       </div>
       <div className="chart-vistior">
-        <Title level={5}>Active Users</Title>
-        <Paragraph className="lastweek">
-          than last week <span className="bnb2">+30%</span>
-        </Paragraph>
-        <Paragraph className="lastweek">
-          We have created multiple options for you to put together and customize
-          into pixel-perfect pages.
-        </Paragraph>
+        <Title level={5}>Sales Statistics</Title>
         <Row gutter={[16, 16]}>
           {items.map((v, index) => (
             <Col xs={6} xl={6} sm={6} md={6} key={index}>

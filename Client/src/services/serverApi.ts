@@ -530,3 +530,25 @@ export const callGetCommentBlogById = async (blogId: string) => {
 export const callDeleteCommentBlog = async (commentId: string) => {
   return axios.delete(`/api/v1/dashboard/comment/delete-comment?commentId=${commentId}`);
 }
+
+// statistic
+
+export const callGetTotalRevenue = async () => {
+  return axios.get(`/api/v1/dashboard/statistics/order/get-total-revenue`);
+}
+
+export const callGetDishSalesStatistics = async () => {
+  return axios.get(`/api/v1/dashboard/statistics/order/get-dish-sales-statistics`);
+}
+
+export const callGetDishSalesRevenueProfit = async () => {
+  return axios.get(`/api/v1/dashboard/statistics/order/get-dish-sales-revenue-profit`);
+}
+
+export const callGetDishSalesRevenueProfitByWeek = async () => {
+  return axios.get(`/api/v1/dashboard/statistics/order/get-dish-sales-revenue-profit-by-week`);
+}
+
+export const callGetDishSalesRevenueProfitByMonth = async () => {
+  return axios.get(`/api/v1/dashboard/statistics/order/get-dish-sales-revenue-profit-by-month`);
+}
