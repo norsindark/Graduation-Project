@@ -252,8 +252,11 @@ function CheckoutPage() {
         throw new Error('Invalid delivery fee format');
       }
 
-      // Kiểm tra orderSummary
-      if (!orderSummary) {
+      // Sửa phần kiểm tra orderSummary
+      const currentOrderSummary =
+        updatedOrderSummary || cachedOrderSummary || orderSummary;
+
+      if (!currentOrderSummary) {
         notification.error({
           message: 'Order Information Missing',
           description: 'Unable to update order summary. Please try again.',
@@ -263,15 +266,20 @@ function CheckoutPage() {
         return;
       }
 
+      // Cập nhật orderSummary mới
       const newOrderSummary = {
-        ...orderSummary,
+        ...currentOrderSummary,
         delivery: feeAmount,
         total: Math.round(
-          orderSummary.subtotal + feeAmount - (orderSummary.discount || 0)
+          currentOrderSummary.subtotal +
+            feeAmount -
+            (currentOrderSummary.discount || 0)
         ),
       };
 
       setUpdatedOrderSummary(newOrderSummary);
+      // Cập nhật cả cachedOrderSummary
+      setCachedOrderSummary(newOrderSummary);
 
       notification.success({
         message: 'Address Selected',
@@ -610,9 +618,6 @@ function CheckoutPage() {
           onClose={() => {
             setIsAccountModalOpen(false);
             setEditingAddressId(null);
-            if (cachedOrderSummary) {
-              setUpdatedOrderSummary(cachedOrderSummary);
-            }
             fetchAddresses();
           }}
           initialActiveTab="address"
