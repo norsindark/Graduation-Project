@@ -54,7 +54,7 @@ const Category: React.FC = () => {
       if (sortQuery) {
         query += `&sortBy=${sortQuery}`;
       } else {
-        query += `&sortBy=name&sortDir=desc`;
+        query += `&sortBy=name&sortDir=asc`;
       }
       const response = await callGetAllCategory(query);
       if (
@@ -198,7 +198,11 @@ const Category: React.FC = () => {
       render: (description: string) =>
         description ? (
           <Tooltip title={description}>
-            <span>{description.length > 50 ? description.slice(0, 50) + '...' : description}</span>
+            <span>
+              {description.length > 50
+                ? description.slice(0, 50) + '...'
+                : description}
+            </span>
           </Tooltip>
         ) : (
           'No Description'

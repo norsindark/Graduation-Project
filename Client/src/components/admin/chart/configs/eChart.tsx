@@ -3,8 +3,8 @@ import { ApexOptions } from 'apexcharts';
 const eChart = {
   series: [
     {
-      name: 'Sales',
-      data: [450, 200, 100, 220, 500, 100, 400, 230, 500],
+      name: 'Number of sales',
+      data: [],
       color: '#fff',
     },
   ],
@@ -39,24 +39,12 @@ const eChart = {
       strokeDashArray: 2,
     },
     xaxis: {
-      categories: [
-        'Feb',
-        'Mar',
-        'Apr',
-        'May',
-        'Jun',
-        'Jul',
-        'Aug',
-        'Sep',
-        'Oct',
-      ],
+      categories: [],
       labels: {
         show: true,
         align: 'right',
-        minWidth: 0,
-        maxWidth: 160,
         style: {
-          colors: Array(9).fill('#fff'),
+          colors: '#fff',
         },
       },
     },
@@ -64,17 +52,16 @@ const eChart = {
       labels: {
         show: true,
         align: 'right',
-        minWidth: 0,
-        maxWidth: 160,
         style: {
-          colors: Array(9).fill('#fff'),
+          colors: '#fff',
         },
+        formatter: (value: number) => Math.round(value).toString(),
       },
     },
     tooltip: {
       y: {
         formatter: function (val: number) {
-          return '$ ' + val + ' thousands';
+          return val.toString() + ' dishes';
         },
       },
     },

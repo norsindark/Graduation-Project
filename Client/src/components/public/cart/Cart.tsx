@@ -116,9 +116,6 @@ const Cart = ({
           >
             view cart
           </Link>
-          <a className="checkout" href="check_out.html">
-            checkout
-          </a>
         </div>
       </div>
     </>

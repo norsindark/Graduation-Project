@@ -12,6 +12,9 @@ import {
 } from '../../services/serverApi';
 import Echart from '../../components/admin/chart/EChart';
 import LineChart from '../../components/admin/chart/LineChart';
+import ChartProfitWeekAndMonth from '../../components/admin/chart/ChartProfitWeekAndMonth';
+import { TableOutlined } from '@ant-design/icons';
+import { BarChartOutlined } from '@ant-design/icons';
 
 interface DishRevenue {
   totalRevenue: number;
@@ -156,7 +159,7 @@ function Home() {
 
   const [totalUsers, setTotalUsers] = useState({
     totalUser: 0,
-    userToday: 0.00 + ' %',
+    userToday: 0.0 + ' %',
   });
 
   const [previousStatistics, setPreviousStatistics] = useState({
@@ -190,8 +193,6 @@ function Home() {
         const monthlyStatsResponse =
           await callGetDishSalesRevenueProfitByMonth();
 
-        
-
         const dishSalesData = dishSalesResponse.data;
         const formattedSalesData = Object.entries(dishSalesData).map(
           ([name, sales]) => ({
@@ -202,7 +203,7 @@ function Home() {
         setBestSellingProducts(formattedSalesData);
 
         console.log(totalUserStatistics.data);
-        
+
         setTotalUsers(totalUserStatistics.data);
 
         setDishRevenueStats(dishRevenueResponse.data);
@@ -438,6 +439,12 @@ function Home() {
     }))
   );
 
+  const [viewMode, setViewMode] = useState<'table' | 'chart'>('table');
+
+  const toggleViewMode = () => {
+    setViewMode((prev) => (prev === 'table' ? 'chart' : 'table'));
+  };
+
   return (
     <>
       <div className="layout-content">
@@ -491,8 +498,77 @@ function Home() {
           </Col>
         </Row>
       </div>
+      <Row gutter={[24, 0]} justify="end" className="mb-24">
+        <Col>
+          <Button
+            type="primary"
+            onClick={toggleViewMode}
+            icon={
+              viewMode === 'table' ? <BarChartOutlined /> : <TableOutlined />
+            }
+          >
+            Switch to {viewMode === 'table' ? 'Chart' : 'Table'} View
+          </Button>
+        </Col>
+      </Row>
+      {viewMode === 'table' ? (
+        <>
+          <Row gutter={[24, 0]}>
+            <Col xs={24} sm={24} md={12} lg={12} xl={24} className="mb-24">
+              <Card
+                title="Weekly Revenue Statistics"
+                bordered={false}
+                className="criclebox h-full"
+              >
+                <Table
+                  dataSource={weeklyData}
+                  columns={weeklyColumns}
+                  pagination={{
+                    pageSize: 5,
+                    showSizeChanger: true,
+                  }}
+                />
+              </Card>
+            </Col>
+          </Row>
+
+          <Row gutter={[24, 0]}>
+            <Col xs={24} sm={24} md={12} lg={12} xl={24} className="mb-24">
+              <Card
+                title="Monthly Revenue Statistics"
+                bordered={false}
+                className="criclebox h-full"
+              >
+                <Table
+                  dataSource={monthlyData}
+                  columns={monthlyColumns}
+                  pagination={{
+                    pageSize: 5,
+                    showSizeChanger: true,
+                  }}
+                />
+              </Card>
+            </Col>
+          </Row>
+        </>
+      ) : (
+        <Row gutter={[24, 0]}>
+          <Col xs={24} sm={24} md={12} lg={12} xl={24} className="mb-24">
+            <Card
+              title="Revenue Statistics Chart"
+              bordered={false}
+              className="criclebox h-full"
+            >
+              <ChartProfitWeekAndMonth
+                weeklyStats={weeklyStats}
+                monthlyStats={monthlyStats}
+              />
+            </Card>
+          </Col>
+        </Row>
+      )}
       <Row gutter={[24, 0]}>
-        <Col xs={24} sm={24} md={12} lg={12} xl={24} className="mb-24">
+        <Col xs={24} sm={24} md={12} lg={12} xl={12} className="mb-24">
           <Card
             title="Best Selling Products"
             bordered={false}
@@ -510,9 +586,7 @@ function Home() {
             />
           </Card>
         </Col>
-      </Row>
-      <Row gutter={[24, 0]}>
-        <Col xs={24} sm={24} md={12} lg={12} xl={24} className="mb-24">
+        <Col xs={24} sm={24} md={12} lg={12} xl={12} className="mb-24">
           <Card
             title="Revenue Statistics by Dish"
             bordered={false}
@@ -527,42 +601,6 @@ function Home() {
                 showTotal: (total) => `Total ${total} dishes`,
               }}
               scroll={{ x: 800 }}
-            />
-          </Card>
-        </Col>
-      </Row>
-      <Row gutter={[24, 0]}>
-        <Col xs={24} sm={24} md={12} lg={12} xl={24} className="mb-24">
-          <Card
-            title="Weekly Revenue Statistics"
-            bordered={false}
-            className="criclebox h-full"
-          >
-            <Table
-              dataSource={weeklyData}
-              columns={weeklyColumns}
-              pagination={{
-                pageSize: 5,
-                showSizeChanger: true,
-              }}
-            />
-          </Card>
-        </Col>
-      </Row>
-      <Row gutter={[24, 0]}>
-        <Col xs={24} sm={24} md={12} lg={12} xl={24} className="mb-24">
-          <Card
-            title="Monthly Revenue Statistics"
-            bordered={false}
-            className="criclebox h-full"
-          >
-            <Table
-              dataSource={monthlyData}
-              columns={monthlyColumns}
-              pagination={{
-                pageSize: 5,
-                showSizeChanger: true,
-              }}
             />
           </Card>
         </Col>
