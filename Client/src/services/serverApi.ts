@@ -552,3 +552,7 @@ export const callGetDishSalesRevenueProfitByWeek = async () => {
 export const callGetDishSalesRevenueProfitByMonth = async () => {
   return axios.get(`/api/v1/dashboard/statistics/order/get-dish-sales-revenue-profit-by-month`);
 }
+
+export const callGetTotalUserStatistics = async () => {
+  return axios.get(`/api/v1/dashboard/statistics/user/get-total-user-statistics`);
+}
