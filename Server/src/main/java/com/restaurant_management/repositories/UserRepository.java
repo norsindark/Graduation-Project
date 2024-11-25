@@ -11,9 +11,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.sql.Timestamp;
-import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, String> {
@@ -67,4 +65,10 @@ public interface UserRepository extends JpaRepository<User, String> {
             "FROM User u " +
             "WHERE u.createdAt <= :oneYearAgo")
     List<UserMembershipDto> findUsersWithCreatedAtBeforeYear(@Param("oneYearAgo") Timestamp oneYearAgo);
+
+    @Query("SELECT COUNT(u) FROM User u")
+    Long countTotalUsers();
+
+    @Query("SELECT COUNT(u) FROM User u WHERE u.createdAt >= :today")
+    Long countToDayUsers(@Param("today") Timestamp today);
 }

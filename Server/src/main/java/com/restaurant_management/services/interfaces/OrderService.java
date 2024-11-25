@@ -28,14 +28,4 @@ public interface OrderService {
 
     ApiResponse cancelOrder(String orderId)
             throws DataExitsException, MessagingException, UnsupportedEncodingException;
-
-    StatisticResponse getTotalRevenue() throws DataExitsException;
-
-    Map<String, Long> getDishSalesStatistics() throws DataExitsException;
-
-    Map<String, Map<String, Double>> getDishSalesRevenueAndProfit();
-
-    Map<String, Map<String, Map<String, Double>>> getDishSalesRevenueAndProfitByMonth();
-
-    Map<String, Map<String, Map<String, Double>>> getDishSalesRevenueAndProfitByWeek();
 }
