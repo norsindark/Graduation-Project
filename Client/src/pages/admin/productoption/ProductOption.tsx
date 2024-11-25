@@ -99,6 +99,8 @@ const ProductOption: React.FC = () => {
           options: [],
           displayOrder: `${group.displayOrder}-${index + 1}`,
         }));
+      } else {
+        group.children = undefined;
       }
     };
 
@@ -222,41 +224,46 @@ const ProductOption: React.FC = () => {
     {
       title: 'Action',
       key: 'actions',
-      render: (_: any, record: DishOptionGroupItem) => (
-        <Space>
-          {record.children && (
-            <Button
-              type="primary"
-              shape="round"
-              icon={<EditOutlined />}
-              onClick={() => handleEditClick(record)}
+      render: (_: any, record: DishOptionGroupItem) => {
+        const isChildOption = record.displayOrder?.includes('-');
+        const isOption = !Array.isArray(record.options) || isChildOption;
+
+        return (
+          <Space>
+            {!isOption && (
+              <Button
+                type="primary"
+                shape="round"
+                icon={<EditOutlined />}
+                onClick={() => handleEditClick(record)}
+              >
+                Edit
+              </Button>
+            )}
+            <Popconfirm
+              title={
+                isOption
+                  ? 'Delete this option product?'
+                  : 'Delete this group option product?'
+              }
+              onConfirm={() =>
+                isOption
+                  ? handleDeleteClickOption(record.groupId)
+                  : handleDeleteClick(record.groupId)
+              }
             >
-              Edit
-            </Button>
-          )}
-          <Popconfirm
-            title={
-              !record.children
-                ? 'Delete this option product?'
-                : 'Delete this group option product?'
-            }
-            onConfirm={() =>
-              record.children
-                ? handleDeleteClick(record.groupId)
-                : handleDeleteClickOption(record.groupId)
-            }
-          >
-            <Button
-              type="primary"
-              danger
-              shape="round"
-              icon={<DeleteOutlined />}
-            >
-              {!record.children ? 'Delete Option' : 'Delete'}
-            </Button>
-          </Popconfirm>
-        </Space>
-      ),
+              <Button
+                type="primary"
+                danger
+                shape="round"
+                icon={<DeleteOutlined />}
+              >
+                {isOption ? 'Delete Option' : 'Delete'}
+              </Button>
+            </Popconfirm>
+          </Space>
+        );
+      },
     },
   ];
 

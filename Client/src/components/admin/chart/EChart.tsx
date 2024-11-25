@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import ReactApexChart from 'react-apexcharts';
-import { Row, Col, Typography } from 'antd';
+import { Row, Col, Typography, Spin } from 'antd';
 import { callGetDishSalesStatistics } from '../../../services/serverApi';
 import eChart from './configs/eChart';
 
 const EChart: React.FC = () => {
-  const { Title, Paragraph } = Typography;
+  const { Title } = Typography;
+  const [loading, setLoading] = useState(true);
   const [chartData, setChartData] = useState<{
     categories: string[];
     data: number[];
@@ -17,19 +18,21 @@ const EChart: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setLoading(true);
         const response = await callGetDishSalesStatistics();
         const salesData = response.data;
 
-        // Chuyển đổi dữ liệu cho chart
         const categories = Object.keys(salesData);
-        const data = Object.values(salesData);
+        const data = Object.values(salesData) as number[];
 
         setChartData({
           categories,
-          data: data as number[],
+          data,
         });
       } catch (error) {
         console.error('Error fetching chart data:', error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -41,6 +44,21 @@ const EChart: React.FC = () => {
     xaxis: {
       ...eChart.options.xaxis,
       categories: chartData.categories,
+      labels: {
+        ...eChart.options.xaxis?.labels,
+        style: {
+          colors: Array(chartData.categories.length).fill('#fff'),
+        },
+      },
+    },
+    yaxis: {
+      ...eChart.options.yaxis,
+      labels: {
+        ...(eChart.options.yaxis as ApexYAxis).labels,
+        style: {
+          colors: Array(10).fill('#fff'), // Số lượng nhãn trục y
+        },
+      },
     },
   };
 
@@ -48,27 +66,32 @@ const EChart: React.FC = () => {
     {
       name: 'Number of sales',
       data: chartData.data,
+      color: '#fff',
     },
   ];
 
   const items = [
     {
-      Title: chartData.data.reduce((a, b) => a + b, 0),
-      user: 'Total number of dishes sold',
+      title: chartData.data.reduce((a, b) => a + b, 0),
+      description: 'Total number of dishes sold',
     },
     {
-      Title: chartData.categories.length,
-      user: 'Number of dish types',
+      title: chartData.categories.length,
+      description: 'Number of dish types',
     },
     {
-      Title: Math.max(...chartData.data),
-      user: 'Most sold dish',
+      title: Math.max(...(chartData.data.length ? chartData.data : [0])),
+      description: 'Most sold dish',
     },
     {
-      Title: Math.min(...chartData.data),
-      user: 'Least sold dish',
+      title: Math.min(...(chartData.data.length ? chartData.data : [0])),
+      description: 'Least sold dish',
     },
   ];
+
+  if (loading) {
+    return <Spin size="large" className="center-spin" />;
+  }
 
   return (
     <>
@@ -84,11 +107,11 @@ const EChart: React.FC = () => {
       <div className="chart-vistior">
         <Title level={5}>Sales Statistics</Title>
         <Row gutter={[16, 16]}>
-          {items.map((v, index) => (
+          {items.map((item, index) => (
             <Col xs={6} xl={6} sm={6} md={6} key={index}>
               <div className="chart-visitor-count">
-                <Title level={4}>{v.Title}</Title>
-                <span>{v.user}</span>
+                <Title level={4}>{item.title}</Title>
+                <span>{item.description}</span>
               </div>
             </Col>
           ))}
