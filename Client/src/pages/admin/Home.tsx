@@ -8,6 +8,7 @@ import {
   callGetDishSalesRevenueProfit,
   callGetDishSalesRevenueProfitByWeek,
   callGetDishSalesRevenueProfitByMonth,
+  callGetTotalUserStatistics,
 } from '../../services/serverApi';
 import Echart from '../../components/admin/chart/EChart';
 import LineChart from '../../components/admin/chart/LineChart';
@@ -153,6 +154,11 @@ function Home() {
     sales: 0,
   });
 
+  const [totalUsers, setTotalUsers] = useState({
+    totalUser: 0,
+    userToday: 0.00 + ' %',
+  });
+
   const [previousStatistics, setPreviousStatistics] = useState({
     totalRevenue: 0,
     totalOrders: 0,
@@ -177,11 +183,14 @@ function Home() {
         setStatistics(currentStats.data);
         setPreviousStatistics(previousStats.data);
 
+        const totalUserStatistics = await callGetTotalUserStatistics();
         const dishSalesResponse = await callGetDishSalesStatistics();
         const dishRevenueResponse = await callGetDishSalesRevenueProfit();
         const weeklyStatsResponse = await callGetDishSalesRevenueProfitByWeek();
         const monthlyStatsResponse =
           await callGetDishSalesRevenueProfitByMonth();
+
+        
 
         const dishSalesData = dishSalesResponse.data;
         const formattedSalesData = Object.entries(dishSalesData).map(
@@ -191,6 +200,10 @@ function Home() {
           })
         );
         setBestSellingProducts(formattedSalesData);
+
+        console.log(totalUserStatistics.data);
+        
+        setTotalUsers(totalUserStatistics.data);
 
         setDishRevenueStats(dishRevenueResponse.data);
         setWeeklyStats(weeklyStatsResponse.data);
@@ -233,7 +246,7 @@ function Home() {
     },
     {
       today: 'Orders',
-      title: `+${statistics.totalOrders}`,
+      title: `${statistics.totalOrders}`,
       persent: `${calculatePercentageChange(
         statistics.totalOrders,
         previousStatistics.totalOrders
@@ -245,9 +258,9 @@ function Home() {
           : 'redtext',
     },
     {
-      today: 'Out of Stock Products',
-      title: '13,200',
-      persent: '10%',
+      today: 'Total Users',
+      title: `${totalUsers.totalUser}`,
+      persent: `${totalUsers.userToday}`,
       icon: cart,
       bnb: 'bnb2',
     },
