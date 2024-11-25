@@ -1,9 +1,42 @@
-import React, { useState } from 'react';
-import { Button, Card, Col, Row, Typography } from 'antd';
-import { Table, Tag, Space } from 'antd';
+import React, { useState, useEffect } from 'react';
+import { Button, Card, Col, Row, Typography, Tag } from 'antd';
+import { Table } from 'antd';
 
+import {
+  callGetTotalRevenue,
+  callGetDishSalesStatistics,
+  callGetDishSalesRevenueProfit,
+  callGetDishSalesRevenueProfitByWeek,
+  callGetDishSalesRevenueProfitByMonth,
+} from '../../services/serverApi';
 import Echart from '../../components/admin/chart/EChart';
 import LineChart from '../../components/admin/chart/LineChart';
+
+interface DishRevenue {
+  totalRevenue: number;
+  profit: number;
+  totalCost: number;
+}
+
+interface WeeklyDishStats {
+  [week: string]: {
+    [dishName: string]: {
+      totalRevenue: number;
+      profit: number;
+      totalCost: number;
+    };
+  };
+}
+
+interface MonthlyDishStats {
+  [month: string]: {
+    [dishName: string]: {
+      totalRevenue: number;
+      profit: number;
+      totalCost: number;
+    };
+  };
+}
 
 function Home() {
   const { Title } = Typography;
@@ -98,156 +131,299 @@ function Home() {
     </svg>,
   ];
 
+  const [statistics, setStatistics] = useState({
+    totalRevenue: 0,
+    totalOrders: 0,
+  });
+
+  const [bestSellingProducts, setBestSellingProducts] = useState<
+    Array<{ name: string; sales: number }>
+  >([]);
+
+  const [dishRevenueStats, setDishRevenueStats] = useState<
+    Record<string, DishRevenue>
+  >({});
+
+  const [weeklyStats, setWeeklyStats] = useState<WeeklyDishStats>({});
+  const [monthlyStats, setMonthlyStats] = useState<MonthlyDishStats>({});
+
+  const [totalProfit, setTotalProfit] = useState(0);
+  const [bestSellingDish, setBestSellingDish] = useState({
+    name: '',
+    sales: 0,
+  });
+
+  const [previousStatistics, setPreviousStatistics] = useState({
+    totalRevenue: 0,
+    totalOrders: 0,
+  });
+
+  const calculatePercentageChange = (
+    current: number,
+    previous: number
+  ): number => {
+    if (previous === 0) return 100;
+    return ((current - previous) / previous) * 100;
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [currentStats, previousStats] = await Promise.all([
+          callGetTotalRevenue(),
+          callGetTotalRevenue(),
+        ]);
+
+        setStatistics(currentStats.data);
+        setPreviousStatistics(previousStats.data);
+
+        const dishSalesResponse = await callGetDishSalesStatistics();
+        const dishRevenueResponse = await callGetDishSalesRevenueProfit();
+        const weeklyStatsResponse = await callGetDishSalesRevenueProfitByWeek();
+        const monthlyStatsResponse =
+          await callGetDishSalesRevenueProfitByMonth();
+
+        const dishSalesData = dishSalesResponse.data;
+        const formattedSalesData = Object.entries(dishSalesData).map(
+          ([name, sales]) => ({
+            name,
+            sales: sales as number,
+          })
+        );
+        setBestSellingProducts(formattedSalesData);
+
+        setDishRevenueStats(dishRevenueResponse.data);
+        setWeeklyStats(weeklyStatsResponse.data);
+        setMonthlyStats(monthlyStatsResponse.data);
+
+        const totalProfit = Object.values(dishRevenueResponse.data).reduce(
+          (sum: number, stats: any) => sum + (stats.profit || 0),
+          0
+        );
+        setTotalProfit(totalProfit);
+
+        const bestSeller = Object.entries(dishSalesResponse.data).reduce(
+          (max, [name, sales]) =>
+            (sales as number) > max.sales
+              ? { name, sales: sales as number }
+              : max,
+          { name: '', sales: 0 }
+        );
+        setBestSellingDish(bestSeller);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+    fetchData();
+  }, []);
+
   const count = [
     {
-      today: 'Tổng doanh thu',
-      title: '$53,000',
-      persent: '+30%',
+      today: 'Total Revenue',
+      title: `${statistics.totalRevenue.toLocaleString()}đ`,
+      persent: `${calculatePercentageChange(
+        statistics.totalRevenue,
+        previousStatistics.totalRevenue
+      ).toFixed(1)}%`,
       icon: dollor,
-      bnb: 'bnb2',
+      bnb:
+        statistics.totalRevenue >= previousStatistics.totalRevenue
+          ? 'bnb2'
+          : 'redtext',
     },
     {
-      today: 'Đơn hàng',
-      title: '+1,200',
-      persent: '-20%',
+      today: 'Orders',
+      title: `+${statistics.totalOrders}`,
+      persent: `${calculatePercentageChange(
+        statistics.totalOrders,
+        previousStatistics.totalOrders
+      ).toFixed(1)}%`,
       icon: heart,
-      bnb: 'redtext',
+      bnb:
+        statistics.totalOrders >= previousStatistics.totalOrders
+          ? 'bnb2'
+          : 'redtext',
     },
     {
-      today: 'Sản phẩm hết hàng',
+      today: 'Out of Stock Products',
       title: '13,200',
       persent: '10%',
       icon: cart,
       bnb: 'bnb2',
     },
+
     {
-      today: 'Khách hàng',
-      title: '3,200',
-      persent: '+20%',
+      today: 'Best Selling Item',
+      title: `${bestSellingDish.sales} `,
+      persent: '+25%',
       icon: profile,
       bnb: 'bnb2',
     },
   ];
 
-  const bestSellingProducts = [
-    { name: 'Sản phẩm A', sales: 1200 },
-    { name: 'Sản phẩm B', sales: 950 },
-    { name: 'Sản phẩm C', sales: 800 },
-    { name: 'Sản phẩm D', sales: 750 },
-    { name: 'Sản phẩm E', sales: 600 },
+  const bestSellingColumns = [
+    {
+      title: 'Product Name',
+      dataIndex: 'name',
+      key: 'name',
+      width: '60%',
+      ellipsis: true,
+    },
+    {
+      title: 'Sales Quantity',
+      dataIndex: 'sales',
+      key: 'sales',
+      width: '40%',
+      sorter: (a: any, b: any) => a.sales - b.sales,
+      render: (sales: number) => (
+        <Tag color="blue">{sales.toLocaleString()}</Tag>
+      ),
+    },
   ];
 
-  const columns = [
+  const revenueColumns = [
     {
-      title: 'Tracking ID',
-      dataIndex: 'trackingId',
-      key: 'trackingId',
+      title: 'Dish Name',
+      dataIndex: 'name',
+      key: 'name',
+      width: '30%',
+      ellipsis: true,
     },
     {
-      title: 'Product',
-      dataIndex: 'product',
-      key: 'product',
-      sorter: (a: any, b: any) => a.age - b.age,
+      title: 'Revenue',
+      dataIndex: 'revenue',
+      key: 'revenue',
+      width: '25%',
+      render: (value: number) => (
+        <Tag color="green">{`${value?.toLocaleString()}đ`}</Tag>
+      ),
+      sorter: (a: any, b: any) => a.revenue - b.revenue,
     },
     {
-      title: 'Customer',
-      dataIndex: 'customer',
-      key: 'customer',
-      sorter: (a: any, b: any) => a.age - b.age,
+      title: 'Cost',
+      dataIndex: 'cost',
+      key: 'cost',
+      width: '20%',
+      render: (value: number) => (
+        <Tag color="red">{`${value?.toLocaleString()}đ`}</Tag>
+      ),
+      sorter: (a: any, b: any) => a.cost - b.cost,
     },
     {
-      title: 'Date',
-      dataIndex: 'date',
-      key: 'date',
-      sorter: (a: any, b: any) => a.age - b.age,
+      title: 'Profit',
+      dataIndex: 'profit',
+      key: 'profit',
+      width: '25%',
+      render: (value: number) => (
+        <Tag color={value >= 0 ? 'green' : 'red'}>
+          {`${value?.toLocaleString()}đ`}
+        </Tag>
+      ),
+      sorter: (a: any, b: any) => a.profit - b.profit,
+    },
+  ];
+
+  const revenueData = Object.entries(dishRevenueStats).map(([name, stats]) => ({
+    key: name,
+    name,
+    revenue: stats.totalRevenue || 0,
+    cost: stats.totalCost || 0,
+    profit: stats.profit || 0,
+  }));
+
+  const weeklyColumns = [
+    {
+      title: 'Week',
+      dataIndex: 'week',
+      key: 'week',
     },
     {
-      title: 'Amount',
-      dataIndex: 'amount',
-      key: 'amount',
-      sorter: (a: any, b: any) => a.age - b.age,
+      title: 'Dish',
+      dataIndex: 'dishName',
+      key: 'dishName',
     },
     {
-      title: 'Payment Method',
-      dataIndex: 'paymentMethod',
-      key: 'paymentMethod',
-      sorter: (a: any, b: any) => a.age - b.age,
+      title: 'Revenue',
+      dataIndex: 'revenue',
+      key: 'revenue',
+      render: (value: number) => `${value?.toLocaleString()}đ`,
+      sorter: (a: any, b: any) => a.revenue - b.revenue,
     },
     {
-      title: 'Status',
-      dataIndex: 'status',
-      key: 'status',
-      render: (status: any) => {
-        let color =
-          status === 'Approved'
-            ? 'green'
-            : status === 'Pending'
-              ? 'orange'
-              : 'red';
-        return (
-          <Tag color={color} key={status}>
-            {status}
-          </Tag>
-        );
+      title: 'Cost',
+      dataIndex: 'cost',
+      key: 'cost',
+      render: (value: number) => `${value?.toLocaleString()}đ`,
+      sorter: (a: any, b: any) => a.cost - b.cost,
+    },
+    {
+      title: 'Profit',
+      dataIndex: 'profit',
+      key: 'profit',
+      render: (value: number) => `${value?.toLocaleString()}đ`,
+      sorter: (a: any, b: any) => a.profit - b.profit,
+    },
+  ];
+
+  const weeklyData = Object.entries(weeklyStats).flatMap(([week, dishes]) =>
+    Object.entries(dishes).map(([dishName, stats]) => ({
+      key: `${week}-${dishName}`,
+      week,
+      dishName,
+      revenue: stats.totalRevenue || 0,
+      cost: stats.totalCost || 0,
+      profit: stats.profit || 0,
+    }))
+  );
+
+  const monthlyColumns = [
+    {
+      title: 'Month',
+      dataIndex: 'month',
+      key: 'month',
+      render: (month: string) => {
+        const [m, y] = month.split('-');
+        return `Month ${m}/${y}`;
       },
     },
-  ];
-
-  const data = [
     {
-      key: '1',
-      trackingId: '1141513',
-      product: 'Acer Nitro 5',
-      customer: 'John Smith',
-      date: '1 March',
-      amount: 730,
-      paymentMethod: 'Cash on Delivery',
-      status: 'Approved',
+      title: 'Dish',
+      dataIndex: 'dishName',
+      key: 'dishName',
     },
     {
-      key: '2',
-      trackingId: '2422355',
-      product: 'Playstation 5',
-      customer: 'Michael Doe',
-      date: '1 March',
-      amount: 900,
-      paymentMethod: 'Online Payment',
-      status: 'Pending',
+      title: 'Revenue',
+      dataIndex: 'revenue',
+      key: 'revenue',
+      render: (value: number) => `${value?.toLocaleString()}đ`,
+      sorter: (a: any, b: any) => a.revenue - b.revenue,
     },
     {
-      key: '3',
-      trackingId: '1184513',
-      product: 'Redragon S101',
-      customer: 'John Smith',
-      date: '1 March',
-      amount: 35,
-      paymentMethod: 'Cash on Delivery',
-      status: 'Approved',
+      title: 'Cost',
+      dataIndex: 'cost',
+      key: 'cost',
+      render: (value: number) => `${value?.toLocaleString()}đ`,
+      sorter: (a: any, b: any) => a.cost - b.cost,
     },
     {
-      key: '4',
-      trackingId: '2557411',
-      product: 'Razer Blade 15',
-      customer: 'Jane Smith',
-      date: '1 March',
-      amount: 920,
-      paymentMethod: 'Online Payment',
-      status: 'Pending',
-    },
-    {
-      key: '5',
-      trackingId: '2451023',
-      product: 'ASUS ROG Strix',
-      customer: 'Harold Carol',
-      date: '1 March',
-      amount: 2000,
-      paymentMethod: 'Online Payment',
-      status: 'Approved',
+      title: 'Profit',
+      dataIndex: 'profit',
+      key: 'profit',
+      render: (value: number) => `${value?.toLocaleString()}đ`,
+      sorter: (a: any, b: any) => a.profit - b.profit,
     },
   ];
-  // const onChange = (pagination, filters, sorter, extra) => {
 
-  // };
+  const monthlyData = Object.entries(monthlyStats).flatMap(([month, dishes]) =>
+    Object.entries(dishes).map(([dishName, stats]) => ({
+      key: `${month}-${dishName}`,
+      month,
+      dishName,
+      revenue: stats.totalRevenue || 0,
+      cost: stats.totalCost || 0,
+      profit: stats.profit || 0,
+    }))
+  );
 
   return (
     <>
@@ -301,49 +477,79 @@ function Home() {
             </Card>
           </Col>
         </Row>
-
-        <Row gutter={[24, 0]}>
-          <Col xs={24} sm={24} md={24} lg={24} xl={24} className="mb-24">
-            <Table
-              className="def"
-              columns={columns}
-              dataSource={data}
-              // onChange={onChange}
-              rowKey="key"
-              rowHoverable={true}
-              pagination={{
-                current: 1,
-                pageSize: 5,
-                showSizeChanger: true,
-                total: 5,
-              }}
-            />
-          </Col>
-        </Row>
       </div>
       <Row gutter={[24, 0]}>
         <Col xs={24} sm={24} md={12} lg={12} xl={24} className="mb-24">
           <Card
-            title="Sản phẩm bán chạy"
+            title="Best Selling Products"
             bordered={false}
             className="criclebox h-full"
           >
             <Table
               dataSource={bestSellingProducts}
-              columns={[
-                {
-                  title: 'Tên sản phẩm',
-                  dataIndex: 'name',
-                  key: 'name',
-                },
-                {
-                  title: 'Số lượng bán',
-                  dataIndex: 'sales',
-                  key: 'sales',
-                  sorter: (a, b) => a.sales - b.sales,
-                },
-              ]}
-              pagination={false}
+              columns={bestSellingColumns}
+              pagination={{
+                pageSize: 5,
+                showSizeChanger: true,
+                showTotal: (total) => `Total ${total} products`,
+              }}
+              scroll={{ x: 500 }}
+            />
+          </Card>
+        </Col>
+      </Row>
+      <Row gutter={[24, 0]}>
+        <Col xs={24} sm={24} md={12} lg={12} xl={24} className="mb-24">
+          <Card
+            title="Revenue Statistics by Dish"
+            bordered={false}
+            className="criclebox h-full"
+          >
+            <Table
+              dataSource={revenueData}
+              columns={revenueColumns}
+              pagination={{
+                pageSize: 5,
+                showSizeChanger: true,
+                showTotal: (total) => `Total ${total} dishes`,
+              }}
+              scroll={{ x: 800 }}
+            />
+          </Card>
+        </Col>
+      </Row>
+      <Row gutter={[24, 0]}>
+        <Col xs={24} sm={24} md={12} lg={12} xl={24} className="mb-24">
+          <Card
+            title="Weekly Revenue Statistics"
+            bordered={false}
+            className="criclebox h-full"
+          >
+            <Table
+              dataSource={weeklyData}
+              columns={weeklyColumns}
+              pagination={{
+                pageSize: 5,
+                showSizeChanger: true,
+              }}
+            />
+          </Card>
+        </Col>
+      </Row>
+      <Row gutter={[24, 0]}>
+        <Col xs={24} sm={24} md={12} lg={12} xl={24} className="mb-24">
+          <Card
+            title="Monthly Revenue Statistics"
+            bordered={false}
+            className="criclebox h-full"
+          >
+            <Table
+              dataSource={monthlyData}
+              columns={monthlyColumns}
+              pagination={{
+                pageSize: 5,
+                showSizeChanger: true,
+              }}
             />
           </Card>
         </Col>
