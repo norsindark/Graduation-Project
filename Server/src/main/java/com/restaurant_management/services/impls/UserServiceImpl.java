@@ -40,7 +40,6 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Optional<UserResponse> getUserByAccessToken() throws DataExitsException {
-
         GetUserUtil userUtil = new GetUserUtil();
         String username = userUtil.getUserEmail();
         Optional<User> user = this.userRepository.findByEmail(username);
