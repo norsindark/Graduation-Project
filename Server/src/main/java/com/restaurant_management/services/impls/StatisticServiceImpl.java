@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -68,14 +69,25 @@ public class StatisticServiceImpl implements StatisticService {
                     .forEach(result -> {
                         int month = (int) result.get("month");
                         int year = (int) result.get("year");
-                        String monthKey = month + "-" + year;
+                        String monthKey = String.format("%02d-%d", month, year);
                         dishStatisticsByMonth
                                 .computeIfAbsent(monthKey, k -> new HashMap<>())
                                 .put(dish.getDishName(), stats);
                     });
         }
 
-        return dishStatisticsByMonth;
+        return dishStatisticsByMonth.entrySet().stream()
+                .sorted((entry1, entry2) -> {
+                    String monthKey1 = entry1.getKey();
+                    String monthKey2 = entry2.getKey();
+                    return monthKey1.compareTo(monthKey2);
+                })
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        Map.Entry::getValue,
+                        (e1, e2) -> e1,
+                        LinkedHashMap::new
+                ));
     }
 
 
@@ -100,14 +112,25 @@ public class StatisticServiceImpl implements StatisticService {
                     .forEach(result -> {
                         int week = (int) result.get("week");
                         int year = (int) result.get("year");
-                        String weekKey = "W" + week + "-" + year;
+                        String weekKey = String.format("W%02d-%d", week, year);
                         dishStatisticsByWeek
                                 .computeIfAbsent(weekKey, k -> new HashMap<>())
                                 .put(dish.getDishName(), stats);
                     });
         }
 
-        return dishStatisticsByWeek;
+        return dishStatisticsByWeek.entrySet().stream()
+                .sorted((entry1, entry2) -> {
+                    String weekKey1 = entry1.getKey();
+                    String weekKey2 = entry2.getKey();
+                    return weekKey1.compareTo(weekKey2);
+                })
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        Map.Entry::getValue,
+                        (e1, e2) -> e1,
+                        LinkedHashMap::new
+                ));
     }
 
 
