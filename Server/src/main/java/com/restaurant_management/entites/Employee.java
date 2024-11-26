@@ -2,11 +2,9 @@ package com.restaurant_management.entites;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.annotations.UuidGenerator;
@@ -30,7 +28,7 @@ public class Employee {
 
     @OneToOne
     @JoinColumn(name = "user_id", referencedColumnName = "user_id")
-    @JsonIgnore
+    @JsonManagedReference
     private User user;
 
     @Column(name = "employee_name", nullable = false)
