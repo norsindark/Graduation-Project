@@ -1,5 +1,10 @@
 import { Button, Form, Radio, Select, Popconfirm } from 'antd';
-import { NavLink, useLocation, useNavigate } from 'react-router-dom';
+import {
+  NavLink,
+  useLocation,
+  useNavigate,
+  useOutletContext,
+} from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../redux/store';
@@ -11,6 +16,7 @@ import {
 import { Input, notification, Pagination } from 'antd';
 import Loading from '../../components/Loading/Loading';
 import Account from '../../components/public/auth/account/Account';
+import type { LayoutContextType } from '../../components/public/layout/LayoutPublic';
 
 interface Address {
   id: string;
@@ -344,6 +350,8 @@ function CheckoutPage() {
     });
   };
 
+  const { openModal } = useOutletContext<LayoutContextType>();
+
   return (
     <>
       <section
@@ -623,6 +631,7 @@ function CheckoutPage() {
           initialActiveTab="address"
           editingAddressId={editingAddressId}
           onAddressUpdate={handleAddressUpdate}
+          setActiveModal={openModal} // Thêm dòng này
         />
       )}
     </>
