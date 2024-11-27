@@ -1,8 +1,11 @@
 import { useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import Account from '../../components/public/auth/account/Account';
+interface OrderSuccessProps {
+  setActiveModal: (modalName: string | null) => void;
+}
 
-function OrderSuccess() {
+function OrderSuccess({ setActiveModal }: OrderSuccessProps) {
   const location = useLocation();
 
   const { orderId, paymentMethod } = location.state || {};
@@ -99,6 +102,7 @@ function OrderSuccess() {
           }}
           initialActiveTab="order"
           editingAddressId={null}
+          setActiveModal={setActiveModal} // Thêm dòng này
         />
       )}
     </>

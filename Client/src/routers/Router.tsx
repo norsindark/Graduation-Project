@@ -143,7 +143,7 @@ export const router = createBrowserRouter([
       },
       {
         path: '/order-success',
-        element: <OrderSuccess />,
+        element: <OrderSuccess setActiveModal={(modalName) => {}} />,
       },
       {
         path: `/payment/return`,

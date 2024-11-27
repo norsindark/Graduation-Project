@@ -17,6 +17,7 @@ export interface LayoutContextType {
   openModal: (modalName: string | null) => void;
   closeModal: () => void;
   activeModal: string | null;
+  editingAddressId: string | null;
 }
 
 const LayoutPublic = () => {
@@ -71,6 +72,7 @@ const LayoutPublic = () => {
     openModal,
     closeModal,
     activeModal,
+    editingAddressId: null,
   };
 
   useEffect(() => {
@@ -122,6 +124,7 @@ const LayoutPublic = () => {
           onClose={closeModal}
           setActiveModal={openModal}
           initialActiveTab={activeModal}
+          editingAddressId={null}
         />
       )}
     </>

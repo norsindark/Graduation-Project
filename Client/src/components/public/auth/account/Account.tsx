@@ -13,6 +13,7 @@ interface AccountProps {
   initialActiveTab: string | null;
   editingAddressId: string | null;
   onAddressUpdate?: () => void;
+  setActiveModal: (modalName: string | null) => void; // thêm dòng này
 }
 
 const Account: React.FC<AccountProps> = ({
