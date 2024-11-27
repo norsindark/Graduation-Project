@@ -12,7 +12,9 @@ export default defineConfig({
     port: 3000, // Thay đổi nếu cần port khác
   },
   build: {
+    outDir: '../public',  
     rollupOptions: {
+      // input: '/index.html', // Đường dẫn tệp HTML chính
       external: [
         'jquery', // Đánh dấu là external, sẽ không được bundle
         'bootstrap',
@@ -45,5 +47,6 @@ export default defineConfig({
   optimizeDeps: {
     exclude: ['js-big-decimal'], // Loại trừ thư viện khỏi quá trình optimization
   },
-  base: './', // Đặt đường dẫn gốc, hữu ích nếu bạn deploy ứng dụng trong subfolder
+  // base: './', // Đặt đường dẫn gốc, hữu ích nếu bạn deploy ứng dụng trong subfolder
+  
 });
