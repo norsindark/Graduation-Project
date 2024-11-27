@@ -149,14 +149,18 @@ export const router = createBrowserRouter([
         path: `/payment/return`,
         element: <PaymentReturn />,
       },
+      {
+        path : '/oauth2/authorization/google',
+        element : <HomePage />
+      }
     ],
   },
   {
     path: '/',
     element: (
-      // <ProtectedRoute>
+      <ProtectedRoute>
       <Main />
-      // {/* </ProtectedRoute> */}
+      </ProtectedRoute>
     ),
     errorElement: <NotFound />,
     children: [
