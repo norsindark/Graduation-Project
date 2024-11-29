@@ -3,7 +3,9 @@ import { useSelector } from 'react-redux';
 import { Navigate } from 'react-router-dom';
 import NotPermitted from './NotPermitted';
 import { RootState } from '../../redux/store';
-
+import {
+  notification,
+} from 'antd';
 interface RoleBaseRouteProps {
   children: ReactNode;
 }
@@ -28,15 +30,20 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
     (state: RootState) => state.account.isAuthenticated
   );
 
-  return (
-    <>
-      {isAuthenticated ? (
-        <RoleBaseRoute>{children}</RoleBaseRoute>
-      ) : (
-        <Navigate to="/login" replace />
-      )}
-    </>
-  );
+  if (isAuthenticated) {
+    return <RoleBaseRoute>{children}</RoleBaseRoute>;
+  } else {
+    // Display the notification
+    notification.error({
+      message: 'You do not have access',
+      description:
+        'You do not have access to the admin page',
+      duration: 5,
+    });
+
+    // Redirect to login
+    return <Navigate to="/login" replace />;
+  }
 };
 
 export default ProtectedRoute;
