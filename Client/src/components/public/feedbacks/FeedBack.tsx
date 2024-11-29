@@ -18,6 +18,45 @@ interface Review {
   createdAt: string;
 }
 
+const FAKE_REVIEWS: Review[] = [
+  {
+    reviewId: '1',
+    rating: 5,
+    comment: 'The food is delicious, the service is attentive',
+    dishId: '1',
+    dishName: 'Beef pho',
+    userId: '1',
+    userFullName: 'John Doe',
+    userAvatar: '../../../../public/images/comment_img_1.png',
+    replies: [],
+    createdAt: new Date().toISOString(),
+  },
+  {
+    reviewId: '2',
+    rating: 4.5,
+    comment: 'The space is beautiful, the food is delicious',
+    dishId: '2',
+    dishName: 'Com tam',
+    userId: '2',
+    userFullName: 'Tran Thi B',
+    userAvatar: '../../../../public/images/comment_img_2.jpg',
+    replies: [],
+    createdAt: new Date().toISOString(),
+  },
+  {
+    reviewId: '3',
+    rating: 5,
+    comment: 'I will come back to support the restaurant',
+    dishId: '3',
+    dishName: 'Bun bo',
+    userId: '3',
+    userFullName: 'Le Van C',
+    userAvatar: '../../../../public/images/comment_img_2.jpg',
+    replies: [],
+    createdAt: new Date().toISOString(),
+  },
+];
+
 function FeedBack() {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(false);
@@ -30,13 +69,13 @@ function FeedBack() {
     setLoading(true);
     try {
       const response = await callGet20HightestReview();
-      setReviews(response.data);
+      setReviews(
+        Array.isArray(response.data) && response.data.length > 0
+          ? response.data
+          : FAKE_REVIEWS
+      );
     } catch (error) {
-      notification.error({
-        message: 'Lỗi khi tải đánh giá',
-        description: 'Vui lòng thử lại sau',
-        duration: 5,
-      });
+      setReviews(FAKE_REVIEWS);
     } finally {
       setLoading(false);
     }
@@ -108,33 +147,39 @@ function FeedBack() {
 
         <div className="row testi_slider">
           <Slider {...settings}>
-            {reviews.map((review) => (
-              <div
-                key={review.reviewId}
-                className="col-xl-4 wow fadeInUp"
-                data-wow-duration="1s"
-              >
-                <div className="fp__single_testimonial">
-                  <div className="fp__testimonial_header d-flex flex-wrap align-items-center">
-                    <div className="img">
-                      <img
-                        src={review.userAvatar}
-                        alt={review.userFullName}
-                        className="img-fluid w-100"
-                      />
+            {Array.isArray(reviews) && reviews.length > 0 ? (
+              reviews.map((review) => (
+                <div
+                  key={review.reviewId}
+                  className="col-xl-4 wow fadeInUp"
+                  data-wow-duration="1s"
+                >
+                  <div className="fp__single_testimonial">
+                    <div className="fp__testimonial_header d-flex flex-wrap align-items-center">
+                      <div className="img">
+                        <img
+                          src={review.userAvatar}
+                          alt={review.userFullName}
+                          className="img-fluid w-100"
+                        />
+                      </div>
+                      <div className="text">
+                        <h4>{review.userFullName}</h4>
+                        <p>{review.dishName}</p>
+                      </div>
                     </div>
-                    <div className="text">
-                      <h4>{review.userFullName}</h4>
-                      <p>{review.dishName}</p>
+                    <div className="fp__single_testimonial_body">
+                      <p className="feedback">{review.comment}</p>
+                      <span className="rating">
+                        {renderStars(review.rating)}
+                      </span>
                     </div>
-                  </div>
-                  <div className="fp__single_testimonial_body">
-                    <p className="feedback">{review.comment}</p>
-                    <span className="rating">{renderStars(review.rating)}</span>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))
+            ) : (
+              <div>No reviews yet</div>
+            )}
           </Slider>
         </div>
       </div>

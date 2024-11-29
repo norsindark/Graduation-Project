@@ -75,7 +75,7 @@ function Coupon({ cartItems }: { cartItems: any }) {
 
   const settings = {
     dots: true,
-    infinite: true,
+    infinite: false,
     speed: 500,
     slidesToShow: 2,
     slidesToScroll: 1,
@@ -87,13 +87,13 @@ function Coupon({ cartItems }: { cartItems: any }) {
       {
         breakpoint: 1024,
         settings: {
-          slidesToShow: 3,
+          slidesToShow: Math.min(3, coupons.length),
         },
       },
       {
         breakpoint: 600,
         settings: {
-          slidesToShow: 2,
+          slidesToShow: Math.min(2, coupons.length),
         },
       },
       {
