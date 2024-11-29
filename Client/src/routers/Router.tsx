@@ -31,7 +31,7 @@ import Coupon from '../pages/admin/coupon/Coupon';
 import Review from '../pages/admin/review/Review';
 import Setting from '../pages/admin/setting/Setting';
 import PaymentPage from '../pages/public/PaymentPage';
-import OrderSuccess from '../pages/public/OrderSuccess';
+import StatusPayment from '../pages/public/StatusPayment';
 import PaymentReturn from '../pages/public/PaymentReturn';
 import ProductOfferDaily from '../pages/admin/productofferdaily/ProductOfferDaily';
 import FaqsPage from '../pages/public/FaqsPage';
@@ -142,24 +142,24 @@ export const router = createBrowserRouter([
         element: <PaymentPage />,
       },
       {
-        path: '/order-success',
-        element: <OrderSuccess setActiveModal={(modalName) => {}} />,
+        path: '/status-payment',
+        element: <StatusPayment setActiveModal={(modalName) => {}} />,
       },
       {
         path: `/payment/return`,
         element: <PaymentReturn />,
       },
       {
-        path : '/oauth2/authorization/google',
-        element : <HomePage />
-      }
+        path: '/oauth2/authorization/google',
+        element: <HomePage />,
+      },
     ],
   },
   {
     path: '/',
     element: (
       <ProtectedRoute>
-      <Main />
+        <Main />
       </ProtectedRoute>
     ),
     errorElement: <NotFound />,

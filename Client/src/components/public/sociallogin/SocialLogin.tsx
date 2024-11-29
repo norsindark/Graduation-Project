@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-
+import { Button } from 'antd';
 const SocialLogin = () => {
   const [loading, setLoading] = useState(false);
 
@@ -12,21 +12,24 @@ const SocialLogin = () => {
   return (
     <ul>
       <li>
-        <button
+        <Button
+          type="primary"
+          shape="round"
           onClick={handleClick}
           style={{
             background: 'none',
             border: 'none',
             cursor: 'pointer',
             padding: 0,
+            width: '100%',
           }}
         >
           {loading ? (
-            <i className="fas fa-spinner fa-spin"></i>
+            <i className="fas fa-spinner fa-spin text-xl"></i>
           ) : (
-            <i className="fab fa-google-plus-g"></i>
+            <i className="fab fa-google-plus-g text-xl"></i>
           )}
-        </button>
+        </Button>
       </li>
     </ul>
   );
