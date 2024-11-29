@@ -7,13 +7,11 @@ import com.restaurant_management.enums.UnitType;
 import com.restaurant_management.exceptions.DataExitsException;
 import com.restaurant_management.payloads.responses.ApiResponse;
 import com.restaurant_management.payloads.responses.OrderResponse;
-import com.restaurant_management.payloads.responses.StatisticResponse;
 import com.restaurant_management.repositories.*;
 import com.restaurant_management.services.interfaces.OrderService;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.*;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.EntityModel;
@@ -28,7 +26,9 @@ import java.io.UnsupportedEncodingException;
 import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 @Service
@@ -114,11 +114,13 @@ public class OrderServiceImpl implements OrderService {
             orderRepository.save(order);
         }
 
-        sendEmailListOrderItems(
-                user.getEmail(), request.getItems(),
-                request.getCouponId(), order.getTotalPrice(),
-                request.getPaymentMethod(), order.getStatus(),
-                request.getShippingFee());
+        if (!request.getPaymentMethod().equalsIgnoreCase("BANKING")) {
+            sendEmailListOrderItems(
+                    user.getEmail(), request.getItems(),
+                    request.getCouponId(), order.getTotalPrice(),
+                    request.getPaymentMethod(), order.getStatus(),
+                    request.getShippingFee());
+        }
 
         return new ApiResponse(order.getId(), HttpStatus.CREATED);
     }
@@ -130,7 +132,7 @@ public class OrderServiceImpl implements OrderService {
         User user = order.getUser();
         order.setStatus(status.toUpperCase(Locale.ROOT));
         orderRepository.save(order);
-        sendMailWhenUpdateOrderStatus(user.getEmail(), orderId, status);
+//        sendMailWhenUpdateOrderStatus(user.getEmail(), orderId, status);
         return new ApiResponse("Order updated successfully", HttpStatus.OK);
     }
 
@@ -348,7 +350,7 @@ public class OrderServiceImpl implements OrderService {
         order.setStatus("CANCELED");
         orderRepository.save(order);
 
-        sendMailWhenUpdateOrderStatus(order.getUser().getEmail(), orderId, "CANCELED");
+//        sendMailWhenUpdateOrderStatus(order.getUser().getEmail(), orderId, "CANCELED");
 
         return new ApiResponse("Order has been successfully canceled", HttpStatus.OK);
     }

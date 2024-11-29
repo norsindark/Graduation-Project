@@ -80,7 +80,7 @@ public class PaymentServiceImpl implements PaymentService {
         String vnp_CreateDate = formatter.format(cld.getTime());
         vnp_Params.put("vnp_CreateDate", vnp_CreateDate);
 
-        cld.add(Calendar.MINUTE, 15);
+        cld.add(Calendar.MINUTE, 432);
         String vnp_ExpireDate = formatter.format(cld.getTime());
         vnp_Params.put("vnp_ExpireDate", vnp_ExpireDate);
 
@@ -130,17 +130,17 @@ public class PaymentServiceImpl implements PaymentService {
         String signValue = PaymentConfig.hashAllFields(fields);
 
         if (!signValue.equals(vnp_SecureHash)) {
-            return new ApiResponse("Invalid signature", HttpStatus.BAD_REQUEST);
+            throw new DataExitsException("Invalid signature");
         }
 
         String orderInfo = params.get("vnp_TxnRef");
         if (orderInfo == null) {
-            return new ApiResponse("Missing transaction reference", HttpStatus.BAD_REQUEST);
+            throw new DataExitsException("Order not found");
         }
 
         if (!"00".equals(params.get("vnp_TransactionStatus"))) {
             updateOrderStatusToPaid(orderInfo, "FAILED");
-            return new ApiResponse(orderInfo , HttpStatus.BAD_REQUEST);
+            throw new DataExitsException("Payment failed with order: " + orderInfo);
         }
 
         updateOrderStatusToPaid(orderInfo, "PAID");
