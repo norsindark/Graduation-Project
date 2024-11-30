@@ -1,83 +1,150 @@
-import { useEffect, useState } from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import { useState } from 'react';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import Account from '../../components/public/auth/account/Account';
-import { callGetOrderById } from '../../services/clientApi';
-import { RootState } from '../../redux/store';
-import { useSelector } from 'react-redux';
+import {
+  callProcessPayment,
+  callUpdateStatusOrder,
+} from '../../services/clientApi';
+import { Modal, notification } from 'antd';
+import cod from '../../../public/images/cod.png';
+import vnpay from '../../../public/images/vnpay.png';
+import { Image, Popconfirm } from 'antd';
+
 interface StatusPaymentProps {
   setActiveModal: (modalName: string | null) => void;
-}
-interface OrderOption {
-  optionId: string;
-  optionName: string;
-  additionalPrice: number;
-}
-
-interface OrderItem {
-  itemId: string;
-  dishId: string;
-  dishName: string;
-  price: number;
-  quantity: number;
-  totalPrice: number;
-  thumbImage: string;
-  options: OrderOption[];
-}
-
-interface Address {
-  street: string;
-  commune: string;
-  city: string;
-  state: string;
-  country: string;
-  phoneNumber: string;
-}
-
-interface Order {
-  orderId: string;
-  userEmail: string;
-  orderStatus: string;
-  totalPrice: number;
-  createdAt: string;
-  address: Address;
-  orderItems: OrderItem[];
 }
 
 function StatusPayment({ setActiveModal }: StatusPaymentProps) {
   const location = useLocation();
   const { orderId, paymentMethod, paymentStatus } = location.state || {};
   const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+
   const handleViewOrders = () => {
     setIsAccountModalOpen(true);
   };
-  const userId = useSelector((state: RootState) => state.account.user?.id);
-  const [listOrder, setListOrder] = useState<Order[]>([]);
-  useEffect(() => {
-    fetchOrder();
-  }, [orderId]);
-  const fetchOrder = async () => {
+
+  const orderIdNew = orderId?.includes('Payment failed with order:')
+    ? orderId.split(': ')[1].trim()
+    : orderId;
+
+  const handlePayment = async (paymentMethod: 'COD' | 'BANKING') => {
+    setLoading(true);
     try {
-      const response = await callGetOrderById(userId || '', '');
-      if (response?.status === 200) {
-        if (
-          response?.data?._embedded?.orderResponseList &&
-          Array.isArray(response.data._embedded.orderResponseList)
-        ) {
-          setListOrder(response.data._embedded.orderResponseList);
-        } else {
-          setListOrder([]);
+      if (paymentMethod === 'COD') {
+        try {
+          const response = await callUpdateStatusOrder(orderIdNew, 'PENDING');
+          if (response.status === 200) {
+            notification.success({
+              message: 'Order success',
+              description: (
+                <div>
+                  <p>Thank you for your order!</p>
+                  <p>Please check your email for order details.</p>
+                </div>
+              ),
+              duration: 5,
+              placement: 'top',
+            });
+          } else {
+            notification.error({
+              message: 'Error',
+              description:
+                response.data?.errors?.error || 'Order update failed',
+              duration: 5,
+              showProgress: true,
+            });
+          }
+          navigate('/status-payment', {
+            state: {
+              orderId: orderIdNew,
+              paymentMethod: 'COD',
+              paymentStatus: 'success',
+            },
+          });
+        } catch (updateError) {
+          console.error('Error updating order status:', updateError);
         }
+      } else if (paymentMethod === 'BANKING') {
+        await callProcessPayment(orderIdNew);
       }
-    } catch (error) {
-      console.error('Error fetching order:', error);
+      setIsPaymentModalOpen(false);
+    } catch (error: any) {
+      console.error('Payment error:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleOrderAgain = () => {
-    if (listOrder.length > 0) {
-      if (listOrder.find((order) => order.orderId === orderId)) {
-      }
-    }
+  const PaymentModal = () => {
+    return (
+      <Modal
+        open={isPaymentModalOpen}
+        onCancel={() => setIsPaymentModalOpen(false)}
+        footer={null}
+        width={600}
+        centered
+      >
+        <div className="flex flex-col space-y-6">
+          <h2 className="text-2xl font-bold text-center text-white bg-[#81c784] p-2 rounded-lg mt-4">
+            Select Payment Method
+          </h2>
+          <div className="grid grid-cols-2 gap-6">
+            {/* Cash on Delivery */}
+            <div className="transform transition-all hover:scale-105">
+              <Popconfirm
+                title="Are you sure you want to pay by cash on delivery?"
+                onConfirm={() => handlePayment('COD')}
+                okButtonProps={{ loading: loading }}
+              >
+                <button
+                  className="w-full p-4 border-2 rounded-lg hover:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  disabled={loading}
+                >
+                  <div className="flex flex-col items-center space-y-3">
+                    <Image
+                      src={cod}
+                      alt="Cash on Delivery"
+                      className="w-16 h-16 object-contain"
+                      preview={false}
+                    />
+                    <span className="font-bold text-gray-700">
+                      Cash on Delivery
+                    </span>
+                  </div>
+                </button>
+              </Popconfirm>
+            </div>
+
+            {/* VNPay */}
+            <div className="transform transition-all hover:scale-105">
+              <Popconfirm
+                title="Are you sure you want to pay by banking?"
+                onConfirm={() => handlePayment('BANKING')}
+                okButtonProps={{ loading: loading }}
+              >
+                <button
+                  className="w-full p-4 border-2 rounded-lg hover:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  disabled={loading}
+                >
+                  <div className="flex flex-col items-center space-y-3">
+                    <Image
+                      src={vnpay}
+                      alt="VNPay"
+                      className="w-16 h-16 object-contain"
+                      preview={false}
+                    />
+                    <span className="font-bold text-gray-700">Banking</span>
+                  </div>
+                </button>
+              </Popconfirm>
+            </div>
+          </div>
+        </div>
+      </Modal>
+    );
   };
 
   return (
@@ -189,9 +256,14 @@ function StatusPayment({ setActiveModal }: StatusPaymentProps) {
               )}
 
               <div className="flex justify-center gap-4">
-                <a className="common_btn" onClick={handleOrderAgain}>
-                  {paymentStatus === 'success' ? 'Check Order' : 'Pay Again'}
-                </a>
+                {paymentStatus !== 'success' && (
+                  <a
+                    className="common_btn"
+                    onClick={() => setIsPaymentModalOpen(true)}
+                  >
+                    Pay Again
+                  </a>
+                )}
                 <a className="common_btn" href="/menu">
                   Buy more Dishes
                 </a>
@@ -203,6 +275,7 @@ function StatusPayment({ setActiveModal }: StatusPaymentProps) {
           </div>
         </div>
       </section>
+      <PaymentModal />
       {isAccountModalOpen && (
         <Account
           onClose={() => {
@@ -210,7 +283,7 @@ function StatusPayment({ setActiveModal }: StatusPaymentProps) {
           }}
           initialActiveTab="order"
           editingAddressId={null}
-          setActiveModal={setActiveModal} // Thêm dòng này
+          setActiveModal={setActiveModal}
         />
       )}
     </>
