@@ -1,12 +1,24 @@
-import { Button, notification, Pagination, Tag, Modal } from 'antd';
+import {
+  Button,
+  notification,
+  Pagination,
+  Tag,
+  Modal,
+  Popconfirm,
+  Image,
+} from 'antd';
 import { useEffect, useState } from 'react';
 import {
   callGetOrderById,
   callCancelOrder,
+  callProcessPayment,
+  callUpdateStatusOrder,
 } from '../../../../services/clientApi';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../../redux/store';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
+import cod from '../../../../../public/images/cod.png';
+import vnpay from '../../../../../public/images/vnpay.png';
 
 interface OrderOption {
   optionId: string;
@@ -50,6 +62,7 @@ enum OrderStatus {
   PROCESSING = 'PROCESSING',
   SHIPPING = 'SHIPPING',
   COMPLETED = 'COMPLETED',
+  CANCELED = 'CANCELED',
 }
 
 const isStatusActive = (
@@ -97,6 +110,8 @@ const OrderAccount = () => {
   const [listOrder, setListOrder] = useState<Order[]>([]);
 
   const [loading, setLoading] = useState(false);
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [processingOrderId, setProcessingOrderId] = useState<string>('');
 
   const statusColor = {
     PENDING: '#faad14',
@@ -104,7 +119,7 @@ const OrderAccount = () => {
     PROCESSING: '#722ed1',
     SHIPPING: '#52c41a',
     COMPLETED: '#52c41a',
-    CANCELLED: '#ff4d4f',
+    CANCELED: '#ff4d4f',
   };
 
   const userId = useSelector((state: RootState) => state.account.user?.id);
@@ -206,6 +221,113 @@ const OrderAccount = () => {
     });
   };
 
+  const handlePayment = async (paymentMethod: 'COD' | 'BANKING') => {
+    setLoading(true);
+    try {
+      if (paymentMethod === 'COD') {
+        const response = await callUpdateStatusOrder(
+          processingOrderId,
+          'PENDING'
+        );
+        if (response.status === 200) {
+          notification.success({
+            message: 'Order success',
+            description: (
+              <div>
+                <p>Thank you for your order!</p>
+                <p>Please check your email for order details.</p>
+              </div>
+            ),
+            duration: 5,
+            placement: 'top',
+          });
+          fetchItems();
+        } else {
+          notification.error({
+            message: 'Error',
+            description: response.data?.errors?.error || 'Update order failed',
+            duration: 5,
+            showProgress: true,
+          });
+        }
+      } else if (paymentMethod === 'BANKING') {
+        await callProcessPayment(processingOrderId);
+      }
+      setIsPaymentModalOpen(false);
+    } catch (error) {
+      console.error('Payment error:', error);
+      notification.error({
+        message: 'Payment error',
+        description: 'An error occurred during the payment process',
+        duration: 5,
+        showProgress: true,
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const PaymentModal = () => {
+    return (
+      <Modal
+        open={isPaymentModalOpen}
+        onCancel={() => setIsPaymentModalOpen(false)}
+        footer={null}
+        width={600}
+        centered
+      >
+        <div className="flex flex-col space-y-6">
+          <h2 className="text-2xl font-bold text-center text-white bg-[#81c784] p-2 rounded-lg mt-4">
+            Select Payment Method
+          </h2>
+          <div className="grid grid-cols-2 gap-6">
+            <div className="transform transition-all hover:scale-105">
+              <Popconfirm
+                title="Are you sure you want to pay by cash on delivery?"
+                onConfirm={() => handlePayment('COD')}
+                okButtonProps={{ loading: loading }}
+              >
+                <button className="w-full p-4 border-2 rounded-lg hover:border-primary-500">
+                  <div className="flex flex-col items-center space-y-3">
+                    <Image
+                      src={cod}
+                      alt="COD"
+                      className="w-16 h-16 object-contain"
+                      preview={false}
+                    />
+                    <span className="font-bold text-gray-700">
+                      Cash on delivery
+                    </span>
+                  </div>
+                </button>
+              </Popconfirm>
+            </div>
+
+            <div className="transform transition-all hover:scale-105">
+              <Popconfirm
+                title="Are you sure you want to pay by banking?"
+                onConfirm={() => handlePayment('BANKING')}
+                okButtonProps={{ loading: loading }}
+              >
+                <button className="w-full p-4 border-2 rounded-lg hover:border-primary-500">
+                  <div className="flex flex-col items-center space-y-3">
+                    <Image
+                      src={vnpay}
+                      alt="VNPay"
+                      className="w-16 h-16 object-contain"
+                      preview={false}
+                    />
+                    <span className="font-bold text-gray-700">Banking</span>
+                  </div>
+                </button>
+              </Popconfirm>
+            </div>
+          </div>
+        </div>
+      </Modal>
+    );
+  };
+
   return (
     <div
       className="tab-pane fade"
@@ -243,7 +365,7 @@ const OrderAccount = () => {
                           </p>
                         </td>
                         <td>
-                          <span className="status ">
+                          <span className="status">
                             <Tag
                               color={
                                 statusColor[
@@ -266,6 +388,22 @@ const OrderAccount = () => {
                             onClick={() => handleViewInvoice(order)}
                           >
                             <p className="text-base font-bold">View</p>
+                          </a>
+                          <a
+                            className="cancel_order"
+                            onClick={() => {
+                              setProcessingOrderId(order.orderId);
+                              setIsPaymentModalOpen(true);
+                            }}
+                            style={{
+                              display:
+                                order.orderStatus === 'FAILED'
+                                  ? 'inline'
+                                  : 'none',
+                              cursor: 'pointer',
+                            }}
+                          >
+                            <p className="text-base font-bold">Pay again</p>
                           </a>
                           <a
                             className="cancel_order"
@@ -420,6 +558,7 @@ const OrderAccount = () => {
             />
           </div>
         )}
+        <PaymentModal />
       </div>
     </div>
   );
