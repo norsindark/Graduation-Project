@@ -331,3 +331,7 @@ export const callGet20HightestReview = async () => {
 export const callUpdateStatusOrder = async (orderId: string, status: string) => {
   return axios.put(`/api/v1/dashboard/order/update-order-status?orderId=${orderId}&status=${status}`);
 };
+
+export const callRepayOrder = async (orderId: String) => {
+  return axios.put(`/api/v1/client/order/repay-order?orderId=${orderId}`);
+};

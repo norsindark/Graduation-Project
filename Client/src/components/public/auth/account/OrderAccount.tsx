@@ -13,6 +13,7 @@ import {
   callCancelOrder,
   callProcessPayment,
   callUpdateStatusOrder,
+  callRepayOrder,
 } from '../../../../services/clientApi';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../../redux/store';
@@ -225,9 +226,8 @@ const OrderAccount = () => {
     setLoading(true);
     try {
       if (paymentMethod === 'COD') {
-        const response = await callUpdateStatusOrder(
-          processingOrderId,
-          'PENDING'
+        const response = await callRepayOrder(
+          processingOrderId
         );
         if (response.status === 200) {
           notification.success({
