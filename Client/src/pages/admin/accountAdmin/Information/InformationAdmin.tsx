@@ -37,7 +37,6 @@ const InformationAdmin = () => {
           oldPassword,
           newPassword
         );
-  
 
         if (response?.status === 200) {
           notification.success({
@@ -129,7 +128,7 @@ const InformationAdmin = () => {
                   <Form.Item
                     label="Confirm Password"
                     name="confirmPassword"
-                    dependencies={['password']} // This makes sure confirmPassword depends on the password field
+                    dependencies={['newPassword']} // Đã sửa lại
                     rules={[
                       {
                         required: true,
@@ -137,7 +136,11 @@ const InformationAdmin = () => {
                       },
                       ({ getFieldValue }) => ({
                         validator(_, value) {
-                          if (!value || getFieldValue('password') === value) {
+                          if (
+                            !value ||
+                            getFieldValue('newPassword') === value
+                          ) {
+                            // Đã sửa lại
                             return Promise.resolve();
                           }
                           return Promise.reject(

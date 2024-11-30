@@ -331,3 +331,7 @@ export const callGetAllCountBlogByCategory = async () => {
 export const callGet20HightestReview = async () => {
   return axios.get(`/api/v1/auth/guest/get-top-20-highest-rated-reviews`);
 };
+
+export const callUpdateStatusOrder = async (orderId: string, status: string) => {
+  return axios.put(`/api/v1/dashboard/order/update-order-status?orderId=${orderId}&status=${status}`);
+};

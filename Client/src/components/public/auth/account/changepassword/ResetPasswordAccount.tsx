@@ -103,7 +103,7 @@ const ResetPasswordAccount = () => {
                       placeholder="Old Password"
                       autoComplete="old-password"
                     />
-                  </ Form.Item>
+                  </Form.Item>
                 </div>
                 <div className="col-xl-7">
                   <Form.Item
@@ -139,7 +139,11 @@ const ResetPasswordAccount = () => {
                       },
                       ({ getFieldValue }) => ({
                         validator(_, value) {
-                          if (!value || getFieldValue('newPassword') === value) { // Đã sửa lại
+                          if (
+                            !value ||
+                            getFieldValue('newPassword') === value
+                          ) {
+                            // Đã sửa lại
                             return Promise.resolve();
                           }
                           return Promise.reject(

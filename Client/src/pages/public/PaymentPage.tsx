@@ -68,7 +68,7 @@ function PaymentPage() {
             duration: 5,
             placement: 'top',
           });
-          navigate('/order-success', {
+          navigate('/status-payment', {
             state: {
               orderId: response.data?.message,
               paymentMethod: 'COD',

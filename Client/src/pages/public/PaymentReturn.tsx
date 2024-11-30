@@ -51,8 +51,7 @@ function PaymentReturn() {
               </div>
             ),
             duration: 5,
-            placement: 'topRight',
-            showProgress: true,
+            placement: 'top',
           });
           navigate('/status-payment', {
             state: {
@@ -101,8 +100,7 @@ function PaymentReturn() {
                 </div>
               ),
               duration: 5,
-              placement: 'topRight',
-              showProgress: true,
+              placement: 'top',
             });
             navigate('/status-payment', {
               state: {
