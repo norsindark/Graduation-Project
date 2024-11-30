@@ -29,6 +29,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 @Service
@@ -115,11 +116,17 @@ public class OrderServiceImpl implements OrderService {
         }
 
         if (!request.getPaymentMethod().equalsIgnoreCase("BANKING")) {
-            sendEmailListOrderItems(
-                    user.getEmail(), request.getItems(),
-                    request.getCouponId(), order.getTotalPrice(),
-                    request.getPaymentMethod(), order.getStatus(),
-                    request.getShippingFee());
+            CompletableFuture.runAsync(() -> {
+                try {
+                    sendEmailListOrderItems(
+                            user.getEmail(), request.getItems(),
+                            request.getCouponId(), order.getTotalPrice(),
+                            request.getPaymentMethod(), order.getStatus(),
+                            request.getShippingFee());
+                } catch (MessagingException | UnsupportedEncodingException | DataExitsException e) {
+                    throw new RuntimeException(e);
+                }
+            });
         }
 
         return new ApiResponse(order.getId(), HttpStatus.CREATED);
@@ -132,7 +139,33 @@ public class OrderServiceImpl implements OrderService {
         User user = order.getUser();
         order.setStatus(status.toUpperCase(Locale.ROOT));
         orderRepository.save(order);
-//        sendMailWhenUpdateOrderStatus(user.getEmail(), orderId, status);
+
+        CompletableFuture.runAsync(() -> {
+            try {
+                sendMailWhenUpdateOrderStatus(user.getEmail(), orderId, status);
+            } catch (MessagingException | UnsupportedEncodingException e) {
+                throw new RuntimeException(e);
+            }
+        });
+        return new ApiResponse("Order updated successfully", HttpStatus.OK);
+    }
+
+    @Override
+    public ApiResponse repayOrder(String orderId) throws DataExitsException, MessagingException, UnsupportedEncodingException {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new DataExitsException("Order not found"));
+        User user = order.getUser();
+        order.setStatus("PENDING");
+        order.setPaymentMethod("COD");
+        orderRepository.save(order);
+
+        CompletableFuture.runAsync(() -> {
+            try {
+                sendMailWhenUpdateOrderStatus(user.getEmail(), orderId, "PENDING");
+            } catch (MessagingException | UnsupportedEncodingException e) {
+                throw new RuntimeException(e);
+            }
+        });
         return new ApiResponse("Order updated successfully", HttpStatus.OK);
     }
 
@@ -350,7 +383,13 @@ public class OrderServiceImpl implements OrderService {
         order.setStatus("CANCELED");
         orderRepository.save(order);
 
-//        sendMailWhenUpdateOrderStatus(order.getUser().getEmail(), orderId, "CANCELED");
+        CompletableFuture.runAsync(() -> {
+            try {
+                sendMailWhenUpdateOrderStatus(order.getUser().getEmail(), orderId, "CANCELED");
+            } catch (MessagingException | UnsupportedEncodingException e) {
+                throw new RuntimeException(e);
+            }
+        });
 
         return new ApiResponse("Order has been successfully canceled", HttpStatus.OK);
     }
@@ -474,6 +513,7 @@ public class OrderServiceImpl implements OrderService {
         content.append("</tbody>")
                 .append("</table>")
                 .append("<p style=\"color: #5C8E5F;\">Coupon Code: <strong>").append(coupon != null ? coupon.getCode() : "N/A").append("</strong></p>")
+                .append("<p style=\"color: #5C8E5F;\">Coupon Discount: <strong>").append(coupon != null ? currencyFormat.format(coupon.getDiscountPercent()) : "N/A").append("</strong></p>")
                 .append("<p style=\"color: #5C8E5F;\">Payment Method: <strong>").append(paymentMethod).append("</strong></p>")
                 .append("<p style=\"color: #5C8E5F;\">Order Status: <strong>").append(status).append("</strong></p>")
                 .append("<p style=\"color: #5C8E5F;\">Shipping Fee: <strong>").append(currencyFormat.format(shippingFee != null ? shippingFee : 0.0)).append("</strong></p>")
