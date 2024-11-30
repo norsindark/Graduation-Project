@@ -4,13 +4,11 @@ import com.restaurant_management.dtos.OrderDto;
 import com.restaurant_management.exceptions.DataExitsException;
 import com.restaurant_management.payloads.responses.ApiResponse;
 import com.restaurant_management.payloads.responses.OrderResponse;
-import com.restaurant_management.payloads.responses.StatisticResponse;
 import jakarta.mail.MessagingException;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
 
 import java.io.UnsupportedEncodingException;
-import java.util.Map;
 
 public interface OrderService {
     PagedModel<EntityModel<OrderResponse>> getAllOrdersByUserId(
@@ -24,6 +22,9 @@ public interface OrderService {
             throws DataExitsException, MessagingException, UnsupportedEncodingException;
 
     ApiResponse updateOrderStatus(String orderId, String status)
+            throws DataExitsException, MessagingException, UnsupportedEncodingException;
+
+    ApiResponse repayOrder(String orderId)
             throws DataExitsException, MessagingException, UnsupportedEncodingException;
 
     ApiResponse cancelOrder(String orderId)

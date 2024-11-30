@@ -38,9 +38,15 @@ public class OrderController {
         return ResponseEntity.ok(orderService.addNewOrder(request));
     }
 
-    @PutMapping("cancel-order")
+    @PutMapping("/cancel-order")
     public ResponseEntity<ApiResponse> cancelOrder(@RequestParam String orderId)
             throws DataExitsException, MessagingException, UnsupportedEncodingException {
         return ResponseEntity.ok(orderService.cancelOrder(orderId));
+    }
+
+    @PutMapping("/repay-order")
+    public ResponseEntity<?> repayOrder(@RequestParam String orderId)
+            throws DataExitsException, MessagingException, UnsupportedEncodingException {
+        return ResponseEntity.ok(orderService.repayOrder(orderId));
     }
 }
