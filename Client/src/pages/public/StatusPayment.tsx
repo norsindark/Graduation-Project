@@ -4,6 +4,7 @@ import Account from '../../components/public/auth/account/Account';
 import {
   callProcessPayment,
   callUpdateStatusOrder,
+  callRepayOrder,
 } from '../../services/clientApi';
 import { Modal, notification } from 'antd';
 import cod from '../../../public/images/cod.png';
@@ -35,7 +36,7 @@ function StatusPayment({ setActiveModal }: StatusPaymentProps) {
     try {
       if (paymentMethod === 'COD') {
         try {
-          const response = await callUpdateStatusOrder(orderIdNew, 'PENDING');
+          const response = await callRepayOrder(orderIdNew);
           if (response.status === 200) {
             notification.success({
               message: 'Order success',
