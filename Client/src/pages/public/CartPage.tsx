@@ -290,7 +290,7 @@ const CartPage: React.FC = () => {
       };
 
       navigate('/checkout', {
-        state: { orderSummary },
+        state: { orderSummary, from: '/cart' },
       });
     }
   };

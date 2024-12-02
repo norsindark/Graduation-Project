@@ -45,6 +45,9 @@ import CategoryBlog from '../pages/admin/categorisBlog/CategoryBlog';
 import Blog from '../pages/admin/blog/Blog';
 import CommentsBlog from '../pages/admin/commentsBlog/CommentsBlog';
 import EmployeeShift from '../pages/admin/employeeShift/EmployeeShift';
+import PrivateRouter from '../components/NotFound/PrivateRouter';
+import PrivatePaymentRouter from '../components/NotFound/PrivatePaymentRouter';
+
 export const router = createBrowserRouter([
   {
     path: '/',
@@ -127,40 +130,52 @@ export const router = createBrowserRouter([
 
       {
         path: '/cart',
-        element: <CartPage />,
+        element: (
+          <PrivateRouter>
+            <CartPage />
+          </PrivateRouter>
+        ),
       },
       {
         path: '/checkout',
         element: (
-          // <ProtectedRoute>
-          <CheckoutPage />
-          // </ProtectedRoute>
+          <PrivatePaymentRouter>
+            <CheckoutPage />
+          </PrivatePaymentRouter>
         ),
       },
       {
         path: '/payment',
-        element: <PaymentPage />,
+        element: (
+          <PrivatePaymentRouter>
+            <PaymentPage />
+          </PrivatePaymentRouter>
+        ),
       },
       {
         path: '/status-payment',
-        element: <StatusPayment setActiveModal={(modalName) => {}} />,
+        element: (
+          <PrivatePaymentRouter>
+            <StatusPayment setActiveModal={(modalName) => {}} />
+          </PrivatePaymentRouter>
+        ),
       },
       {
         path: `/payment/return`,
-        element: <PaymentReturn />,
-      },
-      {
-        path: '/oauth2/authorization/google',
-        element: <HomePage />,
+        element: (
+          <PrivatePaymentRouter>
+            <PaymentReturn />
+          </PrivatePaymentRouter>
+        ),
       },
     ],
   },
   {
     path: '/',
     element: (
-      // <ProtectedRoute>
+      <ProtectedRoute>
         <Main />
-      // </ProtectedRoute>
+      </ProtectedRoute>
     ),
     errorElement: <NotFound />,
     children: [
