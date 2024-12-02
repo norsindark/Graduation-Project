@@ -158,9 +158,9 @@ export const router = createBrowserRouter([
   {
     path: '/',
     element: (
-      <ProtectedRoute>
+      // <ProtectedRoute>
         <Main />
-      </ProtectedRoute>
+      // </ProtectedRoute>
     ),
     errorElement: <NotFound />,
     children: [

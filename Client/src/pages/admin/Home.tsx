@@ -233,47 +233,47 @@ function Home() {
 
   const count = [
     {
-      today: 'Total Revenue',
-      title: `${statistics.totalRevenue.toLocaleString()}đ`,
-      persent: `${calculatePercentageChange(
-        statistics.totalRevenue,
-        previousStatistics.totalRevenue
-      ).toFixed(1)}%`,
-      icon: dollor,
-      bnb:
-        statistics.totalRevenue >= previousStatistics.totalRevenue
-          ? 'bnb2'
-          : 'redtext',
+        today: 'Total Revenue',
+        title: `${statistics?.totalRevenue?.toLocaleString() || '0'}đ`,
+        persent: `${calculatePercentageChange(
+            statistics?.totalRevenue || 0,
+            previousStatistics?.totalRevenue || 0
+        ).toFixed(1)}%`,
+        icon: dollor,
+        bnb:
+            (statistics?.totalRevenue || 0) >= (previousStatistics?.totalRevenue || 0)
+                ? 'bnb2'
+                : 'redtext',
     },
     {
-      today: 'Orders',
-      title: `${statistics.totalOrders}`,
-      persent: `${calculatePercentageChange(
-        statistics.totalOrders,
-        previousStatistics.totalOrders
-      ).toFixed(1)}%`,
-      icon: heart,
-      bnb:
-        statistics.totalOrders >= previousStatistics.totalOrders
-          ? 'bnb2'
-          : 'redtext',
+        today: 'Orders',
+        title: `${statistics?.totalOrders || 0}`,
+        persent: `${calculatePercentageChange(
+            statistics?.totalOrders || 0,
+            previousStatistics?.totalOrders || 0
+        ).toFixed(1)}%`,
+        icon: heart,
+        bnb:
+            (statistics?.totalOrders || 0) >= (previousStatistics?.totalOrders || 0)
+                ? 'bnb2'
+                : 'redtext',
     },
     {
-      today: 'Total Users',
-      title: `${totalUsers.totalUser}`,
-      persent: `${totalUsers.userToday}`,
-      icon: cart,
-      bnb: 'bnb2',
+        today: 'Total Users',
+        title: `${totalUsers?.totalUser || 0}`,
+        persent: `${totalUsers?.userToday || 0}`,
+        icon: cart,
+        bnb: 'bnb2',
     },
+    {
+        today: 'Best Selling Item',
+        title: `${bestSellingDish?.sales || 0}`,
+        persent: '+25%',
+        icon: profile,
+        bnb: 'bnb2',
+    },
+];
 
-    {
-      today: 'Best Selling Item',
-      title: `${bestSellingDish.sales} `,
-      persent: '+25%',
-      icon: profile,
-      bnb: 'bnb2',
-    },
-  ];
 
   const bestSellingColumns = [
     {
