@@ -66,9 +66,15 @@ public class CouponServiceImpl implements CouponService {
     }
 
     @Override
-    public ApiResponse addNewCoupon(CouponDto request) {
+    public ApiResponse addNewCoupon(CouponDto request) throws DataExitsException {
         if (couponRepository.existsByCode(request.getCode())) {
-            return new ApiResponse("Coupon already exists", HttpStatus.BAD_REQUEST);
+            throw new DataExitsException("Coupon already exists");
+        }
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        LocalDate startDate = LocalDate.parse(request.getStartDate(), formatter);
+        LocalDate expirationDate = LocalDate.parse(request.getExpirationDate(), formatter);
+        if (startDate.isAfter(expirationDate)) {
+            throw new DataExitsException("Start date must be before expiration date");
         }
         Coupon coupon = Coupon.builder()
                 .code(request.getCode())
@@ -90,13 +96,13 @@ public class CouponServiceImpl implements CouponService {
         Coupon coupon = couponRepository.findById(id)
                 .orElseThrow(() -> new DataExitsException("Coupon not found"));
         if (couponRepository.existsByCodeAndIdNot(request.getCode(), id)) {
-            return new ApiResponse("Coupon already exists", HttpStatus.BAD_REQUEST);
+            throw new DataExitsException("Coupon already exists");
         }
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         LocalDate startDate = LocalDate.parse(request.getStartDate(), formatter);
         LocalDate expirationDate = LocalDate.parse(request.getExpirationDate(), formatter);
         if (startDate.isAfter(expirationDate)) {
-            return new ApiResponse("Start date must be before expiration date", HttpStatus.BAD_REQUEST);
+            throw new DataExitsException("Start date must be before expiration date");
         }
         coupon.setCode(request.getCode());
         coupon.setDescription(request.getDescription());
