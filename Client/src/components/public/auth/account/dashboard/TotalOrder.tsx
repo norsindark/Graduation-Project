@@ -27,10 +27,7 @@ const TotalOrder = () => {
             acc.total++;
             if (order.orderStatus === 'COMPLETED') {
               acc.completed++;
-            } else if (
-              order.orderStatus === 'CANCELLED' ||
-              order.orderStatus === 'CANCELED'
-            ) {
+            } else if (order.orderStatus === 'CANCELLED') {
               acc.cancelled++;
             }
             return acc;

@@ -49,7 +49,7 @@ function MenuHome() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
   const [current, setCurrent] = useState<number>(1);
-  const [pageSize, setPageSize] = useState<number>(8);
+  const [pageSize, setPageSize] = useState<number>(6);
   const [total, setTotal] = useState<number>(0);
 
   const [categories, setCategories] = useState<Category[]>([]);

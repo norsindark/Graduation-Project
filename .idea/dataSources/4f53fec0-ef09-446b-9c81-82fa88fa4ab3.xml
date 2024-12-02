@@ -11,9 +11,9 @@
 4||10|c|G
 4||10|C|G
 4||10|T|G</Grants>
-      <IntrospectionStateNumber>4869</IntrospectionStateNumber>
+      <IntrospectionStateNumber>5238</IntrospectionStateNumber>
       <ServerVersion>16.4</ServerVersion>
-      <StartupTime>1732522822</StartupTime>
+      <StartupTime>1733121334</StartupTime>
       <TimeZones>true ACDT
 true ACSST
 false ACST
@@ -808,7 +808,7 @@ false Zulu
 14697||10|C|G
 14697||-9223372036854775808|U|G
 14697||10|U|G</Grants>
-      <IntrospectionStateNumber>4869</IntrospectionStateNumber>
+      <IntrospectionStateNumber>5238</IntrospectionStateNumber>
       <ObjectId>16389</ObjectId>
       <OwnerName>postgres</OwnerName>
     </database>
@@ -4245,8 +4245,8 @@ false Zulu
     <schema id="265" parent="2" name="public">
       <Comment>standard public schema</Comment>
       <Current>1</Current>
-      <IntrospectionStateNumber>4869</IntrospectionStateNumber>
-      <LastIntrospectionLocalTimestamp>2024-11-25.16:32:13</LastIntrospectionLocalTimestamp>
+      <IntrospectionStateNumber>5238</IntrospectionStateNumber>
+      <LastIntrospectionLocalTimestamp>2024-12-02.09:25:06</LastIntrospectionLocalTimestamp>
       <ObjectId>2200</ObjectId>
       <StateNumber>524</StateNumber>
       <OwnerName>pg_database_owner</OwnerName>
@@ -7974,7 +7974,7 @@ false Zulu
       <DasType>text|0s</DasType>
       <NotNull>1</NotNull>
       <Position>2</Position>
-      <StateNumber>4787</StateNumber>
+      <StateNumber>5173</StateNumber>
       <TypeId>25</TypeId>
     </column>
     <column id="568" parent="512" name="created_at">
@@ -7986,7 +7986,7 @@ false Zulu
     <column id="569" parent="512" name="seo_description">
       <DasType>text|0s</DasType>
       <Position>4</Position>
-      <StateNumber>4788</StateNumber>
+      <StateNumber>5174</StateNumber>
       <TypeId>25</TypeId>
     </column>
     <column id="570" parent="512" name="seo_title">
@@ -8271,7 +8271,7 @@ false Zulu
       <DasType>text|0s</DasType>
       <NotNull>1</NotNull>
       <Position>2</Position>
-      <StateNumber>4789</StateNumber>
+      <StateNumber>5175</StateNumber>
       <TypeId>25</TypeId>
     </column>
     <column id="611" parent="515" name="created_at">
@@ -8731,7 +8731,7 @@ false Zulu
     <column id="674" parent="522" name="long_description">
       <DasType>text|0s</DasType>
       <Position>6</Position>
-      <StateNumber>4790</StateNumber>
+      <StateNumber>5176</StateNumber>
       <TypeId>25</TypeId>
     </column>
     <column id="675" parent="522" name="offer_price">
@@ -9539,7 +9539,7 @@ false Zulu
     <column id="790" parent="531" name="comment">
       <DasType>text|0s</DasType>
       <Position>2</Position>
-      <StateNumber>4791</StateNumber>
+      <StateNumber>5177</StateNumber>
       <TypeId>25</TypeId>
     </column>
     <column id="791" parent="531" name="created_at">
