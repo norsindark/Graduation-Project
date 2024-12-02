@@ -1,11 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Slider from 'react-slick';
 import { Link, useNavigate } from 'react-router-dom';
-import {
-  callGetAllOffers,
-  callWishList,
-  callWishListById,
-} from '../../../services/clientApi';
+import { callWishList, callWishListById } from '../../../services/clientApi';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../redux/store';
 import { notification } from 'antd';
@@ -16,97 +12,53 @@ interface Offer {
   discountPercentage: number;
 }
 
-const DailyOffer: React.FC = () => {
+interface DailyOfferProps {
+  offers: any[];
+}
+
+const DailyOffer: React.FC<DailyOfferProps> = ({ offers }) => {
   const [dailyOffers, setDailyOffers] = useState<Offer[]>([]);
   const navigate = useNavigate();
   const userId = useSelector((state: RootState) => state.account.user?.id);
+
   useEffect(() => {
-    const fetchOffers = async () => {
-      try {
-        const response = await callGetAllOffers();
-        const currentDate = new Date();
-
-        const validOffers = response.data._embedded.offerResponseList.filter(
-          (offer: any) => {
-            if (offer.offerType !== 'DAILY') return false;
-
-            const endDate = new Date(offer.endDate);
-            return currentDate <= endDate;
-          }
-        );
-        if (validOffers.length === 0) {
-          setDailyOffers([
-            {
-              id: 'default1',
-              discountPercentage: 30,
-              dish: {
-                dishName: 'Dal Makhani Paneer',
-                description: 'Lightly smoked and minced pork tenderloin topped',
-                thumbImage: 'images/slider_img_1.png',
-                slug: 'dal-makhani-paneer',
-              },
-            },
-            {
-              id: 'default2',
-              discountPercentage: 40,
-              dish: {
-                dishName: 'Hyderabadi biryani',
-                description: 'Lightly smoked and minced pork tenderloin topped',
-                thumbImage: 'images/slider_img_2.png',
-                slug: 'hyderabadi-biryani',
-              },
-            },
-            {
-              id: 'default3',
-              discountPercentage: 55,
-              dish: {
-                dishName: 'Beef Masala Salad',
-                description: 'Lightly smoked and minced pork tenderloin topped',
-                thumbImage: 'images/slider_img_3.png',
-                slug: 'beef-masala-salad',
-              },
-            },
-          ]);
-        } else {
-          setDailyOffers(validOffers);
-        }
-      } catch (error) {
-        setDailyOffers([
-          {
-            id: 'default1',
-            discountPercentage: 30,
-            dish: {
-              dishName: 'Dal Makhani Paneer',
-              description: 'Lightly smoked and minced pork tenderloin topped',
-              thumbImage: 'images/slider_img_1.png',
-              slug: 'dal-makhani-paneer',
-            },
+    if (offers.length === 0) {
+      setDailyOffers([
+        {
+          id: 'default1',
+          discountPercentage: 30,
+          dish: {
+            dishName: 'Dal Makhani Paneer',
+            description: 'Lightly smoked and minced pork tenderloin topped',
+            thumbImage: 'images/slider_img_1.png',
+            slug: 'dal-makhani-paneer',
           },
-          {
-            id: 'default2',
-            discountPercentage: 40,
-            dish: {
-              dishName: 'Hyderabadi biryani',
-              description: 'Lightly smoked and minced pork tenderloin topped',
-              thumbImage: 'images/slider_img_2.png',
-              slug: 'hyderabadi-biryani',
-            },
+        },
+        {
+          id: 'default2',
+          discountPercentage: 40,
+          dish: {
+            dishName: 'Hyderabadi biryani',
+            description: 'Lightly smoked and minced pork tenderloin topped',
+            thumbImage: 'images/slider_img_2.png',
+            slug: 'hyderabadi-biryani',
           },
-          {
-            id: 'default3',
-            discountPercentage: 55,
-            dish: {
-              dishName: 'Beef Masala Salad',
-              description: 'Lightly smoked and minced pork tenderloin topped',
-              thumbImage: 'images/slider_img_3.png',
-              slug: 'beef-masala-salad',
-            },
+        },
+        {
+          id: 'default3',
+          discountPercentage: 55,
+          dish: {
+            dishName: 'Beef Masala Salad',
+            description: 'Lightly smoked and minced pork tenderloin topped',
+            thumbImage: 'images/slider_img_3.png',
+            slug: 'beef-masala-salad',
           },
-        ]);
-      }
-    };
-    fetchOffers();
-  }, []);
+        },
+      ]);
+    } else {
+      setDailyOffers(offers);
+    }
+  }, [offers]);
 
   const settings = {
     dots: true,

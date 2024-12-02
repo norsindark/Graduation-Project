@@ -6,8 +6,8 @@ import {
   doRemoveProductAction,
   CartItem,
   SelectedOption,
-  doUpdateQuantityAction,
 } from '../../../redux/order/orderSlice';
+import { notification } from 'antd';
 
 const Cart = ({
   showCart,
@@ -54,6 +54,19 @@ const Cart = ({
     return cartItems.reduce((total, item) => {
       return total + item.detail?.price * item.quantity;
     }, 0);
+  };
+
+  const handleViewCart = (e: React.MouseEvent) => {
+    if (cartItems.length === 0) {
+      e.preventDefault();
+      notification.warning({
+        message: 'Cart is empty ',
+        description: 'Please add products to the cart before viewing.',
+        duration: 3,
+        showProgress: true,
+      });
+      setShowCart(false);
+    }
   };
 
   return (
@@ -110,8 +123,11 @@ const Cart = ({
             sub total <span>{formatPrice(calculateTotalPrice())} VNĐ</span>
           </p>
           <Link
-            className="cart_view hover:bg-black"
-            onClick={() => setShowCart(false)}
+            className={`cart_view hover:bg-black ${cartItems.length === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
+            onClick={(e) => {
+              setShowCart(false);
+              handleViewCart(e);
+            }}
             to="/cart"
           >
             view cart
