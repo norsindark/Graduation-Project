@@ -60,6 +60,7 @@ const ProductDetail: React.FC = () => {
     discountPercentage: number;
     offerId: string;
   } | null>(null);
+  const [allDishes, setAllDishes] = useState<DishDetail[]>([]);
 
   useEffect(() => {
     if (hasAddedToCart) {
@@ -100,12 +101,13 @@ const ProductDetail: React.FC = () => {
       setLoading(true);
       try {
         const allDishesResponse = await callGetAllDishes('');
-        const allDishes = allDishesResponse.data._embedded?.dishResponseList;
+        const dishes = allDishesResponse.data._embedded?.dishResponseList;
+        setAllDishes(dishes);
 
-        const matchingDish = allDishes.find(
+        const matchingDish = dishes.find(
           (dish: DishDetail) => dish.slug === slug
         );
-
+        console.log('matchingDish', matchingDish);
         if (matchingDish) {
           const detailResponse = await callGetDishDetail(matchingDish.dishId);
           const dishData = detailResponse.data;
@@ -590,7 +592,12 @@ const ProductDetail: React.FC = () => {
               <TabsDescriptionAndReview dishDetail={dishDetail} />
             </div>
           </div>
-          <ReLatedItem />
+          {dishDetail && allDishes.length > 0 && (
+            <ReLatedItem
+              allDishes={allDishes}
+              categoryName={dishDetail.categoryName}
+            />
+          )}
         </div>
       </section>
     </>

@@ -9,9 +9,32 @@ interface RoleBaseRouteProps {
 }
 
 const RoleBaseRoute: React.FC<RoleBaseRouteProps> = ({ children }) => {
-  const isAdminRoute = window.location.pathname.startsWith('/dashboard');
+  const allowedRoutes = [
+    '/dashboard',
+    '/user',
+    '/employee-shift',
+    '/attendance',
+    '/category',
+    '/account-admin',
+    '/warehouse',
+    '/product-daily-offer',
+    '/product',
+    '/product-option',
+    '/coupon',
+    '/order',
+    '/review',
+    '/setting',
+    '/category-blog-admin',
+    '/blog-admin',
+    '/comments-blog-admin',
+  ];
+
+  const isAdminRoute = allowedRoutes.some((route) =>
+    window.location.pathname.startsWith(route)
+  );
   const user = useSelector((state: RootState) => state.account.user);
   const userRole = user?.role?.name;
+
   if (isAdminRoute && userRole === 'ADMIN') {
     return <>{children}</>;
   } else {
@@ -28,14 +51,10 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
     (state: RootState) => state.account.isAuthenticated
   );
 
-  return (
-    <>
-      {isAuthenticated ? (
-        <RoleBaseRoute>{children}</RoleBaseRoute>
-      ) : (
-        <Navigate to="/login" replace />
-      )}
-    </>
+  return isAuthenticated ? (
+    <RoleBaseRoute>{children}</RoleBaseRoute>
+  ) : (
+    <Navigate to="/login" replace />
   );
 };
 
