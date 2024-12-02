@@ -383,7 +383,7 @@ const Warehouse: React.FC = () => {
               pageSize: pageSize,
               total: totalItems,
               showSizeChanger: true,
-              pageSizeOptions: ['5', '10', '20', '50'],
+              pageSizeOptions: ['5', '10', '20', '50', '100'],
               onShowSizeChange: (_, size) => {
                 setCurrentPage(1);
                 setPageSize(size);
