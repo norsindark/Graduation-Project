@@ -100,13 +100,13 @@ const ProductEdit: React.FC<ProductEditProps> = ({
           })),
           thumbImage: currentDish.thumbImage
             ? [
-              {
-                uid: '-1',
-                name: 'thumbImage.png',
-                status: 'done',
-                url: currentDish.thumbImage,
-              },
-            ]
+                {
+                  uid: '-1',
+                  name: 'thumbImage.png',
+                  status: 'done',
+                  url: currentDish.thumbImage,
+                },
+              ]
             : [],
           images:
             currentDish.images?.map((img: any, index: number) => ({
@@ -177,11 +177,19 @@ const ProductEdit: React.FC<ProductEditProps> = ({
 
     recipes.forEach((recipe: any, index: number) => {
       formData.append(`recipes[${index}].warehouseId`, recipe.ingredientId);
-      formData.append(
-        `recipes[${index}].quantityUsed`,
-        recipe.quantityUsed.toString()
-      );
-      formData.append(`recipes[${index}].unit`, recipe.unit);
+      if (recipe.quantityUsed) {
+        formData.append(
+          `recipes[${index}].quantityUsed`,
+          recipe.quantityUsed.toString()
+        );
+      } else {
+        formData.append(`recipes[${index}].quantityUsed`, '0');
+      }
+      if (recipe.unit) {
+        formData.append(`recipes[${index}].unit`, recipe.unit);
+      } else {
+        formData.append(`recipes[${index}].unit`, 'g');
+      }
     });
 
     optionSelections.forEach((option: any, index: number) => {
@@ -189,18 +197,26 @@ const ProductEdit: React.FC<ProductEditProps> = ({
         `optionSelections[${index}].optionSelectionId`,
         option.optionSelectionId
       );
-      formData.append(
-        `optionSelections[${index}].additionalPrice`,
-        option.additionalPrice.toString()
-      );
+      if (option.additionalPrice) {
+        formData.append(
+          `optionSelections[${index}].additionalPrice`,
+          option.additionalPrice.toString()
+        );
+      } else {
+        formData.append(`optionSelections[${index}].additionalPrice`, '0');
+      }
     });
 
     options.forEach((option: any, index: number) => {
       formData.append(`options[${index}].optionId`, option.optionName);
-      formData.append(
-        `options[${index}].additionalPrice`,
-        option.additionalPrice.toString()
-      );
+      if (option.additionalPrice) {
+        formData.append(
+          `options[${index}].additionalPrice`,
+          option.additionalPrice.toString()
+        );
+      } else {
+        formData.append(`options[${index}].additionalPrice`, '0');
+      }
     });
 
     try {
@@ -407,9 +423,9 @@ const ProductEdit: React.FC<ProductEditProps> = ({
               name="offerPrice"
               label="Offer price"
               className="font-medium"
-            // rules={[
-            //   { required: true, message: 'Vui lòng nhập giá khuyến mãi!' },
-            // ]}
+              // rules={[
+              //   { required: true, message: 'Vui lòng nhập giá khuyến mãi!' },
+              // ]}
             >
               <InputNumber
                 min={0}
@@ -438,9 +454,11 @@ const ProductEdit: React.FC<ProductEditProps> = ({
                 fileList={form.getFieldValue('thumbImage') || []}
                 beforeUpload={(file) => {
                   const isJpgOrPng =
-                    file.type === 'image/jpeg' || file.type === 'image/png';
+                    file.type === 'image/jpeg' ||
+                    file.type === 'image/png' ||
+                    file.type === 'image/webp';
                   if (!isJpgOrPng) {
-                    message.error('You can only upload JPG/PNG files!');
+                    message.error('You can only upload JPG/PNG/WEBP files!');
                   } else {
                     handleThumbImageUpload(file);
                   }
@@ -473,9 +491,11 @@ const ProductEdit: React.FC<ProductEditProps> = ({
                 fileList={form.getFieldValue('images') || []}
                 beforeUpload={(file) => {
                   const isJpgOrPng =
-                    file.type === 'image/jpeg' || file.type === 'image/png';
+                    file.type === 'image/jpeg' ||
+                    file.type === 'image/png' ||
+                    file.type === 'image/webp';
                   if (!isJpgOrPng) {
-                    message.error('You can only upload JPG/PNG files!');
+                    message.error('You can only upload JPG/PNG/WEBP files!');
                     return false;
                   }
                   handleImagesOtherUpload(file);
@@ -522,9 +542,12 @@ const ProductEdit: React.FC<ProductEditProps> = ({
             >
               <Select>
                 {categoryList
-                  .filter(category => category.categoryStatus === 'ACTIVE')
+                  .filter((category) => category.categoryStatus === 'ACTIVE')
                   .map((category) => (
-                    <Option key={category.categoryId} value={category.categoryId}>
+                    <Option
+                      key={category.categoryId}
+                      value={category.categoryId}
+                    >
                       {category.categoryName}
                     </Option>
                   ))}
@@ -583,9 +606,14 @@ const ProductEdit: React.FC<ProductEditProps> = ({
                           }
                         >
                           {ingredientList
-                            .sort((a, b) => a.ingredientName.localeCompare(b.ingredientName))
+                            .sort((a, b) =>
+                              a.ingredientName.localeCompare(b.ingredientName)
+                            )
                             .map((ingredient) => (
-                              <Option key={ingredient.warehouseId} value={ingredient.warehouseId}>
+                              <Option
+                                key={ingredient.warehouseId}
+                                value={ingredient.warehouseId}
+                              >
                                 {ingredient.ingredientName}
                               </Option>
                             ))}
@@ -642,24 +670,24 @@ const ProductEdit: React.FC<ProductEditProps> = ({
           <Col xs={24} sm={12}>
             <Form.List
               name="optionSelections"
-            // rules={[
-            //   {
-            //     validator: async (_, value) => {
-            //       if (!value || value.length === 0) {
-            //         setTimeout(() => {
-            //           notification.error({
-            //             message: 'Error',
-            //             description: 'Please enter option selection!',
-            //             duration: 5,
-            //             showProgress: true,
-            //           });
-            //         }, 800);
-            //         return Promise.reject();
-            //       }
-            //       return Promise.resolve();
-            //     },
-            //   },
-            // ]}
+              // rules={[
+              //   {
+              //     validator: async (_, value) => {
+              //       if (!value || value.length === 0) {
+              //         setTimeout(() => {
+              //           notification.error({
+              //             message: 'Error',
+              //             description: 'Please enter option selection!',
+              //             duration: 5,
+              //             showProgress: true,
+              //           });
+              //         }, 800);
+              //         return Promise.reject();
+              //       }
+              //       return Promise.resolve();
+              //     },
+              //   },
+              // ]}
             >
               {(fields, { add, remove }) => (
                 <>
@@ -676,12 +704,12 @@ const ProductEdit: React.FC<ProductEditProps> = ({
                         {...restField}
                         name={[name, 'optionName']}
                         className="mb-0 w-full"
-                      // rules={[
-                      //   {
-                      //     required: true,
-                      //     message: 'Please select an option!',
-                      //   },
-                      // ]}
+                        // rules={[
+                        //   {
+                        //     required: true,
+                        //     message: 'Please select an option!',
+                        //   },
+                        // ]}
                       >
                         <Select
                           placeholder="Select option"
@@ -743,24 +771,24 @@ const ProductEdit: React.FC<ProductEditProps> = ({
             </Form.List>
             <Form.List
               name="options"
-            // rules={[
-            //   {
-            //     validator: async (_, value) => {
-            //       if (!value || value.length === 0) {
-            //         setTimeout(() => {
-            //           notification.error({
-            //             message: 'Error',
-            //             description: 'Please enter option selection!',
-            //             duration: 5,
-            //             showProgress: true,
-            //           });
-            //         }, 800);
-            //         return Promise.reject();
-            //       }
-            //       return Promise.resolve();
-            //     },
-            //   },
-            // ]}
+              // rules={[
+              //   {
+              //     validator: async (_, value) => {
+              //       if (!value || value.length === 0) {
+              //         setTimeout(() => {
+              //           notification.error({
+              //             message: 'Error',
+              //             description: 'Please enter option selection!',
+              //             duration: 5,
+              //             showProgress: true,
+              //           });
+              //         }, 800);
+              //         return Promise.reject();
+              //       }
+              //       return Promise.resolve();
+              //     },
+              //   },
+              // ]}
             >
               {(fields, { add, remove }) => (
                 <>
@@ -774,12 +802,12 @@ const ProductEdit: React.FC<ProductEditProps> = ({
                         {...restField}
                         name={[name, 'optionName']}
                         className="mb-0 w-full"
-                      // rules={[
-                      //   {
-                      //     required: true,
-                      //     message: 'Please select an option!',
-                      //   },
-                      // ]}
+                        // rules={[
+                        //   {
+                        //     required: true,
+                        //     message: 'Please select an option!',
+                        //   },
+                        // ]}
                       >
                         <Select
                           placeholder="Select option"
@@ -846,7 +874,7 @@ const ProductEdit: React.FC<ProductEditProps> = ({
               className="font-medium"
             >
               <ReactQuill
-                className=" h-[250px] max-h-[1200px] w-full bg-white"
+                className=" h-[480px] max-h-[1200px] w-full bg-white"
                 theme="snow"
                 modules={modules}
                 formats={formats}

@@ -18,7 +18,7 @@ interface Blog {
 
 function BlogPage() {
   const [current, setCurrent] = useState<number>(1);
-  const [pageSize, setPageSize] = useState<number>(8);
+  const [pageSize, setPageSize] = useState<number>(6);
   const [total, setTotal] = useState<number>(0);
   const [blogs, setBlogs] = useState<Blog[]>([]);
   const [loading, setLoading] = useState(false);
@@ -33,13 +33,14 @@ function BlogPage() {
     } else {
       fetchBlogs();
     }
-  }, [searchParams]);
+  }, [searchParams, current, pageSize]);
 
   const fetchBlogs = async () => {
     setLoading(true);
     try {
       const query = `pageNo=${current - 1}&pageSize=${pageSize}&sortBy=createdAt&sortDir=desc`;
       const response = await callGetAllBlog(query);
+      console.log('responseblog', response);
       const blogsData = response.data._embedded?.blogResponseList;
       if (blogsData) {
         const activeBlogs = blogsData.filter(

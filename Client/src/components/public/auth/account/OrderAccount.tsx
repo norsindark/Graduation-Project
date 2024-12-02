@@ -63,7 +63,7 @@ enum OrderStatus {
   PROCESSING = 'PROCESSING',
   SHIPPING = 'SHIPPING',
   COMPLETED = 'COMPLETED',
-  CANCELED = 'CANCELED',
+  CANCELLED = 'CANCELLED',
 }
 
 const isStatusActive = (
@@ -120,7 +120,7 @@ const OrderAccount = () => {
     PROCESSING: '#722ed1',
     SHIPPING: '#52c41a',
     COMPLETED: '#52c41a',
-    CANCELED: '#ff4d4f',
+    CANCELLED: '#ff4d4f',
   };
 
   const userId = useSelector((state: RootState) => state.account.user?.id);
@@ -226,9 +226,7 @@ const OrderAccount = () => {
     setLoading(true);
     try {
       if (paymentMethod === 'COD') {
-        const response = await callRepayOrder(
-          processingOrderId
-        );
+        const response = await callRepayOrder(processingOrderId);
         if (response.status === 200) {
           notification.success({
             message: 'Order success',

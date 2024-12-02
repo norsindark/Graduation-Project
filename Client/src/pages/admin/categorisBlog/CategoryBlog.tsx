@@ -54,7 +54,7 @@ const CategoryBlog: React.FC = () => {
       if (sortQuery) {
         query += `&sortBy=${sortQuery}`;
       } else {
-        query += `&sortBy=name&sortDir=desc`;
+        query += `&sortBy=displayOrder&sortDir=desc`;
       }
       const response = await callGetAllCategoryBlog(query);
       if (

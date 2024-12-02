@@ -255,9 +255,11 @@ const BlogEdit: React.FC<BlogEditProps> = ({
                 maxCount={1}
                 beforeUpload={(file) => {
                   const isJpgOrPng =
-                    file.type === 'image/jpeg' || file.type === 'image/png';
+                    file.type === 'image/jpeg' ||
+                    file.type === 'image/png' ||
+                    file.type === 'image/webp';
                   if (!isJpgOrPng) {
-                    message.error('Only JPG/PNG files are allowed!');
+                    message.error('Only JPG/PNG/WEBP files are allowed!');
                     return false;
                   }
                   handleImageUpload(file);
@@ -354,7 +356,7 @@ const BlogEdit: React.FC<BlogEditProps> = ({
             >
               <ReactQuill
                 theme="snow"
-                className="h-[320px] max-h-[1200px] w-full bg-white"
+                className="h-[480px] max-h-[1200px] w-full bg-white"
                 modules={modules}
                 formats={formats}
               />
@@ -370,8 +372,8 @@ const BlogEdit: React.FC<BlogEditProps> = ({
               rules={[
                 { required: true, message: 'Please enter SEO title!' },
                 {
-                  max: 60,
-                  message: 'SEO title must be less than 60 characters!',
+                  max: 80,
+                  message: 'SEO title must be less than 80 characters!',
                 },
               ]}
             >
