@@ -4,7 +4,6 @@ import {
   callGetAllDishes,
   callWishList,
   callWishListById,
-  callGetAllOffers,
 } from '../../../services/clientApi';
 import { notification, Pagination } from 'antd';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
@@ -42,7 +41,11 @@ interface WishListDish {
   ratingCount: number;
 }
 
-function MenuHome() {
+interface MenuHomeProps {
+  offers: any[];
+}
+
+const MenuHome: React.FC<MenuHomeProps> = ({ offers }) => {
   const [showDropdown, setShowDropdown] = useState<number | null>(null);
   const [activeFilter, setActiveFilter] = useState('*');
   const [menuItems, setMenuItems] = useState<any[]>([]);
@@ -53,14 +56,12 @@ function MenuHome() {
   const [total, setTotal] = useState<number>(0);
 
   const [categories, setCategories] = useState<Category[]>([]);
-  const [offers, setOffers] = useState<any[]>([]);
 
   const navigate = useNavigate();
 
   useEffect(() => {
     fetchCategories();
     fetchProducts();
-    fetchOffers();
   }, [current, pageSize]);
 
   const fetchCategories = async () => {
@@ -122,23 +123,6 @@ function MenuHome() {
       });
     } finally {
       setLoading(false);
-    }
-  };
-
-  const fetchOffers = async () => {
-    try {
-      const response = await callGetAllOffers();
-      const currentDate = new Date();
-
-      const validOffers = response.data._embedded.offerResponseList.filter(
-        (offer: any) => {
-          const endDate = new Date(offer.endDate);
-          return currentDate <= endDate;
-        }
-      );
-      setOffers(validOffers);
-    } catch (error) {
-      console.error('Error fetching offers:', error);
     }
   };
 
@@ -424,6 +408,6 @@ function MenuHome() {
       </div>
     </section>
   );
-}
+};
 
 export default MenuHome;

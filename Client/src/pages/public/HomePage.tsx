@@ -16,6 +16,7 @@ import FeedBack from '../../components/public/feedbacks/FeedBack';
 import Counter from '../../components/public/counter/Counter';
 import Blogs from '../../components/public/blogs/Blogs';
 import { LayoutContextType } from '../../components/public/layout/LayoutPublic';
+import { callGetAllOffers } from '../../services/clientApi';
 
 const HomePage = () => {
   const navigate = useNavigate();
@@ -32,6 +33,30 @@ const HomePage = () => {
   const [feedBackRef, feedBackInView] = useInView({ threshold: 0.3 });
   const [counterRef, counterInView] = useInView({ threshold: 0.3 });
   const [blogsRef, blogsInView] = useInView({ threshold: 0.3 });
+
+  const [offers, setOffers] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetchOffers();
+  }, []);
+
+  const fetchOffers = async () => {
+    try {
+      const response = await callGetAllOffers();
+      const currentDate = new Date();
+
+      const validOffers = response.data._embedded.offerResponseList.filter(
+        (offer: any) => {
+          const endDate = new Date(offer.endDate);
+          return currentDate <= endDate;
+        }
+      );
+      setOffers(validOffers);
+    } catch (error) {
+      console.error('Error fetching offers:', error);
+      setOffers([]);
+    }
+  };
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -60,7 +85,9 @@ const HomePage = () => {
   const memoizedComponents = useMemo(
     () => (
       <>
-        <BannerSlider />
+        <BannerSlider
+          offers={offers.filter((offer) => offer.offerType === 'BANNER')}
+        />
         <div
           ref={whyChooseRef}
           className={`fade-in ${whyChooseInView ? 'is-visible' : ''}`}
@@ -71,13 +98,15 @@ const HomePage = () => {
           ref={dailyOfferRef}
           className={`fade-in ${dailyOfferInView ? 'is-visible' : ''}`}
         >
-          <DailyOffer />
+          <DailyOffer
+            offers={offers.filter((offer) => offer.offerType === 'DAILY')}
+          />
         </div>
         <div
           ref={menuHomeRef}
           className={`fade-in ${menuHomeInView ? 'is-visible' : ''}`}
         >
-          <MenuHome />
+          <MenuHome offers={offers} />
         </div>
         <div
           ref={slideIntroRef}
@@ -112,6 +141,7 @@ const HomePage = () => {
       </>
     ),
     [
+      offers,
       whyChooseInView,
       dailyOfferInView,
       menuHomeInView,

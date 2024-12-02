@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import Slider from 'react-slick';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
-import { callGetAllOffers } from '../../../services/clientApi';
 import { Link, useNavigate } from 'react-router-dom';
 
 interface BannerOffer {
@@ -19,134 +18,77 @@ interface BannerOffer {
   };
 }
 
-function BannerSlider() {
+interface BannerSliderProps {
+  offers: any[];
+}
+
+const BannerSlider: React.FC<BannerSliderProps> = ({ offers }) => {
   const [weeklyOffers, setWeeklyOffers] = useState<BannerOffer[]>([]);
   const navigate = useNavigate();
+
   useEffect(() => {
-    const fetchOffers = async () => {
-      try {
-        const response = await callGetAllOffers();
-        const currentDate = new Date();
-
-        const validOffers = response.data._embedded.offerResponseList
-          .filter((offer: any) => {
-            if (offer.offerType !== 'BANNER') return false;
-            const endDate = new Date(offer.endDate);
-            const startDate = new Date(offer.startDate);
-            return currentDate >= startDate && currentDate <= endDate;
-          })
-          .map((offer: any) => ({
-            id: offer.id,
-            discountPercentage: offer.discountPercentage,
-            dish: {
-              dishName: offer.dish.dishName,
-              categoryName: offer.dish.categoryName,
-              description: offer.dish.description,
-              thumbImage: offer.dish.thumbImage,
-              slug: offer.dish.slug,
-              price: offer.dish.price,
-              offerPrice: offer.dish.offerPrice,
-            },
-          }));
-
-        if (validOffers.length > 0) {
-          setWeeklyOffers(validOffers);
-        } else {
-          setWeeklyOffers([
-            {
-              id: 'default',
-              discountPercentage: 35,
-              dish: {
-                dishName: 'Different spice for a Different taste',
-                categoryName: 'Featured',
-                description:
-                  'Lorem ipsum, dolor sit amet consectetur adipisicing elit.',
-                thumbImage: '/images/slider_img_1.png',
-                slug: 'special-dish',
-                price: 100000,
-                offerPrice: 65000,
-              },
-            },
-            {
-              id: 'default2',
-              discountPercentage: 70,
-              dish: {
-                dishName: 'Eat healthy. Stay healthy.',
-                categoryName: 'Featured',
-                description:
-                  'Lorem ipsum, dolor sit amet consectetur adipisicing elit. Ipsum fugit minima et debitis ut distinctio optio qui voluptate natus.',
-                thumbImage: '/images/slider_img_2.png',
-                slug: 'special-dish',
-                price: 100000,
-                offerPrice: 70000,
-              },
-            },
-            {
-              id: 'default3',
-              discountPercentage: 50,
-              dish: {
-                dishName: 'Great food. Tastes good.',
-                categoryName: 'Featured',
-                description:
-                  'Lorem ipsum, dolor sit amet consectetur adipisicing elit. Ipsum fugit minima et debitis ut distinctio optio qui voluptate natus.',
-                thumbImage: '/images/slider_img_3.png',
-                slug: 'special-dish',
-                price: 100000,
-                offerPrice: 50000,
-              },
-            },
-          ]);
-        }
-      } catch (error) {
-        console.error('Error fetching offers:', error);
-        setWeeklyOffers([
-          {
-            id: 'default',
-            discountPercentage: 35,
-            dish: {
-              dishName: 'Eat healthy. Stay healthy.',
-              categoryName: 'Featured',
-              description:
-                'Lorem ipsum, dolor sit amet consectetur adipisicing elit. Ipsum fugit minima et debitis ut distinctio optio qui voluptate natus.',
-              thumbImage: '/images/slider_img_2.png',
-              slug: 'special-dish',
-              price: 100000,
-              offerPrice: 65000,
-            },
+    if (offers.length === 0) {
+      setWeeklyOffers([
+        {
+          id: 'default',
+          discountPercentage: 35,
+          dish: {
+            dishName: 'Different spice for a Different taste',
+            categoryName: 'Featured',
+            description:
+              'Lorem ipsum, dolor sit amet consectetur adipisicing elit.',
+            thumbImage: '/images/slider_img_1.png',
+            slug: 'special-dish',
+            price: 100000,
+            offerPrice: 65000,
           },
-          {
-            id: 'default2',
-            discountPercentage: 70,
-            dish: {
-              dishName: 'Great food. Tastes good.',
-              categoryName: 'Featured',
-              description:
-                'Lorem ipsum, dolor sit amet consectetur adipisicing elit. Ipsum fugit minima et debitis ut distinctio optio qui voluptate natus.',
-              thumbImage: '/images/slider_img_2.png',
-              slug: 'special-dish',
-              price: 100000,
-              offerPrice: 70000,
-            },
+        },
+        {
+          id: 'default2',
+          discountPercentage: 70,
+          dish: {
+            dishName: 'Eat healthy. Stay healthy.',
+            categoryName: 'Featured',
+            description:
+              'Lorem ipsum, dolor sit amet consectetur adipisicing elit. Ipsum fugit minima et debitis ut distinctio optio qui voluptate natus.',
+            thumbImage: '/images/slider_img_2.png',
+            slug: 'special-dish',
+            price: 100000,
+            offerPrice: 70000,
           },
-          {
-            id: 'default3',
-            discountPercentage: 50,
-            dish: {
-              dishName: 'Great food. Tastes good.',
-              categoryName: 'Featured',
-              description:
-                'Lorem ipsum, dolor sit amet consectetur adipisicing elit. Ipsum fugit minima et debitis ut distinctio optio qui voluptate natus.',
-              thumbImage: '/images/slider_img_3.png',
-              slug: 'special-dish',
-              price: 100000,
-              offerPrice: 50000,
-            },
+        },
+        {
+          id: 'default3',
+          discountPercentage: 50,
+          dish: {
+            dishName: 'Great food. Tastes good.',
+            categoryName: 'Featured',
+            description:
+              'Lorem ipsum, dolor sit amet consectetur adipisicing elit. Ipsum fugit minima et debitis ut distinctio optio qui voluptate natus.',
+            thumbImage: '/images/slider_img_3.png',
+            slug: 'special-dish',
+            price: 100000,
+            offerPrice: 50000,
           },
-        ]);
-      }
-    };
-    fetchOffers();
-  }, []);
+        },
+      ]);
+    } else {
+      const mappedOffers = offers.map((offer) => ({
+        id: offer.id,
+        discountPercentage: offer.discountPercentage,
+        dish: {
+          dishName: offer.dish.dishName,
+          categoryName: offer.dish.categoryName,
+          description: offer.dish.description,
+          thumbImage: offer.dish.thumbImage,
+          slug: offer.dish.slug,
+          price: offer.dish.price,
+          offerPrice: offer.dish.offerPrice,
+        },
+      }));
+      setWeeklyOffers(mappedOffers);
+    }
+  }, [offers]);
 
   const settings = {
     dots: true,
@@ -226,6 +168,6 @@ function BannerSlider() {
       </div>
     </section>
   );
-}
+};
 
 export default BannerSlider;
