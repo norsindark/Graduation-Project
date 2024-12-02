@@ -139,11 +139,19 @@ const ProductNew: React.FC<ProductNewProps> = ({
 
     recipes.forEach((recipe, index) => {
       formData.append(`recipes[${index}].warehouseId`, recipe.ingredientId);
-      formData.append(
-        `recipes[${index}].quantityUsed`,
-        recipe.quantityUsed.toString()
-      );
-      formData.append(`recipes[${index}].unit`, recipe.unit);
+      if (recipe.quantityUsed) {
+        formData.append(
+          `recipes[${index}].quantityUsed`,
+          recipe.quantityUsed.toString()
+        );
+      } else {
+        formData.append(`recipes[${index}].quantityUsed`, '0');
+      }
+      if (recipe.unit) {
+        formData.append(`recipes[${index}].unit`, recipe.unit);
+      } else {
+        formData.append(`recipes[${index}].unit`, 'g');
+      }
     });
 
     if (
@@ -153,10 +161,14 @@ const ProductNew: React.FC<ProductNewProps> = ({
     ) {
       optionSelections.forEach((option, index) => {
         formData.append(`optionSelections[${index}].optionId`, option.optionId);
-        formData.append(
-          `optionSelections[${index}].additionalPrice`,
-          option.additionalPrice.toString()
-        );
+        if (option.additionalPrice) {
+          formData.append(
+            `optionSelections[${index}].additionalPrice`,
+            option.additionalPrice.toString()
+          );
+        } else {
+          formData.append(`optionSelections[${index}].additionalPrice`, '0');
+        }
       });
     }
 
@@ -345,9 +357,11 @@ const ProductNew: React.FC<ProductNewProps> = ({
                 maxCount={1}
                 beforeUpload={(file) => {
                   const isJpgOrPng =
-                    file.type === 'image/jpeg' || file.type === 'image/png';
+                    file.type === 'image/jpeg' ||
+                    file.type === 'image/png' ||
+                    file.type === 'image/webp';
                   if (!isJpgOrPng) {
-                    message.error('You can only upload JPG/PNG files!');
+                    message.error('You can only upload JPG/PNG/WEBP files!');
                   } else {
                     handleThumbImageUpload(file);
                   }
@@ -380,9 +394,11 @@ const ProductNew: React.FC<ProductNewProps> = ({
                 fileList={form.getFieldValue('images') || []}
                 beforeUpload={(file) => {
                   const isJpgOrPng =
-                    file.type === 'image/jpeg' || file.type === 'image/png';
+                    file.type === 'image/jpeg' ||
+                    file.type === 'image/png' ||
+                    file.type === 'image/webp';
                   if (!isJpgOrPng) {
-                    message.error('You can only upload JPG/PNG files!');
+                    message.error('You can only upload JPG/PNG/WEBP files!');
                     return false;
                   }
                   handleImagesOtherUpload(file);
@@ -663,7 +679,7 @@ const ProductNew: React.FC<ProductNewProps> = ({
               className="font-medium"
             >
               <ReactQuill
-                className=" h-[3200px] max-h-[1200px] w-full bg-white"
+                className="h-[480px] max-h-[1200px] w-full bg-white"
                 theme="snow"
                 modules={modules}
                 formats={formats}
