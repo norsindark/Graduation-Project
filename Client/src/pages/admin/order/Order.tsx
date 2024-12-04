@@ -321,17 +321,20 @@ const Order: React.FC = () => {
       dataIndex: 'address',
       key: 'address',
       width: 300,
-      render: (address: any) => (
-        <div>
-          <div>{address.street}</div>
-          <div>{`${address.commune}, ${address.city}`}</div>
-          <div>{`${address.state}, ${address.country}`}</div>
-          <div>SĐT: {address.phoneNumber}</div>
-        </div>
-      ),
-      sorter: (a: any, b: any) =>
-        a.address.phoneNumber.localeCompare(b.address.phoneNumber),
-    },
+      render: (address: any) =>
+        address ? (
+          <div>
+            <div>{address.street}</div>
+            <div>{`${address.commune}, ${address.city}`}</div>
+            <div>{`${address.state}, ${address.country}`}</div>
+            <div>SĐT: {address.phoneNumber}</div>
+          </div>
+        ) : null,
+      sorter: (a: any, b: any) => {
+        if (!a.address || !b.address) return 0; 
+        return a.address.phoneNumber.localeCompare(b.address.phoneNumber);
+      },
+    },    
     {
       title: 'Order Detail',
       key: 'orderItems',
