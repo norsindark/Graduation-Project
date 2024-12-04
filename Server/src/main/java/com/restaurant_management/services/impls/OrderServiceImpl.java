@@ -86,7 +86,7 @@ public class OrderServiceImpl implements OrderService {
         List<OrderResponse> orderResponses = orders.stream()
                 .map(order -> {
                     Address address = addressRepository.findById(order.getAddressId())
-                            .orElseThrow(() -> new RuntimeException("Address not found"));
+                            .orElse(null);
                     List<OrderItem> orderItems = orderItemRepository.findByOrder(order);
                     return new OrderResponse(order, address, orderItems);
                 })
