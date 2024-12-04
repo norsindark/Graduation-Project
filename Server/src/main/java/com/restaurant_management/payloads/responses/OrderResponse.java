@@ -34,7 +34,7 @@ public class OrderResponse {
         this.totalPrice = order.getTotalPrice();
         this.createdAt = order.getCreatedAt();
         this.updatedAt = order.getUpdatedAt();
-        this.address = AddressResponse.toAddress(address);
+        this.address =  (address != null) ? AddressResponse.toAddress(address) : null;
         this.orderItems = orderItems.stream().map(OrderItemResponse::new).toList();
     }
 }
