@@ -194,8 +194,12 @@ const CouponNew: React.FC<CouponNewProps> = ({
           name="description"
           label="Description"
           className="font-medium"
+          rules={[
+            { required: true, message: 'Please enter a description!' },
+            { max: 255, message: 'Description cannot exceed 255 characters!' },
+          ]}
         >
-          <Input.TextArea rows={2} />
+          <Input.TextArea rows={2} maxLength={255} />
         </Form.Item>
 
         <Row gutter={16}>
