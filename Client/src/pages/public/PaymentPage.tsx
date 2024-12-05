@@ -9,7 +9,7 @@ import { useSelector } from 'react-redux';
 import { RootState } from '../../redux/store';
 import { useDispatch } from 'react-redux';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 // Add formatPrice function
 const formatPrice = (price: number) => {
   return Math.round(price).toLocaleString('vi-VN');
@@ -24,6 +24,7 @@ function PaymentPage() {
   const cartItems = useSelector((state: RootState) => state.order.carts);
   const userId = useSelector((state: RootState) => state.account.user?.id);
   const [loading, setLoading] = useState(false);
+
   const handlePayment = async (paymentMethod: 'COD' | 'BANKING') => {
     setLoading(true);
     try {
@@ -55,45 +56,68 @@ function PaymentPage() {
         '',
         orderSummary?.delivery || 0
       );
+
       if (response.status === 200) {
         if (paymentMethod === 'COD') {
-          notification.success({
-            message: 'Order success',
-            description: (
-              <div>
-                <p>Thank you for your order!</p>
-                <p>Please check your email for order details.</p>
-              </div>
-            ),
-            duration: 5,
-            placement: 'top',
-          });
           navigate('/status-payment', {
             state: {
               orderId: response.data?.message,
               paymentMethod: 'COD',
+              paymentStatus: 'success',
+              from: '/payment',
             },
           });
-          dispatch(doClearCartAction());
+
+          setTimeout(() => {
+            dispatch(doClearCartAction());
+            notification.success({
+              message: 'Order success',
+              description: (
+                <div>
+                  <p>Thank you for your order!</p>
+                  <p>Please check your email for order details.</p>
+                </div>
+              ),
+              duration: 5,
+              placement: 'top',
+            });
+          }, 100);
         } else if (paymentMethod === 'BANKING') {
           await callProcessPayment(response.data?.message);
         }
       } else {
-        notification.error({
-          message: 'Payment error',
-          description: 'An error occurred during the payment process',
-        });
+        throw new Error('Order creation failed');
       }
     } catch (error) {
+      console.error('Payment error:', error);
       notification.error({
         message: 'Payment error',
         description: 'An error occurred during the payment process',
       });
-      console.error('Payment error:', error);
+      navigate('/status-payment', {
+        state: {
+          orderId: null,
+          paymentMethod: 'ERROR',
+          paymentStatus: 'failed',
+          from: '/payment',
+        },
+        replace: true,
+      });
     } finally {
       setLoading(false);
     }
   };
+
+  // Kiểm tra nếu không có thông tin cần thiết từ checkout
+  useEffect(() => {
+    if (!orderSummary || !selectedAddressId || !deliveryInfo) {
+      notification.error({
+        message: 'Invalid access',
+        description: 'Please complete checkout process first',
+      });
+      navigate('/cart');
+    }
+  }, [orderSummary, selectedAddressId, deliveryInfo]);
 
   return (
     <>

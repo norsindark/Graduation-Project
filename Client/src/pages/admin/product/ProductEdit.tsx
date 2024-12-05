@@ -371,9 +371,7 @@ const ProductEdit: React.FC<ProductEditProps> = ({
 
   return (
     <>
-      <h4 className="text-center text-xl font-semibold mb-4">
-        Create new dish
-      </h4>
+      <h4 className="text-center text-xl font-semibold mb-4">Edit dish</h4>
       <Form form={form} onFinish={onFinish} layout="vertical">
         <Row gutter={16}>
           <Col xs={24} sm={12}>
