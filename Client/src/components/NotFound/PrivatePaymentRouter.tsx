@@ -12,9 +12,7 @@ const PrivatePaymentRouter: React.FC<PrivatePaymentRouterProps> = ({
   children,
 }) => {
   const location = useLocation();
-  const isAuthenticated = useSelector(
-    (state: RootState) => state.account.isAuthenticated
-  );
+
   const cartItems = useSelector((state: RootState) => state.order.carts);
 
   const previousPath = location.state?.from || '/';
@@ -29,10 +27,14 @@ const PrivatePaymentRouter: React.FC<PrivatePaymentRouterProps> = ({
     return <Navigate to="/menu" state={{ from: location }} replace />;
   }
 
-  if (previousPath !== '/cart') {
+  if (
+    previousPath !== '/checkout' &&
+    previousPath !== '/cart' &&
+    previousPath !== '/payment'
+  ) {
     notification.warning({
       message: 'Access denied',
-      description: 'Please access from the cart page.',
+      description: 'Please access from the checkout or cart page.',
       duration: 3,
       showProgress: true,
     });

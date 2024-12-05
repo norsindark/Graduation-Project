@@ -346,6 +346,7 @@ function CheckoutPage() {
         orderSummary: updatedOrderSummary || orderSummary,
         selectedAddressId,
         deliveryInfo,
+        from: '/checkout',
       },
     });
   };
