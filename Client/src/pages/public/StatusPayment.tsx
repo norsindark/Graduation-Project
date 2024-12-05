@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import Account from '../../components/public/auth/account/Account';
 import {
@@ -22,6 +22,12 @@ function StatusPayment({ setActiveModal }: StatusPaymentProps) {
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!orderId || !paymentMethod || !paymentStatus) {
+      navigate('/cart');
+    }
+  }, [orderId, paymentMethod, paymentStatus]);
 
   const handleViewOrders = () => {
     setIsAccountModalOpen(true);
@@ -63,6 +69,7 @@ function StatusPayment({ setActiveModal }: StatusPaymentProps) {
               orderId: orderIdNew,
               paymentMethod: 'COD',
               paymentStatus: 'success',
+              from: 'status-payment',
             },
           });
         } catch (updateError) {

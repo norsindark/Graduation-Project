@@ -25,6 +25,11 @@ function PaymentReturn() {
   const vnp_SecureHash = searchParams.get('vnp_SecureHash') || '';
 
   useEffect(() => {
+    if (!vnp_TxnRef) {
+      navigate('/cart');
+      return;
+    }
+
     const processPayment = async () => {
       try {
         const response = await callPaymentReturn(
@@ -58,6 +63,7 @@ function PaymentReturn() {
               orderId: response.data?.message,
               paymentMethod: 'VNPAY',
               paymentStatus: 'success',
+              from: 'payment/return',
             },
           });
           dispatch(doClearCartAction());
@@ -107,6 +113,7 @@ function PaymentReturn() {
                 orderId: response.data?.errors?.error,
                 paymentMethod: 'VNPAY',
                 paymentStatus: 'failed',
+                from: 'payment/return',
               },
             });
             dispatch(doClearCartAction());
