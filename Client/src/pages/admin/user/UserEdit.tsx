@@ -85,6 +85,7 @@ const UserEdit: React.FC<UserEditProps> = ({
             <Form.Item
               name="email"
               label="Email"
+              className="font-medium"
               rules={[
                 { required: true, message: 'Please enter an email!' },
                 { type: 'email', message: 'Invalid email format!' },
@@ -97,6 +98,7 @@ const UserEdit: React.FC<UserEditProps> = ({
             <Form.Item
               name="fullName"
               label="Full Name"
+              className="font-medium"
               rules={[
                 { required: true, message: 'Please enter the full name!' },
               ]}
@@ -111,6 +113,7 @@ const UserEdit: React.FC<UserEditProps> = ({
             <Form.Item
               name="role"
               label="Role"
+              className="font-medium"
               rules={[{ required: true, message: 'Please select a role!' }]}
             >
               <Select>
@@ -124,6 +127,7 @@ const UserEdit: React.FC<UserEditProps> = ({
             <Form.Item
               name="status"
               label="Status"
+              className="font-medium"
               rules={[{ required: true, message: 'Please select a status!' }]}
             >
               <Select>

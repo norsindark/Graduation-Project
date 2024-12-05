@@ -154,19 +154,11 @@ export const router = createBrowserRouter([
       },
       {
         path: '/status-payment',
-        element: (
-          <PrivatePaymentRouter>
-            <StatusPayment setActiveModal={(modalName) => {}} />
-          </PrivatePaymentRouter>
-        ),
+        element: <StatusPayment setActiveModal={(modalName) => {}} />,
       },
       {
         path: `/payment/return`,
-        element: (
-          <PrivatePaymentRouter>
-            <PaymentReturn />
-          </PrivatePaymentRouter>
-        ),
+        element: <PaymentReturn />,
       },
     ],
   },

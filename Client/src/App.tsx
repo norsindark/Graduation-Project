@@ -56,11 +56,9 @@ function App() {
     const token = localStorage.getItem('accessToken');
     if (token && !isAuthenticated) {
       dispatch(setLoading(true));
-      setTimeout(() => {
-        getAccount().catch((err) =>
-          console.error('Error during account fetch:', err)
-        );
-      }, 1000);
+      getAccount().catch((err) =>
+        console.error('Error during account fetch:', err)
+      );
     } else {
       dispatch(setLoading(false));
     }
