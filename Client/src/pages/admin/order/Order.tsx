@@ -74,10 +74,10 @@ const Order: React.FC = () => {
 
   const [loading, setLoading] = useState(false);
 
-  const [total, setTotal] = useState(0);
-  const [current, setCurrent] = useState(1);
-  const [pageSize, setPageSize] = useState(5);
-  const [sortQuery, setSortQuery] = useState('');
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [pageSize, setPageSize] = useState<number>(5);
+  const [totalItems, setTotalItems] = useState<number>(0);
+  const [sortQuery, setSortQuery] = useState<string>('');
   const [isExpanded, setIsExpanded] = useState(false);
 
   const [isStatusModalVisible, setIsStatusModalVisible] = useState(false);
@@ -86,12 +86,12 @@ const Order: React.FC = () => {
 
   useEffect(() => {
     fetchOrders();
-  }, []);
+  }, [currentPage, pageSize, sortQuery]);
 
   const fetchOrders = async () => {
     setLoading(true);
     try {
-      let query = `pageNo=${current - 1}&pageSize=${pageSize}`;
+      let query = `pageNo=${currentPage - 1}&pageSize=${pageSize}`;
       if (sortQuery) {
         query += `&sortBy=${sortQuery}`;
       } else {
@@ -100,24 +100,25 @@ const Order: React.FC = () => {
       const response = await callGetAllOrder(query);
       if (response.data._embedded?.orderResponseList) {
         setDataSource(response.data._embedded.orderResponseList);
-        setTotal(response.data.page.totalElements);
+        setTotalItems(response.data.page.totalElements);
+        setCurrentPage(response.data.page.number + 1);
       } else {
         setDataSource([]);
-        setTotal(0);
+        setTotalItems(0);
       }
     } catch (error) {
       notification.error({
-        message: 'Error during get process!',
+        message: 'Lỗi khi tải danh sách đơn hàng',
+        description: 'Vui lòng thử lại sau.',
         duration: 5,
         showProgress: true,
       });
-      setDataSource([]);
     }
     setLoading(false);
   };
 
   const onChange = (pagination: any, sortDir: any) => {
-    setCurrent(pagination.current);
+    setCurrentPage(pagination.current);
     setPageSize(pagination.pageSize);
     if (sortDir && sortDir.field) {
       const order = sortDir.order === 'ascend' ? 'asc' : 'desc';
@@ -331,10 +332,10 @@ const Order: React.FC = () => {
           </div>
         ) : null,
       sorter: (a: any, b: any) => {
-        if (!a.address || !b.address) return 0; 
+        if (!a.address || !b.address) return 0;
         return a.address.phoneNumber.localeCompare(b.address.phoneNumber);
       },
-    },    
+    },
     {
       title: 'Order Detail',
       key: 'orderItems',
@@ -463,15 +464,17 @@ const Order: React.FC = () => {
         loading={loading}
         onChange={onChange}
         pagination={{
-          current: current,
+          current: currentPage,
           pageSize: pageSize,
-          total: total,
+          total: totalItems,
           showSizeChanger: true,
-          showQuickJumper: true,
-          pageSizeOptions: ['5', '10', '20', '50'],
-          onShowSizeChange: (current, size) => {
-            setCurrent(1);
+          pageSizeOptions: ['5', '10', '20', '50', '100'],
+          onShowSizeChange: (_, size) => {
+            setCurrentPage(1);
             setPageSize(size);
+          },
+          onChange: (page) => {
+            setCurrentPage(page);
           },
         }}
         scroll={{ x: 'max-content' }}
