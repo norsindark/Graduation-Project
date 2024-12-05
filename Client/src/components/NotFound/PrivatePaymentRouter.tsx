@@ -17,7 +17,11 @@ const PrivatePaymentRouter: React.FC<PrivatePaymentRouterProps> = ({
 
   const previousPath = location.state?.from || '/';
 
-  if (cartItems.length === 0) {
+  if (
+    cartItems.length === 0 &&
+    !location.pathname.includes('status-payment') &&
+    !location.pathname.includes('payment/return')
+  ) {
     notification.warning({
       message: 'Cart is empty',
       description: 'Please add products to the cart before continuing.',
@@ -30,7 +34,11 @@ const PrivatePaymentRouter: React.FC<PrivatePaymentRouterProps> = ({
   if (
     previousPath !== '/checkout' &&
     previousPath !== '/cart' &&
-    previousPath !== '/payment'
+    previousPath !== '/payment' &&
+    previousPath !== '/status-payment' &&
+    previousPath !== '/payment/return' &&
+    !location.pathname.includes('status-payment') &&
+    !location.pathname.includes('payment/return')
   ) {
     notification.warning({
       message: 'Access denied',
