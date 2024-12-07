@@ -273,7 +273,7 @@ const Blog: React.FC = () => {
             icon={<EyeOutlined />}
             onClick={() => handleViewClick(record)}
           >
-            Xem
+            View
           </Button>
           <Button
             type="primary"
@@ -281,7 +281,7 @@ const Blog: React.FC = () => {
             icon={<EditOutlined />}
             onClick={() => handleEditClick(record)}
           >
-            Sửa
+            Edit
           </Button>
           <Popconfirm
             title="Are you sure you want to delete this blog?"
@@ -293,7 +293,7 @@ const Blog: React.FC = () => {
               shape="round"
               icon={<DeleteOutlined />}
             >
-              Xóa
+              Delete
             </Button>
           </Popconfirm>
         </Space>

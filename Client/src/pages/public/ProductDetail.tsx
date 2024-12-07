@@ -556,7 +556,7 @@ const ProductDetail: React.FC = () => {
                       >
                         <i className="fal fa-minus"></i>
                       </button>
-                      <input type="text" value={currentQuantity} readOnly />
+                      <input type="text" value={currentQuantity}  />
                       <button
                         className="btn btn-success"
                         onClick={() => handleChangeButton('PLUS')}

@@ -153,7 +153,7 @@ const LocationEdit: React.FC<LocationEditProps> = ({
   return (
     <div className="container text-medium">
       <h4 className="fp__dsahboard_overview_item text-center flex justify-center items-center p-3 font-[500] text-[18px]">
-        Create New Address
+        Edit Restaurant Location
       </h4>
       <Form layout="vertical" form={form} onFinish={onFinish}>
         <div className="row">

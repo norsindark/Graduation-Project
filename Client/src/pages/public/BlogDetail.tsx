@@ -452,7 +452,7 @@ function BlogDetail() {
                     loading={commentLoading}
                     className="px-6 py-2 flex items-center gap-2 bg-blue-500 hover:bg-blue-600 transition-all duration-300"
                   >
-                    {commentLoading ? 'Đang gửi...' : 'Gửi bình luận'}
+                    {commentLoading ? 'Sending. . .' : 'Send Comment'}
                   </Button>
                 </Form>
               </div>
