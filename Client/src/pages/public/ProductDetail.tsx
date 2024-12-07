@@ -372,10 +372,10 @@ const ProductDetail: React.FC = () => {
             currentOffer?.discountPercentage ||
             (dishDetail.offerPrice < dishDetail.price
               ? Math.round(
-                  ((dishDetail.price - dishDetail.offerPrice) /
-                    dishDetail.price) *
-                    100
-                )
+                ((dishDetail.price - dishDetail.offerPrice) /
+                  dishDetail.price) *
+                100
+              )
               : undefined),
           thumbImage: dishDetail.thumbImage,
         },
@@ -475,13 +475,12 @@ const ProductDetail: React.FC = () => {
                   {Array.from({ length: 5 }, (_, index) => (
                     <i
                       key={index}
-                      className={`${
-                        index < Math.floor(dishDetail?.rating || 0)
-                          ? 'fas fa-star'
-                          : index < (dishDetail?.rating || 0)
-                            ? 'fas fa-star-half-alt'
-                            : 'far fa-star'
-                      }`}
+                      className={`${index < Math.floor(dishDetail?.rating || 0)
+                        ? 'fas fa-star'
+                        : index < (dishDetail?.rating || 0)
+                          ? 'fas fa-star-half-alt'
+                          : 'far fa-star'
+                        }`}
                     ></i>
                   ))}
                   <span>({dishDetail?.rating})</span>
@@ -524,7 +523,7 @@ const ProductDetail: React.FC = () => {
                               e.target.checked,
                               option.optionSelectionId,
                               optionGroup.optionGroupName.toLowerCase() ===
-                                'size'
+                              'size'
                             )
                           }
                         />
@@ -545,8 +544,7 @@ const ProductDetail: React.FC = () => {
 
                 <div className="details_quentity">
                   <h5>
-                    select quantity (Available : {dishDetail?.availableQuantity}
-                    )
+                    select quantity (Available : {dishDetail?.availableQuantity})
                   </h5>
                   <div className="quentity_btn_area flex-wrap align-items-center justify-start">
                     <div className="quentity_btn">
@@ -556,7 +554,16 @@ const ProductDetail: React.FC = () => {
                       >
                         <i className="fal fa-minus"></i>
                       </button>
-                      <input type="text" value={currentQuantity}  />
+                      <input
+                        type="text"
+                        value={currentQuantity}
+                        onChange={(e) => {
+                          const value = parseInt(e.target.value, 10);
+                          if (!isNaN(value) && value >= 0 && value <= dishDetail?.availableQuantity) {
+                            setCurrentQuantity(value);
+                          }
+                        }}
+                      />
                       <button
                         className="btn btn-success"
                         onClick={() => handleChangeButton('PLUS')}

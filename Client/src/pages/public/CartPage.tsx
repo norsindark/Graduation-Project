@@ -101,7 +101,7 @@ const CartPage: React.FC = () => {
         return (
           total +
           (item.dishId === cartItem.dishId &&
-          JSON.stringify(item.selectedOptions) ===
+            JSON.stringify(item.selectedOptions) ===
             JSON.stringify(cartItem.selectedOptions)
             ? 0
             : item.quantity)
@@ -314,6 +314,13 @@ const CartPage: React.FC = () => {
     }
   }, [orderState.status, orderState.error, dispatch]);
 
+  const showNotification = (message: string) => {
+    notification.error({
+      message: 'Error',
+      description: message,
+    });
+  };
+
   return (
     <>
       <section
@@ -423,17 +430,26 @@ const CartPage: React.FC = () => {
                               <input
                                 type="text"
                                 value={item.quantity}
-                                readOnly
+                                onChange={(e) => {
+                                  const value = parseInt(e.target.value, 10);
+                                  if (!isNaN(value)) {
+                                    if (value >= 0 && value <= item.availableQuantity) {
+                                      handleUpdateQuantity(item.dishId, item.selectedOptions, value);
+                                    } else {
+                                      showNotification(`Cannot add more than available (${item.availableQuantity}) quantity or less than 0`);
+                                    }
+                                  }
+                                }}
                               />
                               <button
                                 className="btn btn-success"
-                                onClick={() =>
-                                  handleUpdateQuantity(
-                                    item.dishId,
-                                    item.selectedOptions,
-                                    item.quantity + 1
-                                  )
-                                }
+                                onClick={() => {
+                                  if (item.quantity + 1 <= item.availableQuantity) {
+                                    handleUpdateQuantity(item.dishId, item.selectedOptions, item.quantity + 1);
+                                  } else {
+                                    showNotification(`Cannot add more than available (${item.availableQuantity}) quantity or less than 0`);
+                                  }
+                                }}
                               >
                                 <i className="fal fa-plus"></i>
                               </button>
