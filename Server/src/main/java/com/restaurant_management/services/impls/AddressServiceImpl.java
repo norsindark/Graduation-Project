@@ -10,7 +10,6 @@ import com.restaurant_management.payloads.responses.ApiResponse;
 import com.restaurant_management.repositories.AddressRepository;
 import com.restaurant_management.repositories.UserRepository;
 import com.restaurant_management.services.interfaces.AddressService;
-import com.restaurant_management.utils.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -39,7 +38,7 @@ public class AddressServiceImpl implements AddressService {
 
     @Override
     public ApiResponse addAddress(AddressDto addressDto) throws DataExitsException {
-        String currentUserName = SecurityUtils.getCurrentUserId();
+//        String currentUserName = SecurityUtils.getCurrentUserId();
         Optional<User> user = this.userRepository.findById(addressDto.getUserId());
         if (user.isEmpty()) {
             throw new DataExitsException("User not found");
