@@ -398,7 +398,7 @@ function CheckoutPage() {
                   <div className="fp__check_form">
                     <h5>
                       select address{' '}
-                      <a href="#" onClick={handleCreateNewAddress}>
+                      <a onClick={handleCreateNewAddress} className="">
                         <i className="far fa-plus"></i> Create new address
                       </a>
                     </h5>
