@@ -102,6 +102,10 @@ public class ReviewServiceImpl implements ReviewService {
             throw new DataExitsException("Rating must be between 1 and 5");
         }
 
+        if (reviewDto.getReview().length() > 500) {
+            throw new DataExitsException("Review must be less than 500 characters");
+        }
+
         Review review = Review.builder()
                 .rating(reviewDto.getRating())
                 .comment(reviewDto.getReview())
@@ -119,7 +123,15 @@ public class ReviewServiceImpl implements ReviewService {
         Review review = reviewRepository.findById(reviewDto.getReviewId())
                 .orElseThrow(() -> new DataExitsException("Review not found"));
 
-        review.setRating(reviewDto.getRating());
+//        if (reviewDto.getRating() > 5 || reviewDto.getRating() < 1) {
+//            throw new DataExitsException("Rating must be between 1 and 5");
+//        }
+
+        if (reviewDto.getReview().length() > 500) {
+            throw new DataExitsException("Review must be less than 500 characters");
+        }
+
+//        review.setRating(reviewDto.getRating());
         review.setComment(reviewDto.getReview());
 
         reviewRepository.save(review);
@@ -143,6 +155,10 @@ public class ReviewServiceImpl implements ReviewService {
                 .orElseThrow(() -> new DataExitsException("Review not found"));
         User user = userRepository.findById(reviewDto.getUserId())
                 .orElseThrow(() -> new DataExitsException("User not found"));
+
+        if (reviewDto.getReview().length() > 500) {
+            throw new DataExitsException("Review must be less than 500 characters");
+        }
 
         Review replyReview = Review.builder()
                 .comment(reviewDto.getReview())
