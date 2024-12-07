@@ -118,10 +118,10 @@ function TabsDescriptionAndReview({
           duration: 5,
           showProgress: true,
         });
-      } else {
+      } else if (response.status === 403) {
         notification.error({
           message: 'An error occurred while reviewing',
-          description: response.data.errors?.error || 'Something went wrong',
+          description: response.data.errors?.error || 'You need to login to review',
           duration: 5,
           showProgress: true,
         });
@@ -129,7 +129,7 @@ function TabsDescriptionAndReview({
     } catch (error: any) {
       notification.error({
         message: 'An error occurred while reviewing',
-        description: error.message || 'Something went wrong abcadsadas',
+        description: error.message || 'Something went wrong',
         duration: 5,
         showProgress: true,
       });
