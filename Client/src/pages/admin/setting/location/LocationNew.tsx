@@ -132,7 +132,7 @@ const LocationNew: React.FC<LocationNewProps> = ({
             <Form.Item
               label="Province/State"
               name="states"
-              rules={[{ required: true, message: 'Please input your City!' }]}
+              rules={[{ required: true, message: 'Please input your State!' }]}
             >
               <Select placeholder="Province/State" onChange={handleCityChange}>
                 {cities.map((city: any) => (
@@ -147,7 +147,7 @@ const LocationNew: React.FC<LocationNewProps> = ({
             <Form.Item
               label="City/Town"
               name="city"
-              rules={[{ required: true, message: 'Please input your State!' }]}
+              rules={[{ required: true, message: 'Please input your City!' }]}
             >
               <Select
                 placeholder="City/Town"

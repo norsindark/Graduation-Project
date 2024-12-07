@@ -157,7 +157,7 @@ const Blog: React.FC = () => {
       const res = await callDeleteBlog(id);
       if (res?.status === 200) {
         notification.success({
-          message: 'Category deleted successfully!',
+          message: 'Blog successfully!',
           duration: 5,
           showProgress: true,
         });

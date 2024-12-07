@@ -454,33 +454,31 @@ const OrderAccount = () => {
               <div className="header_address">
                 <h4>Delivery address</h4>
                 <p>
-                  {selectedOrder?.address.street},{' '}
-                  {selectedOrder?.address.commune}
+                  {selectedOrder?.address?.street ?? ''},{' '}
+                  {selectedOrder?.address?.commune ?? ''}
                   <br />
-                  {selectedOrder?.address.city}, {selectedOrder?.address.state}
+                  {selectedOrder?.address?.city ?? ''}, {selectedOrder?.address?.state ?? ''}
                 </p>
                 <p>
                   <b>Phone:</b>{' '}
-                  <span>{selectedOrder?.address.phoneNumber}</span>
+                  <span>{selectedOrder?.address?.phoneNumber ?? ''}</span>
                 </p>
               </div>
               <div className="header_address">
                 <p>
                   <b>Invoice code: </b>
                   <span>
-                    #{selectedOrder?.orderId.substring(0, 8).toUpperCase()}
+                    #{selectedOrder?.orderId?.substring(0, 8).toUpperCase() ?? ''}
                   </span>
                 </p>
                 <p>
-                  <b>Email:</b> <span>{selectedOrder?.userEmail}</span>
+                  <b>Email:</b> <span>{selectedOrder?.userEmail ?? ''}</span>
                 </p>
                 <p>
                   <b>Order date:</b>{' '}
                   <span>
                     {selectedOrder?.createdAt
-                      ? new Date(selectedOrder.createdAt).toLocaleDateString(
-                          'vi-VN'
-                        )
+                      ? new Date(selectedOrder.createdAt).toLocaleDateString('vi-VN')
                       : ''}
                   </span>
                 </p>
