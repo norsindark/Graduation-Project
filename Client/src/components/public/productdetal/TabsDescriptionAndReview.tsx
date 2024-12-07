@@ -521,6 +521,7 @@ function TabsDescriptionAndReview({
                             <TextArea
                               rows={3}
                               placeholder="Write your review"
+                              maxLength={500}
                             />
                           </Form.Item>
                           <Form.Item>
