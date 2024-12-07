@@ -198,7 +198,7 @@ const CategoryBlog: React.FC = () => {
   return (
     <div className="layout-content">
       <Card
-        title="Quản Lý Danh Mục Blog"
+        title="Category Blog"
         extra={
           !showCategoryBlogNew &&
           !showCategoryBlogEdit && (
