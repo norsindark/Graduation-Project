@@ -63,7 +63,6 @@ enum OrderStatus {
   PROCESSING = 'PROCESSING',
   SHIPPING = 'SHIPPING',
   COMPLETED = 'COMPLETED',
-  CANCELLED = 'CANCELLED',
 }
 
 const isStatusActive = (
@@ -265,6 +264,143 @@ const OrderAccount = () => {
     }
   };
 
+  const handlePrintInvoice = () => {
+    const printContent = document.createElement('div');
+    printContent.innerHTML = `
+      <html>
+        <head>
+          <title>invoice #${selectedOrder?.orderId.substring(0, 8).toUpperCase()}</title>
+          <script src="https://cdn.tailwindcss.com"></script>
+          <style>
+            @media print {
+              .print-button { display: none !important; }
+            }
+            body { font-family: 'Arial', sans-serif; }
+          </style>
+        </head>
+        <body class="bg-gray-50 p-8">
+          <div class="max-w-4xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
+            <!-- Header -->
+            <div class="bg-gradient-to-r from-green-500 to-green-600 text-white px-8 py-4">
+              <div class="flex justify-between items-center">
+                <h1 class="text-2xl font-bold">
+                  invoice #${selectedOrder?.orderId.substring(0, 8).toUpperCase()}
+                </h1>
+                <div class="text-sm">
+                  <p>Order date: ${new Date(selectedOrder?.createdAt || '').toLocaleDateString('vi-VN')}</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Thông tin khách hàng -->
+            <div class="grid grid-cols-2 gap-8 p-8 bg-gray-50">
+              <div>
+                <h2 class="text-lg font-semibold text-gray-700 mb-4">Delivery information</h2>
+                <div class="space-y-2 text-gray-600">
+                  <p class="font-medium">Address:</p>
+                  <p>${selectedOrder?.address?.street}, ${selectedOrder?.address?.commune}</p>
+                  <p>${selectedOrder?.address?.city}, ${selectedOrder?.address?.state}</p>
+                  <p class="font-medium mt-2">Phone number: ${selectedOrder?.address?.phoneNumber}</p>
+                </div>
+              </div>
+              <div>
+                <h2 class="text-lg font-semibold text-gray-700 mb-4">Order information</h2>
+                <div class="space-y-2 text-gray-600">
+                  <p><span class="font-medium">Email:</span> ${selectedOrder?.userEmail}</p>
+                  <p><span class="font-medium">Status:</span> 
+                    <span class="px-2 py-1 rounded-full text-sm ${
+                      selectedOrder?.orderStatus === 'COMPLETED'
+                        ? 'bg-green-100 text-green-800'
+                        : 'bg-yellow-100 text-yellow-800'
+                    }">
+                      ${selectedOrder?.orderStatus}
+                    </span>
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Chi tiết đơn hàng -->
+            <div class="p-8">
+              <table class="w-full">
+                <thead>
+                  <tr class="bg-gray-50 border-b">
+                    <th class="py-3 px-4 text-left text-sm font-semibold text-gray-600">STT</th>
+                    <th class="py-3 px-4 text-left text-sm font-semibold text-gray-600">Dish name</th>
+                    <th class="py-3 px-4 text-left text-sm font-semibold text-gray-600">Options</th>
+                    <th class="py-3 px-4 text-right text-sm font-semibold text-gray-600">Price</th>
+                    <th class="py-3 px-4 text-right text-sm font-semibold text-gray-600">Quantity</th>
+                    <th class="py-3 px-4 text-right text-sm font-semibold text-gray-600">Total</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y">
+                  ${selectedOrder?.orderItems
+                    .map(
+                      (item, index) => `
+                    <tr class="hover:bg-gray-50">
+                      <td class="py-4 px-4 text-sm text-gray-600">${index + 1}</td>
+                      <td class="py-4 px-4 text-sm text-gray-600">${item.dishName}</td>
+                      <td class="py-4 px-4 text-sm text-gray-600">
+                        ${item.options
+                          .map(
+                            (opt) =>
+                              `<div class="text-xs text-gray-500">
+                            ${opt.optionName} 
+                            <span class="text-green-600">(+${opt.additionalPrice.toLocaleString()} VNĐ)</span>
+                          </div>`
+                          )
+                          .join('')}
+                      </td>
+                      <td class="py-4 px-4 text-sm text-gray-600 text-right">
+                        ${item.price.toLocaleString()} VNĐ
+                      </td>
+                      <td class="py-4 px-4 text-sm text-gray-600 text-right">${item.quantity}</td>
+                      <td class="py-4 px-4 text-sm font-medium text-gray-900 text-right">
+                        ${item.totalPrice.toLocaleString()} VNĐ
+                      </td>
+                    </tr>
+                  `
+                    )
+                    .join('')}
+                </tbody>
+                <tfoot>
+                  <tr class="border-t-2 border-gray-200">
+                    <td colspan="5" class="py-4 px-4 text-right font-semibold text-gray-700">Tổng cộng:</td>
+                    <td class="py-4 px-4 text-right font-bold text-lg text-green-600">
+                      ${selectedOrder?.totalPrice.toLocaleString()} VNĐ
+                    </td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+
+            <!-- Footer -->
+            <div class="bg-gray-50 px-8 py-6 border-t">
+              <div class="text-center text-gray-500 text-sm">
+                <p>Thank you for using our service!</p>
+                <p class="mt-1">For any questions, please contact: syncfood@example.com</p>
+              </div>
+            </div>
+          </div>
+        </body>
+      </html>
+    `;
+
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.write(printContent.innerHTML);
+      printWindow.document.close();
+      printWindow.focus();
+
+      printWindow.onload = function () {
+        printWindow.print();
+        printWindow.onafterprint = function () {
+          printWindow.close();
+        };
+      };
+    }
+  };
+
   const PaymentModal = () => {
     return (
       <Modal
@@ -423,6 +559,17 @@ const OrderAccount = () => {
                 </table>
               </div>
             </div>
+            {listOrder.length > 0 && (
+              <div className="absolute left-[50%] mt-2 transform z-1000 bg-white p-2 ">
+                <Pagination
+                  align="center"
+                  current={current}
+                  total={total}
+                  pageSize={pageSize}
+                  onChange={handlePageChange}
+                />
+              </div>
+            )}
           </>
         ) : (
           <div className="">
@@ -457,7 +604,8 @@ const OrderAccount = () => {
                   {selectedOrder?.address?.street ?? ''},{' '}
                   {selectedOrder?.address?.commune ?? ''}
                   <br />
-                  {selectedOrder?.address?.city ?? ''}, {selectedOrder?.address?.state ?? ''}
+                  {selectedOrder?.address?.city ?? ''},{' '}
+                  {selectedOrder?.address?.state ?? ''}
                 </p>
                 <p>
                   <b>Phone:</b>{' '}
@@ -468,7 +616,9 @@ const OrderAccount = () => {
                 <p>
                   <b>Invoice code: </b>
                   <span>
-                    #{selectedOrder?.orderId?.substring(0, 8).toUpperCase() ?? ''}
+                    #
+                    {selectedOrder?.orderId?.substring(0, 8).toUpperCase() ??
+                      ''}
                   </span>
                 </p>
                 <p>
@@ -478,7 +628,9 @@ const OrderAccount = () => {
                   <b>Order date:</b>{' '}
                   <span>
                     {selectedOrder?.createdAt
-                      ? new Date(selectedOrder.createdAt).toLocaleDateString('vi-VN')
+                      ? new Date(selectedOrder.createdAt).toLocaleDateString(
+                          'vi-VN'
+                        )
                       : ''}
                   </span>
                 </p>
@@ -538,20 +690,13 @@ const OrderAccount = () => {
                 </table>
               </div>
             </div>
-            <a className="print_btn common_btn" href="#">
+            <a
+              className="print_btn common_btn"
+              onClick={handlePrintInvoice}
+              style={{ cursor: 'pointer' }}
+            >
               <i className="far fa-print"></i> Print invoice
             </a>
-          </div>
-        )}
-        {listOrder.length > 0 && (
-          <div className="absolute left-[55%] transform z-1000 bg-white p-2 ">
-            <Pagination
-              align="center"
-              current={current}
-              total={total}
-              pageSize={pageSize}
-              onChange={handlePageChange}
-            />
           </div>
         )}
         <PaymentModal />
