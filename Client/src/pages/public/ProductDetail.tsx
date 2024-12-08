@@ -100,18 +100,17 @@ const ProductDetail: React.FC = () => {
     const fetchDishDetail = async () => {
       setLoading(true);
       try {
-        const allDishesResponse = await callGetAllDishes('');
+        const query = "pageNo=0&pageSize=100&sortBy=dishName&sortDir=asc";
+        const allDishesResponse = await callGetAllDishes(query);
         const dishes = allDishesResponse.data._embedded?.dishResponseList;
         setAllDishes(dishes);
 
         const matchingDish = dishes.find(
           (dish: DishDetail) => dish.slug === slug
         );
-        console.log('matchingDish', matchingDish);
         if (matchingDish) {
           const detailResponse = await callGetDishDetail(matchingDish.dishId);
           const dishData = detailResponse.data;
-
           if (currentOffer) {
             const discountedPrice =
               dishData.price * (1 - currentOffer.discountPercentage / 100);
@@ -124,7 +123,6 @@ const ProductDetail: React.FC = () => {
             setDishDetail(dishData);
           }
         } else {
-          console.error('Dish not found');
           notification.error({
             message: 'Dish not found',
             description: 'The requested dish could not be found.',
