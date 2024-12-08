@@ -1,9 +1,11 @@
+import { Row, Col } from 'antd';
+
 const HeaderTop = () => {
   return (
     <section className="fp__topbar">
       <div className="container">
-        <div className="row">
-          <div className="col-xl-4 col-md-8">
+        <Row className="row">
+          <Col xs={21} md={16} xl={8}>
             <ul className="fp__topbar_info d-flex flex-wrap">
               <li>
                 <a href="mailto:synfood.bmt@gmail.com">
@@ -16,8 +18,8 @@ const HeaderTop = () => {
                 </a>
               </li>
             </ul>
-          </div>
-          <div className="col-xl-8 col-md-4 d-none d-md-block">
+          </Col>
+          <Col xs={0} md={8} xl={16}>
             <ul className="topbar_icon d-flex flex-wrap">
               <li>
                 <a href="#">
@@ -40,8 +42,8 @@ const HeaderTop = () => {
                 </a>{' '}
               </li>
             </ul>
-          </div>
-        </div>
+          </Col>
+        </Row>
       </div>
     </section>
   );

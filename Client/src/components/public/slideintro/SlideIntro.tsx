@@ -31,12 +31,43 @@ function SlideIntro() {
     dots: true,
     infinite: true,
     speed: 1000,
-    slidesToShow: 3,
-    slidesToScroll: 1,
     autoplay: true,
     autoplaySpeed: 2500,
     nextArrow: <NextArrow />,
     prevArrow: <PrevArrow />,
+    responsive: [
+      {
+        breakpoint: 1200, // xl
+        settings: {
+          slidesToShow: 3,
+          slidesToScroll: 1,
+        },
+      },
+      {
+        breakpoint: 992, // lg
+        settings: {
+          slidesToShow: 2,
+          slidesToScroll: 1,
+        },
+      },
+      {
+        breakpoint: 768, // md
+        settings: {
+          slidesToShow: 2,
+          slidesToScroll: 1,
+        },
+      },
+      {
+        breakpoint: 576, // sm
+        settings: {
+          slidesToShow: 1,
+          slidesToScroll: 1,
+          arrows: false, // ẩn mũi tên trên mobile
+        },
+      },
+    ],
+    slidesToShow: 3,
+    slidesToScroll: 1,
   };
 
   const sliderData = [
@@ -75,15 +106,21 @@ function SlideIntro() {
           data-wow-duration="1s"
         >
           {sliderData.map((item) => (
-            <div key={item.id} className="col-xl-4">
+            <div key={item.id} className="col-12">
               <a
                 href="#"
                 className="fp__add_slider_single"
-                style={{ background: `url(${item.image})` }}
+                style={{
+                  background: `url(${item.image})`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                }}
               >
                 <div className="text">
-                  <h3>{item.title}</h3>
-                  <p>{item.description}</p>
+                  <h3 className="text-base md:text-lg lg:text-xl">
+                    {item.title}
+                  </h3>
+                  <p className="text-sm md:text-base">{item.description}</p>
                 </div>
               </a>
             </div>

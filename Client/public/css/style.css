@@ -6731,6 +6731,12 @@ CHECKOUT PAGE START
     opacity 0.5s ease-out,
     transform 0.5s ease-out;
 }
+@media (max-width: 932px) and (min-width: 430px) {
+  .fade-in {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 
 .fade-in.is-visible {
   opacity: 1;
