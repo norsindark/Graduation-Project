@@ -1746,6 +1746,15 @@ body {
   width: 100% !important;
 }
 
+@media (max-width: 932px) and (min-width: 430px) {
+  body {
+    overflow: hidden !important;
+  }
+  .logo-header {
+    max-width: 80%;
+  }
+}
+
 .card-info-2 .ant-card-body {
   height: 100%;
 }
