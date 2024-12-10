@@ -435,6 +435,7 @@ const Order: React.FC = () => {
               type="primary"
               onClick={() => handleUpdateStatusOrder(record.orderId)}
               shape="round"
+              disabled={record.orderStatus === 'COMPLETED' || record.orderStatus === 'CANCELLED'}
               icon={<EditOutlined />}
             >
               Edit Status

@@ -15,6 +15,7 @@ import {
   Col,
   Row,
   Popconfirm,
+  Tooltip,
 } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import dayjs from 'dayjs';
@@ -224,6 +225,13 @@ function Review() {
       title: 'Comment',
       dataIndex: 'comment',
       key: 'comment',
+      render: (comment) => (
+        <Tooltip title={comment.length > 50 ? comment : ''}>
+          <span>
+            {comment.length > 50 ? `${comment.slice(0, 50)}...` : comment}
+          </span>
+        </Tooltip>
+      ),
     },
     {
       title: 'Created At',
@@ -278,9 +286,8 @@ function Review() {
             <h2 className="text-xl font-semibold mb-2">Dish List</h2>
             <ul className="space-y-2">
               <li
-                className={`p-2 border rounded cursor-pointer ${
-                  !selectedDish ? 'bg-blue-100' : ''
-                }`}
+                className={`p-2 border rounded cursor-pointer ${!selectedDish ? 'bg-blue-100' : ''
+                  }`}
                 onClick={() => {
                   setSelectedDish(null);
                   fetchReviews('');
@@ -291,9 +298,8 @@ function Review() {
               {dishes.map((dish) => (
                 <li
                   key={dish.dishId}
-                  className={`p-2 border rounded cursor-pointer ${
-                    selectedDish?.dishId === dish.dishId ? 'bg-blue-100' : ''
-                  }`}
+                  className={`p-2 border rounded cursor-pointer ${selectedDish?.dishId === dish.dishId ? 'bg-blue-100' : ''
+                    }`}
                   onClick={() => handleDishClick(dish)}
                 >
                   <h3 className="font-semibold text-base">{dish.name}</h3>
