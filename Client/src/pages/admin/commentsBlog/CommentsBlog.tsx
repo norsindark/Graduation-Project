@@ -9,6 +9,7 @@ import {
   Col,
   Row,
   Popconfirm,
+  Tooltip,
 } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import dayjs from 'dayjs';
@@ -208,6 +209,13 @@ function CommentsBlog() {
       title: 'Comment',
       dataIndex: 'content',
       key: 'content',
+      render: (content) => (
+        <Tooltip title={content.length > 50 ? content : ''}>
+          <span>
+            {content.length > 50 ? `${content.slice(0, 50)}...` : content}
+          </span>
+        </Tooltip>
+      ),
     },
 
     {
@@ -263,9 +271,8 @@ function CommentsBlog() {
             <h2 className="text-xl font-semibold mb-2">Blog List</h2>
             <ul className="space-y-2">
               <li
-                className={`p-2 border rounded cursor-pointer ${
-                  !selectedBlog ? 'bg-blue-100' : ''
-                }`}
+                className={`p-2 border rounded cursor-pointer ${!selectedBlog ? 'bg-blue-100' : ''
+                  }`}
                 onClick={() => {
                   setSelectedBlog(null);
                   fetchComments('');
@@ -276,9 +283,8 @@ function CommentsBlog() {
               {blogs.map((blog) => (
                 <li
                   key={blog.blogId}
-                  className={`p-2 border rounded cursor-pointer ${
-                    selectedBlog?.blogId === blog.blogId ? 'bg-blue-100' : ''
-                  }`}
+                  className={`p-2 border rounded cursor-pointer ${selectedBlog?.blogId === blog.blogId ? 'bg-blue-100' : ''
+                    }`}
                   onClick={() => handleBlogClick(blog)}
                 >
                   <h3 className="font-semibold text-base">{blog.title}</h3>

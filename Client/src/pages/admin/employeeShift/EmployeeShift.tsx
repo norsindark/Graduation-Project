@@ -10,26 +10,41 @@ import { Space } from 'antd';
 import { Popconfirm, Card } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import moment from 'moment';
+// interface EmployeeShift {
+//   id: string;
+//   employee: {
+//     id: string;
+//     employeeName: string;
+//     salary: number;
+//     jobTitle: string;
+//     createdAt: string;
+//     updatedAt: string;
+//   };
+//   shift: {
+//     id: string;
+//     shiftName: string;
+//     startTime: string;
+//     endTime: string;
+//     createdAt: string;
+//     updatedAt: string;
+//   };
+//   workDate: string;
+//   newWorkDate: string;
+//   status: string | null;
+//   notes: string | null;
+//   createdAt: string;
+//   updatedAt: string;
+// }
+
 interface EmployeeShift {
   id: string;
-  employee: {
-    id: string;
-    employeeName: string;
-    salary: number;
-    jobTitle: string;
-    createdAt: string;
-    updatedAt: string;
-  };
-  shift: {
-    id: string;
-    shiftName: string;
-    startTime: string;
-    endTime: string;
-    createdAt: string;
-    updatedAt: string;
-  };
+  employeeId: string;
+  employeeName: string;
+  shiftId: string;
+  shiftName: string;
+  startTime: string;
+  endTime: string;
   workDate: string;
-  newWorkDate: string;
   status: string | null;
   notes: string | null;
   createdAt: string;
@@ -98,8 +113,8 @@ const EmployeeShift: React.FC = () => {
       }
     } catch {
       notification.error({
-        message: 'Không thể tải danh sách ca làm việc',
-        description: 'Đã xảy ra lỗi khi tải dữ liệu!',
+        message: 'Error loading data',
+        description: 'An error occurred while loading the data!',
         duration: 5,
         showProgress: true,
       });
@@ -174,17 +189,17 @@ const EmployeeShift: React.FC = () => {
   const columns = [
     {
       title: 'Employee Name',
-      dataIndex: ['employee', 'employeeName'],
+      dataIndex: 'employeeName',
       key: 'employeeName',
       sorter: (a: EmployeeShift, b: EmployeeShift) =>
-        a.employee.employeeName.localeCompare(b.employee.employeeName),
+        a.employeeName.localeCompare(b.employeeName),
     },
     {
       title: 'Shift Name',
-      dataIndex: ['shift', 'shiftName'],
+      dataIndex: 'shiftName',
       key: 'shiftName',
       sorter: (a: EmployeeShift, b: EmployeeShift) =>
-        a.shift.shiftName.localeCompare(b.shift.shiftName),
+        a.shiftName.localeCompare(b.shiftName),
     },
     {
       title: 'Work Date',
@@ -196,18 +211,18 @@ const EmployeeShift: React.FC = () => {
     },
     {
       title: 'Start Time',
-      dataIndex: ['shift', 'startTime'],
+      dataIndex: 'startTime',
       key: 'startTime',
       sorter: (a: EmployeeShift, b: EmployeeShift) =>
-        a.shift.startTime.localeCompare(b.shift.startTime),
+        a.startTime.localeCompare(b.startTime),
       render: (text: string) => text.slice(0, 5), // Chỉ lấy HH:MM
     },
     {
       title: 'End Time',
-      dataIndex: ['shift', 'endTime'],
+      dataIndex: 'endTime',
       key: 'endTime',
       sorter: (a: EmployeeShift, b: EmployeeShift) =>
-        a.shift.endTime.localeCompare(b.shift.endTime),
+        a.endTime.localeCompare(b.endTime),
       render: (text: string) => text.slice(0, 5), // Chỉ lấy HH:MM
     },
     {
@@ -230,8 +245,8 @@ const EmployeeShift: React.FC = () => {
             title="Are you sure you want to delete this shift?"
             onConfirm={() =>
               handleDeleteClick(
-                record.employee.id,
-                record.shift.id,
+                record.employeeId,
+                record.shiftId,
                 moment(record.workDate).format('YYYY-MM-DD')
               )
             }

@@ -71,11 +71,24 @@ const EmployeeShiftNew: React.FC<EmployeeShiftNewProps> = ({
         values.dateRange[1].format('YYYY-MM-DD')
       );
       if (response?.status === 200) {
-        notification.success({
-          message: 'Create new employee shift successfully!',
-          duration: 5,
-          showProgress: true,
-        });
+        const message = response.data.message;
+        if (message.includes('However, there were some issues:')) {
+          const issues = message.split('\n').slice(1);
+          issues.forEach((issue: any) => {
+            notification.warning({
+              message: 'Warning',
+              description: issue,
+              duration: 5,
+              showProgress: true,
+            });
+          });
+        } else {
+          notification.success({
+            message: 'Create new employee shift successfully!',
+            duration: 5,
+            showProgress: true,
+          });
+        }
         onAddSuccess();
       } else {
         notification.error({

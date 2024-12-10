@@ -10,26 +10,41 @@ import { SaveOutlined, CloseOutlined } from '@ant-design/icons';
 
 const { Option } = Select;
 
+// interface EmployeeShift {
+//   id: string;
+//   employee: {
+//     id: string;
+//     employeeName: string;
+//     salary: number;
+//     jobTitle: string;
+//     createdAt: string;
+//     updatedAt: string;
+//   };
+//   shift: {
+//     id: string;
+//     shiftName: string;
+//     startTime: string;
+//     endTime: string;
+//     createdAt: string;
+//     updatedAt: string;
+//   };
+//   workDate: string;
+//   newWorkDate: string;
+//   status: string | null;
+//   notes: string | null;
+//   createdAt: string;
+//   updatedAt: string;
+// }
+
 interface EmployeeShift {
   id: string;
-  employee: {
-    id: string;
-    employeeName: string;
-    salary: number;
-    jobTitle: string;
-    createdAt: string;
-    updatedAt: string;
-  };
-  shift: {
-    id: string;
-    shiftName: string;
-    startTime: string;
-    endTime: string;
-    createdAt: string;
-    updatedAt: string;
-  };
+  employeeId: string;
+  employeeName: string;
+  shiftId: string;
+  shiftName: string;
+  startTime: string;
+  endTime: string;
   workDate: string;
-  newWorkDate: string;
   status: string | null;
   notes: string | null;
   createdAt: string;
@@ -56,8 +71,8 @@ const EmployeeShiftEdit: React.FC<EmployeeShiftEditProps> = ({
     fetchEmployees();
     fetchShifts();
     form.setFieldsValue({
-      employeeId: currentEmployeeShift.employee.id,
-      shiftId: currentEmployeeShift.shift.id,
+      employeeId: currentEmployeeShift.employeeId,
+      shiftId: currentEmployeeShift.shiftId,
       workDate: moment(currentEmployeeShift.workDate),
       newWorkDate: '',
     });
@@ -99,8 +114,8 @@ const EmployeeShiftEdit: React.FC<EmployeeShiftEditProps> = ({
     setIsSubmitting(true);
     try {
       const response = await callUpdateEmployeeShift(
-        currentEmployeeShift.employee.id,
-        currentEmployeeShift.shift.id,
+        currentEmployeeShift.employeeId,
+        currentEmployeeShift.shiftId,
         moment(currentEmployeeShift.workDate).format('YYYY-MM-DD'),
         values.newWorkDate.format('YYYY-MM-DD')
       );
