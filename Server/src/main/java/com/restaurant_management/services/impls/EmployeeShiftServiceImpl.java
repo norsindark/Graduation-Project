@@ -19,7 +19,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
@@ -175,26 +174,48 @@ public class EmployeeShiftServiceImpl implements EmployeeShiftService {
             while (!startDate.isAfter(endDate)) {
                 Timestamp workDate = Timestamp.valueOf(startDate.atStartOfDay());
 
-                if (employeeShiftRepository.existsByEmployeeAndShiftAndWorkDate(
-                        employeeOpt.get(), shiftOpt.get(), workDate)) {
+//                if (employeeShiftRepository.existsByEmployeeAndShiftAndWorkDate(
+//                        employeeOpt.get(), shiftOpt.get(), workDate)) {
+//                    messages.add("Employee shift already exists for " + employeeOpt.get().getEmployeeName() +
+//                            " on date: " + startDate + " for shift: " + shiftOpt.get().getShiftName());
+//                }
+                if (employeeShiftRepository.existsByEmployeeNameAndShiftNameAndWorkDate(
+                        employeeOpt.get().getEmployeeName(), shiftOpt.get().getShiftName(), workDate)) {
                     messages.add("Employee shift already exists for " + employeeOpt.get().getEmployeeName() +
                             " on date: " + startDate + " for shift: " + shiftOpt.get().getShiftName());
-                } else {
+                }
+                else {
                     EmployeeShift employeeShift = new EmployeeShift();
-                    employeeShift.setEmployee(employeeOpt.get());
-                    employeeShift.setShift(shiftOpt.get());
+//                    employeeShift.setEmployee(employeeOpt.get());
+//                    employeeShift.setShift(shiftOpt.get());
+                    employeeShift.setEmployeeId(employeeOpt.get().getId());
+                    employeeShift.setShiftId(shiftOpt.get().getId());
+                    employeeShift.setEmployeeName(employeeOpt.get().getEmployeeName());
+                    employeeShift.setShiftName(shiftOpt.get().getShiftName());
+                    employeeShift.setStartTime(shiftOpt.get().getStartTime());
+                    employeeShift.setEndTime(shiftOpt.get().getEndTime());
                     employeeShift.setWorkDate(workDate);
                     employeeShifts.add(employeeShift);
                 }
 
-                if (attendanceRepository.existsByEmployeeAndShiftAndAttendanceDate(
-                        employeeOpt.get(), shiftOpt.get(), workDate)) {
+//                if (attendanceRepository.existsByEmployeeAndShiftAndAttendanceDate(
+//                        employeeOpt.get(), shiftOpt.get(), workDate)) {
+//                    messages.add("Attendance already exists for " + employeeOpt.get().getEmployeeName() +
+//                            " on date: " + startDate + " for shift ID: " + shiftOpt.get().getShiftName());
+//                }
+                if (attendanceRepository.existsByEmployeeNameAndShiftNameAndAttendanceDate(
+                        employeeOpt.get().getEmployeeName(), shiftOpt.get().getShiftName(), workDate)) {
                     messages.add("Attendance already exists for " + employeeOpt.get().getEmployeeName() +
                             " on date: " + startDate + " for shift ID: " + shiftOpt.get().getShiftName());
-                } else {
+                }
+                else {
                     Attendance attendance = new Attendance();
-                    attendance.setEmployee(employeeOpt.get());
-                    attendance.setShift(shiftOpt.get());
+                    attendance.setEmployeeId(employeeOpt.get().getId());
+                    attendance.setEmployeeName(employeeOpt.get().getEmployeeName());
+                    attendance.setShiftId(shiftOpt.get().getId());
+                    attendance.setShiftName(shiftOpt.get().getShiftName());
+                    attendance.setStartTime(shiftOpt.get().getStartTime().toString());
+                    attendance.setEndTime(shiftOpt.get().getEndTime().toString());
                     attendance.setAttendanceDate(workDate);
                     attendance.setStatus(StatusType.PENDING.toString());
                     attendance.setNote(null);
@@ -222,7 +243,6 @@ public class EmployeeShiftServiceImpl implements EmployeeShiftService {
     }
 
     @Override
-    @Modifying
     @Transactional
     public ApiResponse removeEmployeeFromShift(String employeeId, String shiftId, String workDate)
             throws DataExitsException {
@@ -285,8 +305,14 @@ public class EmployeeShiftServiceImpl implements EmployeeShiftService {
             throw new DataExitsException("Cannot update shift after attendance has been recorded.");
         }
 
-        if (employeeShiftRepository.existsByEmployeeAndShiftAndWorkDate(
-                employeeShift.getEmployee(), employeeShift.getShift(), newWorkDateTimestamp)) {
+//        if (employeeShiftRepository.existsByEmployeeAndShiftAndWorkDate(
+//                employeeShift.getEmployee(), employeeShift.getShift(), newWorkDateTimestamp)) {
+//            throw new DataExitsException("Employee shift already exists for employee ID: " + request.getEmployeeIds() +
+//                    " on date: " + request.getNewWorkDate());
+//        }
+
+        if (employeeShiftRepository.existsByEmployeeNameAndShiftNameAndWorkDate(
+                employeeShift.getEmployeeName(), employeeShift.getShiftName(), newWorkDateTimestamp)) {
             throw new DataExitsException("Employee shift already exists for employee ID: " + request.getEmployeeIds() +
                     " on date: " + request.getNewWorkDate());
         }

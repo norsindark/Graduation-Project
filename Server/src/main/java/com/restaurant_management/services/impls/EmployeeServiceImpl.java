@@ -171,7 +171,7 @@ public class EmployeeServiceImpl implements EmployeeService {
             throw new DataExitsException("User not found");
         }
 
-        employeeShiftRepository.deleteByEmployeeId(employeeId);
+//        employeeShiftRepository.deleteByEmployeeId(employeeId);
         employeeRepository.deleteByEmployeeId(employeeId);
 
         Role role = roleRepository.findByName(RoleName.USER.toString());

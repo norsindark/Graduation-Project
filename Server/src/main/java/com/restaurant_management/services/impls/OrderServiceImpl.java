@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.UnsupportedEncodingException;
+import java.sql.Timestamp;
 import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -64,8 +65,7 @@ public class OrderServiceImpl implements OrderService {
         }
         List<OrderResponse> orderResponses = orders.stream()
                 .map(order -> {
-                    Address address = addressRepository.findById(order.getAddressId())
-                            .orElse(null);
+                    Address address = buildAddress(order);
                     List<OrderItem> orderItems = orderItemRepository.findByOrder(order);
                     return new OrderResponse(order, address, orderItems);
                 })
@@ -85,13 +85,29 @@ public class OrderServiceImpl implements OrderService {
         }
         List<OrderResponse> orderResponses = orders.stream()
                 .map(order -> {
-                    Address address = addressRepository.findById(order.getAddressId())
-                            .orElse(null);
+                    Address address = buildAddress(order);
                     List<OrderItem> orderItems = orderItemRepository.findByOrder(order);
                     return new OrderResponse(order, address, orderItems);
                 })
                 .collect(Collectors.toList());
         return pagedResourcesAssembler.toModel(new PageImpl<>(orderResponses, pageable, orders.getTotalElements()));
+    }
+
+    private Address buildAddress(Order order) {
+        return Address.builder()
+                .id(order.getAddressId())
+                .phoneNumber(order.getPhoneNumber())
+                .state(order.getState())
+                .street(order.getStreet())
+                .commune(order.getCommune())
+                .district(order.getDistrict())
+                .city(order.getCity())
+                .country(order.getCountry())
+                .postalCode(order.getPostalCode())
+                .addressType(order.getAddressType())
+                .createdAt(Timestamp.valueOf(order.getCreatedAt()))
+                .updatedAt(Timestamp.valueOf(order.getUpdatedAt()))
+                .build();
     }
 
     @Override
@@ -100,11 +116,11 @@ public class OrderServiceImpl implements OrderService {
             throws DataExitsException, MessagingException, UnsupportedEncodingException {
         User user = userRepository.findById(request.getUserId())
                 .orElseThrow(() -> new DataExitsException("User not found"));
-        addressRepository.findById(request.getAddressId())
+        Address address = addressRepository.findById(request.getAddressId())
                 .orElseThrow(() -> new DataExitsException("Address not found"));
 
         updateWarehouse(request);
-        Order order = createNewOrder(request, user);
+        Order order = createNewOrder(request, user, address);
         order.setTotalPrice(totalOrderPrice(request));
         orderRepository.save(order);
         addOrderItem(order, request);
@@ -169,16 +185,25 @@ public class OrderServiceImpl implements OrderService {
         return new ApiResponse("Order updated successfully", HttpStatus.OK);
     }
 
-    private Order createNewOrder(OrderDto request, User user) throws DataExitsException {
+    private Order createNewOrder(OrderDto request, User user, Address address) throws DataExitsException {
         Order order = Order.builder()
                 .user(user)
-                .addressId(request.getAddressId())
                 .status("PENDING")
                 .note(request.getNote())
                 .paymentMethod(request.getPaymentMethod())
                 .shippingFee(request.getShippingFee())
                 .totalPrice(request.getTotalPrice())
                 .createdAt(LocalDateTime.now())
+                .addressId(request.getAddressId())
+                .street(address.getStreet())
+                .commune(address.getCommune())
+                .district(address.getDistrict())
+                .city(address.getCity())
+                .country(address.getCountry())
+                .postalCode(address.getPostalCode())
+                .phoneNumber(address.getPhoneNumber())
+                .state(address.getState())
+                .addressType(address.getAddressType())
                 .build();
         orderRepository.save(order);
         return order;
@@ -370,7 +395,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional
     public ApiResponse cancelOrder(String orderId) throws
-            DataExitsException, MessagingException, UnsupportedEncodingException  {
+            DataExitsException, MessagingException, UnsupportedEncodingException {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new DataExitsException("Order not found"));
 

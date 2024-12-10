@@ -24,10 +24,10 @@ public class AttendanceByDateResponse {
 
     public AttendanceByDateResponse(Attendance attendance) {
         this.attendanceId = attendance.getId();
-        this.employeeName = attendance.getEmployee().getEmployeeName();
-        this.shiftName = attendance.getShift().getShiftName();
-        this.shiftStartTime = attendance.getShift().getStartTime().toString();
-        this.shiftEndTime = attendance.getShift().getEndTime().toString();
+        this.employeeName = attendance.getEmployeeName();
+        this.shiftName = attendance.getShiftName();
+        this.shiftStartTime = attendance.getStartTime();
+        this.shiftEndTime = attendance.getEndTime();
         this.attendanceDate = attendance.getAttendanceDate().toString();
         this.status = attendance.getStatus();
         this.note = attendance.getNote();

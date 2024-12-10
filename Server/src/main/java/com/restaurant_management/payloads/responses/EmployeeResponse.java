@@ -1,7 +1,6 @@
 package com.restaurant_management.payloads.responses;
 
 import com.restaurant_management.entites.Employee;
-import com.restaurant_management.entites.EmployeeShift;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -29,13 +28,13 @@ public class EmployeeResponse {
         this.salary = decimalFormat.format(employee.getSalary());
     }
 
-    public EmployeeResponse(EmployeeShift employeeShift) {
-        this.employeeId = employeeShift.getEmployee().getId();
-        this.employeeName = employeeShift.getEmployee().getEmployeeName();
-        this.email = employeeShift.getEmployee().getUser().getEmail();
-        this.jobTitle = employeeShift.getEmployee().getJobTitle();
-        this.salary = decimalFormat.format(employeeShift.getEmployee().getSalary());
-    }
+//    public EmployeeResponse(EmployeeShift employeeShift) {
+//        this.employeeId = employeeShift.getEmployee().getId();
+//        this.employeeName = employeeShift.getEmployee().getEmployeeName();
+//        this.email = employeeShift.getEmployee().getUser().getEmail();
+//        this.jobTitle = employeeShift.getEmployee().getJobTitle();
+//        this.salary = decimalFormat.format(employeeShift.getEmployee().getSalary());
+//    }
 
     private static final DecimalFormat decimalFormat = new DecimalFormat("#,###.##");
 }

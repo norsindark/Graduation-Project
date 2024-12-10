@@ -1,8 +1,9 @@
 package com.restaurant_management.entites;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,8 +14,6 @@ import org.hibernate.annotations.UuidGenerator;
 
 import java.sql.Timestamp;
 import java.time.LocalTime;
-import java.util.HashSet;
-import java.util.Set;
 
 @Entity
 @Data
@@ -38,13 +37,13 @@ public class Shift {
     @Column(name = "end_time", nullable = false)
     private LocalTime endTime;
 
-    @OneToMany(mappedBy = "shift")
-    @JsonIgnore
-    private Set<EmployeeShift> employeeShifts = new HashSet<>();
+//    @OneToMany(mappedBy = "shift")
+//    @JsonIgnore
+//    private Set<EmployeeShift> employeeShifts = new HashSet<>();
 
-    @OneToMany(mappedBy = "shift")
-    @JsonIgnore
-    private Set<Attendance> attendances = new HashSet<>();
+//    @OneToMany(mappedBy = "shift")
+//    @JsonIgnore
+//    private Set<Attendance> attendances = new HashSet<>();
 
     @Column(name = "created_at")
     @CreationTimestamp

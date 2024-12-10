@@ -1,7 +1,6 @@
 package com.restaurant_management.services.impls;
 
 import com.restaurant_management.dtos.ShiftDto;
-import com.restaurant_management.entites.EmployeeShift;
 import com.restaurant_management.entites.Shift;
 import com.restaurant_management.exceptions.DataExitsException;
 import com.restaurant_management.payloads.requests.ShiftRequest;
@@ -24,7 +23,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalTime;
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -116,14 +114,15 @@ public class ShiftServiceImpl implements ShiftService {
     }
 
     @Override
+    @Transactional
     public ApiResponse deleteShift(String id) throws DataExitsException {
         Optional<Shift> shift = shiftRepository.findById(id);
         if (shift.isEmpty()) {
             throw new DataExitsException("Shift not found");
         }
 
-        List<EmployeeShift> employeeShifts = employeeShiftRepository.findAllByShift(shift.get());
-        employeeShiftRepository.deleteAll(employeeShifts);
+//        List<EmployeeShift> employeeShifts = employeeShiftRepository.findAllByShift(shift.get());
+//        employeeShiftRepository.deleteAll(employeeShifts);
         shiftRepository.deleteById(id);
         return new ApiResponse("Shift deleted successfully", HttpStatus.OK);
     }
