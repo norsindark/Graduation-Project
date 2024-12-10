@@ -45,6 +45,33 @@ public class Order {
     @Column(name = "address_id", length = 36)
     private String addressId;
 
+    @Column(name = "phoneNumber", length = 15)
+    private String phoneNumber;
+
+    @Column(name = "state")
+    private String state;
+
+    @Column(name = "street")
+    private String street;
+
+    @Column(name = "commune")
+    private String commune;
+
+    @Column(name = "district")
+    private String district;
+
+    @Column(name = "country")
+    private String country;
+
+    @Column(name = "city")
+    private String city;
+
+    @Column(name = "postal_code")
+    private int postalCode;
+
+    @Column(name = "address_type")
+    private String addressType;
+
     @Column(name = "payment_method", length = 20)
     private String paymentMethod;
 
