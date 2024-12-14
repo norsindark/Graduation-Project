@@ -9,6 +9,8 @@ interface Blog {
   slug: string;
   title: string;
   categoryBlogName: string;
+  seoTitle: string;
+  seoDescription: string;
   status: string;
   thumbnail: string;
   createdAt: string;
@@ -40,7 +42,7 @@ function BlogPage() {
     try {
       const query = `pageNo=${current - 1}&pageSize=${pageSize}&sortBy=createdAt&sortDir=desc`;
       const response = await callGetAllBlog(query);
-      console.log('responseblog', response);
+
       const blogsData = response.data._embedded?.blogResponseList;
       if (blogsData) {
         const activeBlogs = blogsData.filter(
