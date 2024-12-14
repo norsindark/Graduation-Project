@@ -18,13 +18,15 @@ import { formatDateEnUS } from '../../utils/formatDateEn-US';
 import PrevAndNextBlog from '../../components/public/prevandnextBlog/PrevAndNextBlog';
 import { callGetAllCountBlogByCategory } from '../../services/clientApi';
 import SearchBlog from '../../components/public/searchblog/SearchBlog';
-
+import { Helmet } from 'react-helmet';
 interface BlogDetail {
   id: string;
   title: string;
   content: string;
   author: string;
   thumbnail: string;
+  seoTitle: string;
+  seoDescription: string;
   tags: string;
   createdAt: string;
   totalComments: number;
@@ -73,6 +75,11 @@ function BlogDetail() {
   const [tags, setTags] = useState<string[]>([]);
   const [categories, setCategories] = useState<CategoryCount[]>([]);
 
+  const [blogDataSEO, setBlogDataSEO] = useState({
+    title: 'default seo title',
+    description: 'default seo description',
+  });
+
   const navigate = useNavigate();
   const MAX_TAGS = 12;
   useEffect(() => {
@@ -94,6 +101,11 @@ function BlogDetail() {
       const response = await callGetBlogBySlug(slug);
       if (response.status === 200) {
         setBlogData(response.data);
+        setBlogDataSEO({
+          title: response.data.seoTitle || 'Default Blog Title',
+          description:
+            response.data.seoDescription || 'Default Blog Description',
+        });
       }
     } catch (error) {
       notification.error({
@@ -272,6 +284,10 @@ function BlogDetail() {
 
   return (
     <>
+      <Helmet>
+        <title>{blogDataSEO.title}</title>
+        <meta name="description" content={blogDataSEO.description} />
+      </Helmet>
       <section
         className="fp__breadcrumb"
         style={{ background: 'url(../../../public/images/counter_bg.jpg)' }}
@@ -513,8 +529,8 @@ function BlogDetail() {
                         <a
                           onClick={() => handleTagClick(tag)}
                           className="px-3 py-1.5 bg-gray-100 hover:bg-primary-600 
-                         hover:text-white rounded-full text-sm transition-colors 
-                         duration-300 cursor-pointer"
+                          hover:text-white rounded-full text-sm transition-colors 
+                          duration-300 cursor-pointer"
                         >
                           {tag}
                         </a>
