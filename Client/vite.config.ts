@@ -11,8 +11,9 @@ export default defineConfig({
     strictPort: true, // Đảm bảo dùng chính xác port đã cấu hình
     port: 3000, // Thay đổi nếu cần port khác
   },
+  publicDir: 'public',
   build: {
-    outDir: '../public',  
+    outDir: '../buildClient',  
     rollupOptions: {
       // input: '/index.html', // Đường dẫn tệp HTML chính
       external: [
