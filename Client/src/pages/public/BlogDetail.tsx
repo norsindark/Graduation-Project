@@ -290,7 +290,7 @@ function BlogDetail() {
       </Helmet>
       <section
         className="fp__breadcrumb"
-        style={{ background: 'url(../../../public/images/counter_bg.jpg)' }}
+        style={{ backgroundImage: 'url(/images/counter_bg.jpg)' }}
       >
         <div className="fp__breadcrumb_overlay">
           <div className="container">
