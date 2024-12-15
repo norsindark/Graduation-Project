@@ -13,7 +13,7 @@ export default defineConfig({
   },
   publicDir: 'public',
   build: {
-    outDir: '../buildClient',  
+    outDir: '../public',  
     rollupOptions: {
       // input: '/index.html', // Đường dẫn tệp HTML chính
       external: [

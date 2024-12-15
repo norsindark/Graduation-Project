@@ -26,10 +26,29 @@ function Main() {
   const user = useSelector((state: RootState) => state.account.user);
   const userRole = user?.role?.name;
 
+  const getScrollbarClass = () => {
+    switch (sidenavColor) {
+      case '#66bb6a':
+        return 'scrollbar-green';
+      case '#1890ff':
+        return 'scrollbar-blue';
+      case '#d9363e':
+        return 'scrollbar-red';
+      case '#fadb14':
+        return 'scrollbar-yellow';
+      case '#111':
+        return 'scrollbar-black';
+      default:
+        return 'scrollbar-green';
+    }
+  };
+
   return (
     <>
       {/* {userRole === 'ADMIN' && ( */}
-      <Layout className="layout-dashboard">
+      <Layout
+        className={`layout-dashboard custom-scrollbar ${getScrollbarClass()}`}
+      >
         <Drawer
           title={false}
           placement="left"
@@ -57,8 +76,7 @@ function Main() {
         <Sider
           breakpoint="lg"
           collapsedWidth="0"
-          onCollapse={(collapsed, type) => {
-          }}
+          onCollapse={(collapsed, type) => {}}
           trigger={null}
           width={250}
           theme="light"
@@ -80,6 +98,7 @@ function Main() {
               handleSidenavColor={handleSidenavColor}
               handleSidenavType={handleSidenavType}
               handleFixedNavbar={handleFixedNavbar}
+              sidenavColor={sidenavColor}
             />
           </AntHeader>
           <Content className="content-ant">

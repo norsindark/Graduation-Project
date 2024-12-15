@@ -246,3 +246,41 @@
 .image-gallery-thumbnail:hover {
   border: 3px solid #66bb6a !important;
 }
+
+/* Table.css */
+/* Tạo class động dựa trên sidenavColor */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  border-radius: 4px;
+  transition: all 0.3s ease;
+}
+
+/* Thêm các class màu tương ứng */
+.scrollbar-green::-webkit-scrollbar-thumb {
+  background: #66bb6a;
+}
+
+.scrollbar-blue::-webkit-scrollbar-thumb {
+  background: #1890ff;
+}
+
+.scrollbar-red::-webkit-scrollbar-thumb {
+  background: #d9363e;
+}
+
+.scrollbar-yellow::-webkit-scrollbar-thumb {
+  background: #fadb14;
+}
+
+.scrollbar-black::-webkit-scrollbar-thumb {
+  background: #111;
+}
