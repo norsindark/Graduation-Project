@@ -67,7 +67,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ onClose, setActiveModal }) => {
   };
 
   return (
-    <Modal 
+    <Modal
       open={true}
       onCancel={onClose}
       footer={null}
@@ -82,14 +82,14 @@ const LoginModal: React.FC<LoginModalProps> = ({ onClose, setActiveModal }) => {
       }
     >
       <section
-        className="fp__signup" 
+        className="fp__signup"
         style={{ backgroundImage: 'url(images/login_bg.jpg)' }}
       >
-         <div className="fp__signup_overlay pt_45 xs_pt_45 pb_45 xs_pb_45">
+        <div className="fp__signup_overlay pt_45 xs_pt_45 pb_45 xs_pb_45">
           <div className="container">
             <div className="row wow fadeInUp" data-wow-duration="1s">
               <div className="col-xxl-12 col-xl-12 col-md-12 col-lg-12 m-auto">
-                <div className="fp__login_area" >
+                <div className="fp__login_area">
                   <h2>Welcome back!</h2>
                   <p className="text-lg">Sign In to continue</p>
                   <Form
@@ -106,11 +106,6 @@ const LoginModal: React.FC<LoginModalProps> = ({ onClose, setActiveModal }) => {
                         {
                           type: 'email',
                           message: 'Please enter a valid email!',
-                        },
-                        {
-                          pattern: /^[a-zA-Z0-9._%+-]+@gmail\.com$/,
-                          message:
-                            'Please use a valid Gmail address (example@gmail.com)!',
                         },
                         {
                           validator: (_, value) => {
@@ -184,8 +179,8 @@ const LoginModal: React.FC<LoginModalProps> = ({ onClose, setActiveModal }) => {
                   </p>
                 </div>
               </div>
+            </div>
           </div>
-        </div>
         </div>
       </section>
     </Modal>

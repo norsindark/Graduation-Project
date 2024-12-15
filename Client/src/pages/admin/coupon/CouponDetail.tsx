@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, Table, Spin, Typography, notification } from 'antd';
+import { Modal, Table, Spin, Typography, Tooltip, notification } from 'antd';
 import dayjs from 'dayjs';
 import { callGetCouponByCode } from '../../../services/serverApi';
 
@@ -68,14 +68,24 @@ const CouponDetail: React.FC<CouponDetailProps> = ({
       title: 'Description',
       dataIndex: 'description',
       key: 'description',
-      render: (description: string) => (
-        <Typography.Paragraph
-          ellipsis={{ rows: 2, expandable: true, symbol: 'more' }}
-          style={{ wordBreak: 'break-word', margin: 0 }}
-        >
-          {description}
-        </Typography.Paragraph>
-      ),
+      render: (description: string) => {
+        const maxLength = 60;
+        const displayText =
+          description.length > maxLength
+            ? `${description.substring(0, maxLength)}...`
+            : description;
+
+        return (
+          <Tooltip title={description}>
+            <Typography.Paragraph
+              ellipsis={{ rows: 2, expandable: true, symbol: 'more' }}
+              style={{ wordBreak: 'break-word', margin: 0 }}
+            >
+              {displayText}
+            </Typography.Paragraph>
+          </Tooltip>
+        );
+      },
     },
     {
       title: 'Available Quantity',
@@ -104,7 +114,7 @@ const CouponDetail: React.FC<CouponDetailProps> = ({
       title="Coupon Detail"
       open={visible}
       onCancel={onClose}
-      width={800}
+      width={850}
       footer={null}
       centered
     >

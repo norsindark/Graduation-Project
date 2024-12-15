@@ -162,6 +162,7 @@ function Header({
   handleSidenavColor,
   handleSidenavType,
   handleFixedNavbar,
+  sidenavColor,
 }: {
   placement: DrawerProps['placement'];
   name: string;
@@ -170,6 +171,7 @@ function Header({
   handleSidenavColor: (color: string) => void;
   handleSidenavType: (type: string) => void;
   handleFixedNavbar: (fixed: boolean) => void;
+  sidenavColor: string;
 }) {
   const { Title, Text } = Typography;
   const navigate = useNavigate();
@@ -292,8 +294,25 @@ function Header({
     ...bellData2.map((item) => ({ ...item, type: 'bellData2' })),
   ];
 
+  const getScrollbarClass = (color: any) => {
+    switch (color) {
+      case '#66bb6a':
+        return 'scrollbar-green';
+      case '#1890ff':
+        return 'scrollbar-blue';
+      case '#d9363e':
+        return 'scrollbar-red';
+      case '#fadb14':
+        return 'scrollbar-yellow';
+      case '#111':
+        return 'scrollbar-black';
+      default:
+        return 'scrollbar-green';
+    }
+  };
+
   return (
-    <>
+    <div className={`custom-scrollbar ${getScrollbarClass(sidenavColor)}`}>
       <section
         className="fp__banner h-[11vh] pt-[15px]"
         style={{ backgroundImage: 'url(images/counter_bg.jpg)' }}
@@ -345,8 +364,13 @@ function Header({
                   <div className="theme-color mb-2">
                     <ButtonContainer>
                       <Button
-                        style={{ backgroundColor: '#1890ff', color: '#fff' }}
-                        onClick={() => handleSidenavColor('#1890ff')}
+                        style={{
+                          backgroundColor: '#66bb6a',
+                          color: '#fff',
+                          borderColor:
+                            sidenavColor === '#66bb6a' ? '#fff' : 'transparent',
+                        }}
+                        onClick={() => handleSidenavColor('#66bb6a')}
                       >
                         1
                       </Button>
@@ -419,7 +443,7 @@ function Header({
                 trigger={['click']}
                 dropdownRender={() => (
                   <div
-                    className="header-notifications-dropdown"
+                    className={`header-notifications-dropdown custom-scrollbar ${getScrollbarClass(sidenavColor)}`}
                     style={{
                       maxHeight: '300px',
                       overflowY: 'auto',
@@ -546,7 +570,7 @@ function Header({
           </Col>
         </Row>
       </section>
-    </>
+    </div>
   );
 }
 

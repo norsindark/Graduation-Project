@@ -17,9 +17,28 @@ import { FaCalendarCheck } from 'react-icons/fa';
 import { FaTags } from 'react-icons/fa';
 import logo from '../../../assets/images/imagelogosyndev.png';
 import { FaBlog } from 'react-icons/fa6';
+
 function Sidenav({ color }: { color: string }) {
   const { pathname } = useLocation();
   const page = pathname.replace('/', '');
+
+  const getScrollbarClass = (color: string) => {
+    switch (color) {
+      case '#66bb6a':
+        return 'scrollbar-green';
+      case '#1890ff':
+        return 'scrollbar-blue';
+      case '#d9363e':
+        return 'scrollbar-red';
+      case '#fadb14':
+        return 'scrollbar-yellow';
+      case '#111':
+        return 'scrollbar-black';
+      default:
+        return 'scrollbar-green';
+    }
+  };
+
   const menuItems = [
     {
       key: '1',
@@ -275,13 +294,23 @@ function Sidenav({ color }: { color: string }) {
   ];
 
   return (
-    <>
+    <div className={` custom-scrollbar ${getScrollbarClass(color)}`}>
       <div className="brand">
         <img src={logo} alt="Sync Food" className="max-w-32 mx-auto" />
       </div>
       <hr />
-      <Menu theme="light" mode="inline" items={menuItems} />
-    </>
+      <Menu
+        theme="light"
+        mode="inline"
+        items={menuItems}
+        className={`custom-scrollbar ${getScrollbarClass(color)}`}
+        style={{
+          maxHeight: 'calc(100vh - 200px)', // Chiều cao tối đa cho menu
+          overflowY: 'auto', // Cho phép scroll
+          overflowX: 'hidden', // Ẩn thanh scroll ngang
+        }}
+      />
+    </div>
   );
 }
 
