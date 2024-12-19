@@ -95,21 +95,22 @@ public class AttendanceServiceImpl implements AttendanceService {
     public double sumSalaryPerMonth(Integer month, Integer year) throws DataExitsException {
         try {
             List<Object[]> attendanceCounts = attendanceRepository.countAttendanceByMonthAndYear(month, year);
+            System.out.println(attendanceCounts);
             double totalSalary = 0;
 
             for (Object[] attendance : attendanceCounts) {
-                String employeeId = (String) attendance[0];
-                Long presentCount = (Long) attendance[1];
-                Long absentCount = (Long) attendance[2];
+                String employeeId = attendance[0].toString();
+                Long presentCount = ((Number) attendance[1]).longValue();
+                Long absentCount = ((Number) attendance[2]).longValue();
 
                 double actualSalary = calculateActualSalary(employeeId, presentCount, absentCount);
                 totalSalary += actualSalary;
-
             }
+
 
             return totalSalary;
         } catch (Exception e) {
-            throw new DataExitsException("No attendance found for this month " + month + " and year " + year);
+            throw new DataExitsException("No attendance found for this month " + month + " and year " + year + e);
         }
     }
 
