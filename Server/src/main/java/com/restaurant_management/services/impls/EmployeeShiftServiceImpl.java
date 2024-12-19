@@ -342,20 +342,22 @@ public class EmployeeShiftServiceImpl implements EmployeeShiftService {
     public Long sumHoursWorked(Integer month, Integer year) throws DataExitsException {
         try {
             List<Object[]> totalShiftInMonth = employeeShiftRepository.findShiftsByMonthAndYear(month, year);
+            System.out.println("totalShiftInMonth: " + totalShiftInMonth);
+
             long totalHours = 0;
 
             for (Object[] shift : totalShiftInMonth) {
-
-                LocalTime startTime = (LocalTime) shift[0];
-                LocalTime endTime = (LocalTime) shift[1];
+                String shiftName = (String) shift[0];
+                LocalTime startTime = (LocalTime) shift[1];
+                LocalTime endTime = (LocalTime) shift[2];
 
                 long hoursWorked = Duration.between(startTime, endTime).toHours();
-
                 totalHours += hoursWorked;
             }
+
             return totalHours;
         } catch (Exception e) {
-            throw new DataExitsException("Error counting hours worked for month: " + month + " and year: " + year);
+            throw new DataExitsException("Error counting hours worked for month: " + month + " and year: " + year + e);
         }
     }
 

@@ -131,19 +131,21 @@ public class OrderServiceImpl implements OrderService {
             orderRepository.save(order);
         }
 
-        if (!request.getPaymentMethod().equalsIgnoreCase("BANKING")) {
-            CompletableFuture.runAsync(() -> {
-                try {
-                    sendEmailListOrderItems(
-                            user.getEmail(), request.getItems(),
-                            request.getCouponId(), order.getTotalPrice(),
-                            request.getPaymentMethod(), order.getStatus(),
-                            request.getShippingFee());
-                } catch (MessagingException | UnsupportedEncodingException | DataExitsException e) {
-                    throw new RuntimeException(e);
-                }
-            });
-        }
+//        if (!request.getPaymentMethod().equalsIgnoreCase("BANKING")) {
+//
+//        }
+
+        CompletableFuture.runAsync(() -> {
+            try {
+                sendEmailListOrderItems(
+                        user.getEmail(), request.getItems(),
+                        request.getCouponId(), order.getTotalPrice(),
+                        request.getPaymentMethod(), order.getStatus(),
+                        request.getShippingFee());
+            } catch (MessagingException | UnsupportedEncodingException | DataExitsException e) {
+                throw new RuntimeException(e);
+            }
+        });
 
         return new ApiResponse(order.getId(), HttpStatus.CREATED);
     }
